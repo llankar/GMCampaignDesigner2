@@ -1,8 +1,9 @@
 {
   "fields": [
-    {
-      "name": "Name",
-      "type": "text"
-    }
+      {"name": "Title", "type": "text"},
+      {"name": "Summary", "type": "longtext"},
+      {"name": "Linked Places", "type": "linked_list", "linked_type": "Place"},
+      {"name": "Linked NPCs", "type": "linked_list", "linked_type": "NPC"},
+      {"name": "Tags", "type": "tags"}
   ]
 }

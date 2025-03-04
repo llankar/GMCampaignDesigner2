@@ -1,0 +1,19 @@
+[
+  {
+    "Name": "aaa",
+    "Role": "aaa",
+    "Description": {
+      "text": "aaa",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "bnbbb",
+    "Tags": ""
+  }
+]
