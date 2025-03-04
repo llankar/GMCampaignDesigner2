@@ -884,5 +884,165 @@
     "Role": "Servitor Handler",
     "Description": "Once human, now a grotesque hybrid with pale, slimy skin, bulging gills, and barnacle-encrusted limbs. Morloch commands squads of modified humans, enforcing obedience through pain implants and psychic triggers.",
     "Faction": "Fomor"
+  },
+  {
+    "Name": "Lord Na’thraal",
+    "Role": "Fomor Warlord",
+    "Description": "A towering sea-creature with skin of barnacle armor and eyes like dead tide pools.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Queen Briarheart",
+    "Role": "Wyld Fae Queen",
+    "Description": "Thorn-crowned, with skin like silver bark and a heart that glows faintly gold.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "Knight Armand St. Croix",
+    "Role": "Knight of the Cross",
+    "Description": "A battle-scarred Black man with a sword cracked down its length, his faith tested to the limit.",
+    "Faction": "Knights of the Cross"
+  },
+  {
+    "Name": "Demon Grishkar",
+    "Role": "Bound Demon",
+    "Description": "A monstrous figure wrapped in smoking chains, its voice like grinding metal.",
+    "Faction": "Demons"
+  },
+  {
+    "Name": "Wyld Huntress Seline",
+    "Role": "Wyld Fae Enforcer",
+    "Description": "A sleek predator with amber eyes and a smile that could cut glass.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "Knight Captain Mariel Brightwind",
+    "Role": "Wyld Fae Champion",
+    "Description": "A radiant Summer-aligned Wyld Fae warrior, wearing armor of woven sunlight and storm leaves.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "Elder Tidecaller Orsk",
+    "Role": "Fomor Shaman",
+    "Description": "A hunchbacked aquatic seer, his staff crusted with coral and glowing runes.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Detective Sofia Vasquez",
+    "Role": "Chicago Cop",
+    "Description": "Human detective caught in supernatural war, tough as nails with eyes haunted by what she's seen.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Sir Elijah Castor",
+    "Role": "Fallen Knight of the Cross",
+    "Description": "A weary man, his sword cracked and stained, tormented by a curse and his own faith.",
+    "Faction": "Knights of the Cross"
+  },
+  {
+    "Name": "Demon Prince Velkar",
+    "Role": "Vengeful Demon",
+    "Description": "A creature of smoke and shattered iron, with a face made of melted masks.",
+    "Faction": "Demons"
+  },
+  {
+    "Name": "Sister Maria Bell",
+    "Role": "Knight of the Cross",
+    "Description": "A steadfast knight, her armor old but her heart strong.",
+    "Faction": "Knights of the Cross"
+  },
+  {
+    "Name": "Blacksmith Gavin Hurst",
+    "Role": "Cursed Smith",
+    "Description": "A mortal blacksmith whose family once reforged Excalibur, now living in fear of the supernatural.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "The Weeping Angel",
+    "Role": "Spirit of Regret",
+    "Description": "A spectral figure clad in funeral silk, weeping tears of molten silver.",
+    "Faction": "Spirits"
+  },
+  {
+    "Name": "The Hollow Prince",
+    "Role": "Traitorous Fae Noble",
+    "Description": "A faded reflection of a prince, hollowed by broken oaths and shattered pride.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "Laughing Dagger Kaelen",
+    "Role": "Wyld Assassin",
+    "Description": "A grinning shadow with daggers made from regrets, slipping between worlds.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "Archivist Yewthorn",
+    "Role": "Keeper of Fae Lore",
+    "Description": "A tree-like fae, with scrolls embedded in its bark, reciting history that cuts like blades.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "The Bound Jester",
+    "Role": "Cursed Fae Entertainer",
+    "Description": "A broken fool, dancing on bleeding feet, compelled to amuse his captors.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "Eleanor Drake",
+    "Role": "Mortal Cursed by Demon",
+    "Description": "A human caught in a binding curse, linked to a demon through a chain of pain.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Demon Grishkar",
+    "Role": "Bound Demon",
+    "Description": "A monstrous figure wrapped in smoking chains, its voice like grinding metal.",
+    "Faction": "Demons"
+  },
+  {
+    "Name": "Chainmaker Aldous",
+    "Role": "Legendary Smith",
+    "Description": "A long-dead mortal smith who first forged chains for demons, appearing as a ghostly figure of smoke and steel.",
+    "Faction": "Spirits"
+  },
+  {
+    "Name": "Sorceress Marina",
+    "Role": "Occult Expert",
+    "Description": "A modern-day sorceress specialized in binding and breaking infernal contracts.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Bishop Tallow",
+    "Role": "Sin-Eater Priest",
+    "Description": "A priest who absorbs the curses of others into his own soul, flickering between holy and damned.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "The Blood Hag Mirskaya",
+    "Role": "Fomor Witch",
+    "Description": "A bloated, waterlogged hag who weaves curses from human blood and lake mud.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Wyld Healer Brialyn",
+    "Role": "Wyld Fae Healer",
+    "Description": "A healer bound by ancient rules, her hands can cure or curse depending on her respect for the patient.",
+    "Faction": "Wyld Feys"
+  },
+  {
+    "Name": "Captain Sofia Domingez",
+    "Role": "Chicago Police Captain",
+    "Description": {
+      "text": "Hardened by years of supernatural cleanup, trusted by mortals and feared by monsters.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Mortals"
   }
 ]
