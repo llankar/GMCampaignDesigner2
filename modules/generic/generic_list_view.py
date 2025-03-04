@@ -38,7 +38,9 @@ class GenericListView(ctk.CTkFrame):
         self.canvas.create_window((0, 0), window=self.list_frame, anchor="nw")
 
         self.list_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+        self.canvas.bind("<Enter>", lambda _: self.bind_mousewheel())
+        self.canvas.bind("<Leave>", lambda _: self.unbind_mousewheel())
 
         self.items = self.model_wrapper.load_items()
         self.filtered_items = self.items.copy()
@@ -46,8 +48,15 @@ class GenericListView(ctk.CTkFrame):
         self.create_table_header()
         self.refresh_list()
 
+    def bind_mousewheel(self):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def unbind_mousewheel(self):
+        self.canvas.unbind_all("<MouseWheel>")
+
     def _on_mousewheel(self, event):
-        self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
+        if self.canvas.winfo_exists():
+            self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     def create_table_header(self):
         headers = [field["name"] for field in self.template["fields"]] + ["Actions"]
@@ -130,3 +139,7 @@ class GenericListView(ctk.CTkFrame):
 
         self.filtered_items.sort(key=lambda x: get_sort_value(x))
         self.refresh_list()
+
+    def destroy(self):
+        self.unbind_mousewheel()
+        super().destroy()

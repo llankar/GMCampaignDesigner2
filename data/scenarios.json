@@ -441,14 +441,24 @@
   },
   {
     "Title": "Reflections of the Denarians",
-    "Summary": "A Denarian has corrupted Cloud Gate, using its reflective surface to trap people inside it and feed on their despair. The investigators must banish the Denarian’s influence without destroying the iconic sculpture.",
+    "Summary": {
+      "text": "A Denarian has corrupted Cloud Gate, using its reflective surface to trap people inside it and feed on their despair. The investigators must banish the Denarian’s influence without destroying the iconic sculpture.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Places": [
-      "Cloud Gate"
+      "Arctis Tor"
     ],
     "NPCs": [
-      "Denarian Host",
-      "Trapped Victims",
-      "Reluctant Guardian Spirit"
+      "Warden Lysander Black",
+      "Alaric Raith",
+      "Marcus 'Mark' Shaw and Ophiriel"
     ]
   },
   {
