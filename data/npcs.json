@@ -1,9 +1,9 @@
 [
   {
-    "Name": "aaa",
-    "Role": "aaa",
+    "Name": "Sariel of the Hollow Glade",
+    "Role": "Fae Courtesan",
     "Description": {
-      "text": "aaa",
+      "text": "Living ivy wrap, steals memories through touch.",
       "formatting": {
         "bold": [],
         "italic": [],
@@ -13,75 +13,78 @@
         "right": []
       }
     },
-    "Faction": "bnbbb"
+    "Faction": "Winter Court"
   },
   {
-    "Name": "bvcxvbxcvbcv",
-    "Role": "vcbbxcvxcv",
-    "Description": {
-      "text": "",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Faction": "retergrgf"
+    "Name": "Thane Coldfingers",
+    "Role": "Winter Warrior",
+    "Description": "Flesh cracked with ice, driven by duty.",
+    "Faction": "Winter Court"
   },
   {
-    "Name": "dfsdfqsqsdf",
-    "Role": "dfqsdf",
-    "Description": {
-      "text": "dfsdfsqsd",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Faction": "asdfsdfsd"
+    "Name": "Lady Laurelindë",
+    "Role": "Summer Spy",
+    "Description": "Golden-haired manipulator embedded in Winter.",
+    "Faction": "Summer Court"
   },
   {
-    "Name": "qsqsdqsddsqqsdfs",
-    "Role": "dfsssdf",
-    "Description": {
-      "text": "sdfsfdsdfsdfsdf\ndfs\nsdf\nsdf\nsdfsdf\nfsdsdfsdf\nsdfsdf\nsdf\n1. dfsd\n2. ssdf\n",
-      "formatting": {
-        "bold": [],
-        "italic": [
-          [
-            "4.0",
-            "9.0"
-          ]
-        ],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Faction": "asdfsdfsd"
+    "Name": "Detective Sofia Vasquez",
+    "Role": "Mortal Detective",
+    "Description": "Investigating supernatural affairs out of love lost to Fae.",
+    "Faction": "None"
   },
   {
-    "Name": "sdfsdffgqsedr",
-    "Role": "sdgfgsdfdfgsdf",
-    "Description": {
-      "text": "",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Faction": "bnbbb"
+    "Name": "The Broken Prince",
+    "Role": "Wyldfae Trickster",
+    "Description": "Once loved Mab, now hunted.",
+    "Faction": "Wyldfae"
+  },
+  {
+    "Name": "Warden Ezekiel Cross",
+    "Role": "White Council Warden",
+    "Description": "Haunted enforcer, scarred by past mistakes.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Meera Kline",
+    "Role": "Vengeful Witch",
+    "Description": "Tattoos pulsate with curses, hunting the Council.",
+    "Faction": "None"
+  },
+  {
+    "Name": "Archivist Yoko Tamura",
+    "Role": "Library Keeper",
+    "Description": "Blind but remembers every book.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Liam Raith",
+    "Role": "Lover",
+    "Description": "White Court vampire truly in love.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Sister Maria Bell",
+    "Role": "Knight of the Cross",
+    "Description": "Former addict, bearer of hope.",
+    "Faction": "Knights of the Cross"
+  },
+  {
+    "Name": "Lucinda Raith",
+    "Role": "White Court Matriarch",
+    "Description": "Ruthless and traditional.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Nicodemus Archleone",
+    "Role": "Denarian Mastermind",
+    "Description": "Cold, calculating and utterly evil.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Pastor Caleb North",
+    "Role": "Hate Preacher",
+    "Description": "Corrupted by Denarian coin.",
+    "Faction": "Denarians"
   }
 ]

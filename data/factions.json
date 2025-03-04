@@ -1,26 +1,31 @@
 [
   {
-    "Name": "bnbbb",
+    "Name": "Winter Court",
     "Description": {
-      "text": "fsdsdfdf",
+      "text": "Cruel manipulators enforcing the Accords.",
       "formatting": {
         "bold": [],
-        "italic": [
+        "italic": [],
+        "underline": [
           [
-            "1.0",
-            "1.8"
+            "1.33",
+            "1.41"
           ]
         ],
-        "underline": [],
         "left": [],
         "center": [],
         "right": []
       }
     },
     "Secrets": {
-      "text": "",
+      "text": "Mab’s rumored affair threatens court stability.",
       "formatting": {
-        "bold": [],
+        "bold": [
+          [
+            "1.31",
+            "1.36"
+          ]
+        ],
         "italic": [],
         "underline": [],
         "left": [],
@@ -30,78 +35,23 @@
     }
   },
   {
-    "Name": "retergrgf",
-    "Description": {
-      "text": "dqssddqsqsdreg",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Secrets": {
-      "text": "",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
+    "Name": "White Council",
+    "Description": "Governing wizards enforcing the Laws of Magic.",
+    "Secrets": "Covered up an innocent execution."
   },
   {
-    "Name": "asdfsdfsd",
-    "Description": {
-      "text": "",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Secrets": {
-      "text": "",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
+    "Name": "White Court",
+    "Description": "Vampires feeding on emotions.",
+    "Secrets": "Forbidden love risks exposing ancient feeding techniques."
   },
   {
-    "Name": "qssdc",
-    "Description": {
-      "text": "sqsdqd",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Secrets": {
-      "text": "qsdqsdqsd",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
+    "Name": "Red Court Remnants",
+    "Description": "Desperate treasure seekers.",
+    "Secrets": "A lost vault holds debts from all major factions."
+  },
+  {
+    "Name": "Denarians",
+    "Description": "Fallen angels corrupting mortals.",
+    "Secrets": "Targeting players directly through personal hate."
   }
 ]

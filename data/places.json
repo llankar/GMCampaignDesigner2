@@ -1,63 +1,82 @@
 [
   {
-    "Name": "sdxdfcqsdf",
-    "Description": {
-      "text": "fezedfefeze\nze\nfze\nfzedf\nsd\nf\nds\nfq\nsdf\nf\nqds\n\nqsdf\ndfs\ndfs\n",
-      "formatting": {
-        "bold": [
-          [
-            "13.0",
-            "16.0"
-          ]
-        ],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
+    "Name": "Arctis Tor",
+    "Description": "Shifting ice palaces echoing with lost voices."
   },
   {
-    "Name": "bbbb",
-    "Description": {
-      "text": "bsdsdsd\ndbdsb\ns\ndsbbsd\nsd",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
+    "Name": "Frozen Fountain",
+    "Description": "A glade where water freezes memories."
   },
   {
-    "Name": "sdfcdfsdfdsq",
-    "Description": {
-      "text": "dsfqsdfqsdfdfdfsfd",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
+    "Name": "Hollow Ballroom",
+    "Description": "A hall where mortals dance for Fae amusement."
   },
   {
-    "Name": "dfssdfsdfsdfsdf",
-    "Description": {
-      "text": "qsdqsdqsdqsdqsdfsdsddfqsd",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
+    "Name": "Lakeshore Ruins",
+    "Description": "A frost-covered ruin connecting Chicago to Winter."
+  },
+  {
+    "Name": "White Council Safehouse",
+    "Description": "Hidden bookstore warded for centuries."
+  },
+  {
+    "Name": "Riverside Mausoleum",
+    "Description": "Site of wrongful execution, stained with magic."
+  },
+  {
+    "Name": "Spiral Archives",
+    "Description": "A library where books shift to hide secrets."
+  },
+  {
+    "Name": "Bane Hill Apartment Complex",
+    "Description": "Modern tower unraveling with ley line backlash."
+  },
+  {
+    "Name": "Hell’s Gate Nightclub",
+    "Description": "Neutral ground for the White Court."
+  },
+  {
+    "Name": "St. Joseph’s Shelter",
+    "Description": "A church refuge hiding forbidden lovers."
+  },
+  {
+    "Name": "Aphrodite Lounge",
+    "Description": "A glamorous feeding ground for lust."
+  },
+  {
+    "Name": "Whispering Alley",
+    "Description": "An alley where shadows repeat secrets."
+  },
+  {
+    "Name": "Crimson Door",
+    "Description": "Red Court sanctuary under a luxury hotel."
+  },
+  {
+    "Name": "Blood Market",
+    "Description": "Underground auction for supernatural debts."
+  },
+  {
+    "Name": "McKenzie Pier",
+    "Description": "Smuggler’s dock for supernatural goods."
+  },
+  {
+    "Name": "Obsidian Crypt",
+    "Description": "Red Court treasure vault sealed in ancient magic."
+  },
+  {
+    "Name": "Burning Chapel",
+    "Description": "Ruined church now a hate group HQ."
+  },
+  {
+    "Name": "Nail & Thorn Bookstore",
+    "Description": "Occult shop trafficking in infernal items."
+  },
+  {
+    "Name": "Chicago River Tunnels",
+    "Description": "Denarian lair filled with chained angels."
+  },
+  {
+    "Name": "Blackwood Park",
+    "Description": "Site of an ancient Denarian summoning."
   }
 ]

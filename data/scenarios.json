@@ -1,8 +1,8 @@
 [
   {
-    "Title": "aaa",
+    "Title": "Shattered Snowglobe",
     "Summary": {
-      "text": "",
+      "text": "The Winter Court is in turmoil after Queen Mab's rumored affair with a Wyldfae trickster. The players must navigate jealous Fae politics to uncover the truth.",
       "formatting": {
         "bold": [],
         "italic": [],
@@ -12,48 +12,86 @@
         "right": []
       }
     },
-    "Linked Places": "",
-    "Linked NPCs": "",
-    "Tags": "",
     "Places": [
-      "bbbb",
-      "bbbb"
+      "Arctis Tor",
+      "Frozen Fountain",
+      "Hollow Ballroom",
+      "Lakeshore Ruins"
     ],
     "NPCs": [
-      "aaa",
-      "bvcxvbxcvbcv"
+      "Sariel of the Hollow Glade",
+      "Thane Coldfingers",
+      "Lady Laurelindë",
+      "Detective Sofia Vasquez",
+      "The Broken Prince"
     ]
   },
   {
-    "Title": "dfsqfgfgqsdrfg",
-    "Summary": {
-      "text": "gsdfgdfsgsdffdfgd\nsdfg\nsdfgsdfg\nsdfg\nsdfg\nsdfgdfgsdfgsdfg\n\nsdfgsdfgsdfsdfg\n• sfgd\n• dfg\n• fg\n\nfgsdg\nf",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [
-          [
-            "4.0",
-            "6.15"
-          ]
-        ],
-        "center": [
-          [
-            "4.0",
-            "6.15"
-          ]
-        ],
-        "right": []
-      }
-    },
+    "Title": "The Last Lawbreaker",
+    "Summary": "A wrongful execution by the White Council leads to a hedge witch's revenge, unraveling ley lines and hidden secrets.",
     "Places": [
-      "sdxdfcqsdf",
-      "sdfcdfsdfdsq"
+      "White Council Safehouse",
+      "Riverside Mausoleum",
+      "Spiral Archives",
+      "Bane Hill Apartment Complex"
     ],
     "NPCs": [
-      "dfsdfqsqsdf",
-      "qsqsdqsddsqqsdfs"
+      "Warden Ezekiel Cross",
+      "Meera Kline",
+      "Archivist Yoko Tamura",
+      "Chloe Morris",
+      "Bishop Tallow"
+    ]
+  },
+  {
+    "Title": "Feast of Hearts",
+    "Summary": "A forbidden love between a White Court vampire and a Knight of the Cross triggers a supernatural scandal threatening both factions.",
+    "Places": [
+      "Hell’s Gate Nightclub",
+      "St. Joseph’s Shelter",
+      "Aphrodite Lounge",
+      "Whispering Alley"
+    ],
+    "NPCs": [
+      "Liam Raith",
+      "Sister Maria Bell",
+      "Lucinda Raith",
+      "Father Colm O’Donnell",
+      "Solomon Drake"
+    ]
+  },
+  {
+    "Title": "The Blood Vault",
+    "Summary": "A long-hidden Red Court treasure vault resurfaces, sparking a supernatural treasure hunt with deadly consequences.",
+    "Places": [
+      "Crimson Door",
+      "Blood Market",
+      "McKenzie Pier",
+      "Obsidian Crypt"
+    ],
+    "NPCs": [
+      "Isabel Montez",
+      "Felix Grant",
+      "Mila Van Dorn",
+      "Arturo Vasquez",
+      "Khanji the Vulture"
+    ]
+  },
+  {
+    "Title": "The Thorned Coin",
+    "Summary": "A Denarian coin corrupts a hate preacher, using him to incite supernatural violence. The players must stop him before it’s too late.",
+    "Places": [
+      "Burning Chapel",
+      "Nail & Thorn Bookstore",
+      "Chicago River Tunnels",
+      "Blackwood Park"
+    ],
+    "NPCs": [
+      "Pastor Caleb North",
+      "Nicodemus Archleone",
+      "Serena Cho",
+      "Detective Roberta Kim",
+      "Ilya Petrov"
     ]
   }
 ]
