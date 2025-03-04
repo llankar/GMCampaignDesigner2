@@ -30,8 +30,18 @@
   {
     "Name": "Detective Sofia Vasquez",
     "Role": "Mortal Detective",
-    "Description": "Investigating supernatural affairs out of love lost to Fae.",
-    "Faction": "None"
+    "Description": {
+      "text": "Investigating supernatural affairs out of love lost to Fae.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Mortals"
   },
   {
     "Name": "The Broken Prince",
@@ -64,12 +74,6 @@
     "Faction": "White Court"
   },
   {
-    "Name": "Sister Maria Bell",
-    "Role": "Knight of the Cross",
-    "Description": "Former addict, bearer of hope.",
-    "Faction": "Knights of the Cross"
-  },
-  {
     "Name": "Lucinda Raith",
     "Role": "White Court Matriarch",
     "Description": "Ruthless and traditional.",
@@ -86,5 +90,799 @@
     "Role": "Hate Preacher",
     "Description": "Corrupted by Denarian coin.",
     "Faction": "Denarians"
+  },
+  {
+    "Name": "Lady Elaris",
+    "Role": "Exiled Winter Lady",
+    "Description": "Slender, ice-pale, with frost weaving her hair into a crown of sorrow. Her voice always sounds like cracking ice.",
+    "Faction": "Winter Court"
+  },
+  {
+    "Name": "Detective Irene Vale",
+    "Role": "Chicago Detective",
+    "Description": {
+      "text": "Tall, scarred Black woman with a weathered trench coat and haunted eyes. She carries a notebook covered in frost.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Sir Alden",
+    "Role": "Winter Knight",
+    "Description": "Massive knight of blue-tinged iron, his breath freezing the air. His blade thirsts for betrayal.",
+    "Faction": "Winter Court"
+  },
+  {
+    "Name": "Sister Maria Bell",
+    "Role": "Knight of the Cross",
+    "Description": "Tough, compassionate, Latina woman with a tattooed rosary and a past full of regrets.",
+    "Faction": "Knights of the Cross"
+  },
+  {
+    "Name": "Warden Lysander Black",
+    "Role": "White Council Senior Wizard",
+    "Description": "A fractured mind inhabiting a ruined body. His eyes are shattered prisms, and his speech overlaps as if spoken by many voices at once.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Aiden Carver",
+    "Role": "Mourning Ghost",
+    "Description": "A young ghost, half-burned, eternally clutching a singed stuffed rabbit.",
+    "Faction": "Spirits"
+  },
+  {
+    "Name": "Joe Callahan",
+    "Role": "Gambler",
+    "Description": "Weathered ex-con who found a Denarian coin in a storm drain — and doesn’t believe in magic.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Jenna Moreno",
+    "Role": "Grieving Widow",
+    "Description": "Latina widow who prays nightly at her husband’s grave, unknowingly harboring a Denarian within her grief.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Marcus Raith",
+    "Role": "Corporate Predator",
+    "Description": "Rakishly handsome man in his early thirties with dark hair silvering at the temples. A specialist in corporate acquisitions and supernatural tech applications, Marcus feeds on ambition and professional pride. Specializes in corporate acquisitions and hostile takeovers; maintains a venture capital firm as cover; secretly a technology enthusiast.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Alaric Raith",
+    "Role": "Socialite and Diplomat",
+    "Description": {
+      "text": "Tall, athletic, with a chiseled jawline and intense hazel eyes.\nAlaric is a skilled manipulator, hosting elite supernatural events to expand House Raith's influence. ",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Winter Court"
+  },
+  {
+    "Name": "Selena Raith",
+    "Role": "Information Broker",
+    "Description": "Dark-haired beauty with a sultry gaze, blending modern chic and classic elegance. Selena runs a high-end escort service that doubles as a front for gathering secrets and influencing powerful mortals. Master of subtle manipulation, treating her conquests as a game.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Gideon Raith",
+    "Role": "Enforcer",
+    "Description": "Lean, predatory build with sharp features, platinum blonde hair, and a perpetual smirk. Known for his violent temper, Gideon acts as House Raith's 'fixer,' hunting down threats and toying with victims before feeding.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Diana Raith",
+    "Role": "Faction Liaison",
+    "Description": "Ethereal beauty with pale skin and silver-blue eyes, often wearing flowing gowns that enhance her ghostly aura. Acts as a liaison between House Raith and magical factions, unmatched in charm but harboring secret ambitions for more power.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Matthias Raith",
+    "Role": "Political Advisor",
+    "Description": "Calm and serene with short-cropped brown hair and a well-groomed beard. Matthias advises Lara Raith, using his mastery of reading desires and predicting outcomes, while secretly nursing ambitions of his own.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Lady Victoria Raith",
+    "Role": "Media Manipulator",
+    "Description": "Statuesque with platinum blonde hair, ice-blue eyes, and avant-garde fashion sense. Manages high-end fashion magazines and modeling agencies, using them as feeding grounds while competing with Lara for influence.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Lord Dominic Malvora",
+    "Role": "Security Mogul",
+    "Description": "Distinguished man in his forties with salt-and-pepper hair and dark eyes that absorb light. Head of Malvora's Chicago operations, running a private security firm and mastering fear-based feeding techniques.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Natasha Malvora",
+    "Role": "Fear Entertainer",
+    "Description": "Young woman with raven-black hair, purple highlights, and gothic-inspired attire. Runs underground horror venues, experiments with digital fear, and cultivates influence among younger supernatural circles.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Isadora Malvora",
+    "Role": "Fear Psychologist",
+    "Description": "Long jet-black hair, pale blue eyes, and dark Victorian dresses. Fascinated by the psychology of fear, Isadora holds private experiments to explore mortal terror, balancing cruelty with intellectual curiosity.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Cyrus Malvora",
+    "Role": "Rogue Terrorist",
+    "Description": "Gaunt with thin graying hair, a ghostly presence wrapped in shabby suits. Black sheep of House Malvora, Cyrus feeds on urban legends by terrorizing isolated communities.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Vera Malvora",
+    "Role": "Sadistic Therapist",
+    "Description": "Warm and motherly appearance with golden curls and a bright smile hiding deep cruelty. Masquerades as a therapist to expose and feed on her clients' fears, building a network of indebted mortals.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Remy Malvora",
+    "Role": "Fear Stalker",
+    "Description": "Rugged and feral with long unkempt hair and predatory eyes. A hunter by nature, Remy stalks victims through the city’s dark corners, preferring action to politics.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Elena Malvora",
+    "Role": "Mass Hysteria Specialist",
+    "Description": "Striking woman with auburn hair and dramatic flair. Creates large-scale fear events, driving entire crowds to madness while pursuing personal ambitions at any cost.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Dr. Elizabeth Skavis",
+    "Role": "Despair Doctor",
+    "Description": "Elegant woman with auburn hair, wire-rimmed glasses, and precise movements. A psychiatrist feeding on despair through exclusive mental health clinics, she studies supernatural depression.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "James Skavis",
+    "Role": "Despair Poet",
+    "Description": "Thin professor with gold-rimmed glasses and vintage suits. Runs literary societies and uses tragic poetry readings as feeding grounds, blending academia with supernatural despair.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Benedict Skavis",
+    "Role": "Despair Counselor",
+    "Description": "Slender with silver hair and perpetually frowning. Acts as a 'counselor' who deepens his victims' depression, believing that life itself is too cruel to deserve hope.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Livia Skavis",
+    "Role": "Despair Artist",
+    "Description": "Ethereal with ash-colored hair and tear-filled eyes. Once an artist herself, Livia now inspires tragic beauty in others before feeding, especially drawn to poets and musicians.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Victor Skavis",
+    "Role": "Grief Predator",
+    "Description": "Tall and gaunt with haunted eyes, wearing simple dark clothes. Poses as a grief counselor, feeding on mourners by pulling them deeper into despair.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Marcella Skavis",
+    "Role": "Isolation Seductress",
+    "Description": "Raven-haired with moonlight skin, moving with languid grace. Seduces the lonely, feeding off their hopelessness, often targeting hospital patients and support groups.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Darius Skavis",
+    "Role": "Economic Despair Architect",
+    "Description": "Weary man in worn suits with tired eyes. Uses financial manipulation and social ruin to spread despair, enjoying both large-scale suffering and personal tragedy.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Lily and Rose Winter",
+    "Role": "Twin Club Owners",
+    "Description": "Identical platinum blonde twins who move in perfect sync. They run exclusive underground clubs and experiment with shared feeding techniques and supernatural psychology.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Alexander Grey",
+    "Role": "Independent Matchmaker",
+    "Description": "Androgynous shapeshifter with fluid grace and cutting-edge fashion. Runs a supernatural matchmaking service while navigating politics between all White Court Houses.",
+    "Faction": "White Court"
+  },
+  {
+    "Name": "Isabella 'Izzy' Ramos",
+    "Role": "Fellowship Liaison",
+    "Description": "Petite Latina woman with tight black curls, dark eyes flickering between kindness and predatory gleam, dressed in layered scarves, heavy jewelry, and combat boots. Former social worker from Mexico City, now a liaison between the Fellowship and supernatural groups after a Red Court attack left her infected.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Akio Tanaka",
+    "Role": "Martial Mentor",
+    "Description": "Tall, slender Japanese man with sharp features, low ponytail, and minimalist grey clothing. Former monk turned martial artist, infected in a ritual gone wrong, now mentoring recruits in self-defense and hunger control.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Rosa Martinez",
+    "Role": "Combat Medic",
+    "Description": "Muscular middle-aged woman with sun-kissed skin, numerous scars, and shaved head. Ex-military medic who uses her medical expertise to heal infected comrades and develop protocols to handle Red Court abilities.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Sebastian 'Bash' Blake",
+    "Role": "Street Guardian",
+    "Description": "Broad-shouldered African American man with a disarming smile, favoring hoodies, sneakers, and fingerless gloves. Former gang mediator, now using his infection-enhanced strength to protect marginalized communities as part of the Fellowship.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Claire Fontaine",
+    "Role": "Lorekeeper",
+    "Description": "Delicate Englishwoman with fair skin, curly blonde hair, round glasses, and a haunting glow in her eyes. Historian and linguist infected while researching vampire lore, now a critical researcher for the Fellowship.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Mateo Delgado",
+    "Role": "Tactical Mastermind",
+    "Description": "Tall, wiry man with hollow cheeks and sharp bones, often in tattered earthy clothes. Former guerrilla fighter from Central America, now a strategist for Fellowship cells, feared for his ruthless efficiency.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Evelyn Cho",
+    "Role": "Sniper Leader",
+    "Description": "Athletic woman with piercing gaze, shoulder-length black hair, and a calm demeanor. Olympic archer turned Fellowship sniper, leveraging her precision to stay effective while keeping her hunger in check.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Carter Finch",
+    "Role": "Digital Spy",
+    "Description": "Wiry man in his forties with piercing blue eyes and vintage band shirts under his leather jacket. Former hacker and black-market info broker, now running the Fellowship’s digital intelligence network.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Alessandra 'Sandy' Marino",
+    "Role": "Legal Manipulator",
+    "Description": "Striking Italian woman with classical beauty, dark curls, and elegant but practical clothing. Former Naples prosecutor infected while handling a Red Court case, now erasing records and legally protecting the Fellowship.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Vladislav 'Vlad' Sokolov",
+    "Role": "Bodyguard",
+    "Description": "Tall, imposing man with a shaved head, pale skin, and a trench coat that cloaks him in shadows. Ex-Russian enforcer turned protector of the Fellowship’s most vulnerable after narrowly surviving infection.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Duchess Maria Lucia de Estrella",
+    "Role": "Red Court Aristocrat",
+    "Description": "Striking woman in her thirties with long black hair and a silver streak, wearing 1940s vintage couture. Former Spanish noble, one of North America's oldest Red Court vampires, seeking to rebuild her power in Chicago after losing ground to the White Council.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Lord Jonathan Blackwood",
+    "Role": "Financial Mastermind",
+    "Description": "British gentleman in his fifties with meticulously groomed silver hair and a custom cane. Turned during the British Empire’s height, he controls the Red Court’s financial operations in the Midwest, with ties to mortal and supernatural banking.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Carmen Moreno",
+    "Role": "Security Chief",
+    "Description": "Athletic woman in her mid-twenties with short spiky hair, leather jacket, and visible scars in her true form. Former special forces soldier, now head of security for Red Court operations in Chicago.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Dr. Nicolas Mendoza",
+    "Role": "Vampiric Researcher",
+    "Description": "Distinguished man in his forties with wire-rimmed glasses and salt-and-pepper hair. Former medical doctor, now overseeing the Red Court’s blood supply while researching vampirism’s biological aspects.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Alexandra 'Lexi' Varez",
+    "Role": "Digital Operator",
+    "Description": "Tech executive in her twenties, always equipped with cutting-edge gadgets and a curated social media presence. Recently turned, she runs Red Court’s digital operations, maintaining darknet communications.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Miguel 'The Artist' Rossi",
+    "Role": "Artistic Forger",
+    "Description": "Bohemian artist in his thirties with paint-stained hands and artistic clothing. Turned in the 1960s art scene, Miguel uses his galleries as fronts for forgery, antiquities, and safe houses.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Isabella and Diego Luna",
+    "Role": "Spy Twins",
+    "Description": "Identical twins in their late teens, moving in eerie synchronicity and wearing coordinated outfits. Turned together in the 1850s, they work as spies and information brokers, gathering secrets for the Court.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Alberto 'The Keeper' Novar",
+    "Role": "Safehouse Master",
+    "Description": "Burly man in his sixties with heavily scarred true form and practical working-class clothes. Former enforcer turned keeper of vampire safe houses, with unmatched knowledge of Chicago’s supernatural hideouts.",
+    "Faction": "Red Court"
+  },
+  {
+    "Name": "Marcus 'Mark' Shaw and Ophiriel",
+    "Role": "Warrior of Ruin",
+    "Description": "Tall, athletic man in his mid-thirties, with a muscular build, close-cropped dark hair, square jaw, and piercing gray eyes. Fitted tactical gear favors practicality over style. Former military or mercenary, now host to Ophiriel, the Fallen Angel of War and Ruin. Ophiriel manifests as scarred bronze armor and grants Mark devastating combat powers, from kinetic redirection to rending claws and war cries.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Alexandra 'Lexi' Cross and Vassago",
+    "Role": "Master Manipulator",
+    "Description": "Lithe woman in her late twenties with blonde hair in a sleek bob, favoring stylish but understated clothing. Predatory green eyes hide her inner demon. Former con artist, now host to Vassago, the Serpent of Secrets. Vassago grants telepathy, illusion-casting, and a venomous bite that traps victims in nightmares.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Captain Jonah Steele and Andras",
+    "Role": "The Inciter",
+    "Description": "Broad-shouldered man in his fifties with a military bearing, salt-and-pepper hair, and a permanent scowl. His combat gear is practical and worn. A decorated officer before falling to Andras, the Angel of Strife, who grants him the power to manipulate lightning, unleash war cries that incite violence, and channel his rage into tactical brilliance.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Lucille Voss and Marchosias",
+    "Role": "Hellfire Huntress",
+    "Description": "Petite woman in her early thirties with pale skin, dark wavy hair, and gothic vintage style. Her eyes burn with cold calculation. Once a reclusive scholar, Lucille now hosts Marchosias, the Black Wolf of Hellfire. She shifts between human and beast, hunts with supernatural senses, and wields black flames that devour both flesh and spirit.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Frederick 'Freddie' Winters and Orobas",
+    "Role": "Phantom Infiltrator",
+    "Description": "Tall, lanky man with short blonde hair and wire-frame glasses, dressed in well-tailored suits hiding his feverish intensity. Former intelligence analyst, now host to Orobas, the Shadow Horse. Freddie can become invisible, phase through walls, and rewrite memories, making him the ultimate infiltrator.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Diana Vale and Barbatos",
+    "Role": "Whispering Tyrant",
+    "Description": "Elegant middle-aged woman with silver hair, sharp features, and evening wear that commands attention. A former socialite and occultist, Diana became the vessel for Barbatos, the Black Owl. With telekinesis, mind control, and access to ancient secrets, she weaves schemes that ensnare enemies and allies alike.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Mikhail Azarov",
+    "Role": "Denarian Suspect and Scapegoat",
+    "Description": "Tall, lean man with sharp features, slicked-back black hair, and a faint scar on his cheek. Always impeccably dressed in a tailored suit, with a crimson gem set into his silver ring. Mikhail’s role is murky — suspected to be a Denarian, but possibly just a red herring set up by the Red Court to divert suspicion. His evasiveness and cold professionalism make him a perfect scapegoat.",
+    "Faction": "Denarians"
+  },
+  {
+    "Name": "Julia Foster",
+    "Role": "Political Consultant",
+    "Description": "Savvy consultant with short dark hair, a no-nonsense demeanor, and a sharp strategic mind. Julia fought her way to the top from humble origins, despising corruption, but her lack of supernatural experience leaves her vulnerable.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Antonia Rosetti",
+    "Role": "Music Historian",
+    "Description": "Tall, elegant Italian woman in her early 40s with flowing dark hair, passionate about music and lost treasures. A romantic dreamer from a family tied to the opera world, she can be dangerously naive about supernatural risks.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Father Michael Evans",
+    "Role": "Community Priest",
+    "Description": "Kind-hearted priest in his late 50s with graying hair and compassionate eyes, known as a pillar of the community. A former occult dabbler, he now runs a shelter but remains haunted by his dark past.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Detective Susan Grant",
+    "Role": "Tenacious Detective",
+    "Description": "Gruff, no-nonsense detective with practical clothes and a sharp glare. Known for her tough justice streak, she secretly acknowledges the supernatural after several close encounters.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Professor Henry Caldwell",
+    "Role": "Obsession-Driven Archaeologist",
+    "Description": "Middle-aged, balding archaeologist obsessed with ancient cultures and mysteries. His curiosity often blinds him to danger, and his willingness to take risks makes him vulnerable to supernatural lures.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Dr. Nora Ellis",
+    "Role": "Dedicated Biochemist",
+    "Description": "Highly intelligent and reserved, Nora dresses conservatively and rarely leaves her lab. She focuses entirely on advancing medical science, unaware her research might intersect with the supernatural.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Emily Green",
+    "Role": "Visionary Artist",
+    "Description": "Soft-spoken artist in her late 20s with curly hair and expressive eyes, often lost in her creative world. Her childhood visions intensified through her art, unknowingly tapping into supernatural energies.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Carter Finch",
+    "Role": "Cybersecurity Specialist",
+    "Description": "Wiry tech expert in his early 40s, fast-talking and conspiracy-obsessed, dressing casually. Former hacker now running a cybersecurity firm, Carter’s drive to uncover hidden secrets draws him into supernatural territory.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Alessandra 'Sandy' Marino",
+    "Role": "High-Profile Attorney",
+    "Description": "Sharp, stylish attorney in her mid-30s with intimidating precision and fierce loyalty to her clients. Known for handling unusual cases, her work often brushes against supernatural law.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Stanislas 'Stan' Sokolov",
+    "Role": "Ex-Enforcer Bodyguard",
+    "Description": "Tall, intimidating man in his early 40s with piercing eyes, a quiet demeanor, and a faint Russian accent. Formerly a mob enforcer, now a loyal protector haunted by his violent past.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Marcy Calhoun",
+    "Role": "Psychometry Teacher",
+    "Description": "Warm, curly-haired woman in her mid-40s working as a history teacher by day, psychometrist by night. Marcy uses her talent for reading object history to help the Paranet track supernatural activity.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Diego 'D' Alvarez",
+    "Role": "Mechanic and Paranet Host",
+    "Description": "Stocky man in his 30s with dark hair and an easygoing demeanor, running a repair shop that doubles as a Paranet safehouse. His minor electrokinesis helps him manipulate electronics in a pinch.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Anita Patel",
+    "Role": "Healer Nurse",
+    "Description": "Petite nurse in her early 30s with practical clothing and a calming presence. Her minor biokinesis lets her ease pain and stabilize injuries, making her vital to Paranet medics.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Raymond 'Ray' Sanchez",
+    "Role": "Sound Illusionist",
+    "Description": "Lanky Hollywood stagehand in his late 20s, usually found in Hawaiian shirts. Ray’s ability to create audio illusions makes him a valuable Paranet distraction expert.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Evelyn 'Evie' Dawson",
+    "Role": "Medium and Shop Owner",
+    "Description": "Middle-aged woman with flowing dresses and a colorful voodoo shop. Evie can talk to spirits, helping the Paranet deal with hauntings, though her gift attracts dangerous attention.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Tommy Greer",
+    "Role": "Aura Spotter",
+    "Description": "Shaggy blonde barista in his mid-20s with a grunge vibe. Tommy can sense magical auras and serves as Seattle’s early warning system for supernatural spikes.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Lana Brooks",
+    "Role": "Charm-Casting Bar Owner",
+    "Description": "Tough bar owner in her late 40s with cowboy boots and a denim wardrobe. Lana crafts protective charms and talismans while running her Nashville bar as a supernatural safehouse.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Dexter 'Dex' Thompson",
+    "Role": "Glamour-Busting Photographer",
+    "Description": "Wiry photographer in his early 30s with a shaved head and mirrored sunglasses. Dex can see through illusions, glamours, and into the Nevernever, serving as Miami’s supernatural scout.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Gloria 'Glo' Richmond",
+    "Role": "Thermokinetic Social Worker",
+    "Description": "Stocky woman in her 50s with dreadlocks and a firm sense of justice. Glo uses her heat and cold manipulation to create safehouses and protect at-risk communities from supernatural threats.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Samira Khan",
+    "Role": "Tarot Diviner",
+    "Description": "Olive-skinned woman in her late 20s with flowing scarves and desert-friendly clothes. Samira’s tarot readings provide eerily accurate (and cryptic) insights to guide Paranet decisions.",
+    "Faction": "Mortals"
+  },
+  {
+    "Name": "Karl 'The Baron' Dragovich",
+    "Role": "War Strategist",
+    "Description": "Tall and skeletal, with pale, waxy skin stretched tight over his skull and faintly glowing red eyes. Wears a tattered 19th-century Russian military uniform adorned with tarnished medals. Once a Russian noble turned during a revolution, Karl delights in brutality and city sieges. He holds a particular vendetta against the White Court.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Lavinia Crane",
+    "Role": "Dark Muse",
+    "Description": "Decrepit beauty with silver hair floating like it’s underwater, wearing ancient, flowing gowns. Once a renowned opera singer, Lavinia now leads a cult that worships her, feeding her both blood and adoration.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Matthias 'The Butcher' Kroll",
+    "Role": "Terror Enforcer",
+    "Description": "Burly and scarred, with rotting flesh under a bloodstained butcher's apron, always clutching a cleaver. A serial killer before turning, Matthias became a Black Court enforcer, gleefully spreading fear.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Esmeralda Wraithchild",
+    "Role": "Twisted Child Predator",
+    "Description": "Small, frail girl with translucent skin and gleaming teeth, dressed in a Victorian mourning gown. Turned as a child, Esmeralda lures families into traps using her innocent appearance and inhuman cruelty.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Gideon Blackwood",
+    "Role": "Necromancer Archivist",
+    "Description": "Gaunt, corpse-like figure in robes covered in occult symbols, with unnaturally long clawed fingers. Once a mortal necromancer, Gideon joined the Black Court to unlock forbidden knowledge, now commanding undead minions.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Sophia von Hohenheim",
+    "Role": "Blood Alchemist",
+    "Description": "Striking yet horrifying in black lace, her stitched-shut lips giving her a macabre silence. A former aristocratic alchemist obsessed with immortality, Sophia now experiments with blood magic to create vampiric monstrosities.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Rupert 'The Rat' Muldoon",
+    "Role": "Skulking Informant",
+    "Description": "Small and wiry, with sagging gray skin, clawed fingers, and rodent-like movements. A thief turned vampire, Rupert excels at infiltrating mortal society, spying, and selling out anyone to save himself.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Carmilla 'The Siren' di Rossi",
+    "Role": "Seductive Manipulator",
+    "Description": "Mesmerizing beauty hiding subtle decay, with intricate silver and obsidian jewelry enhancing her allure. Former ruler of a small Italian village, Carmilla uses seduction and influence to maintain power and security for the Black Court.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Alaric 'The Judge' Van Aalten",
+    "Role": "Inquisitor Executioner",
+    "Description": "Skeletal figure in ancient judge's robes, with a powdered wig atop his head and rings taken from his victims. Once a fanatical inquisitor, Alaric now conducts 'trials' before sentencing enemies to gruesome deaths.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Ingrid Bludrose",
+    "Role": "Blood Hunt Mistress",
+    "Description": "Tall and draped in a ragged red cloak, with decomposed features and lips stained eternally red. Ingrid commands ghouls and lesser vampires, leading brutal blood hunts across Europe to satisfy her insatiable hunger.",
+    "Faction": "Black Court"
+  },
+  {
+    "Name": "Aisling O'Donnell",
+    "Role": "Geomancer and Celtic Expert",
+    "Description": "Slender woman in her forties with fiery red hair and piercing green eyes, often clad in earth-toned robes with Celtic knotwork. Aisling, from a druidic lineage in Ireland, is the Council’s authority on ancient Celtic magic and ley lines. Known for her skill in weaving wards with natural elements, she mediates supernatural disputes across Europe, especially involving the fae.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Emilio Velasco",
+    "Role": "Veteran Warden",
+    "Description": "Stocky man in his early sixties, with salt-and-pepper hair, a weathered face, and a worn leather jacket paired with a wide-brimmed hat. Emilio fights rogue supernatural threats along the Mexico-U.S. border, specializing in combat magic and spirit banishment. Haunted by the loss of his family to the Red Court, he prioritizes protecting innocent lives over Council politics.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Miyuki Tanaka",
+    "Role": "Spirit Binder",
+    "Description": "Petite woman in her early thirties with straight black hair, blending modern professional style with kimono-inspired elements. Trained by her onmyoji grandfather, Miyuki binds spirits, purifies hauntings, and handles negotiations with yokai and ghosts. Her respect for traditional Japanese magic sometimes clashes with the Council’s rigid ways.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Jean-Baptiste Moreau",
+    "Role": "Illusion Master",
+    "Description": "Tall, elegant man in his fifties with silver hair, neatly trimmed beard, tailored suits, and a dark cloak pinned with an antique silver clasp. A former Sorbonne scholar, Jean-Baptiste is a leading authority on illusions, magical constructs, and theory. His belief in Council superiority sometimes blinds him to unorthodox solutions.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Fatima al-Hussein",
+    "Role": "Necromantic Guardian",
+    "Description": "Striking woman in her late forties with dark curly hair and amber eyes, dressed in Egyptian robes adorned with hieroglyphs. Fatima, a descendant of Egyptian sorcerers, guards Egypt’s magical heritage, specializing in ancient curses and necromancy. Fiercely protective of her homeland’s traditions, she resents the Council’s artifact-hunting mindset.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Anatoly Sokolov",
+    "Role": "Siberian Warden",
+    "Description": "Grizzled, middle-aged man with a muscular build, thick beard, and heavy winter clothing suited for Siberia. A former military officer turned Warden, Anatoly uses brutal tactics and potent wards to guard Eastern Europe against supernatural incursions, believing Council authority must be upheld at all costs.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Nina Guerrero",
+    "Role": "Nature Mystic",
+    "Description": "Tall, athletic woman in her late twenties with dark skin, dreadlocked hair adorned with beads, and colorful flowing clothes. A practitioner of Candomblé, Nina balances relationships between humans and supernatural beings in the Amazon, blending spirit magic with herbal remedies. She often clashes with the Council’s bureaucracy.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Catherine Wallace",
+    "Role": "Ley Line Tracker",
+    "Description": "Wiry woman in her early forties with sun-bleached blonde hair, tanned skin, and practical outdoorsy clothing. A product of Australia’s Outback, Catherine combines Aboriginal traditions with Council training, specializing in tracking supernatural disturbances and communing with nature spirits.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Hassan al-Khalid",
+    "Role": "Dreamwalker and Investigator",
+    "Description": "Tall, lean man in his early fifties with a neatly trimmed beard and intense dark eyes, alternating between traditional Moroccan robes and modern suits. A master dreamwalker from a family of Berber mystics, Hassan specializes in mind magic and interrogation, tracking even the most elusive mages through their dreams.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Mariana Torres",
+    "Role": "Diplomat and Negotiator",
+    "Description": "Charismatic woman in her mid-thirties with curly dark hair, modern stylish clothing, and silver jewelry. Once a lawyer, Mariana now brokers supernatural peace in South America, using her legal mind to negotiate with supernatural factions and enforce the Unseelie Accords.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Evelyn 'Evie' Matthews",
+    "Role": "Spirit Guide",
+    "Description": "Statuesque woman in her late thirties with wild curly hair streaked with silver, dressed in flowing or vintage clothes adorned with charms and beads. Raised in New Orleans’ rich supernatural culture, Evie blends Hoodoo with Council magic, specializing in communicating with and guiding spirits.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Nathaniel Greene",
+    "Role": "Ancient Lore Expert",
+    "Description": "Wiry man in his fifties with sharp features, thinning brown hair, and perpetual reading glasses over tweed jackets. A former Harvard professor turned Council scholar, Nathaniel excels at decoding ancient texts, rituals, and artifacts, but his academic obsession sometimes clouds his judgment.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Josephine 'Jo' Tyler",
+    "Role": "Warden Investigator",
+    "Description": "Strong-built woman in her early forties with short-cropped hair, runic tattoos up her arms, and practical outdoor gear. Formerly a Seattle private investigator, Jo combines street smarts with ward magic, handling rogue practitioners and supernatural disappearances along the Pacific coast.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Arno Fischer",
+    "Role": "Surveillance Mage",
+    "Description": "Tall, severe man in his late fifties with iron-gray hair, impeccable suits, and a silver cane focus. A former East German Stasi agent turned Warden, Arno excels at wards, counter-surveillance, and tracking rogue magic across Central Europe, driven by rigid discipline and loyalty to the Council.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Elena Povar",
+    "Role": "Fate Weaver",
+    "Description": "Petite woman in her thirties with dark curls, embroidered shawls, and silver jewelry, carrying a carved wooden staff. From a Romani witchcraft lineage, Elena specializes in divination and fate magic, serving as a bridge between the Council and Europe’s supernatural underworld.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Dino Luca",
+    "Role": "Charming Duelist",
+    "Description": "Handsome man in his early forties with dark curly hair, a roguish smile, tailored suits with colorful flair, and a custom enchanted rapier. Born to Italian nobility, Dino blends enchantment, blood magic, and political intrigue, balancing loyalties between the White Council and the Vatican’s magical arm.",
+    "Faction": "White Council"
+  },
+  {
+    "Name": "Eldritch Titan",
+    "Role": "Strong Villain",
+    "Description": "A towering, twisted mass of tentacles and chitinous plates, radiating a field of warped gravity. Its hide is thick and its mere presence inspires terror, while its devastating tentacle strikes and gravitational pulses crush everything nearby.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Oblivion Warden",
+    "Role": "Medium Villain",
+    "Description": "A shifting entity with a semi-corporeal form, flickering between dimensions. Its psychic pulses scramble minds, while its body can phase out of reality to avoid harm.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Nightmare Ripper",
+    "Role": "Strong Villain",
+    "Description": "A horror formed from congealed fears, its body a rotting patchwork of shadows and bone. It manifests victims' worst nightmares and hunts them with chilling precision.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Veil Shifter",
+    "Role": "Medium Villain",
+    "Description": "A faceless creature constantly shifting its form, blending into its surroundings with illusion magic. Its bladed limbs and conjured weapons reflect the fears and aggression of its enemies.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Harbinger of the Void",
+    "Role": "Strong Villain",
+    "Description": "A void-touched monstrosity armored in crackling void energy, capable of firing beams of entropy and shattering reality itself with each step.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "The Corruptor",
+    "Role": "Medium Villain",
+    "Description": "A slithering being of dripping corruption, its touch rotting both flesh and spirit. Its presence warps weapons and armor, eroding both resolve and reality.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Abyssal Herald",
+    "Role": "Strong Villain",
+    "Description": "A towering warlord of the void, wielding a spiked flail forged from reality itself. Its psychic commands can force enemies to turn on one another.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Voidling Drone",
+    "Role": "Minor Minion",
+    "Description": "A skittering, insectoid creature made of void chitin and shifting shadows, attacking in coordinated swarms that amplify their collective power.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Chained Horror",
+    "Role": "Medium Minion",
+    "Description": "A lumbering abomination bound in rusted chains, each strike lashing out at multiple foes with brutal efficiency.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Eye of Despair",
+    "Role": "Lieutenant (Weak)",
+    "Description": "A floating, pulsating eye encased in semi-corporeal flesh, projecting beams of dread that paralyze and weaken all who meet its gaze.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Rift Stalker",
+    "Role": "Medium Minion",
+    "Description": "A sleek, predatory shape-shifter constantly phasing between worlds, striking from ambush before slipping back into the void.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Abyssal Hound",
+    "Role": "Strong Minion",
+    "Description": "A massive, emaciated beast with jagged teeth and burning eyes, its howl spreading terror before it lunges for the kill.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Echo Wraith",
+    "Role": "Lieutenant (Medium)",
+    "Description": "A fractured specter radiating psychic torment, every strike embedding a sliver of its essence into the victim’s mind.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Shattered Apparition",
+    "Role": "Minor Minion",
+    "Description": "A fragmented ghost-like entity, its touch embedding shards of unstable reality into its victims.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Chaos Bringer",
+    "Role": "Lieutenant (Strong)",
+    "Description": "A towering figure wrapped in swirling chaotic energy, lashing out with a blade infused with pure entropy.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Whispering Shadow",
+    "Role": "Medium Minion",
+    "Description": "A fluid shadow with many tendrils, moving silently through darkness and striking with whispering strands of corrupted power.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "Corrupt Spawn",
+    "Role": "Lieutenant (Medium)",
+    "Description": "A bloated, corrupted humanoid dripping with caustic essence, each strike sapping its target’s strength while spreading its blight.",
+    "Faction": "Outsiders"
+  },
+  {
+    "Name": "King Corb",
+    "Role": "Ruler of the Fomor",
+    "Description": "Towering, amphibious humanoid with slick, dark-green skin, webbed fingers, and a crown of living coral fused to his skull. King Corb rules the Fomor from deep beneath the sea, blending ancient sorcery with biotech mastery. He led the push into Chicago after the Red Court's fall, exploiting the chaos to seize territory and human captives.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Lady Morvena",
+    "Role": "Biotech Alchemist",
+    "Description": "Slender Fomor noble with translucent skin, bioluminescent veins, and eyes that shift colors hypnotically. Morvena is responsible for the Fomor's horrifying biological modifications, transforming kidnapped humans into servitors with implanted gills, barnacle-like armor, and unnatural senses.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Lord Balor",
+    "Role": "War Leader",
+    "Description": "Massive, heavily muscled Fomor covered in chitinous plates and wielding a spear grown from a living deep-sea predator. Balor leads Fomor assault squads, favoring brutal shock tactics and hybrid servitor forces. His reputation for cruelty is known even among his own kind.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Vessara the Whisper",
+    "Role": "Spy Mistress",
+    "Description": "Slender and eel-like, with unnaturally long fingers and a voice that slips into minds like seawater. Vessara oversees the Fomor's intelligence network, using mesmerized human agents and shapeshifting servitors to infiltrate mortal organizations.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Captain Dreth",
+    "Role": "Slave Master",
+    "Description": "Broad-shouldered and covered in barnacle-like armor, Dreth's face is split by a lamprey-like mouth. He coordinates human abductions, overseeing the transformation of captives into servitors. Dreth views humans as raw materials, nothing more.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Mireana the Weaver",
+    "Role": "Mutation Specialist",
+    "Description": "Spindly, tentacle-fingered Fomor clad in flowing robes made of living seaweed. Mireana handles the most delicate of hybridization processes, fusing human minds with aquatic predators to create unique servitor monstrosities.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Rusk the Reclaimer",
+    "Role": "Artifact Hunter",
+    "Description": "Hunched, crab-like Fomor with hardened plates covering his back and dozens of tiny, glowing eyes. Rusk scours ruins and wreckage for lost magical artifacts, blending them with Fomor biotech to fuel the faction's growing power.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "The Abyss Choir",
+    "Role": "Psychic Enforcers",
+    "Description": "A collective of mutated former humans fused into a single coral-and-flesh mass. The Choir's eerie song disrupts thought and magical focus, making them living weapons in both battle and interrogation.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Lirak the Harvester",
+    "Role": "Surface Raider",
+    "Description": "Tall, sinewy Fomor wrapped in scavenged wetsuits and chainmail crafted from salvaged shipwrecks. Lirak leads surface raids, blending brutal amphibious assaults with psychological warfare, leaving cryptic symbols carved into victims’ bodies.",
+    "Faction": "Fomor"
+  },
+  {
+    "Name": "Sergeant Morloch",
+    "Role": "Servitor Handler",
+    "Description": "Once human, now a grotesque hybrid with pale, slimy skin, bulging gills, and barnacle-encrusted limbs. Morloch commands squads of modified humans, enforcing obedience through pain implants and psychic triggers.",
+    "Faction": "Fomor"
   }
 ]
