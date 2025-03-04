@@ -334,5 +334,81 @@
   {
     "Name": "Wrigley Field",
     "Description": "A stadium infused with hope and despair. The Billy Goat Curse left lingering supernatural marks, and secret tunnels beneath may connect to Undertown."
+  },
+  {
+    "Name": "Drowned Gate",
+    "Description": "A massive submerged stone arch, pulsing with ancient magic."
+  },
+  {
+    "Name": "Lakefront Battleground",
+    "Description": "A stretch of waterfront where Fomor emerge to wage war."
+  },
+  {
+    "Name": "Wyld Glade of Stones",
+    "Description": "A hidden grove where Wyld Fae judge mortals’ worth."
+  },
+  {
+    "Name": "The Sunken Arena",
+    "Description": "An underwater colosseum where prisoners fight for survival."
+  },
+  {
+    "Name": "The Forgotten Chapel",
+    "Description": "A crumbling chapel where Knights of the Cross once prayed."
+  },
+  {
+    "Name": "The Knight’s Refuge",
+    "Description": "A hidden sanctuary known only to fallen Knights."
+  },
+  {
+    "Name": "Cursed Battlefield",
+    "Description": "A scarred plain where ancient battles replay endlessly."
+  },
+  {
+    "Name": "Demon’s Mirror",
+    "Description": "A reflective portal that holds a demon’s true name."
+  },
+  {
+    "Name": "The Thorned Throne",
+    "Description": "A living throne of roots and blood in the Wyld Court."
+  },
+  {
+    "Name": "Echoing Hall of Oaths",
+    "Description": "A chamber where every broken promise lingers."
+  },
+  {
+    "Name": "Cursed Fey Market",
+    "Description": "A market where respect is traded like gold."
+  },
+  {
+    "Name": "Moonshadow Forest",
+    "Description": "A forest lit only by the reflections of shattered moons."
+  },
+  {
+    "Name": "The Broken Forge",
+    "Description": "Where cursed chains are forged from mortal regrets."
+  },
+  {
+    "Name": "Demon’s Binding Circle",
+    "Description": "A circle etched in bone, binding demon and mortal."
+  },
+  {
+    "Name": "Pain Market",
+    "Description": "A supernatural bazaar where pain itself is currency."
+  },
+  {
+    "Name": "The Chainmaker’s Tomb",
+    "Description": "Grave of the first mortal who bound a demon."
+  },
+  {
+    "Name": "The Blooded Pier",
+    "Description": "Where the water remembers every drop of Knightly blood spilled."
+  },
+  {
+    "Name": "Wyld Grove of Mercy",
+    "Description": "A grove where Wyld Fae grant mercy — if respect is earned."
+  },
+  {
+    "Name": "The Drowned Chapel",
+    "Description": "An underwater ruin where Knights once faced the Fomor."
   }
 ]

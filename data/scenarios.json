@@ -545,5 +545,100 @@
       "Unquiet Dead",
       "Ley Line Expert"
     ]
+  },
+  {
+    "Title": "The Drowned War",
+    "Summary": "The Fomor are waging a hidden war beneath Lake Michigan, flooding into Chicago through ancient submerged gates. The players are caught in the middle when an ancient Wyld Fae ruler — whose respect they must earn — offers the key to closing the gates. But the Fomor won’t go down without unleashing a monstrous sea curse upon the city.",
+    "Places": [
+      "Drowned Gate",
+      "Lakefront Battleground",
+      "Wyld Glade of Stones",
+      "The Sunken Arena"
+    ],
+    "NPCs": [
+      "Lord Na’thraal",
+      "Knight Captain Mariel Brightwind",
+      "Elder Tidecaller Orsk",
+      "Wyld Huntress Seline",
+      "Detective Sofia Vasquez"
+    ]
+  },
+  {
+    "Title": "Blood Debt of the Broken Blade",
+    "Summary": "A fallen Knight of the Cross — driven by grief and a curse laid on their blade — is hunted by a demon who once faced the sword. The players must either help the cursed Knight restore their honor, or stand against both the Knight and the demon as they drag their battle into the mortal world.",
+    "Places": [
+      "The Forgotten Chapel",
+      "The Knight’s Refuge",
+      "Cursed Battlefield",
+      "Demon’s Mirror"
+    ],
+    "NPCs": [
+      "Sir Elijah Castor",
+      "Demon Prince Velkar",
+      "Sister Maria Bell",
+      "Blacksmith Gavin Hurst",
+      "The Weeping Angel"
+    ]
+  },
+  {
+    "Title": "The Court of Shattered Oaths",
+    "Summary": "A Wyld Fae ruler has been betrayed by her own court, and respect is the only currency that can mend the divide. The players must navigate the dangerous court politics, offering trials of respect to win allies while a curse spreads through the Nevernever.",
+    "Places": [
+      "The Thorned Throne",
+      "Echoing Hall of Oaths",
+      "Cursed Fey Market",
+      "Moonshadow Forest"
+    ],
+    "NPCs": [
+      "Queen Briarheart",
+      "The Hollow Prince",
+      "Laughing Dagger Kaelen",
+      "Archivist Yewthorn",
+      "The Bound Jester"
+    ]
+  },
+  {
+    "Title": "The Demon’s Chain",
+    "Summary": "A mortal accidentally binds a demon with a cursed chain — forcing the demon to obey their commands, but also inflicting agony on the mortal every time the demon suffers. The players must break the chain before either the demon or the mortal dies from shared pain.",
+    "Places": [
+      "The Broken Forge",
+      "Demon’s Binding Circle",
+      "Pain Market",
+      "The Chainmaker’s Tomb"
+    ],
+    "NPCs": [
+      "Eleanor Drake",
+      "Demon Grishkar",
+      "Chainmaker Aldous",
+      "Sorceress Marina",
+      "Bishop Tallow"
+    ]
+  },
+  {
+    "Title": "When Knights Fall",
+    "Summary": {
+      "text": "The Fomor launch an all-out supernatural war on Chicago’s waters — and a Knight of the Cross is ambushed and left for dead. As pain cripples the Knight, the players must fight on without them — unless they can uncover an ancient Wyld Fae boon to restore the Knight’s strength.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Places": [
+      "Arctis Tor",
+      "The Blooded Pier",
+      "Wyld Grove of Mercy",
+      "The Drowned Chapel"
+    ],
+    "NPCs": [
+      "Knight Armand St. Croix",
+      "Lord Na’thraal",
+      "The Blood Hag Mirskaya",
+      "Wyld Healer Brialyn",
+      "Captain Sofia Domingez"
+    ]
   }
 ]
