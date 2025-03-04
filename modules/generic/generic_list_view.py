@@ -18,6 +18,10 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkLabel(search_frame, text="Search:").pack(side="left", padx=5)
         search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var)
         search_entry.pack(side="left", fill="x", expand=True, padx=5)
+
+        # Bind Enter key to trigger the filter
+        search_entry.bind("<Return>", lambda event: self.filter_items())
+
         search_button = ctk.CTkButton(search_frame, text="Filter", command=self.filter_items)
         search_button.pack(side="left", padx=5)
         add_button = ctk.CTkButton(search_frame, text="Add", command=self.add_item)
@@ -44,7 +48,6 @@ class GenericListView(ctk.CTkFrame):
             else:
                 label = ctk.CTkLabel(self.list_frame, text=header, anchor="w", padx=5)
                 label.grid(row=0, column=col, sticky="w", pady=(0, 2))
-
 
     def refresh_list(self):
         """ Recharge la liste avec les items filtrés. """
@@ -125,3 +128,4 @@ class GenericListView(ctk.CTkFrame):
         # Tri des items par la colonne sélectionnée
         self.filtered_items.sort(key=lambda x: get_sort_value(x))
         self.refresh_list()
+[]
