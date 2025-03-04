@@ -25,15 +25,25 @@
     ]
   },
   {
-    "Title": "fgsdfggsdfg",
+    "Title": "dfsqfgfgqsdrfg",
     "Summary": {
-      "text": "gfdsdfgsdfg",
+      "text": "gsdfgdfsgsdffdfgd\nsdfg\nsdfgsdfg\nsdfg\nsdfg\nsdfgdfgsdfgsdfg\n\nsdfgsdfgsdfsdfg\n• sfgd\n• dfg\n• fg\n\nfgsdg\nf",
       "formatting": {
         "bold": [],
         "italic": [],
         "underline": [],
-        "left": [],
-        "center": [],
+        "left": [
+          [
+            "4.0",
+            "6.15"
+          ]
+        ],
+        "center": [
+          [
+            "4.0",
+            "6.15"
+          ]
+        ],
         "right": []
       }
     },
@@ -42,9 +52,8 @@
       "sdfcdfsdfdsq"
     ],
     "NPCs": [
-      "aaa",
-      "dfsdfqsqsdf"
-    ],
-    "Tags": ""
+      "dfsdfqsqsdf",
+      "qsqsdqsddsqqsdfs"
+    ]
   }
 ]

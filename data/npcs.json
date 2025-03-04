@@ -13,8 +13,7 @@
         "right": []
       }
     },
-    "Faction": "bnbbb",
-    "Tags": ""
+    "Faction": "bnbbb"
   },
   {
     "Name": "bvcxvbxcvbcv",
@@ -30,8 +29,7 @@
         "right": []
       }
     },
-    "Faction": "retergrgf",
-    "Tags": ""
+    "Faction": "retergrgf"
   },
   {
     "Name": "dfsdfqsqsdf",
@@ -47,7 +45,43 @@
         "right": []
       }
     },
-    "Faction": "asdfsdfsd",
-    "Tags": ""
+    "Faction": "asdfsdfsd"
+  },
+  {
+    "Name": "qsqsdqsddsqqsdfs",
+    "Role": "dfsssdf",
+    "Description": {
+      "text": "sdfsfdsdfsdfsdf\ndfs\nsdf\nsdf\nsdfsdf\nfsdsdfsdf\nsdfsdf\nsdf\n1. dfsd\n2. ssdf\n",
+      "formatting": {
+        "bold": [],
+        "italic": [
+          [
+            "4.0",
+            "9.0"
+          ]
+        ],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "asdfsdfsd"
+  },
+  {
+    "Name": "sdfsdffgqsedr",
+    "Role": "sdgfgsdfdfgsdf",
+    "Description": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "bnbbb"
   }
 ]

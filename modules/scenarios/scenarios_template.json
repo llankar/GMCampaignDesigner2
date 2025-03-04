@@ -3,7 +3,6 @@
       {"name": "Title", "type": "text"},
       {"name": "Summary", "type": "longtext"},
       {"name": "Places", "type": "list", "linked_type": "Place"},
-      {"name": "NPCs", "type": "list", "linked_type": "NPC"},
-      {"name": "Tags", "type": "tags"}
+      {"name": "NPCs", "type": "list", "linked_type": "NPC"}
   ]
 }
