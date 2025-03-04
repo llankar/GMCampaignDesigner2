@@ -78,5 +78,261 @@
   {
     "Name": "Blackwood Park",
     "Description": "Site of an ancient Denarian summoning."
+  },
+  {
+    "Name": "The Blooming Glade",
+    "Description": "A pocket of the Summer Court hidden in mortal Chicago, filled with unnatural beauty."
+  },
+  {
+    "Name": "Goldenroot Cafe",
+    "Description": "A cafe that blooms — literally — when love is in the air."
+  },
+  {
+    "Name": "The Sunlit Court",
+    "Description": "Summer’s throne room, where sunlight is both beauty and blade."
+  },
+  {
+    "Name": "Hidden Garden in Lincoln Park",
+    "Description": "An enchanted garden only revealed to lovers and the lost."
+  },
+  {
+    "Name": "Rookridge Cemetery",
+    "Description": "A cemetery where shadows whisper of broken promises."
+  },
+  {
+    "Name": "The Bleeding House",
+    "Description": "A cursed home where blood seeps from the walls at dusk."
+  },
+  {
+    "Name": "Abandoned Funeral Parlor",
+    "Description": "Once a sanctuary for the dead — now claimed by Black Court squatters."
+  },
+  {
+    "Name": "Shadow Market Underpass",
+    "Description": "A secret market where the dead bargain for memories."
+  },
+  {
+    "Name": "The Rusty Mic Comedy Club",
+    "Description": "Chicago’s grimiest stand-up venue, now cursed with undead punchlines."
+  },
+  {
+    "Name": "WZRD Local Radio Station",
+    "Description": "Where a late-night DJ accidentally summoned the Trickster Spirit."
+  },
+  {
+    "Name": "Grin & Barrow Mortuary",
+    "Description": "A funeral home with a dark sense of humor."
+  },
+  {
+    "Name": "The Trickster’s Record Shop",
+    "Description": "A shop haunted by every joke ever told."
+  },
+  {
+    "Name": "Crimson Nursery",
+    "Description": "A hidden sanctuary where a half-vampire child sleeps."
+  },
+  {
+    "Name": "Blooded Alley",
+    "Description": "An alley soaked with centuries of Red Court killings."
+  },
+  {
+    "Name": "Midnight Playground",
+    "Description": "A park where supernatural children play at night."
+  },
+  {
+    "Name": "Safehouse of the Bear",
+    "Description": "A hidden refuge guarded by a Russian werebear."
+  },
+  {
+    "Name": "The Void Scar",
+    "Description": "A corrupted rift where reality decays."
+  },
+  {
+    "Name": "Underwater Catacombs",
+    "Description": "Ancient tunnels flooded with unnatural water."
+  },
+  {
+    "Name": "Broken River Lock",
+    "Description": "An old river lock now sealed by magical rot."
+  },
+  {
+    "Name": "The Rotting Veil",
+    "Description": "Where the barrier between life and death dissolves."
+  },
+  {
+    "Name": "Frosted Gallery",
+    "Description": "An art gallery where enchanted paintings bleed Winter magic into reality."
+  },
+  {
+    "Name": "Blizzard Alley",
+    "Description": "A Chicago alley locked in perpetual storm, where every gust whispers secrets."
+  },
+  {
+    "Name": "Hollow Mirror",
+    "Description": "A reflection realm where the Winter Court's dark desires manifest."
+  },
+  {
+    "Name": "Shattered Sanctum",
+    "Description": "Warden Black’s sanctum collapsed into fragments of unstable reality — a maze of frozen memories."
+  },
+  {
+    "Name": "Dream-Spiral Library",
+    "Description": "A library existing only in sleep, spiraling endlessly into the subconscious."
+  },
+  {
+    "Name": "Chicago Sanitarium",
+    "Description": "Abandoned psychiatric hospital where spectral patients still wander."
+  },
+  {
+    "Name": "Memory Well",
+    "Description": "A deep well where lost memories pool — and occasionally speak."
+  },
+  {
+    "Name": "Wrecked Intersection",
+    "Description": "The crossroads where accident and fate collided, now glowing faintly at dusk."
+  },
+  {
+    "Name": "Coroner’s Office",
+    "Description": "Where mundane and supernatural deaths collide in files nobody wants to open."
+  },
+  {
+    "Name": "Highway Shrine",
+    "Description": "A roadside memorial pulsing with supernatural energy from grieving loved ones."
+  },
+  {
+    "Name": "The Spirit Holding Cell",
+    "Description": "A warded prison for unstable spirits — creaking at the edges."
+  },
+  {
+    "Name": "Lucky Joe’s Casino",
+    "Description": "A crumbling gambling den where fortune and fate blur."
+  },
+  {
+    "Name": "Abandoned Subway Tunnel",
+    "Description": "A forgotten rail tunnel haunted by lost wagers and unlucky souls."
+  },
+  {
+    "Name": "Coin Collector’s Shop",
+    "Description": "A mundane antique shop unknowingly hiding an ancient evil."
+  },
+  {
+    "Name": "Denarian Watchpoint",
+    "Description": "A secret safehouse used to track Denarian coin movements."
+  },
+  {
+    "Name": "Burned-Out House",
+    "Description": "Charred wreckage where time froze the night of the fire."
+  },
+  {
+    "Name": "The Ashen Veil",
+    "Description": "A ghostly realm formed entirely of ash and regret."
+  },
+  {
+    "Name": "Old Firehouse Records Room",
+    "Description": "Where the history of every fatal fire in Chicago resides."
+  },
+  {
+    "Name": "Mourner’s Tavern",
+    "Description": "A hidden bar where spirits gather to drink memories."
+  },
+  {
+    "Name": "Widow’s Apartment",
+    "Description": "A small home drowning in memories and flickering candles."
+  },
+  {
+    "Name": "Cemetery of St. Agatha",
+    "Description": "A cemetery where the dead whisper their regrets to mourners."
+  },
+  {
+    "Name": "The Lamenting Chapel",
+    "Description": "A chapel where stained glass occasionally cries."
+  },
+  {
+    "Name": "Denarian Blacksite",
+    "Description": "A heavily warded vault for containing and studying Denarians."
+  },
+  {
+    "Name": "The Loop",
+    "Description": "The core of Chicago’s downtown, filled with skyscrapers, iconic landmarks, and supernatural hotspots. Statues like Ceres and the Picasso hum with hidden power. The Civic Opera House is haunted, and Fort Kennedy hides ancient secrets."
+  },
+  {
+    "Name": "Near North Side",
+    "Description": "A trendy neighborhood where young professionals and supernatural predators cross paths. The Excalibur nightclub houses poltergeists, and the riverfront still echoes with the cries of Eastland disaster victims."
+  },
+  {
+    "Name": "Gold Coast",
+    "Description": "Old money, luxury high-rises, and boutique stores catering to mortals and supernatural collectors alike. Behind certain doors on Oak Street, rare magical artifacts change hands."
+  },
+  {
+    "Name": "Cabrini-Green",
+    "Description": "Once a dangerous housing project, now gentrified — but haunted by past violence. Built on Death Corner, the air is thick with old grudges and spirits who refuse to leave."
+  },
+  {
+    "Name": "Lincoln Park",
+    "Description": "A wealthy district of theaters and historical sites. The Chicago Historical Society holds powerful artifacts, and North Avenue Beach pulses with water spirit energy."
+  },
+  {
+    "Name": "Near West Side",
+    "Description": "Home to UIC with its eerie brutalist buildings. Beneath the Kennedy Expressway lies Chicago’s goblin market, and Bloody Maxwell still radiates corruption under its new façade."
+  },
+  {
+    "Name": "Pilsen",
+    "Description": "A cultural crossroads where botanicas cater to supernatural needs and mercados hide forbidden goods. Deals happen here that no mortal should witness."
+  },
+  {
+    "Name": "Chinatown",
+    "Description": "A chaotic blend of neon tourism and ancient power. Bad feng shui warps the streets, and hidden tunnels lead into Undertown, where spirits of the Tong wars still lurk."
+  },
+  {
+    "Name": "Bronzeville",
+    "Description": "Once the beating heart of Black culture, Bronzeville’s jazz clubs and theaters still host spectral performers. Spirits of past leaders occasionally offer advice to the living."
+  },
+  {
+    "Name": "Uptown",
+    "Description": "Faded glamor and hidden power. The Aragon Ballroom and Green Mill are haunted by performers who never left, and the area’s cultural melting pot has birthed unique magical traditions."
+  },
+  {
+    "Name": "The Grey City",
+    "Description": "The forgotten parts of Chicago — identical houses, abandoned alleys, and bars where reality feels thinner than it should. This is where memories, people, and even whole buildings disappear."
+  },
+  {
+    "Name": "Art Institute of Chicago",
+    "Description": "More than a museum, this is a sanctuary of old power. Its twin lion statues may be golems guarding hidden archives in the basement, where dangerous artifacts are stored. Ghosts of artists and patrons linger, bound to unfinished works."
+  },
+  {
+    "Name": "Cloud Gate (The Bean)",
+    "Description": "A reflective sculpture suspected of thaumaturgical properties, showing one’s true self at the right time. Used by diviners and scryers, but its visions are not always kind. Fae activity peaks here during equinoxes."
+  },
+  {
+    "Name": "Millennium Park",
+    "Description": "A public space built atop a thin veil between worlds. The Pritzker Pavilion’s canopy amplifies both sound and magic. Hidden gateways within the gardens are said to lead to other realms during solstices."
+  },
+  {
+    "Name": "Museum of Science and Industry",
+    "Description": "A place where magic and technology blur. The captured U-Boat sits atop a ley-line nexus, and the coal mine exhibit’s deepest tunnels connect to Undertown."
+  },
+  {
+    "Name": "Chicago Riverwalk",
+    "Description": "Echoes of tragedy cling to the water, especially from the Eastland Disaster. Spectral figures appear near the edge, and certain bridges, like Wells Street, are guarded by spirits demanding tolls at midnight."
+  },
+  {
+    "Name": "Field Museum of Natural History",
+    "Description": "A treasure trove of natural and supernatural history. Sue the T-Rex holds a bound spirit, and some Egyptian artifacts are guarded by ancient wards meant to contain rather than display."
+  },
+  {
+    "Name": "Trump Tower",
+    "Description": "A monument to ambition, serving as a potential feeding ground for White Court vampires. Its penthouse is rumored to host supernatural negotiations, and the land beneath carries violent history that bleeds into the building."
+  },
+  {
+    "Name": "Lincoln Park",
+    "Description": "A place of beauty built over mass graves. Ghosts walk the park, especially near the zoo. Some trees act as conduits for trapped spirits, whispering to those willing to listen."
+  },
+  {
+    "Name": "Water Tower Place",
+    "Description": "One of the few survivors of the Great Chicago Fire, possibly protected by ancient magic. A wellspring of power lies beneath it, and shadowy figures appear in the upper floors."
+  },
+  {
+    "Name": "Wrigley Field",
+    "Description": "A stadium infused with hope and despair. The Billy Goat Curse left lingering supernatural marks, and secret tunnels beneath may connect to Undertown."
   }
 ]

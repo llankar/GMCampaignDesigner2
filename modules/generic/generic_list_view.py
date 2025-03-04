@@ -23,15 +23,31 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkButton(search_frame, text="Filter", command=self.filter_items).pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Add", command=self.add_item).pack(side="left", padx=5)
 
-        # List frame
-        self.list_frame = ctk.CTkFrame(self)
-        self.list_frame.pack(fill="both", expand=True)
+        # Frame with scrollbar
+        list_container = ctk.CTkFrame(self)
+        list_container.pack(fill="both", expand=True)
+
+        self.canvas = ctk.CTkCanvas(list_container, highlightthickness=0)
+        self.canvas.pack(side="left", fill="both", expand=True)
+
+        scrollbar = ctk.CTkScrollbar(list_container, command=self.canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+
+        self.list_frame = ctk.CTkFrame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.list_frame, anchor="nw")
+
+        self.list_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         self.items = self.model_wrapper.load_items()
         self.filtered_items = self.items.copy()
 
         self.create_table_header()
         self.refresh_list()
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     def create_table_header(self):
         headers = [field["name"] for field in self.template["fields"]] + ["Actions"]
