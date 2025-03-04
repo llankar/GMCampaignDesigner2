@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 from modules.helpers.text_helpers import format_longtext
 
+
 class GenericListView(ctk.CTkFrame):
     def __init__(self, master, model_wrapper, template, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
@@ -37,9 +38,14 @@ class GenericListView(ctk.CTkFrame):
         headers = [field["name"] for field in self.template["fields"]] + ["Actions"]
 
         for col, header in enumerate(headers):
-            label = ctk.CTkLabel(self.list_frame, text=header, anchor="w", padx=5)
-            label.grid(row=0, column=col, sticky="w", pady=(0, 2))
-        
+            if header != "Actions":  # Only make non-action columns clickable
+                button = ctk.CTkButton(self.list_frame, text=header, anchor="w", command=lambda col=col: self.sort_column(col))
+                button.grid(row=0, column=col, sticky="w", pady=(0, 2), padx=5)
+            else:
+                label = ctk.CTkLabel(self.list_frame, text=header, anchor="w", padx=5)
+                label.grid(row=0, column=col, sticky="w", pady=(0, 2))
+
+
     def refresh_list(self):
         """ Recharge la liste avec les items filtrés. """
         for widget in self.list_frame.winfo_children():
@@ -53,6 +59,7 @@ class GenericListView(ctk.CTkFrame):
 
         for row_index, item in enumerate(self.filtered_items, start=1):
             self.create_item_row(item, row_index)
+
     def create_item_row(self, item, row_index):
         """ Crée une ligne pour un item avec une vraie grille alignée. """
         for col, field in enumerate(self.template["fields"]):
@@ -102,3 +109,19 @@ class GenericListView(ctk.CTkFrame):
             self.items.remove(item)
             self.model_wrapper.save_items(self.items)
             self.filter_items()
+
+    def sort_column(self, col_index):
+        """ Trie la liste des éléments par la colonne cliquée. """
+        field_name = self.template["fields"][col_index]["name"]
+        
+        # Assurez-vous de manipuler les données correctement
+        def get_sort_value(item):
+            value = item.get(field_name, "")
+            # Si c'est un dictionnaire (par exemple un longtext ou un autre champ structuré)
+            if isinstance(value, dict):
+                return value.get("text", "")
+            return value  # Retourne la valeur telle quelle si ce n'est pas un dictionnaire
+
+        # Tri des items par la colonne sélectionnée
+        self.filtered_items.sort(key=lambda x: get_sort_value(x))
+        self.refresh_list()
