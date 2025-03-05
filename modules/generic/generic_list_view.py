@@ -91,14 +91,25 @@ class GenericListView(ctk.CTkFrame):
 
     def create_item_row(self, item, row_index):
         portrait_path = item.get("Portrait", "")
+
+        def on_portrait_click(event=None):
+            self.set_portrait(item)
+
         if portrait_path and os.path.exists(portrait_path):
             img = Image.open(portrait_path)
             ctk_image = CTkImage(light_image=img, size=(32, 32))
             portrait_label = CTkLabel(self.list_frame, image=ctk_image, text="")
-            portrait_label.image = ctk_image  # Store reference to avoid garbage collection
+            portrait_label.image = ctk_image  # Keep reference
             portrait_label.grid(row=row_index, column=0, padx=5)
+
+            # Bind left click to set_portrait (change image)
+            portrait_label.bind("<Button-1>", on_portrait_click)
         else:
-            ctk.CTkLabel(self.list_frame, text="[No Image]").grid(row=row_index, column=0, padx=5)
+            no_image_label = ctk.CTkLabel(self.list_frame, text="[No Image]")
+            no_image_label.grid(row=row_index, column=0, padx=5)
+
+            # Bind left click to set_portrait (choose new image)
+            no_image_label.bind("<Button-1>", on_portrait_click)
 
         for col, field in enumerate([f for f in self.template["fields"] if f["name"] != "Portrait"]):
             value = item.get(field["name"], "")
@@ -114,6 +125,7 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkButton(action_frame, text="Edit", command=lambda i=item: self.edit_item(i)).pack(side="left", padx=2)
         ctk.CTkButton(action_frame, text="Delete", command=lambda i=item: self.delete_item(i)).pack(side="left", padx=2)
         ctk.CTkButton(action_frame, text="Set Portrait", command=lambda i=item: self.set_portrait(i)).pack(side="left", padx=2)
+
 
     def set_portrait(self, item):
         file_path = filedialog.askopenfilename(

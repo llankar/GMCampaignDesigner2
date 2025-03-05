@@ -163,8 +163,8 @@
         "right": []
       }
     },
-    "Faction": "Winter Court",
-    "Portrait": "assets/portraits\\Marcus_Raith_1836095413552.webp"
+    "Faction": "White court",
+    "Portrait": "assets/portraits\\Marcus_Raith_166.webp"
   },
   {
     "Name": "Alaric Raith",
@@ -180,7 +180,7 @@
         "right": []
       }
     },
-    "Faction": "Winter Court",
+    "Faction": "White court",
     "Portrait": "assets/portraits\\Alaric_Raith_1834056372688.webp"
   },
   {
@@ -197,7 +197,7 @@
         "right": []
       }
     },
-    "Faction": "Winter Court",
+    "Faction": "White court",
     "Portrait": "assets/portraits\\Selena_Raith_1749095898752.webp"
   },
   {
@@ -214,7 +214,7 @@
         "right": []
       }
     },
-    "Faction": "Winter Court",
+    "Faction": "White court",
     "Portrait": "assets/portraits\\Gideon_Raith_1749056480720.webp"
   },
   {
@@ -231,104 +231,120 @@
         "right": []
       }
     },
-    "Faction": "Winter Court",
+    "Faction": "White court",
     "Portrait": "assets/portraits\\Diana_Raith_1749056709136.webp"
   },
   {
     "Name": "Matthias Raith",
     "Role": "Political Advisor",
     "Description": "Calm and serene with short-cropped brown hair and a well-groomed beard. Matthias advises Lara Raith, using his mastery of reading desires and predicting outcomes, while secretly nursing ambitions of his own.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Matthias_Raith_166.webp"
   },
   {
     "Name": "Lady Victoria Raith",
     "Role": "Media Manipulator",
     "Description": "Statuesque with platinum blonde hair, ice-blue eyes, and avant-garde fashion sense. Manages high-end fashion magazines and modeling agencies, using them as feeding grounds while competing with Lara for influence.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Lady_Victoria_Raith_166.webp"
   },
   {
     "Name": "Lord Dominic Malvora",
     "Role": "Security Mogul",
     "Description": "Distinguished man in his forties with salt-and-pepper hair and dark eyes that absorb light. Head of Malvora's Chicago operations, running a private security firm and mastering fear-based feeding techniques.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Lord_Dominic_Malvora_166.webp"
   },
   {
     "Name": "Natasha Malvora",
     "Role": "Fear Entertainer",
     "Description": "Young woman with raven-black hair, purple highlights, and gothic-inspired attire. Runs underground horror venues, experiments with digital fear, and cultivates influence among younger supernatural circles.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Natasha_Malvora_166.webp"
   },
   {
     "Name": "Isadora Malvora",
     "Role": "Fear Psychologist",
     "Description": "Long jet-black hair, pale blue eyes, and dark Victorian dresses. Fascinated by the psychology of fear, Isadora holds private experiments to explore mortal terror, balancing cruelty with intellectual curiosity.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Isadora_Malvora_166.webp"
   },
   {
     "Name": "Cyrus Malvora",
     "Role": "Rogue Terrorist",
     "Description": "Gaunt with thin graying hair, a ghostly presence wrapped in shabby suits. Black sheep of House Malvora, Cyrus feeds on urban legends by terrorizing isolated communities.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Cyrus_Malvora_166.webp"
   },
   {
     "Name": "Vera Malvora",
     "Role": "Sadistic Therapist",
     "Description": "Warm and motherly appearance with golden curls and a bright smile hiding deep cruelty. Masquerades as a therapist to expose and feed on her clients' fears, building a network of indebted mortals.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Vera_Malvora_166.webp"
   },
   {
     "Name": "Remy Malvora",
     "Role": "Fear Stalker",
     "Description": "Rugged and feral with long unkempt hair and predatory eyes. A hunter by nature, Remy stalks victims through the city’s dark corners, preferring action to politics.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Remy_Malvora_166.webp"
   },
   {
     "Name": "Elena Malvora",
     "Role": "Mass Hysteria Specialist",
     "Description": "Striking woman with auburn hair and dramatic flair. Creates large-scale fear events, driving entire crowds to madness while pursuing personal ambitions at any cost.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Elena_Malvora_166.webp"
   },
   {
     "Name": "Dr. Elizabeth Skavis",
     "Role": "Despair Doctor",
     "Description": "Elegant woman with auburn hair, wire-rimmed glasses, and precise movements. A psychiatrist feeding on despair through exclusive mental health clinics, she studies supernatural depression.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Dr._Elizabeth_Skavis_166.webp"
   },
   {
     "Name": "James Skavis",
     "Role": "Despair Poet",
     "Description": "Thin professor with gold-rimmed glasses and vintage suits. Runs literary societies and uses tragic poetry readings as feeding grounds, blending academia with supernatural despair.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\James_Skavis_166.webp"
   },
   {
     "Name": "Benedict Skavis",
     "Role": "Despair Counselor",
     "Description": "Slender with silver hair and perpetually frowning. Acts as a 'counselor' who deepens his victims' depression, believing that life itself is too cruel to deserve hope.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Benedict_Skavis_166.webp"
   },
   {
     "Name": "Livia Skavis",
     "Role": "Despair Artist",
     "Description": "Ethereal with ash-colored hair and tear-filled eyes. Once an artist herself, Livia now inspires tragic beauty in others before feeding, especially drawn to poets and musicians.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Livia_Skavis_166.webp"
   },
   {
     "Name": "Victor Skavis",
     "Role": "Grief Predator",
     "Description": "Tall and gaunt with haunted eyes, wearing simple dark clothes. Poses as a grief counselor, feeding on mourners by pulling them deeper into despair.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Victor_Skavis_166.webp"
   },
   {
     "Name": "Marcella Skavis",
     "Role": "Isolation Seductress",
     "Description": "Raven-haired with moonlight skin, moving with languid grace. Seduces the lonely, feeding off their hopelessness, often targeting hospital patients and support groups.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Marcella_Skavis_166.webp"
   },
   {
     "Name": "Darius Skavis",
     "Role": "Economic Despair Architect",
     "Description": "Weary man in worn suits with tired eyes. Uses financial manipulation and social ruin to spread despair, enjoying both large-scale suffering and personal tragedy.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Darius_Skavis_166.webp"
   },
   {
     "Name": "Lily and Rose Winter",
@@ -340,7 +356,8 @@
     "Name": "Alexander Grey",
     "Role": "Independent Matchmaker",
     "Description": "Androgynous shapeshifter with fluid grace and cutting-edge fashion. Runs a supernatural matchmaking service while navigating politics between all White Court Houses.",
-    "Faction": "White Court"
+    "Faction": "White Court",
+    "Portrait": "assets/portraits\\Alexander_Grey_166.webp"
   },
   {
     "Name": "Isabella 'Izzy' Ramos",
@@ -454,37 +471,43 @@
     "Name": "Marcus 'Mark' Shaw and Ophiriel",
     "Role": "Warrior of Ruin",
     "Description": "Tall, athletic man in his mid-thirties, with a muscular build, close-cropped dark hair, square jaw, and piercing gray eyes. Fitted tactical gear favors practicality over style. Former military or mercenary, now host to Ophiriel, the Fallen Angel of War and Ruin. Ophiriel manifests as scarred bronze armor and grants Mark devastating combat powers, from kinetic redirection to rending claws and war cries.",
-    "Faction": "Denarians"
+    "Faction": "Denarians",
+    "Portrait": "assets/portraits\\Marcus_'Mark'_Shaw_and_Ophiriel_166.webp"
   },
   {
     "Name": "Alexandra 'Lexi' Cross and Vassago",
     "Role": "Master Manipulator",
     "Description": "Lithe woman in her late twenties with blonde hair in a sleek bob, favoring stylish but understated clothing. Predatory green eyes hide her inner demon. Former con artist, now host to Vassago, the Serpent of Secrets. Vassago grants telepathy, illusion-casting, and a venomous bite that traps victims in nightmares.",
-    "Faction": "Denarians"
+    "Faction": "Denarians",
+    "Portrait": "assets/portraits\\Alexandra_'Lexi'_Cross_and_Vassago_166.webp"
   },
   {
     "Name": "Captain Jonah Steele and Andras",
     "Role": "The Inciter",
     "Description": "Broad-shouldered man in his fifties with a military bearing, salt-and-pepper hair, and a permanent scowl. His combat gear is practical and worn. A decorated officer before falling to Andras, the Angel of Strife, who grants him the power to manipulate lightning, unleash war cries that incite violence, and channel his rage into tactical brilliance.",
-    "Faction": "Denarians"
+    "Faction": "Denarians",
+    "Portrait": "assets/portraits\\Captain_Jonah_Steele_and_Andras_166.webp"
   },
   {
     "Name": "Lucille Voss and Marchosias",
     "Role": "Hellfire Huntress",
     "Description": "Petite woman in her early thirties with pale skin, dark wavy hair, and gothic vintage style. Her eyes burn with cold calculation. Once a reclusive scholar, Lucille now hosts Marchosias, the Black Wolf of Hellfire. She shifts between human and beast, hunts with supernatural senses, and wields black flames that devour both flesh and spirit.",
-    "Faction": "Denarians"
+    "Faction": "Denarians",
+    "Portrait": "assets/portraits\\Lucille_Voss_and_Marchosias_166.webp"
   },
   {
     "Name": "Frederick 'Freddie' Winters and Orobas",
     "Role": "Phantom Infiltrator",
     "Description": "Tall, lanky man with short blonde hair and wire-frame glasses, dressed in well-tailored suits hiding his feverish intensity. Former intelligence analyst, now host to Orobas, the Shadow Horse. Freddie can become invisible, phase through walls, and rewrite memories, making him the ultimate infiltrator.",
-    "Faction": "Denarians"
+    "Faction": "Denarians",
+    "Portrait": "assets/portraits\\Frederick_'Freddie'_Winters_and_Orobas_166.webp"
   },
   {
     "Name": "Diana Vale and Barbatos",
     "Role": "Whispering Tyrant",
     "Description": "Elegant middle-aged woman with silver hair, sharp features, and evening wear that commands attention. A former socialite and occultist, Diana became the vessel for Barbatos, the Black Owl. With telekinesis, mind control, and access to ancient secrets, she weaves schemes that ensnare enemies and allies alike.",
-    "Faction": "Denarians"
+    "Faction": "Denarians",
+    "Portrait": "assets/portraits\\Diana_Vale_and_Barbatos_166.webp"
   },
   {
     "Name": "Mikhail Azarov",
@@ -616,157 +639,183 @@
     "Name": "Karl 'The Baron' Dragovich",
     "Role": "War Strategist",
     "Description": "Tall and skeletal, with pale, waxy skin stretched tight over his skull and faintly glowing red eyes. Wears a tattered 19th-century Russian military uniform adorned with tarnished medals. Once a Russian noble turned during a revolution, Karl delights in brutality and city sieges. He holds a particular vendetta against the White Court.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Karl_'The_Baron'_Dragovich_166.webp"
   },
   {
     "Name": "Lavinia Crane",
     "Role": "Dark Muse",
     "Description": "Decrepit beauty with silver hair floating like it’s underwater, wearing ancient, flowing gowns. Once a renowned opera singer, Lavinia now leads a cult that worships her, feeding her both blood and adoration.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Lavinia_Crane_166.webp"
   },
   {
     "Name": "Matthias 'The Butcher' Kroll",
     "Role": "Terror Enforcer",
     "Description": "Burly and scarred, with rotting flesh under a bloodstained butcher's apron, always clutching a cleaver. A serial killer before turning, Matthias became a Black Court enforcer, gleefully spreading fear.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Matthias_'The_Butcher'_Kroll_166.webp"
   },
   {
     "Name": "Esmeralda Wraithchild",
     "Role": "Twisted Child Predator",
     "Description": "Small, frail girl with translucent skin and gleaming teeth, dressed in a Victorian mourning gown. Turned as a child, Esmeralda lures families into traps using her innocent appearance and inhuman cruelty.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Esmeralda_Wraithchild_166.webp"
   },
   {
     "Name": "Gideon Blackwood",
     "Role": "Necromancer Archivist",
     "Description": "Gaunt, corpse-like figure in robes covered in occult symbols, with unnaturally long clawed fingers. Once a mortal necromancer, Gideon joined the Black Court to unlock forbidden knowledge, now commanding undead minions.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Gideon_Blackwood_166.webp"
   },
   {
     "Name": "Sophia von Hohenheim",
     "Role": "Blood Alchemist",
     "Description": "Striking yet horrifying in black lace, her stitched-shut lips giving her a macabre silence. A former aristocratic alchemist obsessed with immortality, Sophia now experiments with blood magic to create vampiric monstrosities.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Sophia_von_Hohenheim_166.webp"
   },
   {
     "Name": "Rupert 'The Rat' Muldoon",
     "Role": "Skulking Informant",
     "Description": "Small and wiry, with sagging gray skin, clawed fingers, and rodent-like movements. A thief turned vampire, Rupert excels at infiltrating mortal society, spying, and selling out anyone to save himself.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Rupert_'The_Rat'_Muldoon_166.webp"
   },
   {
     "Name": "Carmilla 'The Siren' di Rossi",
     "Role": "Seductive Manipulator",
     "Description": "Mesmerizing beauty hiding subtle decay, with intricate silver and obsidian jewelry enhancing her allure. Former ruler of a small Italian village, Carmilla uses seduction and influence to maintain power and security for the Black Court.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Carmilla_'The_Siren'_di_Rossi_166.webp"
   },
   {
     "Name": "Alaric 'The Judge' Van Aalten",
     "Role": "Inquisitor Executioner",
     "Description": "Skeletal figure in ancient judge's robes, with a powdered wig atop his head and rings taken from his victims. Once a fanatical inquisitor, Alaric now conducts 'trials' before sentencing enemies to gruesome deaths.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Alaric_'The_Judge'_Van_Aalten_166.webp"
   },
   {
     "Name": "Ingrid Bludrose",
     "Role": "Blood Hunt Mistress",
     "Description": "Tall and draped in a ragged red cloak, with decomposed features and lips stained eternally red. Ingrid commands ghouls and lesser vampires, leading brutal blood hunts across Europe to satisfy her insatiable hunger.",
-    "Faction": "Black Court"
+    "Faction": "Black Court",
+    "Portrait": "assets/portraits\\Ingrid_Bludrose_166.webp"
   },
   {
     "Name": "Aisling O'Donnell",
     "Role": "Geomancer and Celtic Expert",
     "Description": "Slender woman in her forties with fiery red hair and piercing green eyes, often clad in earth-toned robes with Celtic knotwork. Aisling, from a druidic lineage in Ireland, is the Council’s authority on ancient Celtic magic and ley lines. Known for her skill in weaving wards with natural elements, she mediates supernatural disputes across Europe, especially involving the fae.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Aisling_O'Donnell_166.webp"
   },
   {
     "Name": "Emilio Velasco",
     "Role": "Veteran Warden",
     "Description": "Stocky man in his early sixties, with salt-and-pepper hair, a weathered face, and a worn leather jacket paired with a wide-brimmed hat. Emilio fights rogue supernatural threats along the Mexico-U.S. border, specializing in combat magic and spirit banishment. Haunted by the loss of his family to the Red Court, he prioritizes protecting innocent lives over Council politics.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Emilio_Velasco_166.webp"
   },
   {
     "Name": "Miyuki Tanaka",
     "Role": "Spirit Binder",
     "Description": "Petite woman in her early thirties with straight black hair, blending modern professional style with kimono-inspired elements. Trained by her onmyoji grandfather, Miyuki binds spirits, purifies hauntings, and handles negotiations with yokai and ghosts. Her respect for traditional Japanese magic sometimes clashes with the Council’s rigid ways.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Miyuki_Tanaka_166.webp"
   },
   {
     "Name": "Jean-Baptiste Moreau",
     "Role": "Illusion Master",
     "Description": "Tall, elegant man in his fifties with silver hair, neatly trimmed beard, tailored suits, and a dark cloak pinned with an antique silver clasp. A former Sorbonne scholar, Jean-Baptiste is a leading authority on illusions, magical constructs, and theory. His belief in Council superiority sometimes blinds him to unorthodox solutions.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Jean-Baptiste_Moreau_166.webp"
   },
   {
     "Name": "Fatima al-Hussein",
     "Role": "Necromantic Guardian",
     "Description": "Striking woman in her late forties with dark curly hair and amber eyes, dressed in Egyptian robes adorned with hieroglyphs. Fatima, a descendant of Egyptian sorcerers, guards Egypt’s magical heritage, specializing in ancient curses and necromancy. Fiercely protective of her homeland’s traditions, she resents the Council’s artifact-hunting mindset.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Fatima_al-Hussein_166.webp"
   },
   {
     "Name": "Anatoly Sokolov",
     "Role": "Siberian Warden",
     "Description": "Grizzled, middle-aged man with a muscular build, thick beard, and heavy winter clothing suited for Siberia. A former military officer turned Warden, Anatoly uses brutal tactics and potent wards to guard Eastern Europe against supernatural incursions, believing Council authority must be upheld at all costs.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Anatoly_Sokolov_166.webp"
   },
   {
     "Name": "Nina Guerrero",
     "Role": "Nature Mystic",
     "Description": "Tall, athletic woman in her late twenties with dark skin, dreadlocked hair adorned with beads, and colorful flowing clothes. A practitioner of Candomblé, Nina balances relationships between humans and supernatural beings in the Amazon, blending spirit magic with herbal remedies. She often clashes with the Council’s bureaucracy.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Nina_Guerrero_166.webp"
   },
   {
     "Name": "Catherine Wallace",
     "Role": "Ley Line Tracker",
     "Description": "Wiry woman in her early forties with sun-bleached blonde hair, tanned skin, and practical outdoorsy clothing. A product of Australia’s Outback, Catherine combines Aboriginal traditions with Council training, specializing in tracking supernatural disturbances and communing with nature spirits.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Catherine_Wallace_166.webp"
   },
   {
     "Name": "Hassan al-Khalid",
     "Role": "Dreamwalker and Investigator",
     "Description": "Tall, lean man in his early fifties with a neatly trimmed beard and intense dark eyes, alternating between traditional Moroccan robes and modern suits. A master dreamwalker from a family of Berber mystics, Hassan specializes in mind magic and interrogation, tracking even the most elusive mages through their dreams.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Hassan_al-Khalid_166.webp"
   },
   {
     "Name": "Mariana Torres",
     "Role": "Diplomat and Negotiator",
     "Description": "Charismatic woman in her mid-thirties with curly dark hair, modern stylish clothing, and silver jewelry. Once a lawyer, Mariana now brokers supernatural peace in South America, using her legal mind to negotiate with supernatural factions and enforce the Unseelie Accords.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Mariana_Torres_166.webp"
   },
   {
     "Name": "Evelyn 'Evie' Matthews",
     "Role": "Spirit Guide",
     "Description": "Statuesque woman in her late thirties with wild curly hair streaked with silver, dressed in flowing or vintage clothes adorned with charms and beads. Raised in New Orleans’ rich supernatural culture, Evie blends Hoodoo with Council magic, specializing in communicating with and guiding spirits.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Evelyn_'Evie'_Matthews_166.webp"
   },
   {
     "Name": "Nathaniel Greene",
     "Role": "Ancient Lore Expert",
     "Description": "Wiry man in his fifties with sharp features, thinning brown hair, and perpetual reading glasses over tweed jackets. A former Harvard professor turned Council scholar, Nathaniel excels at decoding ancient texts, rituals, and artifacts, but his academic obsession sometimes clouds his judgment.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Nathaniel_Greene_166.webp"
   },
   {
     "Name": "Josephine 'Jo' Tyler",
     "Role": "Warden Investigator",
     "Description": "Strong-built woman in her early forties with short-cropped hair, runic tattoos up her arms, and practical outdoor gear. Formerly a Seattle private investigator, Jo combines street smarts with ward magic, handling rogue practitioners and supernatural disappearances along the Pacific coast.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Josephine_'Jo'_Tyler_166.webp"
   },
   {
     "Name": "Arno Fischer",
     "Role": "Surveillance Mage",
     "Description": "Tall, severe man in his late fifties with iron-gray hair, impeccable suits, and a silver cane focus. A former East German Stasi agent turned Warden, Arno excels at wards, counter-surveillance, and tracking rogue magic across Central Europe, driven by rigid discipline and loyalty to the Council.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Arno_Fischer_166.webp"
   },
   {
     "Name": "Elena Povar",
     "Role": "Fate Weaver",
     "Description": "Petite woman in her thirties with dark curls, embroidered shawls, and silver jewelry, carrying a carved wooden staff. From a Romani witchcraft lineage, Elena specializes in divination and fate magic, serving as a bridge between the Council and Europe’s supernatural underworld.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Elena_Povar_166.webp"
   },
   {
     "Name": "Dino Luca",
     "Role": "Charming Duelist",
     "Description": "Handsome man in his early forties with dark curly hair, a roguish smile, tailored suits with colorful flair, and a custom enchanted rapier. Born to Italian nobility, Dino blends enchantment, blood magic, and political intrigue, balancing loyalties between the White Council and the Vatican’s magical arm.",
-    "Faction": "White Council"
+    "Faction": "White Council",
+    "Portrait": "assets/portraits\\Dino_Luca_166.webp"
   },
   {
     "Name": "Eldritch Titan",
@@ -1089,5 +1138,140 @@
       }
     },
     "Faction": "Mortals"
+  },
+  {
+    "Name": "Aszara",
+    "Role": "Winter Lady",
+    "Description": "Inhumanly beautiful woman with pale skin, long shimmering silver hair, and piercing ice blue eyes. Wears a formfitting white fur and delicate ice crystal gown accentuating her ethereal form. As Mab's Winter Lady, Azsara personifies winter's cruel, unmerciful aspects, delighting in mortals' anguish and binding souls to the Winter Court through tempting bargains.",
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Aszara_182.png"
+  },
+  {
+    "Name": "Isolde Frostwhisper",
+    "Role": "Winter Sidhe Diplomat",
+    "Description": "Tall, ethereal figure with pale, almost translucent skin and hair as white as fresh snow. Wears a gown of glimmering ice crystals. Known for her sharp wit and cutting tongue, Isolde handles negotiations for Winter, seeking influence even if it means making deals with mortals.",
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Isolde_Frostwhisper_182.png"
+  },
+  {
+    "Name": "Morran the Ice-Touched",
+    "Role": "Winter Troll Guardian",
+    "Description": "Massive figure with frost-covered granite-like skin, breath misting in the air like fog. Icicles hang from his beard and his eyes glow a dull blue. Fiercely protective of Winter’s borders, he respects strength in both allies and foes.",
+    "Faction": "Winter Court"
+  },
+  {
+    "Name": "Vespera Coldwing",
+    "Role": "Winter Pixie Spy",
+    "Description": "Delicate, small creature with wings shimmering like frost-covered glass. Her faint blue skin and moonlight hair give her an eerie beauty. Vespera delights in secrets and serves as a messenger and spy for Winter.",
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Vespera_Coldwing_182.png"
+  },
+  {
+    "Name": "Orcus Darkhoof",
+    "Role": "Winter Satyr Hunter",
+    "Description": "Twisted satyr with ram horns, frost-crackling hooves, and deep blue-black skin. He wears a ragged wolf pelt cloak and hunts down violators of Winter’s law, reveling in the chase.",
+    "Faction": "Winter Court"
+  },
+  {
+    "Name": "Morwen of the Shroud",
+    "Role": "Winter Banshee Herald",
+    "Description": "Spectral figure with flowing black hair and a face hidden behind a veil of shadows. Her mournful wail freezes hearts. Morwen heralds doom and serves as a harbinger of Winter’s wrath, secretly yearning for freedom from her role.",
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Morwen_of_the_Shroud_182.png"
+  },
+  {
+    "Name": "Caelia Sunblade",
+    "Role": "Summer Sidhe Warrior",
+    "Description": "Golden-haired Sidhe with skin glowing faintly with warmth. Wears armor made of bronze leaves that shift and grow. Caelia protects Summer’s borders and values the balance between Summer and Winter, though her adherence to Summer’s principles can be rigid.",
+    "Faction": "Summer Court",
+    "Portrait": "assets/portraits\\Caelia_Sunblade_182.png"
+  },
+  {
+    "Name": "Bramble",
+    "Role": "Summer Satyr Reveler",
+    "Description": "Goat-legged satyr with wild green hair tangled with flowers and vines. His eyes twinkle with mischief. Bramble spreads merriment (and chaos) at Summer revels, helping mortals who match his love for freedom and fun.",
+    "Faction": "Summer Court"
+  },
+  {
+    "Name": "Liora Brightflame",
+    "Role": "Summer Sprite Scout",
+    "Description": "Tiny winged creature whose body glows like a living ember. Her wings shimmer with fiery hues and leave sparks in the air. Curious and hungry for stories, Liora serves as a scout between realms.",
+    "Faction": "Summer Court"
+  },
+  {
+    "Name": "Thorne Greenheart",
+    "Role": "Summer Dryad Guardian",
+    "Description": "Dryad with bark-like skin and hair like cascading ivy. She exudes the scent of blooming flowers. Thorne guards a sacred grove linking Summer and the mortal realm, controlling plants for both healing and defense.",
+    "Faction": "Summer Court"
+  },
+  {
+    "Name": "Raul Embermane",
+    "Role": "Summer Centaur Archer",
+    "Description": "Powerful centaur with a red-gold mane and skin bronzed by the sun. Carries an enchanted yew bow. Raul patrols Summer’s borders, defending against Winter and Wyldfae threats. He values honor and bravery.",
+    "Faction": "Summer Court"
+  },
+  {
+    "Name": "Griselda the Hag",
+    "Role": "Wyldfae Hedge Witch",
+    "Description": "Hunched old woman with wild white hair and skin like tree bark. Her eyes glow eerie green, and she wears a cloak of owl feathers. Living deep in enchanted woods, Griselda trades in rare ingredients and dangerous secrets — always with a twist.",
+    "Faction": "Wyldfae"
+  },
+  {
+    "Name": "Nox",
+    "Role": "Wyldfae Darkling Spy",
+    "Description": "Shadowy figure with skin that absorbs light, his form shifting like smoke. Nox sells secrets to the highest bidder, playing Summer, Winter, and mortals against each other.",
+    "Faction": "Wyldfae"
+  },
+  {
+    "Name": "Cora Dewdrop",
+    "Role": "Wyldfae Naiad Guardian",
+    "Description": "Water spirit with skin shimmering like a clear stream and hair flowing like water. Cora guards a hidden healing spring, aiding respectful mortals and drowning those who threaten her waters.",
+    "Faction": "Wyldfae"
+  },
+  {
+    "Name": "Kraig Stoneback",
+    "Role": "Wyldfae Earth Elemental",
+    "Description": "Being of living rock with glowing amber eyes and moss growing on his body. Kraig protects underground realms and enforces neutrality at Wyldfae gatherings, respecting those who honor the earth.",
+    "Faction": "Wyldfae"
+  },
+  {
+    "Name": "Puck",
+    "Role": "Wyldfae Trickster",
+    "Description": "Mischievous young man with wild hair, pointed ears, and a grin full of trouble. Wears a patchwork coat of leaves and feathers. Puck thrives on chaos, challenging pride and authority for fun.",
+    "Faction": "Wyldfae"
+  },
+  {
+    "Name": "Amalia",
+    "Role": "Summer Sidhe Diplomat",
+    "Description": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Summer Court",
+    "Portrait": "assets/portraits\\Amalia_183.png"
+  },
+  {
+    "Name": "Rob",
+    "Role": "Ogre Bouncer",
+    "Description": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Summer Court",
+    "Portrait": "assets/portraits\\Unnamed_3153687116240.png"
   }
 ]
