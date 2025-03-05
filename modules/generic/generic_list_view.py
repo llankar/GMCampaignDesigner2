@@ -1,6 +1,13 @@
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
+from customtkinter import CTkLabel, CTkImage 
+from PIL import Image
 from modules.helpers.text_helpers import format_longtext
+import os
+import shutil
+
+PORTRAIT_FOLDER = "assets/portraits"
+MAX_PORTRAIT_SIZE = (128, 128)  # Resize to this size for storage
 
 class GenericListView(ctk.CTkFrame):
     def __init__(self, master, model_wrapper, template, *args, **kwargs):
@@ -8,9 +15,10 @@ class GenericListView(ctk.CTkFrame):
         self.model_wrapper = model_wrapper
         self.template = template
 
+        os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
+
         self.search_var = ctk.StringVar()
 
-        # Search bar with Add button
         search_frame = ctk.CTkFrame(self)
         search_frame.pack(pady=5, fill="x")
 
@@ -23,7 +31,6 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkButton(search_frame, text="Filter", command=self.filter_items).pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Add", command=self.add_item).pack(side="left", padx=5)
 
-        # Frame with scrollbar
         list_container = ctk.CTkFrame(self)
         list_container.pack(fill="both", expand=True)
 
@@ -59,15 +66,15 @@ class GenericListView(ctk.CTkFrame):
             self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     def create_table_header(self):
-        headers = [field["name"] for field in self.template["fields"]] + ["Actions"]
+        headers = ["Portrait"] + [field["name"] for field in self.template["fields"] if field["name"] != "Portrait"] + ["Actions"]
 
         for col, header in enumerate(headers):
             if header != "Actions":
-                button = ctk.CTkButton(self.list_frame, text=header, anchor="w", command=lambda col=col: self.sort_column(col))
+                button = ctk.CTkButton(self.list_frame, text=header, anchor="w", command=lambda col=col: self.sort_column(col-1) if col > 0 else None)
                 button.grid(row=0, column=col, sticky="w", pady=(0, 2), padx=5)
             else:
                 label = ctk.CTkLabel(self.list_frame, text=header, anchor="w", padx=5)
-                label.grid(row=0, column=col, sticky="w", pady=(0, 2))
+                label.grid(row=0, column=len(headers) - 1, sticky="w", pady=(0, 2))
 
     def refresh_list(self):
         for widget in self.list_frame.winfo_children():
@@ -76,26 +83,66 @@ class GenericListView(ctk.CTkFrame):
         self.create_table_header()
 
         if not self.filtered_items:
-            ctk.CTkLabel(self.list_frame, text="No items found.").grid(row=1, column=0, columnspan=len(self.template["fields"]) + 1, pady=10)
+            ctk.CTkLabel(self.list_frame, text="No items found.").grid(row=1, column=0, columnspan=len(self.template["fields"]) + 2, pady=10)
             return
 
         for row_index, item in enumerate(self.filtered_items, start=1):
             self.create_item_row(item, row_index)
 
     def create_item_row(self, item, row_index):
-        for col, field in enumerate(self.template["fields"]):
+        portrait_path = item.get("Portrait", "")
+        if portrait_path and os.path.exists(portrait_path):
+            img = Image.open(portrait_path)
+            ctk_image = CTkImage(light_image=img, size=(32, 32))
+            portrait_label = CTkLabel(self.list_frame, image=ctk_image, text="")
+            portrait_label.image = ctk_image  # Store reference to avoid garbage collection
+            portrait_label.grid(row=row_index, column=0, padx=5)
+        else:
+            ctk.CTkLabel(self.list_frame, text="[No Image]").grid(row=row_index, column=0, padx=5)
+
+        for col, field in enumerate([f for f in self.template["fields"] if f["name"] != "Portrait"]):
             value = item.get(field["name"], "")
             if field["type"] == "longtext":
                 value = format_longtext(value, max_length=100)
 
             label = ctk.CTkLabel(self.list_frame, text=value, anchor="w", padx=5, wraplength=200)
-            label.grid(row=row_index, column=col, sticky="w", pady=2)
+            label.grid(row=row_index, column=col+1, sticky="w", pady=2)
 
         action_frame = ctk.CTkFrame(self.list_frame)
-        action_frame.grid(row=row_index, column=len(self.template["fields"]), sticky="w")
+        action_frame.grid(row=row_index, column=len(self.template["fields"]) + 1, sticky="w")
 
         ctk.CTkButton(action_frame, text="Edit", command=lambda i=item: self.edit_item(i)).pack(side="left", padx=2)
         ctk.CTkButton(action_frame, text="Delete", command=lambda i=item: self.delete_item(i)).pack(side="left", padx=2)
+        ctk.CTkButton(action_frame, text="Set Portrait", command=lambda i=item: self.set_portrait(i)).pack(side="left", padx=2)
+
+    def set_portrait(self, item):
+        file_path = filedialog.askopenfilename(
+            title="Select Portrait Image",
+            filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp")]
+        )
+
+        if not file_path:
+            return
+
+        if not os.path.exists(PORTRAIT_FOLDER):
+            os.makedirs(PORTRAIT_FOLDER)
+
+        # Generate a filename (can use NPC name if available)
+        npc_name = item.get("Name", "Unnamed").replace(" ", "_")
+        ext = os.path.splitext(file_path)[-1].lower()
+        dest_filename = f"{npc_name}_{len(self.items)}{ext}"
+        dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
+
+        # Resize and save to the portraits folder
+        with Image.open(file_path) as img:
+            img = img.convert("RGB")
+            img.thumbnail(MAX_PORTRAIT_SIZE)
+            img.save(dest_path)
+
+        # Update the item with the relative path
+        item["Portrait"] = dest_path
+        self.model_wrapper.save_items(self.items)
+        self.refresh_list()
 
     def filter_items(self):
         query = self.search_var.get().strip().lower()
@@ -129,15 +176,10 @@ class GenericListView(ctk.CTkFrame):
             self.filter_items()
 
     def sort_column(self, col_index):
+        if col_index < 0:
+            return
         field_name = self.template["fields"][col_index]["name"]
-
-        def get_sort_value(item):
-            value = item.get(field_name, "")
-            if isinstance(value, dict):
-                return value.get("text", "")
-            return value
-
-        self.filtered_items.sort(key=lambda x: get_sort_value(x))
+        self.filtered_items.sort(key=lambda x: x.get(field_name, ""))
         self.refresh_list()
 
     def destroy(self):

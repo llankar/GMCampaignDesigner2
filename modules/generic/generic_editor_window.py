@@ -3,6 +3,10 @@ import json
 import os
 from modules.helpers.rich_text_editor import RichTextEditor
 from modules.helpers.window_helper import position_window_at_top
+from PIL import Image, ImageTk
+from tkinter import filedialog
+
+
 
 FACTIONS_FILE = "data/factions.json"
 NPCS_FILE = "data/npcs.json"
@@ -59,7 +63,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
             elif field["name"] in ["NPCs", "Places"]:
                 self.create_dynamic_combobox_list(field)
-
+            elif field["name"] == "Portrait":
+                self.create_portrait_field(field)
             else:
                 self.create_text_entry(field)
 
@@ -163,9 +168,64 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
             elif field["name"] in ["Places", "NPCs"]:
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
-
+            elif field["name"] == "Portrait":
+                self.item[field["name"]] = self.portrait_path  # Use the stored path
             else:
                 self.item[field["name"]] = widget.get()
-
         self.saved = True
         self.destroy()
+    def create_portrait_field(self, field):
+        frame = ctk.CTkFrame(self.scroll_frame)
+        frame.pack(fill="x", pady=5)
+
+        self.portrait_path = self.item.get("Portrait", "")
+
+        if self.portrait_path and os.path.exists(self.portrait_path):
+            image = Image.open(self.portrait_path).resize((64, 64))
+            self.portrait_image = ImageTk.PhotoImage(image)
+            self.portrait_label = ctk.CTkLabel(frame, image=self.portrait_image, text="")
+        else:
+            self.portrait_label = ctk.CTkLabel(frame, text="[No Image]")
+
+        self.portrait_label.pack(side="left", padx=5)
+
+        ctk.CTkButton(frame, text="Select Portrait", command=self.select_portrait).pack(side="left", padx=5)
+
+        self.field_widgets[field["name"]] = self.portrait_path
+
+
+    def select_portrait(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Portrait Image",
+            filetypes=[
+                ("Image Files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.webp"),
+                ("PNG Files", "*.png"),
+                ("JPEG Files", "*.jpg;*.jpeg"),
+                ("GIF Files", "*.gif"),
+                ("Bitmap Files", "*.bmp"),
+                ("WebP Files", "*.webp"),
+                ("All Files", "*.*")
+            ]
+        )
+
+        if file_path:
+            self.portrait_path = self.copy_and_resize_portrait(file_path)
+            self.portrait_label.configure(text=os.path.basename(self.portrait_path))
+
+    def copy_and_resize_portrait(self, src_path):
+        PORTRAIT_FOLDER = "assets/portraits"
+        MAX_PORTRAIT_SIZE = (128, 128)
+
+        os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
+
+        npc_name = self.item.get("Name", "Unnamed").replace(" ", "_")
+        ext = os.path.splitext(src_path)[-1].lower()
+        dest_filename = f"{npc_name}_{id(self)}{ext}"
+        dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
+
+        with Image.open(src_path) as img:
+            img = img.convert("RGB")
+            img.thumbnail(MAX_PORTRAIT_SIZE)
+            img.save(dest_path)
+
+        return dest_path

@@ -3,6 +3,7 @@
       {"name": "Name", "type": "text"},
       {"name": "Role", "type": "text"},
       {"name": "Description", "type": "longtext"},
-      {"name": "Faction", "type": "choice", "choices": ["Faction A", "Faction B"]}
+      {"name": "Faction", "type": "choice", "choices": ["Faction A", "Faction B"]},
+      {"name": "Portrait", "type": "text"}
   ]
 }

@@ -152,8 +152,19 @@
   {
     "Name": "Marcus Raith",
     "Role": "Corporate Predator",
-    "Description": "Rakishly handsome man in his early thirties with dark hair silvering at the temples. A specialist in corporate acquisitions and supernatural tech applications, Marcus feeds on ambition and professional pride. Specializes in corporate acquisitions and hostile takeovers; maintains a venture capital firm as cover; secretly a technology enthusiast.",
-    "Faction": "White Court"
+    "Description": {
+      "text": "Rakishly handsome man in his early thirties with dark hair silvering at the temples. A specialist in corporate acquisitions and supernatural tech applications, Marcus feeds on ambition and professional pride. Specializes in corporate acquisitions and hostile takeovers; maintains a venture capital firm as cover; secretly a technology enthusiast.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Marcus_Raith_1836095413552.webp"
   },
   {
     "Name": "Alaric Raith",
@@ -169,25 +180,59 @@
         "right": []
       }
     },
-    "Faction": "Winter Court"
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Alaric_Raith_1834056372688.webp"
   },
   {
     "Name": "Selena Raith",
     "Role": "Information Broker",
-    "Description": "Dark-haired beauty with a sultry gaze, blending modern chic and classic elegance. Selena runs a high-end escort service that doubles as a front for gathering secrets and influencing powerful mortals. Master of subtle manipulation, treating her conquests as a game.",
-    "Faction": "White Court"
+    "Description": {
+      "text": "Dark-haired beauty with a sultry gaze, blending modern chic and classic elegance. Selena runs a high-end escort service that doubles as a front for gathering secrets and influencing powerful mortals. Master of subtle manipulation, treating her conquests as a game.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Selena_Raith_1749095898752.webp"
   },
   {
     "Name": "Gideon Raith",
     "Role": "Enforcer",
-    "Description": "Lean, predatory build with sharp features, platinum blonde hair, and a perpetual smirk. Known for his violent temper, Gideon acts as House Raith's 'fixer,' hunting down threats and toying with victims before feeding.",
-    "Faction": "White Court"
+    "Description": {
+      "text": "Lean, predatory build with sharp features, platinum blonde hair, and a perpetual smirk. Known for his violent temper, Gideon acts as House Raith's 'fixer,' hunting down threats and toying with victims before feeding.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Gideon_Raith_1749056480720.webp"
   },
   {
     "Name": "Diana Raith",
     "Role": "Faction Liaison",
-    "Description": "Ethereal beauty with pale skin and silver-blue eyes, often wearing flowing gowns that enhance her ghostly aura. Acts as a liaison between House Raith and magical factions, unmatched in charm but harboring secret ambitions for more power.",
-    "Faction": "White Court"
+    "Description": {
+      "text": "Ethereal beauty with pale skin and silver-blue eyes, often wearing flowing gowns that enhance her ghostly aura. Acts as a liaison between House Raith and magical factions, unmatched in charm but harboring secret ambitions for more power.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Winter Court",
+    "Portrait": "assets/portraits\\Diana_Raith_1749056709136.webp"
   },
   {
     "Name": "Matthias Raith",
