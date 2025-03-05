@@ -98,5 +98,30 @@
     "Name": "Spirits of Chicago",
     "Description": "Ghosts, echoes, and entities tied to Chicago’s history.",
     "Secrets": "The city’s grief is a supernatural resource being tapped by someone."
+  },
+  {
+    "Name": "White court",
+    "Description": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secrets": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    }
   }
 ]
