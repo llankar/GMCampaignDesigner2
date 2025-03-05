@@ -573,7 +573,8 @@
     "Name": "Stanislas 'Stan' Sokolov",
     "Role": "Ex-Enforcer Bodyguard",
     "Description": "Tall, intimidating man in his early 40s with piercing eyes, a quiet demeanor, and a faint Russian accent. Formerly a mob enforcer, now a loyal protector haunted by his violent past.",
-    "Faction": "Mortals"
+    "Faction": "Mortals",
+    "Portrait": "assets/portraits\\Stanislas_'Stan'_Sokolov_184.png"
   },
   {
     "Name": "Marcy Calhoun",

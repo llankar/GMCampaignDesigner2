@@ -66,15 +66,23 @@ class GenericListView(ctk.CTkFrame):
             self.canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     def create_table_header(self):
-        headers = ["Portrait"] + [field["name"] for field in self.template["fields"] if field["name"] != "Portrait"] + ["Actions"]
+        headers = [field["name"] for field in self.template["fields"] if field["name"] != "Portrait"]
+
+        has_portrait = any(f["name"] == "Portrait" for f in self.template["fields"])
+        if has_portrait:
+            headers.insert(0, "Portrait")
+
+        headers.append("Actions")
 
         for col, header in enumerate(headers):
             if header != "Actions":
-                button = ctk.CTkButton(self.list_frame, text=header, anchor="w", command=lambda col=col: self.sort_column(col-1) if col > 0 else None)
+                sort_index = col - (1 if has_portrait and col > 0 else 0)
+                button = ctk.CTkButton(self.list_frame, text=header, anchor="w",
+                                    command=lambda idx=sort_index: self.sort_column(idx) if sort_index >= 0 else None)
                 button.grid(row=0, column=col, sticky="w", pady=(0, 2), padx=5)
             else:
                 label = ctk.CTkLabel(self.list_frame, text=header, anchor="w", padx=5)
-                label.grid(row=0, column=len(headers) - 1, sticky="w", pady=(0, 2))
+                label.grid(row=0, column=col, sticky="w", pady=(0, 2))
 
     def refresh_list(self):
         for widget in self.list_frame.winfo_children():
@@ -90,41 +98,45 @@ class GenericListView(ctk.CTkFrame):
             self.create_item_row(item, row_index)
 
     def create_item_row(self, item, row_index):
-        portrait_path = item.get("Portrait", "")
+        has_portrait = any(f["name"] == "Portrait" for f in self.template["fields"])
 
-        def on_portrait_click(event=None):
-            self.set_portrait(item)
+        col_offset = 0
+        if has_portrait:
+            portrait_path = item.get("Portrait", "")
 
-        if portrait_path and os.path.exists(portrait_path):
-            img = Image.open(portrait_path)
-            ctk_image = CTkImage(light_image=img, size=(32, 32))
-            portrait_label = CTkLabel(self.list_frame, image=ctk_image, text="")
-            portrait_label.image = ctk_image  # Keep reference
-            portrait_label.grid(row=row_index, column=0, padx=5)
+            def on_portrait_click(event=None):
+                self.set_portrait(item)
 
-            # Bind left click to set_portrait (change image)
-            portrait_label.bind("<Button-1>", on_portrait_click)
-        else:
-            no_image_label = ctk.CTkLabel(self.list_frame, text="[No Image]")
-            no_image_label.grid(row=row_index, column=0, padx=5)
+            if portrait_path and os.path.exists(portrait_path):
+                img = Image.open(portrait_path)
+                ctk_image = CTkImage(light_image=img, size=(32, 32))
+                portrait_label = CTkLabel(self.list_frame, image=ctk_image, text="")
+                portrait_label.image = ctk_image
+                portrait_label.grid(row=row_index, column=0, padx=5)
+                portrait_label.bind("<Button-1>", on_portrait_click)
+            else:
+                no_image_label = ctk.CTkLabel(self.list_frame, text="[No Image]")
+                no_image_label.grid(row=row_index, column=0, padx=5)
+                no_image_label.bind("<Button-1>", on_portrait_click)
 
-            # Bind left click to set_portrait (choose new image)
-            no_image_label.bind("<Button-1>", on_portrait_click)
+            col_offset = 1
 
-        for col, field in enumerate([f for f in self.template["fields"] if f["name"] != "Portrait"]):
+        # Fill other columns (excluding Portrait if not present)
+        visible_fields = [f for f in self.template["fields"] if f["name"] != "Portrait"]
+        for col, field in enumerate(visible_fields):
             value = item.get(field["name"], "")
             if field["type"] == "longtext":
                 value = format_longtext(value, max_length=100)
 
             label = ctk.CTkLabel(self.list_frame, text=value, anchor="w", padx=5, wraplength=200)
-            label.grid(row=row_index, column=col+1, sticky="w", pady=2)
+            label.grid(row=row_index, column=col + col_offset, sticky="w", pady=2)
 
+        # Actions column is always after the data columns
         action_frame = ctk.CTkFrame(self.list_frame)
-        action_frame.grid(row=row_index, column=len(self.template["fields"]) + 1, sticky="w")
+        action_frame.grid(row=row_index, column=len(visible_fields) + col_offset, sticky="w")
 
         ctk.CTkButton(action_frame, text="Edit", command=lambda i=item: self.edit_item(i)).pack(side="left", padx=2)
         ctk.CTkButton(action_frame, text="Delete", command=lambda i=item: self.delete_item(i)).pack(side="left", padx=2)
-        ctk.CTkButton(action_frame, text="Set Portrait", command=lambda i=item: self.set_portrait(i)).pack(side="left", padx=2)
 
 
     def set_portrait(self, item):
