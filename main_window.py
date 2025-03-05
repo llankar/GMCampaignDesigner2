@@ -131,7 +131,7 @@ class MainWindow(ctk.CTk):
     def open_entity(self, entity):
         window = ctk.CTkToplevel(self)
         window.title(f"Manage {entity.capitalize()}")
-        window.geometry("1000x600")
+        window.geometry("1500x700")
         window.transient(self)
         window.lift()
         window.focus_force()
