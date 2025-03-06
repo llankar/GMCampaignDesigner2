@@ -6,10 +6,7 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.window_helper import position_window_at_top
 from docx import Document
 from modules.generic.scenario_detail_view import ScenarioDetailView
-
-def load_template(entity_name):
-    with open(f"modules/{entity_name}/{entity_name}_template.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+from modules.npcs.npc_graph_editor import NPCGraphEditor  # Import the graph editor
 
 def load_items_from_json(view, entity_name):
     file_path = filedialog.askopenfilename(
@@ -72,9 +69,7 @@ def preview_and_export_scenarios():
     ctk.CTkButton(selection_window, text="Export Selected", command=export_selected).pack(pady=5)
 
 def preview_and_save(selected_scenarios):
-    place_wrapper = GenericModelWrapper("places")
-    npc_wrapper = GenericModelWrapper("npcs")
-
+    
     place_items = {place["Name"]: place for place in place_wrapper.load_items()}
     npc_items = {npc["Name"]: npc for npc in npc_wrapper.load_items()}
 
@@ -138,12 +133,16 @@ class MainWindow(ctk.CTk):
         self.title("GMCampaignDesigner")
         position_window_at_top(self)
         self.geometry("600x800")
+        self.place_wrapper = GenericModelWrapper("places")
+        self.npc_wrapper = GenericModelWrapper("npcs")
+
         ctk.CTkButton(self, text="Manage Factions", command=lambda: self.open_entity("factions")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Places", command=lambda: self.open_entity("places")).pack(pady=5)
         ctk.CTkButton(self, text="Manage NPCs", command=lambda: self.open_entity("npcs")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Scenarios", command=lambda: self.open_entity("scenarios")).pack(pady=5)
         ctk.CTkButton(self, text="Export Scenarios", command=preview_and_export_scenarios).pack(pady=5)
         ctk.CTkButton(self, text="Open GM Screen", command=self.open_gm_screen).pack(pady=5)
+        ctk.CTkButton(self, text="Manage NPC Graphs", command=self.open_npc_graph_editor).pack(pady=5)  # NEW BUTTON
        
     def open_entity(self, entity):
         window = ctk.CTkToplevel(self)
@@ -205,6 +204,9 @@ class MainWindow(ctk.CTk):
             select_win.after(100, select_win.destroy)
 
         ctk.CTkButton(select_win, text="Open Scenario", command=open_selected_scenario).pack(pady=10)
+    
+    def open_npc_graph_editor(self):
+        NPCGraphEditor(self, self.npc_wrapper)
 
 
 if __name__ == "__main__":
