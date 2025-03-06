@@ -1,28 +1,7 @@
 [
   {
-    "Title": "The Last Lawbreaker2",
-    "Summary": {
-      "text": "A wrongful execution by the White Council leads to a hedge witch's revenge, unraveling ley lines and hidden secrets.",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Secrets": {
-      "text": "this is a secret",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
+    "Title": "The Last Lawbreaker",
+    "Summary": "A wrongful execution by the White Council leads to a hedge witch's revenge, unraveling ley lines and hidden secrets.",
     "Places": [
       "White Council Safehouse",
       "Riverside Mausoleum",
@@ -33,7 +12,7 @@
       "Warden Ezekiel Cross",
       "Meera Kline",
       "Archivist Yoko Tamura",
-      "Sariel of the Hollow Glade",
+      "Chloe Morris",
       "Bishop Tallow"
     ]
   },
@@ -52,8 +31,7 @@
       "Lucinda Raith",
       "Father Colm O’Donnell",
       "Solomon Drake"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Blood Vault",
@@ -70,8 +48,7 @@
       "Mila Van Dorn",
       "Arturo Vasquez",
       "Khanji the Vulture"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Shattered Frost",
@@ -88,8 +65,7 @@
       "Sir Alden",
       "Professor Eliza Trent",
       "The Hollow Man"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Last Execution",
@@ -106,8 +82,7 @@
       "Archivist Yoko Tamura",
       "Chloe Morris",
       "Bishop Tallow"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Thorned Crown",
@@ -124,8 +99,7 @@
       "Serena Cho",
       "Detective Roberta Kim",
       "Ilya Petrov"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Midsummer's Heart",
@@ -142,8 +116,7 @@
       "Sir Brightthorn",
       "The Laughing Gardener",
       "Winter Spy Kaelen"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Grave Promises",
@@ -160,8 +133,7 @@
       "Father Tomas",
       "Jillian Crow",
       "The Bone Harbinger"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Dead Funny",
@@ -178,8 +150,7 @@
       "Frankie Bones",
       "Morgue Technician Kim",
       "The Trickster Spirit"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Blood Heir",
@@ -196,8 +167,7 @@
       "Hunter Varek",
       "Sorceress Marina",
       "Werebear Sergei"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Death in the Void",
@@ -214,8 +184,7 @@
       "Doctor Felix Wong",
       "Outsider Servant Kk-Thral",
       "The Drowned Queen"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Fractured Mind",
@@ -232,8 +201,7 @@
       "The Echoed Child",
       "Spirit Archivist T’kel",
       "Nicodemus Archleone"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Crossing Paths",
@@ -250,8 +218,7 @@
       "Spirit of Amara",
       "Truck Driver Felix Reed",
       "Archivist Matteo"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Coin Flip",
@@ -268,8 +235,7 @@
       "Lucky Penny",
       "Sister Francine",
       "The Gambler’s Ghost"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Ghostlight Vigil",
@@ -286,8 +252,7 @@
       "Medium Evelyn Frost",
       "Firefighter Max Reyes",
       "Angry Spirit Ember"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Mourning Star",
@@ -304,8 +269,7 @@
       "Serena Cho",
       "Father Colm O’Donnell",
       "The Grief-Eater"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Haunted Masterpiece",
@@ -317,8 +281,7 @@
       "Museum Curator",
       "Occult Expert",
       "Restless Spirit"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Golem Guardians",
@@ -330,8 +293,7 @@
       "Local Occult Scholar",
       "Museum Staff",
       "Bound Guardian"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Reflections of Fate",
@@ -343,8 +305,7 @@
       "Local Mystic",
       "Doomed Bystanders",
       "Conspiracy Cultist"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Fae Encounter at the Bean",
@@ -356,8 +317,7 @@
       "Fae Emissary",
       "Guardian of the Gate",
       "Ritual Witness"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Dimensional Rift in Millennium Park",
@@ -369,8 +329,7 @@
       "Occult Scientist",
       "Park Staff",
       "Rift Entity"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "U-Boat Anomaly",
@@ -382,8 +341,7 @@
       "Museum Curator",
       "Ghostly Captain",
       "Undersea Entity"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Ghosts of the Eastland",
@@ -395,8 +353,7 @@
       "River Historian",
       "Restless Spirits",
       "Hidden Conspirator"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Dino’s Curse",
@@ -408,8 +365,7 @@
       "Museum Staff",
       "Spirit of the Past",
       "Reluctant Guardian"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Vampiric Rendezvous",
@@ -421,8 +377,7 @@
       "White Court Power Broker",
       "Red Court Survivor",
       "Mysterious Benefactor"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Buried Secrets of Lincoln Park",
@@ -434,8 +389,7 @@
       "Local Historian",
       "Construction Foreman",
       "Angry Ghost"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Fire and Rebirth at Water Tower Place",
@@ -447,8 +401,7 @@
       "Fire Investigator",
       "Building Spirit",
       "Arsonist Mage"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Billy Goat’s Curse Revisited",
@@ -460,8 +413,7 @@
       "Sports Historian",
       "Cursed Fan",
       "Goat Spirit"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Masterpiece of Damnation",
@@ -473,8 +425,7 @@
       "Missing Curator",
       "White Court Vampire Art Collector",
       "Museum Staff"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Curse in the Sculpture",
@@ -486,8 +437,7 @@
       "Necromancer",
       "Museum Curator",
       "Unwilling Docent"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Reflections of the Denarians",
@@ -509,8 +459,7 @@
       "Warden Lysander Black",
       "Alaric Raith",
       "Marcus 'Mark' Shaw and Ophiriel"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Shattered Dimensions",
@@ -523,8 +472,7 @@
       "Fomor Sorcerer",
       "Park Security",
       "Escaped Creatures"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "A Fairy Court’s Claim",
@@ -536,8 +484,7 @@
       "Fae Lord",
       "Taken Child",
       "White Council Observer"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Red Court’s Experiment",
@@ -549,8 +496,7 @@
       "Red Court Scientists",
       "Kidnapped Humans",
       "Rebel Lab Tech"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Black Court’s Feeding Grounds",
@@ -562,8 +508,7 @@
       "Black Court Spawn",
       "Terrified Witness",
       "Local Vampire Hunter"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "A Demon’s Fossil",
@@ -575,8 +520,7 @@
       "Possessed Guard",
       "Ancient Demon",
       "Museum Director"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Vampiric Rendezvous Redux",
@@ -588,8 +532,7 @@
       "White Court Power Broker",
       "Red Court Survivor",
       "Anonymous Benefactor"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Ley Line of the Dead",
@@ -601,8 +544,7 @@
       "Necromancer",
       "Unquiet Dead",
       "Ley Line Expert"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Drowned War",
@@ -619,8 +561,7 @@
       "Elder Tidecaller Orsk",
       "Wyld Huntress Seline",
       "Detective Sofia Vasquez"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "Blood Debt of the Broken Blade",
@@ -637,8 +578,7 @@
       "Sister Maria Bell",
       "Blacksmith Gavin Hurst",
       "The Weeping Angel"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Court of Shattered Oaths",
@@ -655,8 +595,7 @@
       "Laughing Dagger Kaelen",
       "Archivist Yewthorn",
       "The Bound Jester"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "The Demon’s Chain",
@@ -673,8 +612,7 @@
       "Chainmaker Aldous",
       "Sorceress Marina",
       "Bishop Tallow"
-    ],
-    "Secrets": ""
+    ]
   },
   {
     "Title": "When Knights Fall",
@@ -701,7 +639,6 @@
       "The Blood Hag Mirskaya",
       "Wyld Healer Brialyn",
       "Captain Sofia Domingez"
-    ],
-    "Secrets": ""
+    ]
   }
 ]
