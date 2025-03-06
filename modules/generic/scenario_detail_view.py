@@ -27,7 +27,8 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.add_button = ctk.CTkButton(self.tab_bar, text="+", width=40, command=self.add_new_tab)
         self.add_button.pack(side="right", padx=5)
 
-        self.add_tab("Scenario", self.create_scenario_frame(scenario_item))
+        scenario_name = scenario_item.get("Title", "Unnamed Scenario")
+        self.add_tab(scenario_name, self.create_scenario_frame(scenario_item))
 
     def add_tab(self, name, content_frame):
         if name in self.tabs:
