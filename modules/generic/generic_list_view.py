@@ -155,15 +155,16 @@ class GenericListView(ctk.CTkFrame):
         """Load and resize the portrait to a thumbnail."""
         img = Image.open(path)
         img.thumbnail((32, 32))
-        ctk_img = CTkImage(light_image=img, size=(32, 32))
+        # Pass both light_image and dark_image (using the same image here)
+        ctk_img = CTkImage(light_image=img, dark_image=img, size=(32, 32))
         return ctk_img
 
     def set_portrait(self, item):
         """Prompts user to select a portrait image, resizes, and saves it."""
         file_path = filedialog.askopenfilename(
             title="Select Portrait Image",
-            filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp")]
-        )
+            filetypes=[("Image Files", ("*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp", "*.webp"))]
+            )
         if not file_path:
             return
         if not os.path.exists(PORTRAIT_FOLDER):
