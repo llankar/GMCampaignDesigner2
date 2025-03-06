@@ -1,13 +1,15 @@
-i want to add a functionnality which enable the GM to create several graphic linking the NPCs from the list (kinda like a mindmap). The links must have a text attached to describe the relationship between the npcs. It would allow the GM to add a NPC, then another and then create a link between them. There should be no limits on the number of NPCS present on one graph and no limit on the number of links. The different graphs should be viewable in different tabs to allow swift change from one to another. The NPCs nodes can have a specific color. The user can add drawings (circles, boxes, and so one to a graphic. 
+I want to add a functionnality which enable the GM to create several graphic linking the NPCs from the list (kinda like a mindmap). The links must have a text attached to describe the relationship between the npcs. It would allow the GM to add a NPC, then another and then create a link between them. There should be no limits on the number of NPCS present on one graph and no limit on the number of links. The NPC should be represented by the portrait and name or name if there is no image. It should have a creation mode and a view mode. Their faction should be visible. It should be possible to create a whole faction in one push of a button. Please help me.
 
 affichage d'un scenario
 nom
 Description
 Lieux avec infos
 PNjs avec infos
+==Fait
 
 Plusieurs onglets disponible pour afficher d'autres choses :
 Mindmap des npcs
 Mindmap des lieux ?
 Un NPC plus détaillé ?
 Un lieu ?
+==En cours
