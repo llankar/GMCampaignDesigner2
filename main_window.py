@@ -5,7 +5,7 @@ from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.window_helper import position_window_at_top
 from docx import Document
-
+from modules.generic.scenario_detail_view import ScenarioDetailView
 
 def load_template(entity_name):
     with open(f"modules/{entity_name}/{entity_name}_template.json", "r", encoding="utf-8") as f:
@@ -136,15 +136,15 @@ class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("GMCampaignDesigner")
-        self.geometry("1280x720")
         position_window_at_top(self)
-
+        self.geometry("600x800")
         ctk.CTkButton(self, text="Manage Factions", command=lambda: self.open_entity("factions")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Places", command=lambda: self.open_entity("places")).pack(pady=5)
         ctk.CTkButton(self, text="Manage NPCs", command=lambda: self.open_entity("npcs")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Scenarios", command=lambda: self.open_entity("scenarios")).pack(pady=5)
         ctk.CTkButton(self, text="Export Scenarios", command=preview_and_export_scenarios).pack(pady=5)
-
+        ctk.CTkButton(self, text="Open GM Screen", command=self.open_gm_screen).pack(pady=5)
+       
     def open_entity(self, entity):
         window = ctk.CTkToplevel(self)
         window.title(f"Manage {entity.capitalize()}")
@@ -166,6 +166,46 @@ class MainWindow(ctk.CTk):
                 text=f"Load {entity.capitalize()}",
                 command=lambda: load_items_from_json(view, entity)
             ).pack(pady=5)
+    def open_gm_screen(self):
+        scenario_wrapper = GenericModelWrapper("scenarios")
+        scenarios = scenario_wrapper.load_items()
+
+        if not scenarios:
+            messagebox.showwarning("No Scenarios", "No scenarios available.")
+            return
+
+        select_win = ctk.CTkToplevel(self)
+        select_win.title("Select Scenario")
+        select_win.geometry("800x600")
+
+        scenario_titles = [scenario["Title"] for scenario in scenarios]
+
+        listbox = Listbox(select_win, selectmode="single", height=15)
+        listbox.pack(fill="both", expand=True, padx=10, pady=10)
+
+        for title in scenario_titles:
+            listbox.insert("end", title)
+
+        def open_selected_scenario():
+            selection = listbox.curselection()
+            if not selection:
+                messagebox.showwarning("No Selection", "Please select a scenario.")
+                return
+
+            selected_scenario = scenarios[selection[0]]
+
+            gm_screen_win = ctk.CTkToplevel(self)
+            gm_screen_win.title("GM Screen")
+            gm_screen_win.geometry("1280x720")
+
+            scenario_detail_view = ScenarioDetailView(gm_screen_win, scenario_item=selected_scenario)
+            scenario_detail_view.pack(fill="both", expand=True)
+
+            # Properly destroy select_win after safely opening the new window
+            select_win.after(100, select_win.destroy)
+
+        ctk.CTkButton(select_win, text="Open Scenario", command=open_selected_scenario).pack(pady=10)
+
 
 if __name__ == "__main__":
     app = MainWindow()
