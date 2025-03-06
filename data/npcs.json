@@ -363,55 +363,64 @@
     "Name": "Isabella 'Izzy' Ramos",
     "Role": "Fellowship Liaison",
     "Description": "Petite Latina woman with tight black curls, dark eyes flickering between kindness and predatory gleam, dressed in layered scarves, heavy jewelry, and combat boots. Former social worker from Mexico City, now a liaison between the Fellowship and supernatural groups after a Red Court attack left her infected.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Isabella_'Izzy'_Ramos_184.webp"
   },
   {
     "Name": "Akio Tanaka",
     "Role": "Martial Mentor",
     "Description": "Tall, slender Japanese man with sharp features, low ponytail, and minimalist grey clothing. Former monk turned martial artist, infected in a ritual gone wrong, now mentoring recruits in self-defense and hunger control.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Akio_Tanaka_184.webp"
   },
   {
     "Name": "Rosa Martinez",
     "Role": "Combat Medic",
     "Description": "Muscular middle-aged woman with sun-kissed skin, numerous scars, and shaved head. Ex-military medic who uses her medical expertise to heal infected comrades and develop protocols to handle Red Court abilities.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Rosa_Martinez_184.webp"
   },
   {
     "Name": "Sebastian 'Bash' Blake",
     "Role": "Street Guardian",
     "Description": "Broad-shouldered African American man with a disarming smile, favoring hoodies, sneakers, and fingerless gloves. Former gang mediator, now using his infection-enhanced strength to protect marginalized communities as part of the Fellowship.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Sebastian_'Bash'_Blake_184.webp"
   },
   {
     "Name": "Claire Fontaine",
     "Role": "Lorekeeper",
     "Description": "Delicate Englishwoman with fair skin, curly blonde hair, round glasses, and a haunting glow in her eyes. Historian and linguist infected while researching vampire lore, now a critical researcher for the Fellowship.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Claire_Fontaine_184.webp"
   },
   {
     "Name": "Mateo Delgado",
     "Role": "Tactical Mastermind",
     "Description": "Tall, wiry man with hollow cheeks and sharp bones, often in tattered earthy clothes. Former guerrilla fighter from Central America, now a strategist for Fellowship cells, feared for his ruthless efficiency.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Mateo_Delgado_184.webp"
   },
   {
     "Name": "Evelyn Cho",
     "Role": "Sniper Leader",
     "Description": "Athletic woman with piercing gaze, shoulder-length black hair, and a calm demeanor. Olympic archer turned Fellowship sniper, leveraging her precision to stay effective while keeping her hunger in check.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Evelyn_Cho_184.webp"
   },
   {
     "Name": "Carter Finch",
     "Role": "Digital Spy",
     "Description": "Wiry man in his forties with piercing blue eyes and vintage band shirts under his leather jacket. Former hacker and black-market info broker, now running the Fellowship’s digital intelligence network.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Carter_Finch_184.webp"
   },
   {
     "Name": "Alessandra 'Sandy' Marino",
     "Role": "Legal Manipulator",
     "Description": "Striking Italian woman with classical beauty, dark curls, and elegant but practical clothing. Former Naples prosecutor infected while handling a Red Court case, now erasing records and legally protecting the Fellowship.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Alessandra_'Sandy'_Marino_184.webp"
   },
   {
     "Name": "Vladislav 'Vlad' Sokolov",
@@ -423,7 +432,8 @@
     "Name": "Duchess Maria Lucia de Estrella",
     "Role": "Red Court Aristocrat",
     "Description": "Striking woman in her thirties with long black hair and a silver streak, wearing 1940s vintage couture. Former Spanish noble, one of North America's oldest Red Court vampires, seeking to rebuild her power in Chicago after losing ground to the White Council.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Duchess_Maria_Lucia_de_Estrella_184.webp"
   },
   {
     "Name": "Lord Jonathan Blackwood",
@@ -435,37 +445,43 @@
     "Name": "Carmen Moreno",
     "Role": "Security Chief",
     "Description": "Athletic woman in her mid-twenties with short spiky hair, leather jacket, and visible scars in her true form. Former special forces soldier, now head of security for Red Court operations in Chicago.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Carmen_Moreno_184.webp"
   },
   {
     "Name": "Dr. Nicolas Mendoza",
     "Role": "Vampiric Researcher",
     "Description": "Distinguished man in his forties with wire-rimmed glasses and salt-and-pepper hair. Former medical doctor, now overseeing the Red Court’s blood supply while researching vampirism’s biological aspects.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Dr._Nicolas_Mendoza_184.webp"
   },
   {
     "Name": "Alexandra 'Lexi' Varez",
     "Role": "Digital Operator",
     "Description": "Tech executive in her twenties, always equipped with cutting-edge gadgets and a curated social media presence. Recently turned, she runs Red Court’s digital operations, maintaining darknet communications.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Alexandra_'Lexi'_Varez_184.webp"
   },
   {
     "Name": "Miguel 'The Artist' Rossi",
     "Role": "Artistic Forger",
     "Description": "Bohemian artist in his thirties with paint-stained hands and artistic clothing. Turned in the 1960s art scene, Miguel uses his galleries as fronts for forgery, antiquities, and safe houses.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Miguel_'The_Artist'_Rossi_184.webp"
   },
   {
     "Name": "Isabella and Diego Luna",
     "Role": "Spy Twins",
     "Description": "Identical twins in their late teens, moving in eerie synchronicity and wearing coordinated outfits. Turned together in the 1850s, they work as spies and information brokers, gathering secrets for the Court.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Isabella_and_Diego_Luna_184.webp"
   },
   {
     "Name": "Alberto 'The Keeper' Novar",
     "Role": "Safehouse Master",
     "Description": "Burly man in his sixties with heavily scarred true form and practical working-class clothes. Former enforcer turned keeper of vampire safe houses, with unmatched knowledge of Chicago’s supernatural hideouts.",
-    "Faction": "Red Court"
+    "Faction": "Red Court",
+    "Portrait": "assets/portraits\\Alberto_'The_Keeper'_Novar_184.webp"
   },
   {
     "Name": "Marcus 'Mark' Shaw and Ophiriel",
