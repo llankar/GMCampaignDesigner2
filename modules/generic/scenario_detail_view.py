@@ -38,7 +38,6 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.content_area.pack(fill="both", expand=True)
 
         self.add_button = ctk.CTkButton(self.tab_bar, text="+", width=40, command=self.add_new_tab)
-        self.add_button.pack(side="right", padx=5)
 
         scenario_name = scenario_item.get("Title", "Unnamed Scenario")
         self.add_tab(scenario_name, self.create_entity_frame("Scenarios", scenario_item))
@@ -72,19 +71,11 @@ class ScenarioDetailView(ctk.CTkFrame):
 
     def show_tab(self, name):
         if self.current_tab and self.current_tab in self.tabs:
-            # Reset style for previous tab
             self.tabs[self.current_tab]["button"].configure(fg_color=("gray75", "gray25"))
-
-            # Hide old content
             self.tabs[self.current_tab]["content_frame"].pack_forget()
 
-        # Set new tab
         self.current_tab = name
-
-        # Highlight active tab
         self.tabs[name]["button"].configure(fg_color=("gray55", "gray15"))
-
-        # Show content
         self.tabs[name]["content_frame"].pack(fill="both", expand=True)
 
     def close_tab(self, name):
@@ -100,10 +91,15 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         self.reposition_add_button()
 
-
     def reposition_add_button(self):
         self.add_button.pack_forget()
-        self.add_button.pack(side="right", padx=5)
+
+        # Place the "+" button immediately after the last tab
+        if self.tabs:
+            last_tab_frame = list(self.tabs.values())[-1]["button_frame"]
+            self.add_button.pack(side="left", padx=5, after=last_tab_frame)
+        else:
+            self.add_button.pack(side="left", padx=5)
 
     def add_new_tab(self):
         options = ["Factions", "Places", "NPCs", "Scenarios", "Empty Tab"]
@@ -169,7 +165,6 @@ class ScenarioDetailView(ctk.CTkFrame):
         template = self.templates[entity_type]
 
         if entity_type == "NPCs" and "Portrait" in entity and os.path.exists(entity["Portrait"]):
-            # Display portrait at the top
             img = Image.open(entity["Portrait"])
             img = img.resize((200, 200), Image.Resampling.LANCZOS)
             ctk_image = ctk.CTkImage(light_image=img, size=(200, 200))
@@ -180,7 +175,6 @@ class ScenarioDetailView(ctk.CTkFrame):
             field_name = field["name"]
             field_type = field["type"]
 
-            # Skip "Portrait" field for NPCs since it's handled manually above
             if entity_type == "NPCs" and field_name == "Portrait":
                 continue
 
@@ -193,7 +187,6 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         return frame
 
-    
     def insert_text(self, parent, header, content):
         ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
         box = ctk.CTkTextbox(parent, wrap="word", height=80)
