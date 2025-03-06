@@ -1,4 +1,4 @@
-def format_longtext(data, max_length=100):
+def format_longtext(data, max_length=2000):
     """ Formate un champ longtext pour l'afficher dans une liste (abrégé + multi-lignes). """
     if isinstance(data, dict):
         text = data.get("text", "")

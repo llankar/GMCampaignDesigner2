@@ -96,8 +96,8 @@ class GenericListView(ctk.CTkFrame):
 
     def create_item_row(self, item, row_index):
         """Creates a single row in the grid for the given item.
-           Clicking on any non-portrait field will open the editor.
-           A small red cross at the end deletes the item.
+        Clicking on any non-portrait field will open the editor.
+        A small red cross at the end deletes the item.
         """
         col_index = 0
 
@@ -130,13 +130,25 @@ class GenericListView(ctk.CTkFrame):
             value = item.get(f["name"], "")
             if f.get("type", "").lower() == "longtext":
                 try:
-                    value = format_longtext(value, max_length=100)
+                    value = format_longtext(value, max_length=2000)
                 except Exception:
                     value = str(value)
-            label = ctk.CTkLabel(self.table_frame, text=str(value), anchor="w")
-            label.grid(row=row_index, column=col_index, sticky="ew", padx=5, pady=2)
-            # Instead of calling the wrapper's edit_item (which may not have a template),
-            # we use our own method to open the editor using the ListView's template.
+                # For longtext, add a wraplength to force text wrapping.
+                label = ctk.CTkLabel(
+                    self.table_frame,
+                    text=str(value),
+                    anchor="nw",      # top-left inside the label
+                    justify="left",   # left alignment for multiline text
+                    wraplength=500    # wraps text at ~500px
+                )
+            else:
+                label = ctk.CTkLabel(
+                self.table_frame,
+                text=str(value),
+                anchor="nw",
+                justify="left"
+            )
+            label.grid(row=row_index, column=col_index, sticky="nw", padx=5, pady=2)
             label.bind("<Button-1>", lambda event, i=item: self.open_editor(i))
             col_index += 1
 
@@ -150,6 +162,7 @@ class GenericListView(ctk.CTkFrame):
             command=lambda i=item: self.delete_item(i)
         )
         delete_button.grid(row=row_index, column=col_index, padx=5, pady=2, sticky="e")
+
 
     def load_image_thumbnail(self, path):
         """Load and resize the portrait to a thumbnail."""
