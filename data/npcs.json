@@ -537,7 +537,8 @@
     "Name": "Detective Susan Grant",
     "Role": "Tenacious Detective",
     "Description": "Gruff, no-nonsense detective with practical clothes and a sharp glare. Known for her tough justice streak, she secretly acknowledges the supernatural after several close encounters.",
-    "Faction": "Mortals"
+    "Faction": "Mortals",
+    "Portrait": "assets/portraits\\Detective_Susan_Grant_184.png"
   },
   {
     "Name": "Professor Henry Caldwell",
