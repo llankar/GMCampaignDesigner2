@@ -1,53 +1,38 @@
 import os
+import json
+from modules.generic.generic_editor_window import GenericEditorWindow
 
-# Dossiers concernés
-MODULES = ["factions", "npcs", "places", "scenarios"]
+class GenericModelWrapper:
+    def __init__(self, entity_type):
+        self.entity_type = entity_type
+        # Define the path to the data file, e.g. data/npcs.json for "npcs"
+        self.data_file = os.path.join(os.path.dirname(__file__), "..", "..", "data", f"{entity_type}.json")
+        # Define the path to the template file, e.g. modules/npcs/npcs_template.json for "npcs"
+        self.template_file = os.path.join(os.path.dirname(__file__), "..", entity_type, f"{entity_type}_template.json")
+        
+        # Load the template if it exists; otherwise, set a default empty template.
+        if os.path.exists(self.template_file):
+            with open(self.template_file, "r", encoding="utf-8") as f:
+                self.template = json.load(f)
+        else:
+            self.template = {"fields": []}
+        
+        # The master (parent window) will be set by the ListView later.
+        self.master = None
 
-# Chemin racine où se trouvent les modules
-BASE_PATH = "modules"
+    def load_items(self):
+        if not os.path.exists(self.data_file):
+            return []
+        with open(self.data_file, "r", encoding="utf-8") as f:
+            return json.load(f)
 
-# Template de chaque ModelWrapper
-WRAPPER_TEMPLATE = """
-from modules.{module}.{module}_model import load_{module}, save_{module}
-from modules.{module}.{singular}_editor_window import {Singular}EditorWindow
+    def save_items(self, items):
+        with open(self.data_file, "w", encoding="utf-8") as f:
+            json.dump(items, f, indent=2, ensure_ascii=False)
 
-class {Capitalized}ModelWrapper:
-    @staticmethod
-    def load_items():
-        return load_{module}()
-
-    @staticmethod
-    def save_items(items):
-        save_{module}(items)
-
-    @staticmethod
-    def edit_item(item, creation_mode=False):
-        editor = {Singular}EditorWindow(None, item, creation_mode=creation_mode)
-        editor.wait_window()
+    def edit_item(self, item, creation_mode=False):
+        # Create the editor window using self.template.
+        editor = GenericEditorWindow(self.master, item, self.template, creation_mode)
+        # Wait for the editor window to close.
+        self.master.wait_window(editor)
         return editor.saved
-""".strip()
-
-def generate_wrapper(module):
-    singular = module[:-1]  # faction, npc, place, scenario
-    content = WRAPPER_TEMPLATE.format(
-        module=module,
-        singular=singular,
-        Singular=singular.capitalize(),
-        Capitalized=module.capitalize()
-    )
-
-    wrapper_path = os.path.join(BASE_PATH, module, f"{module}_model_wrapper.py")
-
-    # Création du fichier
-    with open(wrapper_path, "w", encoding="utf-8") as file:
-        file.write(content)
-
-    print(f"✅ {module}_model_wrapper.py créé dans {wrapper_path}")
-
-def generate_all_wrappers():
-    for module in MODULES:
-        generate_wrapper(module)
-
-if __name__ == "__main__":
-    generate_all_wrappers()
-    print("✅ Tous les wrappers sont créés !")
