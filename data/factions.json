@@ -123,5 +123,55 @@
         "right": []
       }
     }
+  },
+  {
+    "Name": "Wyldfae",
+    "Description": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secrets": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    }
+  },
+  {
+    "Name": "Spirits",
+    "Description": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secrets": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    }
   }
 ]
