@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import os
 import json
-from tkinter import Listbox, MULTIPLE, messagebox
+from tkinter import Listbox, MULTIPLE, filedialog, messagebox
 from PIL import Image
 from functools import partial
 from modules.generic.generic_model_wrapper import GenericModelWrapper
@@ -208,10 +208,37 @@ class ScenarioDetailView(ctk.CTkFrame):
 
     def create_note_frame(self):
         frame = ctk.CTkFrame(self.content_area)
+
+        # Add a toolbar at the top for the "Save" button
+        toolbar = ctk.CTkFrame(frame)
+        toolbar.pack(fill="x", padx=5, pady=5)
+
+        save_button = ctk.CTkButton(toolbar, text="Save Note", command=lambda: self.save_note_to_file(frame, f"Note_{len(self.tabs)}"))
+        save_button.pack(side="right", padx=5)
+
+        # Textbox for the note content
         text_box = ctk.CTkTextbox(frame, wrap="word", height=500)
         text_box.pack(fill="both", expand=True, padx=10, pady=5)
+
         frame.text_box = text_box
         return frame
+
+    def save_note_to_file(self, note_frame, default_name):
+        file_path = filedialog.asksaveasfilename(
+            initialfile=default_name,
+            defaultextension=".txt",
+            filetypes=[("Text Files", "*.txt")],
+            title="Save Note As"
+        )
+
+        if not file_path:
+            return  # User cancelled
+
+        content = note_frame.text_box.get("1.0", "end-1c")  # Get all text in the box
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(content)
+
+        messagebox.showinfo("Saved", f"Note saved to {file_path}")
 
 class EntitySelectionView(ctk.CTkFrame):
     def __init__(self, master, entity_type, model_wrapper, template, scenario_detail_view, *args, **kwargs):
