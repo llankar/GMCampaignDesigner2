@@ -92,15 +92,32 @@ def preview_and_save(selected_scenarios):
     for scenario in selected_scenarios:
         title = scenario.get("Title", "Unnamed Scenario")
         summary = scenario.get("Summary", "No description provided.")
-
+        secrets = scenario.get("Secrets", "No secrets provided.")
         doc.add_heading(title, level=2)
-        doc.add_paragraph(summary)
+        
+        # Export Summary using current formatting logic
+        doc.add_heading("Summary", level=3)
+        if isinstance(summary, dict):
+            p = doc.add_paragraph()
+            run = p.add_run(summary.get("text", ""))
+            apply_formatting(run, summary.get("formatting", {}))
+        else:
+            doc.add_paragraph(str(summary))
+        
+        # Export Secrets using current formatting logic
+        doc.add_heading("Secrets", level=3)
+        if isinstance(secrets, dict):
+            p = doc.add_paragraph()
+            run = p.add_run(secrets.get("text", ""))
+            apply_formatting(run, secrets.get("formatting", {}))
+        else:
+            doc.add_paragraph(str(secrets))
 
         doc.add_heading("Places", level=3)
         for place_name in scenario.get("Places", []):
             place = place_items.get(place_name, {"Name": place_name, "Description": "Unknown Place"})
             doc.add_paragraph(f"- {place['Name']}: {place['Description']}")
-
+        
         doc.add_heading("NPCs", level=3)
         for npc_name in scenario.get("NPCs", []):
             npc = npc_items.get(npc_name, {"Name": npc_name, "Role": "Unknown", "Description": {"text": "Unknown NPC", "formatting": {}}})

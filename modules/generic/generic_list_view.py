@@ -149,7 +149,7 @@ class GenericListView(ctk.CTkFrame):
                 justify="left"
             )
             label.grid(row=row_index, column=col_index, sticky="nw", padx=5, pady=2)
-            label.bind("<Button-1>", lambda event, i=item: self.open_editor(i))
+            label.bind("<Button-1>", lambda event, i=item: self.edit_item(i))
             col_index += 1
 
         # 3) Actions column: a small red cross for deletion.
