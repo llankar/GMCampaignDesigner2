@@ -2,10 +2,14 @@ import customtkinter as ctk
 import os
 import json
 from tkinter import Listbox, MULTIPLE, messagebox
-from PIL import Image, ImageTk
+from PIL import Image
 from functools import partial
 from modules.generic.generic_model_wrapper import GenericModelWrapper
+from modules.helpers.text_helpers import format_longtext
+from customtkinter import CTkLabel, CTkImage
 
+PORTRAIT_FOLDER = "assets/portraits"
+MAX_PORTRAIT_SIZE = (32, 32)  # Thumbnail size for lists
 
 class ScenarioDetailView(ctk.CTkFrame):
     def __init__(self, master, scenario_item, *args, **kwargs):
@@ -13,7 +17,6 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         self.scenario = scenario_item
 
-        # Setup model wrappers and templates
         self.wrappers = {
             "Scenarios": GenericModelWrapper("scenarios"),
             "Places": GenericModelWrapper("places"),
@@ -93,8 +96,6 @@ class ScenarioDetailView(ctk.CTkFrame):
 
     def reposition_add_button(self):
         self.add_button.pack_forget()
-
-        # Place the "+" button immediately after the last tab
         if self.tabs:
             last_tab_frame = list(self.tabs.values())[-1]["button_frame"]
             self.add_button.pack(side="left", padx=5, after=last_tab_frame)
@@ -111,7 +112,6 @@ class ScenarioDetailView(ctk.CTkFrame):
         popup.grab_set()
         popup.focus_force()
 
-        ctk.CTkLabel(popup, text="Choose tab type:").pack(pady=10)
         for option in options:
             ctk.CTkButton(popup, text=option, command=lambda o=option: self.open_selection_window(o, popup)).pack(pady=2)
 
@@ -119,32 +119,23 @@ class ScenarioDetailView(ctk.CTkFrame):
         popup.destroy()
 
         if entity_type == "Empty Tab":
-            self.add_tab(f"Note {len(self.tabs)}", self.create_note_frame())
+            self.add_tab(f"Note {len(self.tabs) + 1}", self.create_note_frame())
             return
 
-        wrapper = self.wrappers[entity_type]
-        items = wrapper.load_items()
+        # Regular entity handling (unchanged)
+        model_wrapper = self.wrappers[entity_type]
+        template = self.templates[entity_type]
 
-        select_win = ctk.CTkToplevel(self)
-        select_win.title(f"Select {entity_type}")
-        select_win.geometry("400x300")
-        select_win.transient(self.winfo_toplevel())
-        select_win.grab_set()
-        select_win.focus_force()
+        selection_popup = ctk.CTkToplevel(self)
+        selection_popup.title(f"Select {entity_type}")
+        selection_popup.geometry("600x500")
+        selection_popup.transient(self.winfo_toplevel())
+        selection_popup.grab_set()
+        selection_popup.focus_force()
 
-        listbox = Listbox(select_win, selectmode=MULTIPLE)
-        listbox.pack(fill="both", expand=True, padx=10, pady=10)
+        view = EntitySelectionView(selection_popup, entity_type, model_wrapper, template, self)
+        view.pack(fill="both", expand=True)
 
-        item_names = [item.get("Name", item.get("Title", "Unnamed")) for item in items]
-        for name in item_names:
-            listbox.insert("end", name)
-
-        def open_selected():
-            for i in listbox.curselection():
-                self.open_entity_tab(entity_type, item_names[i])
-            select_win.destroy()
-
-        ctk.CTkButton(select_win, text="Open Selected", command=open_selected).pack(pady=5)
 
     def open_entity_tab(self, entity_type, name):
         wrapper = self.wrappers[entity_type]
@@ -178,7 +169,9 @@ class ScenarioDetailView(ctk.CTkFrame):
             if entity_type == "NPCs" and field_name == "Portrait":
                 continue
 
-            if field_type in ["text", "longtext"]:
+            if field_type == "longtext":
+                self.insert_longtext(frame, field_name, entity.get(field_name, ""))
+            elif field_type == "text":
                 self.insert_text(frame, field_name, entity.get(field_name, ""))
             elif field_type == "list":
                 linked_type = field.get("linked_type", None)
@@ -194,6 +187,14 @@ class ScenarioDetailView(ctk.CTkFrame):
         box.configure(state="disabled")
         box.pack(fill="x", padx=10, pady=5)
 
+    def insert_longtext(self, parent, header, content):
+        ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
+        formatted_text = format_longtext(content, max_length=2000)  # Use your helper
+        box = ctk.CTkTextbox(parent, wrap="word", height=120)
+        box.insert("1.0", formatted_text)
+        box.configure(state="disabled")
+        box.pack(fill="x", padx=10, pady=5)
+
     def insert_links(self, parent, header, items, linked_type):
         ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
         for item in items:
@@ -204,9 +205,164 @@ class ScenarioDetailView(ctk.CTkFrame):
     def _on_link_clicked(self, linked_type, item, event=None):
         self.open_entity_tab(linked_type + "s", item)
 
+
     def create_note_frame(self):
         frame = ctk.CTkFrame(self.content_area)
         text_box = ctk.CTkTextbox(frame, wrap="word", height=500)
         text_box.pack(fill="both", expand=True, padx=10, pady=5)
         frame.text_box = text_box
         return frame
+
+class EntitySelectionView(ctk.CTkFrame):
+    def __init__(self, master, entity_type, model_wrapper, template, scenario_detail_view, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
+
+        self.entity_type = entity_type
+        self.model_wrapper = model_wrapper
+        self.template = template
+        self.scenario_detail_view = scenario_detail_view
+
+        self.items = self.model_wrapper.load_items()
+        self.filtered_items = self.items.copy()
+
+        self.image_cache = {}
+
+        os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
+
+        # Top bar for search
+        self.search_var = ctk.StringVar()
+        search_frame = ctk.CTkFrame(self)
+        search_frame.pack(fill="x", padx=5, pady=5)
+
+        ctk.CTkLabel(search_frame, text="Search:").pack(side="left", padx=5)
+        search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var)
+        search_entry.pack(side="left", fill="x", expand=True, padx=5)
+        search_entry.bind("<KeyRelease>", lambda event: self.filter_items())
+
+        # Main table
+        self.table_frame = ctk.CTkScrollableFrame(self)
+        self.table_frame.pack(fill="both", expand=True, padx=5, pady=5)
+
+        self.headers = []
+        self.has_portrait = any(f["name"] == "Portrait" for f in self.template["fields"])
+        if self.has_portrait:
+            self.headers.append("Portrait")
+
+        for f in self.template["fields"]:
+            if f["name"] != "Portrait":
+                self.headers.append(f["name"])
+
+        self.create_table_header()
+        self.refresh_list()
+
+        ctk.CTkButton(self, text="Open Selected", command=self.open_selected).pack(side="bottom", pady=5)
+
+    def create_table_header(self):
+        """Create column headers like in GenericListView."""
+        total_columns = len(self.headers)
+        if self.has_portrait:
+            self.table_frame.grid_columnconfigure(0, minsize=60)
+        for i in range(1, total_columns):
+            self.table_frame.grid_columnconfigure(i, weight=1)
+
+        for col_index, header_text in enumerate(self.headers):
+            header_button = ctk.CTkButton(
+                self.table_frame, text=header_text, anchor="w",
+                command=lambda c=header_text: self.sort_column(c)
+            )
+            header_button.grid(row=0, column=col_index, sticky="ew", padx=5, pady=2)
+
+    def refresh_list(self):
+        """Clear and recreate all item rows."""
+        for child in self.table_frame.winfo_children():
+            if int(child.grid_info()["row"]) > 0:
+                child.destroy()
+
+        for row_index, item in enumerate(self.filtered_items, start=1):
+            self.create_item_row(item, row_index)
+
+    def create_item_row(self, item, row_index):
+        col_index = 0
+
+        # Portrait column if applicable
+        if self.has_portrait:
+            portrait_path = item.get("Portrait", "")
+            if portrait_path and os.path.exists(portrait_path):
+                if portrait_path in self.image_cache:
+                    ctk_image = self.image_cache[portrait_path]
+                else:
+                    ctk_image = self.load_image_thumbnail(portrait_path)
+                    self.image_cache[portrait_path] = ctk_image
+
+                portrait_label = CTkLabel(self.table_frame, text="", image=ctk_image)
+                portrait_label.grid(row=row_index, column=col_index, padx=5, pady=2)
+                portrait_label.bind("<Button-1>", lambda e, i=item: self.open_entity(i))
+            else:
+                label = ctk.CTkLabel(self.table_frame, text="[No Image]")
+                label.grid(row=row_index, column=col_index, padx=5, pady=2)
+                label.bind("<Button-1>", lambda e, i=item: self.open_entity(i))
+            col_index += 1
+
+        # Other columns
+        for field in self.template["fields"]:
+            if field["name"] == "Portrait":
+                continue
+
+            value = item.get(field["name"], "")
+            field_type = field.get("type", "text")
+
+            if field_type == "longtext":
+                try:
+                    value = format_longtext(value, max_length=200)
+                except Exception:
+                    value = str(value)
+
+                label = ctk.CTkLabel(
+                    self.table_frame,
+                    text=value,
+                    anchor="nw",
+                    justify="left",
+                    wraplength=500
+                )
+            else:
+                label = ctk.CTkLabel(
+                    self.table_frame,
+                    text=str(value),
+                    anchor="nw",
+                    justify="left"
+                )
+
+            label.grid(row=row_index, column=col_index, sticky="nw", padx=5, pady=2)
+            label.bind("<Button-1>", lambda e, i=item: self.open_entity(i))
+            col_index += 1
+
+    def load_image_thumbnail(self, path):
+        img = Image.open(path)
+        img.thumbnail(MAX_PORTRAIT_SIZE)
+        ctk_img = CTkImage(light_image=img, dark_image=img, size=MAX_PORTRAIT_SIZE)
+        return ctk_img
+
+    def filter_items(self):
+        query = self.search_var.get().strip().lower()
+        if not query:
+            self.filtered_items = self.items.copy()
+        else:
+            self.filtered_items = [
+                i for i in self.items if any(query in str(v).lower() for v in i.values())
+            ]
+        self.refresh_list()
+
+    def sort_column(self, column_name):
+        self.filtered_items.sort(key=lambda x: str(x.get(column_name, "")).lower())
+        self.refresh_list()
+
+    def open_entity(self, item):
+        entity_name = item.get("Name", item.get("Title", "Unnamed"))
+        self.scenario_detail_view.open_entity_tab(self.entity_type, entity_name)
+        self.master.destroy()
+
+    def open_selected(self):
+        if not self.filtered_items:
+            messagebox.showwarning("No Selection", "No items available to open.")
+            return
+        self.open_entity(self.filtered_items[0])
