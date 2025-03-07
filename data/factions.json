@@ -100,31 +100,6 @@
     "Secrets": "The city’s grief is a supernatural resource being tapped by someone."
   },
   {
-    "Name": "White court",
-    "Description": {
-      "text": "",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    },
-    "Secrets": {
-      "text": "",
-      "formatting": {
-        "bold": [],
-        "italic": [],
-        "underline": [],
-        "left": [],
-        "center": [],
-        "right": []
-      }
-    }
-  },
-  {
     "Name": "Wyldfae",
     "Description": {
       "text": "",
@@ -151,6 +126,31 @@
   },
   {
     "Name": "Spirits",
+    "Description": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secrets": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    }
+  },
+  {
+    "Name": "White Court",
     "Description": {
       "text": "",
       "formatting": {

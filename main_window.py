@@ -1,5 +1,7 @@
 import customtkinter as ctk
 import json
+import os
+
 from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE
 from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
@@ -7,6 +9,10 @@ from modules.helpers.window_helper import position_window_at_top
 from docx import Document
 from modules.generic.scenario_detail_view import ScenarioDetailView
 from modules.npcs.npc_graph_editor import NPCGraphEditor  # Import the graph editor
+from modules.helpers.template_loader import load_template
+
+# Other imports...
+
 
 def load_items_from_json(view, entity_name):
     file_path = filedialog.askopenfilename(
@@ -135,6 +141,7 @@ class MainWindow(ctk.CTk):
         self.geometry("600x800")
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
+        self.faction_wrapper = GenericModelWrapper("factions")
 
         ctk.CTkButton(self, text="Manage Factions", command=lambda: self.open_entity("factions")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Places", command=lambda: self.open_entity("places")).pack(pady=5)
@@ -206,7 +213,7 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(select_win, text="Open Scenario", command=open_selected_scenario).pack(pady=10)
     
     def open_npc_graph_editor(self):
-        NPCGraphEditor(self, self.npc_wrapper)
+        NPCGraphEditor(self, self.npc_wrapper, self.faction_wrapper)
 
 
 if __name__ == "__main__":
