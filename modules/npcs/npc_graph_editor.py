@@ -11,7 +11,7 @@ PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
 
 class NPCGraphEditor(ctk.CTkToplevel):
-    def __init__(self, master, npc_wrapper: GenericModelWrapper, *args, **kwargs):
+    def __init__(self, master, npc_wrapper: GenericModelWrapper, faction_wrapper: GenericModelWrapper, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.title("NPC Relationship Graph")
         self.geometry("1280x720")
@@ -20,6 +20,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
         self.focus_force()
 
         self.npc_wrapper = npc_wrapper
+        self.faction_wrapper = faction_wrapper
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
         print(f"Loaded {len(self.npcs)} NPCs")
 
@@ -44,6 +45,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
         toolbar.pack(fill="x", padx=5, pady=5)
 
         ctk.CTkButton(toolbar, text="Add NPC", command=self.add_npc).pack(side="left", padx=5)
+        ctk.CTkButton(toolbar, text="Add Faction", command=self.add_faction).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Save Graph", command=self.save_graph).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Load Graph", command=self.load_graph).pack(side="left", padx=5)
 
@@ -56,6 +58,84 @@ class NPCGraphEditor(ctk.CTkToplevel):
         npc_template = load_template("npcs")
         dialog = EntitySelectionDialog(self, "NPCs", self.npc_wrapper, npc_template, on_npc_selected)
         dialog.wait_window()
+
+    def add_faction(self):
+        class FactionSelectionDialog(ctk.CTkToplevel):
+            def __init__(self, master, factions, on_faction_selected):
+                super().__init__(master)
+                self.title("Select Faction")
+                self.geometry("400x300")
+                self.transient(master)
+                self.grab_set()
+                self.focus_force()
+
+                self.factions = factions
+                self.filtered_factions = factions.copy()
+                self.on_faction_selected = on_faction_selected
+
+                self.search_var = ctk.StringVar()
+
+                search_frame = ctk.CTkFrame(self)
+                search_frame.pack(fill="x", padx=5, pady=5)
+
+                ctk.CTkLabel(search_frame, text="Search Faction:").pack(side="left", padx=5)
+                search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var)
+                search_entry.pack(side="left", fill="x", expand=True, padx=5)
+                search_entry.bind("<KeyRelease>", lambda event: self.filter_factions())
+
+                self.list_frame = ctk.CTkScrollableFrame(self)
+                self.list_frame.pack(fill="both", expand=True, padx=5, pady=5)
+
+                self.refresh_list()
+
+            def filter_factions(self):
+                query = self.search_var.get().strip().lower()
+                self.filtered_factions = [f for f in self.factions if query in f.lower()]
+                self.refresh_list()
+
+            def refresh_list(self):
+                for widget in self.list_frame.winfo_children():
+                    widget.destroy()
+
+                for faction in self.filtered_factions:
+                    btn = ctk.CTkButton(self.list_frame, text=faction, command=lambda f=faction: self.select_faction(f))
+                    btn.pack(fill="x", padx=5, pady=2)
+
+            def select_faction(self, faction):
+                self.on_faction_selected(faction)
+                self.destroy()
+
+        def on_faction_selected(faction_name):
+            faction_npcs = [npc for npc in self.npcs.values() if npc.get("Faction") == faction_name]
+
+            if not faction_npcs:
+                messagebox.showinfo("No NPCs", f"No NPCs found for faction '{faction_name}'.")
+                return
+
+            start_x, start_y = 100, 100
+            spacing = 120
+
+            for i, npc in enumerate(faction_npcs):
+                npc_name = npc["Name"]
+                tag = f"npc_{npc_name.replace(' ', '_')}"
+
+                x = start_x + i * spacing
+                y = start_y
+
+                self.graph["nodes"].append({"npc_name": npc_name, "x": x, "y": y})
+                self.node_positions[tag] = (x, y)
+
+            self.draw_graph()
+
+        # Collect unique factions from the NPC list
+        factions = sorted(set(npc.get("Faction", "Unknown") for npc in self.npcs.values() if npc.get("Faction")))
+
+        if not factions:
+            messagebox.showerror("Error", "No factions found in NPC data.")
+            return
+
+        dialog = FactionSelectionDialog(self, factions, on_faction_selected)
+        self.wait_window(dialog)
 
     def place_pending_npc(self, event):
         npc_name = self.pending_npc["Name"]
@@ -163,7 +243,6 @@ class NPCGraphEditor(ctk.CTkToplevel):
                 justify="center",
                 tags=(tag,)
             )
-
     def save_graph(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".json")
         if file_path:
