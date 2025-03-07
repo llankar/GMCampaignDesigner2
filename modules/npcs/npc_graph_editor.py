@@ -50,6 +50,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
     def add_npc(self):
         def on_npc_selected(npc):
             self.pending_npc = npc
+            messagebox.showinfo("Placement", "Click on the canvas to place the NPC.")
             self.canvas.bind("<Button-1>", self.place_pending_npc)
 
         npc_template = load_template("npcs")
@@ -99,7 +100,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
         NODE_WIDTH = 100
         TEXT_LINE_HEIGHT = 14
         TEXT_TOTAL_HEIGHT = 2 * TEXT_LINE_HEIGHT + 4
-        TEXT_PADDING = 5  # Extra padding between portrait and text
+        TEXT_PADDING = 5
 
         for node in self.graph["nodes"]:
             npc_name = node["npc_name"]
@@ -149,7 +150,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
                 wrapped_name = npc_name
 
             if has_portrait:
-                text_y = y - node_height // 2 + portrait_height + TEXT_LINE_HEIGHT // 2 + TEXT_PADDING+3
+                text_y = y - node_height // 2 + portrait_height + TEXT_PADDING + TEXT_LINE_HEIGHT // 2 + 2
             else:
                 text_y = y
 
@@ -166,6 +167,12 @@ class NPCGraphEditor(ctk.CTkToplevel):
     def save_graph(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".json")
         if file_path:
+            for node in self.graph["nodes"]:
+                tag = f"npc_{node['npc_name'].replace(' ', '_')}"
+                x, y = self.node_positions.get(tag, (node["x"], node["y"]))
+                node["x"] = x
+                node["y"] = y
+
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(self.graph, f, indent=2)
 
@@ -174,8 +181,10 @@ class NPCGraphEditor(ctk.CTkToplevel):
         if file_path:
             with open(file_path, "r", encoding="utf-8") as f:
                 self.graph = json.load(f)
-                self.node_positions = {
-                    f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
-                    for n in self.graph["nodes"]
-                }
-                self.draw_graph()
+
+            self.node_positions = {
+                f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
+                for n in self.graph["nodes"]
+            }
+
+            self.draw_graph()
