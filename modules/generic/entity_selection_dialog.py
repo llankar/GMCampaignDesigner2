@@ -13,7 +13,10 @@ class EntitySelectionDialog(ctk.CTkToplevel):
         super().__init__(master)
         self.title(f"Select {entity_type}")
         self.geometry("600x500")
-
+        self.transient(master)  # Key to staying on top
+        self.grab_set()         # Key to blocking background clicks
+        self.focus_force()      # Optional - directly focus the window
+        
         self.entity_type = entity_type
         self.model_wrapper = model_wrapper
         self.template = template
