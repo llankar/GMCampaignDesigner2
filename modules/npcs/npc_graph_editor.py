@@ -80,13 +80,82 @@ class NPCGraphEditor(ctk.CTkToplevel):
 
         ctk.CTkButton(toolbar, text="Add NPC", command=self.add_npc).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Add Faction", command=self.add_faction).pack(side="left", padx=5)
-        ctk.CTkButton(toolbar, text="Save Graph", command=self.save_graph).pack(side="left", padx=5)
-        ctk.CTkButton(toolbar, text="Load Graph", command=self.load_graph).pack(side="left", padx=5)
+        ctk.CTkButton(toolbar, text="Save", command=self.save_graph).pack(side="left", padx=5)
+        ctk.CTkButton(toolbar, text="Load", command=self.load_graph).pack(side="left", padx=5)
+        ctk.CTkButton(toolbar, text="Add Link", command=self.start_link_creation).pack(side="left", padx=5)  # NEW BUTTON
+   
+    def start_link_creation(self):
+        print("Starting link creation")
+        self.canvas.bind("<Button-1>", self.select_first_node)
 
+    def select_first_node(self, event):
+        item = self.canvas.find_closest(event.x, event.y)
+        if not item:
+            print("No item found at first node selection")
+            return
+        item_id = item[0]
+        tags = self.canvas.gettags(item_id)
+        self.first_node = next((t for t in tags if t.startswith("npc_")), None)
+        print(f"First node selected: {self.first_node}")
+        if self.first_node:
+            self.canvas.bind("<Button-1>", self.select_second_node)
+
+    def select_second_node(self, event):
+        item = self.canvas.find_closest(event.x, event.y)
+        if not item:
+            print("No item found at second node selection")
+            return
+        item_id = item[0]
+        tags = self.canvas.gettags(item_id)
+        self.second_node = next((t for t in tags if t.startswith("npc_")), None)
+        print(f"Second node selected: {self.second_node}")
+        if self.second_node:
+            self.canvas.unbind("<Button-1>")
+            self.prompt_link_text()
+
+    def prompt_link_text(self):
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Enter Link Text")
+        dialog.geometry("300x100")
+        dialog.transient(self)
+        dialog.grab_set()
+        dialog.focus_force()
+
+        ctk.CTkLabel(dialog, text="Link Text:").pack(pady=5)
+        link_text_var = ctk.StringVar()
+        link_text_entry = ctk.CTkEntry(dialog, textvariable=link_text_var)
+        link_text_entry.pack(pady=5)
+
+        def on_add_link():
+            link_text = link_text_var.get()
+            print(f"Link text entered: {link_text}")
+            self.add_link(self.first_node, self.second_node, link_text)
+            dialog.destroy()
+
+        ctk.CTkButton(dialog, text="Add Link", command=on_add_link).pack(pady=10)
+
+    def add_link(self, tag1, tag2, link_text):
+        print(f"Adding link between {tag1} and {tag2} with text '{link_text}'")
+        print(f"Current node positions: {self.node_positions}")
+        if tag1 not in self.node_positions or tag2 not in self.node_positions:
+            print(f"Error: One or both NPCs not found. tag1: {tag1}, tag2: {tag2}")
+            messagebox.showerror("Error", "One or both NPCs not found.")
+            return
+
+        x1, y1 = self.node_positions[tag1]
+        x2, y2 = self.node_positions[tag2]
+
+        npc_name1 = tag1.replace("npc_", "").replace("_", " ")
+        npc_name2 = tag2.replace("npc_", "").replace("_", " ")
+
+        print(f"Linking NPCs: {npc_name1} at ({x1}, {y1}) and {npc_name2} at ({x2}, {y2})")
+
+        self.graph["links"].append({"npc_name1": npc_name1, "npc_name2": npc_name2, "text": link_text})
+
+        self.draw_graph()
     def add_npc(self):
         def on_npc_selected(npc):
             self.pending_npc = npc
-            messagebox.showinfo("Placement", "Click on the canvas to place the NPC.")
             self.canvas.bind("<Button-1>", self.place_pending_npc)
 
         npc_template = load_template("npcs")
@@ -215,6 +284,9 @@ class NPCGraphEditor(ctk.CTkToplevel):
                             bbox[2]+padding, bbox[3]+padding)
             self.canvas.configure(scrollregion=scroll_region)
 
+        # Redraw the graph to update link positions
+        self.draw_graph()
+
     def draw_graph(self):
         self.canvas.delete("all")
         self.node_images.clear()
@@ -223,7 +295,27 @@ class NPCGraphEditor(ctk.CTkToplevel):
         TEXT_LINE_HEIGHT = 14
         TEXT_TOTAL_HEIGHT = 2 * TEXT_LINE_HEIGHT + 4
         TEXT_PADDING = 5
-    
+
+        # Draw links first
+        for link in self.graph["links"]:
+            npc_name1 = link["npc_name1"]
+            npc_name2 = link["npc_name2"]
+            link_text = link["text"]
+
+            tag1 = f"npc_{npc_name1.replace(' ', '_')}"
+            tag2 = f"npc_{npc_name2.replace(' ', '_')}"
+
+            x1, y1 = self.node_positions.get(tag1, (0, 0))
+            x2, y2 = self.node_positions.get(tag2, (0, 0))
+
+            self.canvas.create_line(x1, y1, x2, y2, fill="black", tags=("link",))
+
+            mid_x = (x1 + x2) / 2
+            mid_y = (y1 + y2) / 2
+
+            self.canvas.create_text(mid_x, mid_y, text=link_text, fill="red", font=("Arial", 10, "bold"), tags=("link_text",))
+
+        # Draw nodes
         for node in self.graph["nodes"]:
             npc_name = node["npc_name"]
             tag = f"npc_{npc_name.replace(' ', '_')}"
@@ -295,6 +387,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
             scroll_region = (bbox[0]-padding, bbox[1]-padding, 
                             bbox[2]+padding, bbox[3]+padding)
             self.canvas.configure(scrollregion=scroll_region)
+            
     def save_graph(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".json")
         if file_path:
