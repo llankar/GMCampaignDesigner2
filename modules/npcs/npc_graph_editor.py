@@ -22,7 +22,6 @@ class NPCGraphEditor(ctk.CTkToplevel):
         self.npc_wrapper = npc_wrapper
         self.faction_wrapper = faction_wrapper
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
-        print(f"Loaded {len(self.npcs)} NPCs")
 
         self.graph = {"nodes": [], "links": []}
         self.node_positions = {}
@@ -85,30 +84,25 @@ class NPCGraphEditor(ctk.CTkToplevel):
         ctk.CTkButton(toolbar, text="Add Link", command=self.start_link_creation).pack(side="left", padx=5)  # NEW BUTTON
    
     def start_link_creation(self):
-        print("Starting link creation")
         self.canvas.bind("<Button-1>", self.select_first_node)
 
     def select_first_node(self, event):
         item = self.canvas.find_closest(event.x, event.y)
         if not item:
-            print("No item found at first node selection")
             return
         item_id = item[0]
         tags = self.canvas.gettags(item_id)
         self.first_node = next((t for t in tags if t.startswith("npc_")), None)
-        print(f"First node selected: {self.first_node}")
         if self.first_node:
             self.canvas.bind("<Button-1>", self.select_second_node)
 
     def select_second_node(self, event):
         item = self.canvas.find_closest(event.x, event.y)
         if not item:
-            print("No item found at second node selection")
             return
         item_id = item[0]
         tags = self.canvas.gettags(item_id)
         self.second_node = next((t for t in tags if t.startswith("npc_")), None)
-        print(f"Second node selected: {self.second_node}")
         if self.second_node:
             self.canvas.unbind("<Button-1>")
             self.prompt_link_text()
@@ -116,7 +110,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
     def prompt_link_text(self):
         dialog = ctk.CTkToplevel(self)
         dialog.title("Enter Link Text")
-        dialog.geometry("300x100")
+        dialog.geometry("400x150")  # Increased size
         dialog.transient(self)
         dialog.grab_set()
         dialog.focus_force()
@@ -125,20 +119,21 @@ class NPCGraphEditor(ctk.CTkToplevel):
         link_text_var = ctk.StringVar()
         link_text_entry = ctk.CTkEntry(dialog, textvariable=link_text_var)
         link_text_entry.pack(pady=5)
+        link_text_entry.bind("<Return>", lambda event: on_add_link())  # Bind ENTER key
 
         def on_add_link():
             link_text = link_text_var.get()
-            print(f"Link text entered: {link_text}")
             self.add_link(self.first_node, self.second_node, link_text)
             dialog.destroy()
+            self.canvas.bind("<Button-1>", self.start_drag)  # Rebind to start_drag after link creation
 
         ctk.CTkButton(dialog, text="Add Link", command=on_add_link).pack(pady=10)
 
+        # Set focus to the text field after the window is fully initialized
+        dialog.after(100, link_text_entry.focus_set)
+
     def add_link(self, tag1, tag2, link_text):
-        print(f"Adding link between {tag1} and {tag2} with text '{link_text}'")
-        print(f"Current node positions: {self.node_positions}")
         if tag1 not in self.node_positions or tag2 not in self.node_positions:
-            print(f"Error: One or both NPCs not found. tag1: {tag1}, tag2: {tag2}")
             messagebox.showerror("Error", "One or both NPCs not found.")
             return
 
@@ -148,11 +143,11 @@ class NPCGraphEditor(ctk.CTkToplevel):
         npc_name1 = tag1.replace("npc_", "").replace("_", " ")
         npc_name2 = tag2.replace("npc_", "").replace("_", " ")
 
-        print(f"Linking NPCs: {npc_name1} at ({x1}, {y1}) and {npc_name2} at ({x2}, {y2})")
-
         self.graph["links"].append({"npc_name1": npc_name1, "npc_name2": npc_name2, "text": link_text})
 
         self.draw_graph()
+        self.canvas.bind("<Button-1>", self.start_drag)  # Rebind to start_drag after link creation
+
     def add_npc(self):
         def on_npc_selected(npc):
             self.pending_npc = npc
@@ -221,7 +216,6 @@ class NPCGraphEditor(ctk.CTkToplevel):
             for i, npc in enumerate(faction_npcs):
                 npc_name = npc["Name"]
                 tag = f"npc_{npc_name.replace(' ', '_')}"
-
                 x = start_x + i * spacing
                 y = start_y
 
