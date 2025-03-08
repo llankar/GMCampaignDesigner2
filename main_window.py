@@ -213,8 +213,15 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(select_win, text="Open Scenario", command=open_selected_scenario).pack(pady=10)
     
     def open_npc_graph_editor(self):
-        NPCGraphEditor(self, self.npc_wrapper, self.faction_wrapper)
+        window = ctk.CTkToplevel(self)
+        window.title("NPC Graph Editor")
+        window.geometry("1280x720")
+        window.transient(self)
+        window.lift()
+        window.focus_force()
 
+        npc_graph_editor = NPCGraphEditor(window, self.npc_wrapper, self.faction_wrapper)
+        npc_graph_editor.pack(fill="both", expand=True)
 
 if __name__ == "__main__":
     app = MainWindow()

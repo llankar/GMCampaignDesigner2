@@ -10,15 +10,9 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
 
-class NPCGraphEditor(ctk.CTkToplevel):
+class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
     def __init__(self, master, npc_wrapper: GenericModelWrapper, faction_wrapper: GenericModelWrapper, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
-        self.title("NPC Relationship Graph")
-        self.geometry("1280x720")
-        self.transient(master)
-        self.grab_set()
-        self.focus_force()
-
         self.npc_wrapper = npc_wrapper
         self.faction_wrapper = faction_wrapper
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
