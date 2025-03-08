@@ -8,6 +8,8 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.text_helpers import format_longtext
 from customtkinter import CTkLabel, CTkImage
 
+from modules.npcs.npc_graph_editor import NPCGraphEditor
+
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (32, 32)  # Thumbnail size for lists
 
@@ -103,7 +105,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             self.add_button.pack(side="left", padx=5)
 
     def add_new_tab(self):
-        options = ["Factions", "Places", "NPCs", "Scenarios", "Empty Tab"]
+        options = ["Factions", "Places", "NPCs", "Scenarios", "Empty Tab", "NPC Graph"]
 
         popup = ctk.CTkToplevel(self)
         popup.title("Create New Tab")
@@ -121,6 +123,9 @@ class ScenarioDetailView(ctk.CTkFrame):
         if entity_type == "Empty Tab":
             self.add_tab(f"Note {len(self.tabs) + 1}", self.create_note_frame())
             return
+        elif entity_type == "NPC Graph":
+            self.add_tab("NPC Graph", self.create_npc_graph_frame())
+            return
 
         # Regular entity handling (unchanged)
         model_wrapper = self.wrappers[entity_type]
@@ -135,7 +140,6 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         view = EntitySelectionView(selection_popup, entity_type, model_wrapper, template, self)
         view.pack(fill="both", expand=True)
-
 
     def open_entity_tab(self, entity_type, name):
         wrapper = self.wrappers[entity_type]
@@ -239,6 +243,11 @@ class ScenarioDetailView(ctk.CTkFrame):
             file.write(content)
 
         messagebox.showinfo("Saved", f"Note saved to {file_path}")
+
+    def create_npc_graph_frame(self):
+        frame = ctk.CTkFrame(self.content_area)
+        NPCGraphEditor(frame, self.wrappers["NPCs"], self.wrappers["Factions"]).pack(fill="both", expand=True)
+        return frame
 
 class EntitySelectionView(ctk.CTkFrame):
     def __init__(self, master, entity_type, model_wrapper, template, scenario_detail_view, *args, **kwargs):
