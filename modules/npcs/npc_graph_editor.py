@@ -1,7 +1,7 @@
 import json
 import os
 import customtkinter as ctk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
@@ -32,14 +32,48 @@ class NPCGraphEditor(ctk.CTkToplevel):
         self.selected_items = []
         self.drag_start = None
 
-        self.canvas = ctk.CTkCanvas(self, bg="#ffffff", highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
-
+        # Initialize toolbar first
         self.init_toolbar()
+
+        # Create canvas frame and scrollbars
+        self.canvas_frame = ctk.CTkFrame(self)
+        self.canvas_frame.pack(fill="both", expand=True)
+
+        self.canvas = ctk.CTkCanvas(self.canvas_frame, bg="#ffffff", highlightthickness=0)
+        self.h_scrollbar = ttk.Scrollbar(self.canvas_frame, orient="horizontal", command=self.canvas.xview)
+        self.v_scrollbar = ttk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas.yview)
+
+        self.canvas.configure(xscrollcommand=self.h_scrollbar.set, yscrollcommand=self.v_scrollbar.set)
+
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.h_scrollbar.grid(row=1, column=0, sticky="ew")
+        self.v_scrollbar.grid(row=0, column=1, sticky="ns")
+
+        self.canvas_frame.grid_rowconfigure(0, weight=1)
+        self.canvas_frame.grid_columnconfigure(0, weight=1)
 
         self.canvas.bind("<Button-1>", self.start_drag)
         self.canvas.bind("<B1-Motion>", self.on_drag)
 
+        # Add these bindings after canvas creation
+        self.canvas.bind("<MouseWheel>", self._on_mousewheel_y)  # Windows
+        self.canvas.bind("<Shift-MouseWheel>", self._on_mousewheel_x)  # Windows with Shift
+        self.canvas.bind("<Button-4>", self._on_mousewheel_y)  # Linux
+        self.canvas.bind("<Button-5>", self._on_mousewheel_y)  # Linux
+        self.canvas.bind("<Shift-Button-4>", self._on_mousewheel_x)  # Linux with Shift
+        self.canvas.bind("<Shift-Button-5>", self._on_mousewheel_x)  # Linux with Shift
+
+    def _on_mousewheel_y(self, event):
+        if event.num == 4 or event.delta > 0:
+            self.canvas.yview_scroll(-1, "units")
+        elif event.num == 5 or event.delta < 0:
+            self.canvas.yview_scroll(1, "units")
+
+    def _on_mousewheel_x(self, event):
+        if event.num == 4 or event.delta > 0:
+            self.canvas.xview_scroll(-1, "units")
+        elif event.num == 5 or event.delta < 0:
+            self.canvas.xview_scroll(1, "units")
     def init_toolbar(self):
         toolbar = ctk.CTkFrame(self)
         toolbar.pack(fill="x", padx=5, pady=5)
@@ -173,6 +207,14 @@ class NPCGraphEditor(ctk.CTkToplevel):
 
         self.drag_start = (event.x, event.y)
 
+        # Update scroll region during drag
+        bbox = self.canvas.bbox("all")
+        if bbox:
+            padding = 50
+            scroll_region = (bbox[0]-padding, bbox[1]-padding,
+                            bbox[2]+padding, bbox[3]+padding)
+            self.canvas.configure(scrollregion=scroll_region)
+
     def draw_graph(self):
         self.canvas.delete("all")
         self.node_images.clear()
@@ -181,7 +223,7 @@ class NPCGraphEditor(ctk.CTkToplevel):
         TEXT_LINE_HEIGHT = 14
         TEXT_TOTAL_HEIGHT = 2 * TEXT_LINE_HEIGHT + 4
         TEXT_PADDING = 5
-
+    
         for node in self.graph["nodes"]:
             npc_name = node["npc_name"]
             tag = f"npc_{npc_name.replace(' ', '_')}"
@@ -243,6 +285,16 @@ class NPCGraphEditor(ctk.CTkToplevel):
                 justify="center",
                 tags=(tag,)
             )
+
+        # After all elements are drawn, calculate proper scroll region
+        self.canvas.update_idletasks()
+        bbox = self.canvas.bbox("all")
+        if bbox:
+            # Add padding to ensure all content is visible
+            padding = 50
+            scroll_region = (bbox[0]-padding, bbox[1]-padding, 
+                            bbox[2]+padding, bbox[3]+padding)
+            self.canvas.configure(scrollregion=scroll_region)
     def save_graph(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".json")
         if file_path:
