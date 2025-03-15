@@ -1,7 +1,7 @@
 import json
 import os
 import customtkinter as ctk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
 from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
@@ -20,6 +20,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         self.graph = {"nodes": [], "links": []}
         self.node_positions = {}
         self.node_images = {}
+        self.node_rectangles = {}  # Dictionary to store rectangle IDs for each node
 
         self.selected_node = None
         self.selected_items = []
@@ -47,6 +48,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
 
         self.canvas.bind("<Button-1>", self.start_drag)
         self.canvas.bind("<B1-Motion>", self.on_drag)
+        self.canvas.bind("<Button-3>", self.on_right_click)  # Bind right-click event
 
         # Add these bindings after canvas creation
         self.canvas.bind("<MouseWheel>", self._on_mousewheel_y)  # Windows
@@ -67,6 +69,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             self.canvas.xview_scroll(-1, "units")
         elif event.num == 5 or event.delta < 0:
             self.canvas.xview_scroll(1, "units")
+
     def init_toolbar(self):
         toolbar = ctk.CTkFrame(self)
         toolbar.pack(fill="x", padx=5, pady=5)
@@ -131,8 +134,8 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             messagebox.showerror("Error", "One or both NPCs not found.")
             return
 
-        x1, y1 = self.node_positions[tag1]
-        x2, y2 = self.node_positions[tag2]
+        x1, y1 = self.node_positions.get(tag1, (0, 0))
+        x2, y2 = self.node_positions.get(tag2, (0, 0))
 
         npc_name1 = tag1.replace("npc_", "").replace("_", " ")
         npc_name2 = tag2.replace("npc_", "").replace("_", " ")
@@ -213,7 +216,12 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
                 x = start_x + i * spacing
                 y = start_y
 
-                self.graph["nodes"].append({"npc_name": npc_name, "x": x, "y": y})
+                self.graph["nodes"].append({
+                    "npc_name": npc_name,
+                    "x": x,
+                    "y": y,
+                    "color": "lightblue"  # Default color
+                })
                 self.node_positions[tag] = (x, y)
 
             self.draw_graph()
@@ -231,7 +239,12 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
     def place_pending_npc(self, event):
         npc_name = self.pending_npc["Name"]
         tag = f"npc_{npc_name.replace(' ', '_')}"
-        self.graph["nodes"].append({"npc_name": npc_name, "x": event.x, "y": event.y})
+        self.graph["nodes"].append({
+            "npc_name": npc_name,
+            "x": event.x,
+            "y": event.y,
+            "color": "lightblue"  # Default color
+        })
         self.node_positions[tag] = (event.x, event.y)
         self.pending_npc = None
         self.canvas.unbind("<Button-1>")
@@ -275,6 +288,17 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         # Redraw the graph to update link positions
         self.draw_graph()
 
+    def on_right_click(self, event):
+        item = self.canvas.find_closest(event.x, event.y)
+        if not item:
+            return
+        item_id = item[0]
+        tags = self.canvas.gettags(item_id)
+        self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
+        
+        if self.selected_node:
+            self.show_color_menu(event.x, event.y)
+
     def draw_graph(self):
         self.canvas.delete("all")
         self.node_images.clear()
@@ -308,6 +332,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             npc_name = node["npc_name"]
             tag = f"npc_{npc_name.replace(' ', '_')}"
             x, y = self.node_positions.get(tag, (node["x"], node["y"]))
+            color = node.get("color", "lightblue")  # Get color from node
 
             portrait_path = self.npcs.get(npc_name, {}).get("Portrait", "")
             has_portrait = portrait_path and os.path.exists(portrait_path)
@@ -361,11 +386,12 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             lines = wrapped_name.splitlines()
             number_of_lines = len(lines)
             node_height = portrait_height + (number_of_lines * TEXT_LINE_HEIGHT) + (TEXT_PADDING if has_portrait else 0) + 10
-            self.canvas.create_rectangle(
+            rectangle_id = self.canvas.create_rectangle(
                 x - NODE_WIDTH // 2, y - node_height // 2,
                 x + NODE_WIDTH // 2, y + node_height // 2,
-                fill="lightblue", tags=(tag,)
+                fill=color, tags=(tag,)
             )
+            self.node_rectangles[tag] = rectangle_id  # Store rectangle ID in dictionary
             if has_portrait:
                 text_y = y - node_height // 2 + portrait_height + TEXT_PADDING + TEXT_LINE_HEIGHT // 2 + 8
                 self.canvas.create_image(
@@ -375,7 +401,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             else:
                 text_y = y-4
            
-            self.canvas.create_text(
+            self.canvas.create_text(   
                 x, text_y+4,
                 text=wrapped_name,
                 fill="black",
@@ -417,5 +443,21 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
                 f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
                 for n in self.graph["nodes"]
             }
+            for node in self.graph["nodes"]:
+                node["color"] = node.get("color", "lightblue")  # Set default color if not present
+            self.draw_graph()  # Ensure to redraw the graph after loading
 
-            self.draw_graph()
+    def change_node_color(self, color):
+        if self.selected_node:
+            rect_id = self.node_rectangles[self.selected_node]  # Get the rectangle ID
+            self.canvas.itemconfig(rect_id, fill=color)
+            for node in self.graph["nodes"]:
+                if node["npc_name"] == self.selected_node.replace("npc_", "").replace("_", " "):
+                    node["color"] = color  # Update node color
+
+    def show_color_menu(self, x, y):
+        COLORS = ["red", "green", "blue", "yellow", "purple", "orange", "pink", "cyan", "magenta", "lightgray"]  # Updated color list
+        color_menu = Menu(self.canvas, tearoff=0)  # Use tkinter's Menu
+        for color in COLORS:
+            color_menu.add_command(label=color, command=lambda c=color: self.change_node_color(c))
+        color_menu.post(x, y)
