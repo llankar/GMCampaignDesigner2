@@ -603,8 +603,14 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
                 node["x"] = x
                 node["y"] = y
 
+            # Ensure each link has an arrow_mode value (default to "both" if missing)
+            for link in self.graph["links"]:
+                if "arrow_mode" not in link:
+                    link["arrow_mode"] = "both"
+
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(self.graph, f, indent=2)
+
 
     def load_graph(self):
         file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
@@ -612,17 +618,19 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             with open(file_path, "r", encoding="utf-8") as f:
                 self.graph = json.load(f)
 
-            # Rebuild node_positions
-            self.node_positions = {
-                f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
-                for n in self.graph["nodes"]
-            }
-            # Default color if missing
-            for node in self.graph["nodes"]:
-                node["color"] = node.get("color", "lightblue")
+            # Rebuild node_positions from loaded node data
+        self.node_positions = {
+            f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
+            for n in self.graph["nodes"]
+        }
+        # Set default color if missing
+        for node in self.graph["nodes"]:
+            node["color"] = node.get("color", "lightblue")
+        # Set default arrow_mode for each link if not present
+        for link in self.graph["links"]:
+            link["arrow_mode"] = link.get("arrow_mode", "both")
 
-            self.draw_graph()
-
+        self.draw_graph()
     # ─────────────────────────────────────────────────────────────────────────
     # COLOR CHANGES
     # ─────────────────────────────────────────────────────────────────────────
