@@ -280,7 +280,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         self.node_images.clear()
 
         NODE_WIDTH = 100
-        TEXT_LINE_HEIGHT = 14
+        TEXT_LINE_HEIGHT = 25
         TEXT_TOTAL_HEIGHT = 2 * TEXT_LINE_HEIGHT + 4
         TEXT_PADDING = 5
 
@@ -331,36 +331,55 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
 
                 self.node_images[npc_name] = photo
 
-            node_height = portrait_height + TEXT_TOTAL_HEIGHT + (TEXT_PADDING if has_portrait else 0)
-
-            self.canvas.create_rectangle(
-                x - NODE_WIDTH // 2, y - node_height // 2,
-                x + NODE_WIDTH // 2, y + node_height // 2,
-                fill="lightblue", tags=(tag,)
-            )
-
             if has_portrait:
                 self.canvas.create_image(
                     x, y - node_height // 2 + portrait_height // 2,
                     image=self.node_images[npc_name], tags=(tag,)
                 )
 
+            if has_portrait:
+                img = Image.open(portrait_path)
+                original_width, original_height = img.size
+
+                max_portrait_width = NODE_WIDTH - 4
+                max_portrait_height = 80
+
+                ratio = min(max_portrait_width / original_width, max_portrait_height / original_height)
+                portrait_width = int(original_width * ratio)
+                portrait_height = int(original_height * ratio)
+
+                img = img.resize((portrait_width, portrait_height), Image.Resampling.LANCZOS)
+                photo = ImageTk.PhotoImage(img)
+
+                self.node_images[npc_name] = photo
+            
             words = npc_name.split()
             if len(words) >= 2:
                 wrapped_name = f"{words[0]}\n{' '.join(words[1:])}"
             else:
                 wrapped_name = npc_name
-
+            lines = wrapped_name.splitlines()
+            number_of_lines = len(lines)
+            node_height = portrait_height + (number_of_lines * TEXT_LINE_HEIGHT) + (TEXT_PADDING if has_portrait else 0) + 10
+            self.canvas.create_rectangle(
+                x - NODE_WIDTH // 2, y - node_height // 2,
+                x + NODE_WIDTH // 2, y + node_height // 2,
+                fill="lightblue", tags=(tag,)
+            )
             if has_portrait:
-                text_y = y - node_height // 2 + portrait_height + TEXT_PADDING + TEXT_LINE_HEIGHT // 2 + 2
+                text_y = y - node_height // 2 + portrait_height + TEXT_PADDING + TEXT_LINE_HEIGHT // 2 + 8
+                self.canvas.create_image(
+                    x, y - node_height // 2 + portrait_height // 2,
+                    image=self.node_images[npc_name], tags=(tag,))
+            
             else:
-                text_y = y
-
+                text_y = y-4
+           
             self.canvas.create_text(
-                x, text_y,
+                x, text_y+4,
                 text=wrapped_name,
                 fill="black",
-                font=("Arial", 9, "bold"),
+                font=("Arial", 8, "bold"),
                 width=NODE_WIDTH - 4,
                 justify="center",
                 tags=(tag,)
