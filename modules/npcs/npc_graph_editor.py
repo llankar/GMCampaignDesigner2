@@ -25,7 +25,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         self.node_positions = {}
         self.node_images = {}
         self.node_rectangles = {}  # Stores the rectangle item IDs for color changes
-        self.node_bboxes = {}      # NEW: Stores bounding boxes (left, top, right, bottom)
+        self.node_bboxes = {}      # Stores bounding boxes (left, top, right, bottom)
 
         # Link / node selection
         self.selected_node = None
@@ -336,13 +336,12 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             # Right-click on a link
             self.show_link_menu(event.x, event.y)
             self.selected_link = self.get_link_by_position(event.x, event.y)
-
             print(f"Right-clicked on link: {self.selected_link}")
         else:
-            # Possibly right-click on a node
+            # Right-click on a node
             self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
             if self.selected_node:
-                self.show_color_menu(event.x, event.y)
+                self.show_node_menu(event.x, event.y)
 
     def show_color_menu(self, x, y):
         COLORS = [
@@ -367,6 +366,16 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         link_menu.add_cascade(label="Arrow Mode", menu=arrow_submenu)
         
         link_menu.post(x, y)
+
+    def show_node_menu(self, x, y):
+        node_menu = Menu(self.canvas, tearoff=0)
+        # First item: Delete Node
+        node_menu.add_command(label="Delete Node", command=self.delete_node)
+        node_menu.add_separator()
+        # Then include color change option (you can add more items if desired)
+        node_menu.add_command(label="Change Color", command=lambda: self.show_color_menu(x, y))
+        node_menu.post(x, y)
+
     def set_arrow_mode(self, new_mode):
         """
         Sets the arrow_mode (none, start, end, both) of the currently selected link.
@@ -375,7 +384,6 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             print("No link selected, cannot set arrow mode.")
             return
         
-        # Update the link in self.graph to the chosen arrow_mode
         for link in self.graph["links"]:
             if (link["npc_name1"] == self.selected_link["npc_name1"]
                     and link["npc_name2"] == self.selected_link["npc_name2"]):
@@ -383,6 +391,25 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
                 print(f"Updated link arrow_mode to '{new_mode}'")
                 break
         
+        self.draw_graph()
+
+    def delete_node(self):
+        """
+        Deletes the currently selected node and removes any links that include it.
+        """
+        if not self.selected_node:
+            return
+        # Determine node name from tag
+        node_name = self.selected_node.replace("npc_", "").replace("_", " ")
+        # Remove the node from the graph's nodes list
+        self.graph["nodes"] = [node for node in self.graph["nodes"] if node["npc_name"] != node_name]
+        # Remove any links that connect to this node
+        self.graph["links"] = [link for link in self.graph["links"]
+                               if link["npc_name1"] != node_name and link["npc_name2"] != node_name]
+        # Remove the node from node_positions (if present)
+        if self.selected_node in self.node_positions:
+            del self.node_positions[self.selected_node]
+        print(f"Deleted node: {node_name}")
         self.draw_graph()
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -547,9 +574,8 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             text=link["text"],
             fill="red",
             font=("Arial", 10, "bold"),
-            tags=("link","link_text")
+            tags=("link", "link_text")
         )
-
 
     def draw_arrowhead(self, start_x, start_y, end_x, end_y, node_tag):
         """
@@ -569,7 +595,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         # Approximate the node as a circle => radius is half the diagonal
         node_radius = math.sqrt(half_w**2 + half_h**2)
 
-        # Extra gap so arrow tip is outside the rectangle
+        # Extra gap so arrow tip is outside the rectangle (adjust as needed)
         arrow_offset_extra = -20
         arrow_offset = node_radius + arrow_offset_extra
 
@@ -586,9 +612,8 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             arrow_apex_y + arrow_length * math.sin(angle - math.pi / 6),
             fill="black",
             outline="black",
-            tags=("link","arrowhead")
+            tags=("link", "arrowhead")
         )
-
 
     # ─────────────────────────────────────────────────────────────────────────
     # SAVE / LOAD
@@ -611,7 +636,6 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(self.graph, f, indent=2)
 
-
     def load_graph(self):
         file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
         if file_path:
@@ -619,18 +643,19 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
                 self.graph = json.load(f)
 
             # Rebuild node_positions from loaded node data
-        self.node_positions = {
-            f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
-            for n in self.graph["nodes"]
-        }
-        # Set default color if missing
-        for node in self.graph["nodes"]:
-            node["color"] = node.get("color", "lightblue")
-        # Set default arrow_mode for each link if not present
-        for link in self.graph["links"]:
-            link["arrow_mode"] = link.get("arrow_mode", "both")
+            self.node_positions = {
+                f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
+                for n in self.graph["nodes"]
+            }
+            # Set default color if missing
+            for node in self.graph["nodes"]:
+                node["color"] = node.get("color", "lightblue")
+            # Set default arrow_mode for each link if not present
+            for link in self.graph["links"]:
+                link["arrow_mode"] = link.get("arrow_mode", "both")
 
-        self.draw_graph()
+            self.draw_graph()
+
     # ─────────────────────────────────────────────────────────────────────────
     # COLOR CHANGES
     # ─────────────────────────────────────────────────────────────────────────
@@ -644,7 +669,6 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
                     node["color"] = color
                     break
 
-    
     # ─────────────────────────────────────────────────────────────────────────
     # LINK HIT-TESTING
     # ─────────────────────────────────────────────────────────────────────────
