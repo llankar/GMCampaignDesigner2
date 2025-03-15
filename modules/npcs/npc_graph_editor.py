@@ -336,6 +336,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             # Right-click on a link
             self.show_link_menu(event.x, event.y)
             self.selected_link = self.get_link_by_position(event.x, event.y)
+
             print(f"Right-clicked on link: {self.selected_link}")
         else:
             # Possibly right-click on a node
@@ -546,7 +547,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             text=link["text"],
             fill="red",
             font=("Arial", 10, "bold"),
-            tags=("link_text",)
+            tags=("link","link_text")
         )
 
 
@@ -569,7 +570,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         node_radius = math.sqrt(half_w**2 + half_h**2)
 
         # Extra gap so arrow tip is outside the rectangle
-        arrow_offset_extra = -27
+        arrow_offset_extra = -20
         arrow_offset = node_radius + arrow_offset_extra
 
         # Shift apex in the direction from (start_x,start_y) to (end_x,end_y)
@@ -585,7 +586,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             arrow_apex_y + arrow_length * math.sin(angle - math.pi / 6),
             fill="black",
             outline="black",
-            tags=("arrowhead",)
+            tags=("link","arrowhead")
         )
 
 
