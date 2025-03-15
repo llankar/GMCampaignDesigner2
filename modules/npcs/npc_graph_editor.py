@@ -336,7 +336,6 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             # Right-click on a link
             self.show_link_menu(event.x, event.y)
             self.selected_link = self.get_link_by_position(event.x, event.y)
-            print(f"Right-clicked on link: {self.selected_link}")
         else:
             # Right-click on a node
             self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
@@ -372,7 +371,7 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         # First item: Delete Node
         node_menu.add_command(label="Delete Node", command=self.delete_node)
         node_menu.add_separator()
-        # Then include color change option (you can add more items if desired)
+        # Then include color change option
         node_menu.add_command(label="Change Color", command=lambda: self.show_color_menu(x, y))
         node_menu.post(x, y)
 
@@ -381,14 +380,12 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         Sets the arrow_mode (none, start, end, both) of the currently selected link.
         """
         if not self.selected_link:
-            print("No link selected, cannot set arrow mode.")
             return
         
         for link in self.graph["links"]:
             if (link["npc_name1"] == self.selected_link["npc_name1"]
                     and link["npc_name2"] == self.selected_link["npc_name2"]):
                 link["arrow_mode"] = new_mode
-                print(f"Updated link arrow_mode to '{new_mode}'")
                 break
         
         self.draw_graph()
@@ -409,7 +406,6 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         # Remove the node from node_positions (if present)
         if self.selected_node in self.node_positions:
             del self.node_positions[self.selected_node]
-        print(f"Deleted node: {node_name}")
         self.draw_graph()
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -696,8 +692,6 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
             x1, y1 = self.node_positions.get(tag1, (0, 0))
             x2, y2 = self.node_positions.get(tag2, (0, 0))
             distance = self.distance_point_to_line(x, y, x1, y1, x2, y2)
-            print(f"Checking link: {link} | Distance to line: {distance}")
             if distance < threshold:
-                print(f"Identified link: {link}")
                 return link
         return None
