@@ -655,18 +655,17 @@ class NPCGraphEditor(ctk.CTkFrame):  # Change inheritance to CTkFrame
         return math.hypot(px - nearest_x, py - nearest_y)
 
     def get_link_by_position(self, x, y):
+        threshold = 50  # increased threshold value
         for link in self.graph["links"]:
             npc_name1 = link["npc_name1"]
             npc_name2 = link["npc_name2"]
             tag1 = f"npc_{npc_name1.replace(' ', '_')}"
             tag2 = f"npc_{npc_name2.replace(' ', '_')}"
-
             x1, y1 = self.node_positions.get(tag1, (0, 0))
             x2, y2 = self.node_positions.get(tag2, (0, 0))
-
-            dist = self.distance_point_to_line(x, y, x1, y1, x2, y2)
-            print(f"Checking link: {link} | Distance to line: {dist}")
-            if dist < 10:
+            distance = self.distance_point_to_line(x, y, x1, y1, x2, y2)
+            print(f"Checking link: {link} | Distance to line: {distance}")
+            if distance < threshold:
                 print(f"Identified link: {link}")
                 return link
         return None
