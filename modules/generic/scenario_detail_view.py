@@ -111,32 +111,31 @@ class ScenarioDetailView(ctk.CTkFrame):
             print(f"[DETACH] Tab '{name}' is already detached.")
             return
 
-        # Remove the old content frame from the main content area.
         old_frame = self.tabs[name]["content_frame"]
         old_frame.pack_forget()
 
-        # Create the detached window.
         detached_window = ctk.CTkToplevel(self)
         detached_window.title(name)
-        # Disable the close (X) button.
-        detached_window.protocol("WM_DELETE_WINDOW", lambda: None)
+        detached_window.protocol("WM_DELETE_WINDOW", lambda: None)  # Disable close button
+
         print(f"[DETACH] Detached window created: {detached_window}")
 
-        # Use the stored factory function to recreate the content frame in the detached window.
         factory = self.tabs[name].get("factory")
         if factory is None:
             new_frame = old_frame
         else:
             new_frame = factory(detached_window)
         new_frame.pack(fill="both", expand=True)
+        new_frame.update_idletasks()
+        req_width = new_frame.winfo_reqwidth()
+        req_height = new_frame.winfo_reqheight()
+        detached_window.geometry(f"{req_width}x{req_height}")
         print(f"[DETACH] New frame in detached window created: {new_frame}")
 
-        # Check if the new frame already has a portrait label.
         if hasattr(new_frame, "portrait_label"):
             self.tabs[name]["portrait_label"] = new_frame.portrait_label
             print(f"[DETACH] Using existing portrait label from new frame.")
         else:
-            # Optionally, if there is no portrait label, recreate it.
             portrait_label = self.tabs[name].get("portrait_label")
             if portrait_label and portrait_label.winfo_exists():
                 portrait_key = getattr(portrait_label, "entity_name", None)
@@ -153,6 +152,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs[name]["window"] = detached_window
         self.tabs[name]["content_frame"] = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
+
 
 
 
