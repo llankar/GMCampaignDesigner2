@@ -119,29 +119,34 @@ class ScenarioDetailView(ctk.CTkFrame):
         detached_window = ctk.CTkToplevel(self)
         detached_window.title(name)
         detached_window.protocol("WM_DELETE_WINDOW", lambda: None)  # Disable close button
+        print(f"[DETACH] Detached window created: {detached_window}")
 
-        # Use the stored factory function to recreate the content frame in the detached window.
-        factory = self.tabs[name].get("factory")
-        if factory is None:
-            new_frame = old_frame
+        # For note tabs, capture current text and re-create with that text.
+        if name.startswith("Note") and hasattr(old_frame, "text_box"):
+            current_text = old_frame.text_box.get("1.0", "end-1c")
+            new_frame = self.create_note_frame(detached_window, initial_text=current_text)
         else:
-            new_frame = factory(detached_window)
+            factory = self.tabs[name].get("factory")
+            if factory is None:
+                new_frame = old_frame
+            else:
+                new_frame = factory(detached_window)
         new_frame.pack(fill="both", expand=True)
         new_frame.update_idletasks()
         req_width = new_frame.winfo_reqwidth()
         req_height = new_frame.winfo_reqheight()
 
-        # Use a class variable to determine the position of the detached window.
+        # Position the detached window using a class counter.
         if not hasattr(ScenarioDetailView, 'detached_count'):
             ScenarioDetailView.detached_count = 0
         offset_x = ScenarioDetailView.detached_count * (req_width + 10)
-        offset_y = 0  # Change this if you want vertical stacking
+        offset_y = 0
         detached_window.geometry(f"{req_width}x{req_height}+{offset_x}+{offset_y}")
         ScenarioDetailView.detached_count += 1
 
-        print(f"[DETACH] Detached window positioned at {offset_x}, {offset_y}")
+        print(f"[DETACH] New frame in detached window created: {new_frame}")
 
-        # Check if the new frame already has a portrait label.
+        # For NPCs (or others with portrait), use the existing portrait if present.
         if hasattr(new_frame, "portrait_label"):
             self.tabs[name]["portrait_label"] = new_frame.portrait_label
             print(f"[DETACH] Using existing portrait label from new frame.")
@@ -163,8 +168,23 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs[name]["content_frame"] = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
 
-
-
+    def create_note_frame(self, master=None, initial_text=""):
+        if master is None:
+            master = self.content_area
+        frame = ctk.CTkFrame(master)
+        toolbar = ctk.CTkFrame(frame)
+        toolbar.pack(fill="x", padx=5, pady=5)
+        save_button = ctk.CTkButton(
+            toolbar,
+            text="Save Note",
+            command=lambda: self.save_note_to_file(frame, f"Note_{len(self.tabs)}")
+        )
+        save_button.pack(side="right", padx=5)
+        text_box = ctk.CTkTextbox(frame, wrap="word", height=500)
+        text_box.pack(fill="both", expand=True, padx=10, pady=5)
+        text_box.insert("1.0", initial_text)
+        frame.text_box = text_box
+        return frame
 
 
     def reattach_tab(self, name):
@@ -173,24 +193,34 @@ class ScenarioDetailView(ctk.CTkFrame):
             print(f"[REATTACH] Tab '{name}' is not detached.")
             return
 
-        # Destroy the detached window.
         detached_window = self.tabs[name]["window"]
+        current_frame = self.tabs[name]["content_frame"]
+
+        # For note tabs, retrieve the current text
+        current_text = ""
+        if name.startswith("Note") and hasattr(current_frame, "text_box"):
+            current_text = current_frame.text_box.get("1.0", "end-1c")
+        
         if detached_window:
             detached_window.destroy()
             print("[REATTACH] Detached window destroyed.")
 
-        # Recreate the content frame using the factory function with the main content area as master.
         factory = self.tabs[name].get("factory")
         if factory is None:
-            new_frame = self.tabs[name]["content_frame"]
+            new_frame = current_frame
         else:
-            new_frame = factory(self.content_area)
+            # If it's a note tab, pass current_text to the factory
+            if name.startswith("Note"):
+                new_frame = factory(self.content_area, initial_text=current_text)
+            else:
+                new_frame = factory(self.content_area)
         new_frame.pack(fill="both", expand=True)
         self.tabs[name]["content_frame"] = new_frame
         self.tabs[name]["detached"] = False
         self.tabs[name]["window"] = None
         self.show_tab(name)
         print(f"[REATTACH] Tab '{name}' reattached successfully.")
+
 
     def close_tab(self, name):
         if len(self.tabs) == 1:
@@ -225,7 +255,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             self.tabs[name]["content_frame"].pack(fill="both", expand=True)
 
     def add_new_tab(self):
-        options = ["Factions", "Places", "NPCs", "Scenarios", "Empty Tab", "NPC Graph"]
+        options = ["Factions", "Places", "NPCs", "Scenarios", "Note Tab", "NPC Graph"]
         popup = ctk.CTkToplevel(self)
         popup.title("Create New Tab")
         popup.geometry("300x250")
@@ -238,8 +268,12 @@ class ScenarioDetailView(ctk.CTkFrame):
 
     def open_selection_window(self, entity_type, popup):
         popup.destroy()
-        if entity_type == "Empty Tab":
-            self.add_tab(f"Note {len(self.tabs) + 1}", self.create_note_frame())
+        if entity_type == "Note Tab":
+            self.add_tab(
+                f"Note {len(self.tabs) + 1}",
+                self.create_note_frame(), 
+                content_factory=lambda master, initial_text="": self.create_note_frame(master=master, initial_text=initial_text)
+            )
             return
         elif entity_type == "NPC Graph":
             self.add_tab("NPC Graph", self.create_npc_graph_frame())
@@ -329,16 +363,24 @@ class ScenarioDetailView(ctk.CTkFrame):
     def _on_link_clicked(self, linked_type, item, event=None):
         self.open_entity_tab(linked_type + "s", item)
 
-    def create_note_frame(self):
-        frame = ctk.CTkFrame(self.content_area)
+    def create_note_frame(self, master=None, initial_text=""):
+        if master is None:
+            master = self.content_area
+        frame = ctk.CTkFrame(master)
         toolbar = ctk.CTkFrame(frame)
         toolbar.pack(fill="x", padx=5, pady=5)
-        save_button = ctk.CTkButton(toolbar, text="Save Note", command=lambda: self.save_note_to_file(frame, f"Note_{len(self.tabs)}"))
+        save_button = ctk.CTkButton(
+            toolbar,
+            text="Save Note",
+            command=lambda: self.save_note_to_file(frame, f"Note_{len(self.tabs)}")
+        )
         save_button.pack(side="right", padx=5)
         text_box = ctk.CTkTextbox(frame, wrap="word", height=500)
         text_box.pack(fill="both", expand=True, padx=10, pady=5)
+        text_box.insert("1.0", initial_text)
         frame.text_box = text_box
         return frame
+
 
     def save_note_to_file(self, note_frame, default_name):
         file_path = filedialog.asksaveasfilename(
