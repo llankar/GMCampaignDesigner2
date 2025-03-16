@@ -111,15 +111,16 @@ class ScenarioDetailView(ctk.CTkFrame):
             print(f"[DETACH] Tab '{name}' is already detached.")
             return
 
+        # Remove the old content frame from the main content area.
         old_frame = self.tabs[name]["content_frame"]
         old_frame.pack_forget()
 
+        # Create the detached window.
         detached_window = ctk.CTkToplevel(self)
         detached_window.title(name)
         detached_window.protocol("WM_DELETE_WINDOW", lambda: None)  # Disable close button
 
-        print(f"[DETACH] Detached window created: {detached_window}")
-
+        # Use the stored factory function to recreate the content frame in the detached window.
         factory = self.tabs[name].get("factory")
         if factory is None:
             new_frame = old_frame
@@ -129,9 +130,18 @@ class ScenarioDetailView(ctk.CTkFrame):
         new_frame.update_idletasks()
         req_width = new_frame.winfo_reqwidth()
         req_height = new_frame.winfo_reqheight()
-        detached_window.geometry(f"{req_width}x{req_height}")
-        print(f"[DETACH] New frame in detached window created: {new_frame}")
 
+        # Use a class variable to determine the position of the detached window.
+        if not hasattr(ScenarioDetailView, 'detached_count'):
+            ScenarioDetailView.detached_count = 0
+        offset_x = ScenarioDetailView.detached_count * (req_width + 10)
+        offset_y = 0  # Change this if you want vertical stacking
+        detached_window.geometry(f"{req_width}x{req_height}+{offset_x}+{offset_y}")
+        ScenarioDetailView.detached_count += 1
+
+        print(f"[DETACH] Detached window positioned at {offset_x}, {offset_y}")
+
+        # Check if the new frame already has a portrait label.
         if hasattr(new_frame, "portrait_label"):
             self.tabs[name]["portrait_label"] = new_frame.portrait_label
             print(f"[DETACH] Using existing portrait label from new frame.")
@@ -152,6 +162,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs[name]["window"] = detached_window
         self.tabs[name]["content_frame"] = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
+
 
 
 
