@@ -129,23 +129,29 @@ class ScenarioDetailView(ctk.CTkFrame):
         new_frame.pack(fill="both", expand=True)
         print(f"[DETACH] New frame in detached window created: {new_frame}")
 
-        # Optionally, recreate the portrait label.
-        portrait_label = self.tabs[name].get("portrait_label")
-        if portrait_label and portrait_label.winfo_exists():
-            portrait_key = getattr(portrait_label, "entity_name", None)
-            if portrait_key and portrait_key in self.portrait_images:
-                new_portrait_label = ctk.CTkLabel(new_frame, image=self.portrait_images[portrait_key], text="")
-                new_portrait_label.image = self.portrait_images[portrait_key]
-                new_portrait_label.entity_name = portrait_key
-                new_portrait_label.is_portrait = True
-                new_portrait_label.pack(pady=10)
-                print(f"[DETACH] Recreated portrait label for entity '{portrait_key}'.")
-                self.tabs[name]["portrait_label"] = new_portrait_label
+        # Check if the new frame already has a portrait label.
+        if hasattr(new_frame, "portrait_label"):
+            self.tabs[name]["portrait_label"] = new_frame.portrait_label
+            print(f"[DETACH] Using existing portrait label from new frame.")
+        else:
+            # Optionally, if there is no portrait label, recreate it.
+            portrait_label = self.tabs[name].get("portrait_label")
+            if portrait_label and portrait_label.winfo_exists():
+                portrait_key = getattr(portrait_label, "entity_name", None)
+                if portrait_key and portrait_key in self.portrait_images:
+                    new_portrait_label = ctk.CTkLabel(new_frame, image=self.portrait_images[portrait_key], text="")
+                    new_portrait_label.image = self.portrait_images[portrait_key]
+                    new_portrait_label.entity_name = portrait_key
+                    new_portrait_label.is_portrait = True
+                    new_portrait_label.pack(pady=10)
+                    print(f"[DETACH] Recreated portrait label for entity '{portrait_key}'.")
+                    self.tabs[name]["portrait_label"] = new_portrait_label
 
         self.tabs[name]["detached"] = True
         self.tabs[name]["window"] = detached_window
         self.tabs[name]["content_frame"] = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
+
 
     def reattach_tab(self, name):
         print(f"[REATTACH] Start reattaching tab: {name}")
