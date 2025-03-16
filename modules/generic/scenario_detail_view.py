@@ -111,29 +111,29 @@ class ScenarioDetailView(ctk.CTkFrame):
             print(f"[DETACH] Tab '{name}' is already detached.")
             return
 
-        # Remove the old content frame from the main content area.
         old_frame = self.tabs[name]["content_frame"]
         old_frame.pack_forget()
 
-        # Create the detached window.
         detached_window = ctk.CTkToplevel(self)
         detached_window.title(name)
-        detached_window.protocol("WM_DELETE_WINDOW", lambda: None)  # Disable close button
+        detached_window.protocol("WM_DELETE_WINDOW", lambda: None)
         print(f"[DETACH] Detached window created: {detached_window}")
 
-        # Save state from the graph editor (if available)
-        saved_state = None
-        if hasattr(old_frame, "graph_editor") and hasattr(old_frame.graph_editor, "get_state"):
-            saved_state = old_frame.graph_editor.get_state()
-
-        # Use the factory function to create a new instance
-        factory = self.tabs[name].get("factory")
-        if factory is None:
-            new_frame = old_frame
+        # Check if this is a Note tab; handle separately
+        if name.startswith("Note") and hasattr(old_frame, "text_box"):
+            current_text = old_frame.text_box.get("1.0", "end-1c")
+            new_frame = self.create_note_frame(detached_window, initial_text=current_text)
         else:
-            new_frame = factory(detached_window)
-            if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
-                new_frame.graph_editor.set_state(saved_state)
+            factory = self.tabs[name].get("factory")
+            if factory is None:
+                new_frame = old_frame
+            else:
+                new_frame = factory(detached_window)
+                # For tabs with state (like NPC Graph), restore state from graph_editor
+                if hasattr(old_frame, "graph_editor") and hasattr(old_frame.graph_editor, "get_state"):
+                    saved_state = old_frame.graph_editor.get_state()
+                    if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
+                        new_frame.graph_editor.set_state(saved_state)
 
         new_frame.pack(fill="both", expand=True)
         new_frame.update_idletasks()
@@ -149,7 +149,7 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         print(f"[DETACH] New frame in detached window created: {new_frame}")
 
-        # (Optional) Update portrait label if needed...
+        # (Optional) Update portrait label if needed…
         if hasattr(new_frame, "portrait_label"):
             self.tabs[name]["portrait_label"] = new_frame.portrait_label
             print(f"[DETACH] Using existing portrait label from new frame.")
@@ -171,6 +171,9 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs[name]["content_frame"] = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
 
+        # Reorder detached windows after detaching (if you have that function)
+        if hasattr(self, "reorder_detached_windows"):
+            self.reorder_detached_windows()
 
 
     def create_note_frame(self, master=None, initial_text=""):
@@ -232,6 +235,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs[name]["detached"] = False
         self.tabs[name]["window"] = None
         self.show_tab(name)
+        self.reorder_detached_windows()
         print(f"[REATTACH] Tab '{name}' reattached successfully.")
 
 
@@ -419,6 +423,29 @@ class ScenarioDetailView(ctk.CTkFrame):
         graph_editor.pack(fill="both", expand=True)
         frame.graph_editor = graph_editor  # Save a reference for state management
         return frame
+    
+    def reorder_detached_windows(self):
+        screen_width = self.winfo_screenwidth()
+        margin = 10  # space between windows and screen edge
+        current_x = margin
+        current_y = margin
+        max_row_height = 0
+
+        for name, tab in self.tabs.items():
+            if tab.get("detached") and tab.get("window") is not None:
+                window = tab["window"]
+                window.update_idletasks()
+                req_width = window.winfo_reqwidth()
+                req_height = window.winfo_reqheight()
+                # If adding this window would go beyond screen width, wrap to next line
+                if current_x + req_width + margin > screen_width:
+                    current_x = margin
+                    current_y += max_row_height + margin
+                    max_row_height = 0
+                window.geometry(f"{req_width}x{req_height}+{current_x}+{current_y}")
+                current_x += req_width + margin
+                if req_height > max_row_height:
+                    max_row_height = req_height
 
 class EntitySelectionView(ctk.CTkFrame):
     def __init__(self, master, entity_type, model_wrapper, template, scenario_detail_view, *args, **kwargs):
