@@ -118,6 +118,8 @@ class ScenarioDetailView(ctk.CTkFrame):
         # Create the detached window.
         detached_window = ctk.CTkToplevel(self)
         detached_window.title(name)
+        # Disable the close (X) button.
+        detached_window.protocol("WM_DELETE_WINDOW", lambda: None)
         print(f"[DETACH] Detached window created: {detached_window}")
 
         # Use the stored factory function to recreate the content frame in the detached window.
@@ -151,6 +153,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs[name]["window"] = detached_window
         self.tabs[name]["content_frame"] = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
+
 
 
     def reattach_tab(self, name):
