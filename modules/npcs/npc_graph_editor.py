@@ -81,6 +81,18 @@ class NPCGraphEditor(ctk.CTkFrame):
         elif event.num == 5 or event.delta < 0:
             self.canvas.yview_scroll(1, "units")
 
+    def get_state(self):
+        return {
+            "graph": self.graph.copy(),
+            "node_positions": self.node_positions.copy(),
+            # include any other state needed
+        }
+
+    def set_state(self, state):
+        self.graph = state.get("graph", {}).copy()
+        self.node_positions = state.get("node_positions", {}).copy()
+        self.draw_graph()  # Refresh the drawing
+
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: _on_mousewheel_x
     # Scrolls the canvas horizontally based on mouse wheel input.
