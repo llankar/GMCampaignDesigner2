@@ -121,22 +121,25 @@ class ScenarioDetailView(ctk.CTkFrame):
         detached_window.protocol("WM_DELETE_WINDOW", lambda: None)  # Disable close button
         print(f"[DETACH] Detached window created: {detached_window}")
 
-        # For note tabs, capture current text and re-create with that text.
-        if name.startswith("Note") and hasattr(old_frame, "text_box"):
-            current_text = old_frame.text_box.get("1.0", "end-1c")
-            new_frame = self.create_note_frame(detached_window, initial_text=current_text)
+        # Save state from the graph editor (if available)
+        saved_state = None
+        if hasattr(old_frame, "graph_editor") and hasattr(old_frame.graph_editor, "get_state"):
+            saved_state = old_frame.graph_editor.get_state()
+
+        # Use the factory function to create a new instance
+        factory = self.tabs[name].get("factory")
+        if factory is None:
+            new_frame = old_frame
         else:
-            factory = self.tabs[name].get("factory")
-            if factory is None:
-                new_frame = old_frame
-            else:
-                new_frame = factory(detached_window)
+            new_frame = factory(detached_window)
+            if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
+                new_frame.graph_editor.set_state(saved_state)
+
         new_frame.pack(fill="both", expand=True)
         new_frame.update_idletasks()
         req_width = new_frame.winfo_reqwidth()
         req_height = new_frame.winfo_reqheight()
 
-        # Position the detached window using a class counter.
         if not hasattr(ScenarioDetailView, 'detached_count'):
             ScenarioDetailView.detached_count = 0
         offset_x = ScenarioDetailView.detached_count * (req_width + 10)
@@ -146,7 +149,7 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         print(f"[DETACH] New frame in detached window created: {new_frame}")
 
-        # For NPCs (or others with portrait), use the existing portrait if present.
+        # (Optional) Update portrait label if needed...
         if hasattr(new_frame, "portrait_label"):
             self.tabs[name]["portrait_label"] = new_frame.portrait_label
             print(f"[DETACH] Using existing portrait label from new frame.")
@@ -167,6 +170,8 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs[name]["window"] = detached_window
         self.tabs[name]["content_frame"] = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
+
+
 
     def create_note_frame(self, master=None, initial_text=""):
         if master is None:
@@ -196,11 +201,16 @@ class ScenarioDetailView(ctk.CTkFrame):
         detached_window = self.tabs[name]["window"]
         current_frame = self.tabs[name]["content_frame"]
 
-        # For note tabs, retrieve the current text
+        # Save state from the graph editor in the detached frame
+        saved_state = None
+        if hasattr(current_frame, "graph_editor") and hasattr(current_frame.graph_editor, "get_state"):
+            saved_state = current_frame.graph_editor.get_state()
+
+        # Special handling for note tabs (if any)
         current_text = ""
         if name.startswith("Note") and hasattr(current_frame, "text_box"):
             current_text = current_frame.text_box.get("1.0", "end-1c")
-        
+            
         if detached_window:
             detached_window.destroy()
             print("[REATTACH] Detached window destroyed.")
@@ -209,17 +219,21 @@ class ScenarioDetailView(ctk.CTkFrame):
         if factory is None:
             new_frame = current_frame
         else:
-            # If it's a note tab, pass current_text to the factory
             if name.startswith("Note"):
                 new_frame = factory(self.content_area, initial_text=current_text)
             else:
                 new_frame = factory(self.content_area)
+            # Restore the graph state if available
+            if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
+                new_frame.graph_editor.set_state(saved_state)
         new_frame.pack(fill="both", expand=True)
+            
         self.tabs[name]["content_frame"] = new_frame
         self.tabs[name]["detached"] = False
         self.tabs[name]["window"] = None
         self.show_tab(name)
         print(f"[REATTACH] Tab '{name}' reattached successfully.")
+
 
 
     def close_tab(self, name):
@@ -276,7 +290,8 @@ class ScenarioDetailView(ctk.CTkFrame):
             )
             return
         elif entity_type == "NPC Graph":
-            self.add_tab("NPC Graph", self.create_npc_graph_frame())
+            self.add_tab("NPC Graph", self.create_npc_graph_frame(),
+                        content_factory=lambda master: self.create_npc_graph_frame(master))
             return
         model_wrapper = self.wrappers[entity_type]
         template = self.templates[entity_type]
@@ -395,10 +410,14 @@ class ScenarioDetailView(ctk.CTkFrame):
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(content)
         messagebox.showinfo("Saved", f"Note saved to {file_path}")
-
-    def create_npc_graph_frame(self):
-        frame = ctk.CTkFrame(self.content_area)
-        NPCGraphEditor(frame, self.wrappers["NPCs"], self.wrappers["Factions"]).pack(fill="both", expand=True)
+    
+    def create_npc_graph_frame(self, master=None):
+        if master is None:
+            master = self.content_area
+        frame = ctk.CTkFrame(master)
+        graph_editor = NPCGraphEditor(frame, self.wrappers["NPCs"], self.wrappers["Factions"])
+        graph_editor.pack(fill="both", expand=True)
+        frame.graph_editor = graph_editor  # Save a reference for state management
         return frame
 
 class EntitySelectionView(ctk.CTkFrame):
@@ -526,3 +545,5 @@ class EntitySelectionView(ctk.CTkFrame):
             messagebox.showwarning("No Selection", "No items available to open.")
             return
         self.open_entity(self.filtered_items[0])
+    
+    
