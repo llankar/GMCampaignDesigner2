@@ -16,8 +16,16 @@ class ScenarioDetailView(ctk.CTkFrame):
     def __init__(self, master, scenario_item, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         # Persistent cache for portrait images
-        self.portrait_images = {}  
+        self.portrait_images = {}
         self.scenario = scenario_item
+
+        # Load your detach and reattach icon files (adjust file paths and sizes as needed)
+        self.detach_icon = CTkImage(light_image=Image.open("assets/detach_icon.png"),
+                                    dark_image=Image.open("assets/detach_icon.png"),
+                                    size=(20, 20))
+        self.reattach_icon = CTkImage(light_image=Image.open("assets/reattach_icon.png"),
+                                    dark_image=Image.open("assets/reattach_icon.png"),
+                                    size=(20, 20))
 
         self.wrappers = {
             "Scenarios": GenericModelWrapper("scenarios"),
@@ -36,21 +44,56 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tabs = {}
         self.current_tab = None
 
-        self.tab_bar = ctk.CTkFrame(self, height=40)
-        self.tab_bar.pack(side="top", fill="x")
+        # A container to hold both the scrollable tab area and the plus button
+        self.tab_bar_container = ctk.CTkFrame(self, height=60)
+        self.tab_bar_container.pack(side="top", fill="x")
 
+        # The scrollable canvas for tabs
+        self.tab_bar_canvas = ctk.CTkCanvas(self.tab_bar_container, height=40, highlightthickness=0)
+        self.tab_bar_canvas.pack(side="top", fill="x", expand=True)
+
+        # Horizontal scrollbar at the bottom
+        self.h_scrollbar = ctk.CTkScrollbar(
+            self.tab_bar_container,
+            orientation="horizontal",
+            command=self.tab_bar_canvas.xview
+        )
+        self.h_scrollbar.pack(side="bottom", fill="x")
+
+        # The actual frame that holds the tab buttons
+        self.tab_bar = ctk.CTkFrame(self.tab_bar_canvas, height=40)
+        self.tab_bar_id = self.tab_bar_canvas.create_window((0, 0), window=self.tab_bar, anchor="nw")
+
+        # Connect the scrollbar to the canvas
+        self.tab_bar_canvas.configure(xscrollcommand=self.h_scrollbar.set)
+
+        # Update the scroll region when the tab bar resizes
+        self.tab_bar.bind("<Configure>", lambda e: self.tab_bar_canvas.configure(
+            scrollregion=self.tab_bar_canvas.bbox("all")))
+
+        # The plus button stays on the right side of the container
+        self.add_button = ctk.CTkButton(
+            self.tab_bar_container,
+            text="+",
+            width=40,
+            command=self.add_new_tab
+        )
+        self.add_button.pack(side="right", padx=5, pady=5)
+
+        # Main content area for scenario details
         self.content_area = ctk.CTkFrame(self)
         self.content_area.pack(fill="both", expand=True)
 
-        self.add_button = ctk.CTkButton(self.tab_bar, text="+", width=40, command=self.add_new_tab)
-
+        # Example usage: create the first tab from the scenario_item
         scenario_name = scenario_item.get("Title", "Unnamed Scenario")
-        # Pass a factory lambda that recreates the frame with a new master.
         self.add_tab(
             scenario_name,
             self.create_entity_frame("Scenarios", scenario_item),
             content_factory=lambda master: self.create_entity_frame("Scenarios", scenario_item, master=master)
         )
+
+
+
 
     def load_template(self, filename):
         base_path = os.path.dirname(__file__)
@@ -71,7 +114,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         close_button.pack(side="left")
 
         # Create the detach button and store its reference.
-        detach_button = ctk.CTkButton(tab_frame, text="Detach", width=50,
+        detach_button = ctk.CTkButton(tab_frame,image=self.detach_icon, text="", width=50,
                                       command=lambda: self.toggle_detach_tab(name))
         detach_button.pack(side="left")
 
@@ -94,16 +137,12 @@ class ScenarioDetailView(ctk.CTkFrame):
     def toggle_detach_tab(self, name):
         if self.tabs[name]["detached"]:
             self.reattach_tab(name)
-            self.tabs[name]["detach_button"].configure(
-                text="Detach",
-                command=lambda: self.toggle_detach_tab(name)
-            )
+            # After reattaching, show the detach icon
+            self.tabs[name]["detach_button"].configure(image=self.detach_icon)
         else:
             self.detach_tab(name)
-            self.tabs[name]["detach_button"].configure(
-                text="Reattach",
-                command=lambda: self.toggle_detach_tab(name)
-            )
+            # When detached, change to the reattach icon
+            self.tabs[name]["detach_button"].configure(image=self.reattach_icon)
 
     def detach_tab(self, name):
         print(f"[DETACH] Start detaching tab: {name}")
