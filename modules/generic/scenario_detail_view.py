@@ -213,13 +213,16 @@ class ScenarioDetailView(ctk.CTkFrame):
             self.add_button.pack(side="left", padx=5)
 
     def show_tab(self, name):
+        # Hide content for the current tab if it's not detached.
         if self.current_tab and self.current_tab in self.tabs:
+            if not self.tabs[self.current_tab]["detached"]:
+                self.tabs[self.current_tab]["content_frame"].pack_forget()
             self.tabs[self.current_tab]["button"].configure(fg_color=("gray75", "gray25"))
-            self.tabs[self.current_tab]["content_frame"].pack_forget()
-
         self.current_tab = name
         self.tabs[name]["button"].configure(fg_color=("gray55", "gray15"))
-        self.tabs[name]["content_frame"].pack(fill="both", expand=True)
+        # Only pack the content into the main content area if the tab is not detached.
+        if not self.tabs[name]["detached"]:
+            self.tabs[name]["content_frame"].pack(fill="both", expand=True)
 
     def add_new_tab(self):
         options = ["Factions", "Places", "NPCs", "Scenarios", "Empty Tab", "NPC Graph"]
