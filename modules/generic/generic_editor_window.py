@@ -57,10 +57,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
-
             elif field["name"] == "Faction":
                 self.create_faction_field(field)
-
             elif field["name"] in ["NPCs", "Places"]:
                 self.create_dynamic_combobox_list(field)
             elif field["name"] == "Portrait":
@@ -70,11 +68,23 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         self.create_action_bar()
 
-        self.geometry("1000x600")
-        self.minsize(1000, 600)
-
+        # Instead of a fixed geometry, update layout and compute the required size.
         self.update_idletasks()
+        req_width = self.winfo_reqwidth()
+        req_height = self.winfo_reqheight()
+        # Enforce a minimum size if needed.
+        min_width, min_height = 1000, 880
+        if req_width < min_width:
+            req_width = min_width
+        if req_height < min_height:
+            req_height = min_height
+        self.geometry(f"{req_width}x{req_height}")
+        self.minsize(req_width, req_height)
+
+        # Optionally, adjust window position.
         position_window_at_top(self)
+
+
 
     # === Création des champs ===
 

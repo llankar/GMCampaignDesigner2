@@ -47,7 +47,8 @@
     "Name": "The Broken Prince",
     "Role": "Wyldfae Trickster",
     "Description": "Once loved Mab, now hunted.",
-    "Faction": "Wyldfae"
+    "Faction": "Wyldfae",
+    "Portrait": "assets/portraits\\The_Broken_Prince_184.png"
   },
   {
     "Name": "Warden Ezekiel Cross",
@@ -1006,8 +1007,19 @@
   {
     "Name": "Queen Briarheart",
     "Role": "Wyld Fae Queen",
-    "Description": "Thorn-crowned, with skin like silver bark and a heart that glows faintly gold.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "Thorn-crowned, with skin like silver bark and a heart that glows faintly gold.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "Knight Armand St. Croix",
@@ -1024,14 +1036,36 @@
   {
     "Name": "Wyld Huntress Seline",
     "Role": "Wyld Fae Enforcer",
-    "Description": "A sleek predator with amber eyes and a smile that could cut glass.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "A sleek predator with amber eyes and a smile that could cut glass.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "Knight Captain Mariel Brightwind",
     "Role": "Wyld Fae Champion",
-    "Description": "A radiant Summer-aligned Wyld Fae warrior, wearing armor of woven sunlight and storm leaves.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "A radiant Summer-aligned Wyld Fae warrior, wearing armor of woven sunlight and storm leaves.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "Elder Tidecaller Orsk",
@@ -1078,26 +1112,70 @@
   {
     "Name": "The Hollow Prince",
     "Role": "Traitorous Fae Noble",
-    "Description": "A faded reflection of a prince, hollowed by broken oaths and shattered pride.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "A faded reflection of a prince, hollowed by broken oaths and shattered pride.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "Laughing Dagger Kaelen",
     "Role": "Wyld Assassin",
-    "Description": "A grinning shadow with daggers made from regrets, slipping between worlds.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "A grinning shadow with daggers made from regrets, slipping between worlds.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "Archivist Yewthorn",
     "Role": "Keeper of Fae Lore",
-    "Description": "A tree-like fae, with scrolls embedded in its bark, reciting history that cuts like blades.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "A tree-like fae, with scrolls embedded in its bark, reciting history that cuts like blades.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "The Bound Jester",
     "Role": "Cursed Fae Entertainer",
-    "Description": "A broken fool, dancing on bleeding feet, compelled to amuse his captors.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "A broken fool, dancing on bleeding feet, compelled to amuse his captors.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "Eleanor Drake",
@@ -1138,8 +1216,19 @@
   {
     "Name": "Wyld Healer Brialyn",
     "Role": "Wyld Fae Healer",
-    "Description": "A healer bound by ancient rules, her hands can cure or curse depending on her respect for the patient.",
-    "Faction": "Wyld Feys"
+    "Description": {
+      "text": "A healer bound by ancient rules, her hands can cure or curse depending on her respect for the patient.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Faction": "Wyldfae",
+    "Portrait": ""
   },
   {
     "Name": "Captain Sofia Domingez",
