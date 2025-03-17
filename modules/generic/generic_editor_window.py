@@ -103,13 +103,36 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
     def create_faction_field(self, field):
         factions_list = load_factions_list()
-        combobox = ctk.CTkComboBox(self.scroll_frame, values=factions_list)
+        combobox = self.CustomDropdown(self.scroll_frame, options=factions_list, command=lambda val: combobox.set(val))
         combobox.pack(fill="x", pady=5)
         current_faction = self.item.get("Faction", "")
         if current_faction in factions_list:
             combobox.set(current_faction)
         self.field_widgets[field["name"]] = combobox
+    
+    def on_combo_mousewheel(self, event, combobox):
+        # Get the current selection and available options.
+        options = combobox.cget("values")
+        if not options:
+            return
+        current_val = combobox.get()
+        try:
+            idx = options.index(current_val)
+        except ValueError:
+            idx = 0
 
+        # Determine scroll direction.
+        if event.num == 4 or event.delta > 0:
+            # Scroll up: go to previous option.
+            new_idx = max(0, idx - 1)
+        elif event.num == 5 or event.delta < 0:
+            # Scroll down: go to next option.
+            new_idx = min(len(options) - 1, idx + 1)
+        else:
+            new_idx = idx
+
+        combobox.set(options[new_idx])
+    
     def create_dynamic_combobox_list(self, field):
         container = ctk.CTkFrame(self.scroll_frame)
         container.pack(fill="x", pady=5)
@@ -128,28 +151,45 @@ class GenericEditorWindow(ctk.CTkToplevel):
         def add_combobox(initial_value=None):
             row = ctk.CTkFrame(container)
             row.pack(fill="x", pady=2)
-
-            combobox = ctk.CTkComboBox(row, values=options_list)
+            
+            var = ctk.StringVar()
+            # Create a read-only entry to display the selected value:
+            entry = ctk.CTkEntry(row, textvariable=var, state="readonly")
+            entry.pack(side="left", expand=True, fill="x")
+            
+            # Set initial value:
             if initial_value and initial_value in options_list:
-                combobox.set(initial_value)
-            combobox.pack(side="left", expand=True, fill="x")
+                var.set(initial_value)
+            else:
+                var.set(options_list[0] if options_list else "")
 
-            remove_button = ctk.CTkButton(row, text="X", width=30, command=lambda: remove_this(row, combobox))
-            remove_button.pack(side="right", padx=5)
+            # Button to open dropdown:
+            btn = ctk.CTkButton(row, text="▼", width=30, command=lambda: open_dropdown(entry, var))
+            btn.pack(side="left", padx=5)
+            
+            combobox_list.append(entry)
 
-            combobox_list.append(combobox)
-
-        def remove_this(row, combobox):
-            combobox_list.remove(combobox)
+        def remove_this(row, widget):
             row.destroy()
+            combobox_list.remove(widget)
+
+        def open_dropdown(widget, var):
+            # Position dropdown just below the widget
+            x = widget.winfo_rootx()
+            y = widget.winfo_rooty() + widget.winfo_height()
+            dropdown = self.CustomDropdown(self, options=options_list, command=lambda val: var.set(val))
+            dropdown.geometry(f"+{x}+{y}")
+            dropdown.focus_set()
 
         for value in initial_values:
             add_combobox(value)
 
-        add_button = ctk.CTkButton(self.scroll_frame, text=f"Add {field['name'][6:]}", command=lambda: add_combobox())
+        add_button = ctk.CTkButton(self.scroll_frame, text=f"Add {field['name'][6:]}", command=add_combobox)
         add_button.pack(anchor="w", pady=2)
 
         self.field_widgets[field["name"]] = combobox_list
+
+
 
     def create_text_entry(self, field):
         entry = ctk.CTkEntry(self.scroll_frame)
@@ -238,3 +278,29 @@ class GenericEditorWindow(ctk.CTkToplevel):
             img.save(dest_path)
 
         return dest_path
+    class CustomDropdown(ctk.CTkToplevel):
+        def __init__(self, master, options, command, **kwargs):
+            super().__init__(master, **kwargs)
+            self.command = command  # Callback when an option is selected.
+            self.options = options
+            self.overrideredirect(True)  # Remove window decorations
+            self.scrollable = ctk.CTkScrollableFrame(self)
+            self.scrollable.pack(fill="both", expand=True)
+            for opt in options:
+                btn = ctk.CTkButton(self.scrollable, text=opt, command=lambda o=opt: self.select(o))
+                btn.pack(fill="x", padx=5, pady=2)
+            # Bind mouse wheel events on the scrollable frame.
+            self.scrollable.bind("<MouseWheel>", self.on_mousewheel)
+            self.scrollable.bind("<Button-4>", self.on_mousewheel)  # Linux up
+            self.scrollable.bind("<Button-5>", self.on_mousewheel)  # Linux down
+
+        def on_mousewheel(self, event):
+            if event.num == 4 or event.delta > 0:
+                self.scrollable._parent_canvas.yview_scroll(-1, "units")
+            elif event.num == 5 or event.delta < 0:
+                self.scrollable._parent_canvas.yview_scroll(1, "units")
+
+        def select(self, option):
+            self.command(option)
+            self.destroy()
+
