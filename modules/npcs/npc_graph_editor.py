@@ -81,7 +81,9 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Opens the Generic Editor Window for the clicked NPC.
     # ─────────────────────────────────────────────────────────────────────────
     def open_npc_editor(self, event):
-        item = self.canvas.find_closest(event.x, event.y)
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        item = self.canvas.find_closest(x, y)
         if not item:
             return
         tags = self.canvas.gettags(item[0])
@@ -153,7 +155,9 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Selects the first node for a new link based on the nearest canvas item.
     # ─────────────────────────────────────────────────────────────────────────
     def select_first_node(self, event):
-        item = self.canvas.find_closest(event.x, event.y)
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        item = self.canvas.find_closest(x, y)
         if not item:
             return
         tags = self.canvas.gettags(item[0])
@@ -166,7 +170,9 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Selects the second node for a new link and then opens the link text dialog.
     # ─────────────────────────────────────────────────────────────────────────
     def select_second_node(self, event):
-        item = self.canvas.find_closest(event.x, event.y)
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        item = self.canvas.find_closest(x, y)
         if not item:
             return
         tags = self.canvas.gettags(item[0])
@@ -236,13 +242,15 @@ class NPCGraphEditor(ctk.CTkFrame):
     def place_pending_npc(self, event):
         npc_name = self.pending_npc["Name"]
         tag = f"npc_{npc_name.replace(' ', '_')}"
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
         self.graph["nodes"].append({
             "npc_name": npc_name,
-            "x": event.x,
-            "y": event.y,
+            "x": x,
+            "y": y,
             "color": "lightblue"
         })
-        self.node_positions[tag] = (event.x, event.y)
+        self.node_positions[tag] = (x, y)
         self.pending_npc = None
         self.canvas.unbind("<Button-1>")
         self.canvas.bind("<Button-1>", self.start_drag)
@@ -321,14 +329,16 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Begins the node drag operation by identifying the node under the cursor.
     # ─────────────────────────────────────────────────────────────────────────
     def start_drag(self, event):
-        item = self.canvas.find_closest(event.x, event.y)
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        item = self.canvas.find_closest(x, y)
         if not item:
             return
         tags = self.canvas.gettags(item[0])
         self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
         if self.selected_node:
             self.selected_items = self.canvas.find_withtag(self.selected_node)
-            self.drag_start = (event.x, event.y)
+            self.drag_start = (x, y)
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: on_drag
@@ -337,13 +347,15 @@ class NPCGraphEditor(ctk.CTkFrame):
     def on_drag(self, event):
         if not self.selected_node or not self.drag_start:
             return
-        dx = event.x - self.drag_start[0]
-        dy = event.y - self.drag_start[1]
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        dx = x - self.drag_start[0]
+        dy = y - self.drag_start[1]
         for item in self.selected_items:
             self.canvas.move(item, dx, dy)
         old_x, old_y = self.node_positions[self.selected_node]
         self.node_positions[self.selected_node] = (old_x + dx, old_y + dy)
-        self.drag_start = (event.x, event.y)
+        self.drag_start = (x, y)
         bbox = self.canvas.bbox("all")
         if bbox:
             padding = 50
@@ -357,17 +369,19 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Determines whether a link or node was right-clicked and displays the appropriate context menu.
     # ─────────────────────────────────────────────────────────────────────────
     def on_right_click(self, event):
-        item = self.canvas.find_closest(event.x, event.y)
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        item = self.canvas.find_closest(x, y)
         if not item:
             return
         tags = self.canvas.gettags(item[0])
         if "link" in tags:
-            self.show_link_menu(event.x, event.y)
-            self.selected_link = self.get_link_by_position(event.x, event.y)
+            self.show_link_menu(int(x), int(y))
+            self.selected_link = self.get_link_by_position(x, y)
         else:
             self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
             if self.selected_node:
-                self.show_node_menu(event.x, event.y)
+                self.show_node_menu(x, y)
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: show_color_menu
