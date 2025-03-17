@@ -395,7 +395,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         color_menu = Menu(self.canvas, tearoff=0)
         for color in COLORS:
             color_menu.add_command(label=color, command=lambda c=color: self.change_node_color(c))
-        color_menu.post(x, y)
+        color_menu.post(int(x), int(y))
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: show_link_menu
@@ -420,7 +420,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         node_menu.add_command(label="Delete Node", command=self.delete_node)
         node_menu.add_separator()
         node_menu.add_command(label="Change Color", command=lambda: self.show_color_menu(x, y))
-        node_menu.post(x, y)
+        node_menu.post(int(x), int(y))
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: set_arrow_mode
@@ -477,7 +477,7 @@ class NPCGraphEditor(ctk.CTkFrame):
     # and calculates/stores their bounding boxes.
     # ─────────────────────────────────────────────────────────────────────────
     def draw_nodes(self):
-        NODE_WIDTH = 100
+        NODE_WIDTH = 150  # increased to accommodate extra text
         TEXT_LINE_HEIGHT = 25
         TEXT_PADDING = 5
         for node in self.graph["nodes"]:
@@ -485,7 +485,19 @@ class NPCGraphEditor(ctk.CTkFrame):
             tag = f"npc_{npc_name.replace(' ', '_')}"
             x, y = self.node_positions.get(tag, (node["x"], node["y"]))
             color = node.get("color", "lightblue")
-            portrait_path = self.npcs.get(npc_name, {}).get("Portrait", "")
+            
+            # Get NPC data for extra fields
+            npc_data = self.npcs.get(npc_name, {})
+            role = npc_data.get("Role", "")
+            faction = npc_data.get("Faction", "")
+            
+            # Build the text that includes name, role, and faction.
+            wrapped_text = f"{npc_name}\nRole: {role}\nFaction: {faction}"
+            lines = wrapped_text.splitlines()
+            number_of_lines = len(lines)
+            
+            # Handle portrait if available.
+            portrait_path = npc_data.get("Portrait", "")
             has_portrait = portrait_path and os.path.exists(portrait_path)
             portrait_height = 0
             portrait_width = 0
@@ -500,32 +512,31 @@ class NPCGraphEditor(ctk.CTkFrame):
                 img = img.resize((portrait_width, portrait_height), Image.Resampling.LANCZOS)
                 photo = ImageTk.PhotoImage(img)
                 self.node_images[npc_name] = photo
-            words = npc_name.split()
-            if len(words) >= 2:
-                wrapped_name = f"{words[0]}\n{' '.join(words[1:])}"
-            else:
-                wrapped_name = npc_name
-            lines = wrapped_name.splitlines()
-            number_of_lines = len(lines)
-            node_height = (portrait_height +
-                           (number_of_lines * TEXT_LINE_HEIGHT) +
-                           (TEXT_PADDING if has_portrait else 0) + 10)
+            
+            # Calculate node height. If there is a portrait, add padding.
+            node_height = portrait_height + (number_of_lines * TEXT_LINE_HEIGHT) + (TEXT_PADDING if has_portrait else 0) + 10
+            
+            # Compute the rectangle boundaries.
             left = x - (NODE_WIDTH // 2)
             top = y - (node_height // 2)
             right = x + (NODE_WIDTH // 2)
             bottom = y + (node_height // 2)
+            
             rectangle_id = self.canvas.create_rectangle(left, top, right, bottom,
-                                                          fill=color, tags=(tag,))
+                                                        fill=color, tags=(tag,))
             self.node_rectangles[tag] = rectangle_id
             self.node_bboxes[tag] = (left, top, right, bottom)
+            
+            # If there's a portrait, draw it and adjust text_y accordingly.
             if has_portrait:
                 self.canvas.create_image(x, top + (portrait_height // 2),
-                                         image=self.node_images[npc_name], tags=(tag,))
+                                        image=self.node_images[npc_name], tags=(tag,))
                 text_y = top + portrait_height + TEXT_PADDING + (TEXT_LINE_HEIGHT // 2) + 8
             else:
                 text_y = y - 4
+            
             self.canvas.create_text(x, text_y + 4,
-                                    text=wrapped_name,
+                                    text=wrapped_text,
                                     fill="black",
                                     font=("Arial", 8, "bold"),
                                     width=NODE_WIDTH - 4,
