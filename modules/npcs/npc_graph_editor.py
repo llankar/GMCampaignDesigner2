@@ -3,10 +3,13 @@ import os
 import customtkinter as ctk
 from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
+from modules.generic import entity_opener
 from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 import math
+
+from modules.npcs import npc_opener
 
 # Constants for portrait folder and max portrait size
 PORTRAIT_FOLDER = "assets/portraits"
@@ -70,7 +73,29 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.canvas.bind("<Button-5>", self._on_mousewheel_y)
         self.canvas.bind("<Shift-Button-4>", self._on_mousewheel_x)
         self.canvas.bind("<Shift-Button-5>", self._on_mousewheel_x)
+    # Bind double-click on any NPC element to open the editor window
+        self.canvas.bind("<Double-Button-1>", self.open_npc_editor)
 
+ # ─────────────────────────────────────────────────────────────────────────
+    # FUNCTION: open_npc_editor
+    # Opens the Generic Editor Window for the clicked NPC.
+    # ─────────────────────────────────────────────────────────────────────────
+    def open_npc_editor(self, event):
+        item = self.canvas.find_closest(event.x, event.y)
+        if not item:
+            return
+        tags = self.canvas.gettags(item[0])
+        npc_tag = next((t for t in tags if t.startswith("npc_")), None)
+        if not npc_tag:
+            return
+        # Convert tag back to NPC name (assuming spaces were replaced with underscores)
+        npc_name = npc_tag.replace("npc_", "").replace("_", " ")
+        npc_item = self.npcs.get(npc_name)
+        if not npc_item:
+            messagebox.showerror("Error", f"NPC '{npc_name}' not found in data.")
+            return
+        print(f"Opening editor for NPC: {npc_name}")
+        npc_opener.open_npc_editor_window(npc_name)
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: _on_mousewheel_y
     # Scrolls the canvas vertically based on mouse wheel input.

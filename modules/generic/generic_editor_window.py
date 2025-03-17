@@ -182,11 +182,10 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         if self.portrait_path and os.path.exists(self.portrait_path):
             image = Image.open(self.portrait_path).resize((64, 64))
-            self.portrait_image = ImageTk.PhotoImage(image)
+            self.portrait_image = ctk.CTkImage(light_image=image, size=(64, 64))
             self.portrait_label = ctk.CTkLabel(frame, image=self.portrait_image, text="")
         else:
             self.portrait_label = ctk.CTkLabel(frame, text="[No Image]")
-
         self.portrait_label.pack(side="left", padx=5)
 
         ctk.CTkButton(frame, text="Select Portrait", command=self.select_portrait).pack(side="left", padx=5)
