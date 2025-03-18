@@ -1,11 +1,12 @@
 import customtkinter as ctk
 import json
 import os
+import requests 
+from modules.helpers import rich_text_editor, text_helpers
 from modules.helpers.rich_text_editor import RichTextEditor
 from modules.helpers.window_helper import position_window_at_top
 from PIL import Image, ImageTk
-from tkinter import filedialog
-
+from tkinter import filedialog,  messagebox
 
 
 FACTIONS_FILE = "data/factions.json"
@@ -227,8 +228,86 @@ class GenericEditorWindow(ctk.CTkToplevel):
         self.portrait_label.pack(side="left", padx=5)
 
         ctk.CTkButton(frame, text="Select Portrait", command=self.select_portrait).pack(side="left", padx=5)
+        ctk.CTkButton(frame, text="Create Portrait with description", command=self.create_portrait_with_swarmui).pack(side="left", padx=5)
 
         self.field_widgets[field["name"]] = self.portrait_path
+    
+    def create_portrait_with_swarmui(self):
+        SWARM_API_URL = "http://127.0.0.1:7801"  # Change if needed
+
+        """
+        Generates a portrait image using the SwarmUI API and associates the resulting
+        image with the current NPC by updating its 'Portrait' field.
+        """
+        try:
+            # Step 1: Obtain a new session from SwarmUI
+            session_url = f"{SWARM_API_URL}/API/GetNewSession"
+            session_response = requests.post(session_url, json={}, headers={"Content-Type": "application/json"})
+            session_data = session_response.json()
+            session_id = session_data.get("session_id")
+            if not session_id:
+                messagebox.showerror("Error", "Failed to obtain session ID from Swarm API.")
+                return
+
+            # Build a prompt based on the current NPC's data (you can enhance this as needed)
+            npc_name = self.item.get("Name", "Unknown")
+            npc_role = self.item.get("Role", "Unknown")
+            npc_faction = self.item.get("Faction", "Unknown")
+            npc_desc = self.item.get("Description", "Unknown") 
+            npc_desc =  text_helpers.format_longtext(npc_desc)
+            npc_desc = f"{npc_desc} {npc_role} {npc_faction}"
+            prompt = f"{npc_desc}"
+
+            # Step 2: Define image generation parameters
+            prompt_data = {
+                "session_id": session_id,
+                "images": 1,  # Only one portrait needed
+                "prompt": prompt,
+                "negativeprompt": "blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, monstrous, too many fingers, too many legs, too many arms, bad hands, unrealistic weapons, bad grip on equipment",
+                "model": "cinenautsXLATRUE_cinenautsV30",
+                "width": 1024,
+                "height": 1024,
+                "cfgscale": 9,
+                "steps": 20,
+                "seed": -1
+            }
+            generate_url = f"{SWARM_API_URL}/API/GenerateText2Image"
+            image_response = requests.post(generate_url, json=prompt_data, headers={"Content-Type": "application/json"})
+            image_data = image_response.json()
+
+            images = image_data.get("images")
+            if not images or len(images) == 0:
+                messagebox.showerror("Error", "Image generation failed. Check API response.")
+                return
+
+            # Step 3: Download the first generated image
+            image_url = f"{SWARM_API_URL}/{images[0]}"
+            downloaded_image = requests.get(image_url)
+            if downloaded_image.status_code != 200:
+                messagebox.showerror("Error", "Failed to download the generated image.")
+                return
+
+            # Step 4: Save the image locally and update the NPC's Portrait field
+            output_filename = f"{npc_name.replace(' ', '_')}_portrait.png"
+            with open(output_filename, "wb") as f:
+                f.write(downloaded_image.content)
+
+            # Associate the generated portrait with the NPC data.
+            self.portrait_path = self.copy_and_resize_portrait(output_filename)
+            self.portrait_label.configure(text=os.path.basename(self.portrait_path))
+
+            messagebox.showinfo("Success", f"Portrait saved as {output_filename} and associated with the NPC.")
+
+            # Optional: Update the portrait display in the UI.
+            # For example, if you have a portrait label (self.portrait_label), reload the image:
+            # from PIL import ImageTk, Image
+            # img = Image.open(output_filename).resize((64, 64))
+            # self.portrait_image = ctk.CTkImage(light_image=img, size=(64, 64))
+            # self.portrait_label.configure(image=self.portrait_image, text="")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
+
 
 
     def select_portrait(self):
