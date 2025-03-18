@@ -15,7 +15,8 @@
     },
     "Faction": [
       "Winter Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Sariel_of_the_Hollow_Glade_2152303434720.png"
   },
   {
     "Name": "Thane Coldfingers",
@@ -28,10 +29,21 @@
   {
     "Name": "Lady Laurelindë",
     "Role": "Summer Spy",
-    "Description": "Golden-haired manipulator embedded in Winter.",
+    "Description": {
+      "text": "Golden-haired woman fey, manipulator embedded in Winter.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Summer Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lady_Laurelindë_2735717940400.png"
   },
   {
     "Name": "Detective Sofia Vasquez",
