@@ -57,9 +57,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
-            elif field["name"] == "Faction":
-                self.create_faction_field(field)
-            elif field["name"] in ["NPCs", "Places"]:
+            elif field["name"] in ["NPCs", "Places", "Faction"]:
                 self.create_dynamic_combobox_list(field)
             elif field["name"] == "Portrait":
                 self.create_portrait_field(field)
@@ -101,15 +99,6 @@ class GenericEditorWindow(ctk.CTkToplevel):
         editor.pack(fill="both", expand=True, pady=5)
         self.field_widgets[field["name"]] = editor
 
-    def create_faction_field(self, field):
-        factions_list = load_factions_list()
-        combobox = self.CustomDropdown(self.scroll_frame, options=factions_list, command=lambda val: combobox.set(val))
-        combobox.pack(fill="x", pady=5)
-        current_faction = self.item.get("Faction", "")
-        if current_faction in factions_list:
-            combobox.set(current_faction)
-        self.field_widgets[field["name"]] = combobox
-    
     def on_combo_mousewheel(self, event, combobox):
         # Get the current selection and available options.
         options = combobox.cget("values")
@@ -143,6 +132,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
             options_list = load_npcs_list()
         elif field["name"] == "Places":
             options_list = load_places_list()
+        elif field["name"] == "Faction":
+            options_list = load_factions_list()
         else:
             options_list = []
 
@@ -213,10 +204,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             if field["type"] == "longtext":
                 self.item[field["name"]] = widget.get_text_data()
 
-            elif field["name"] == "Faction":
-                self.item[field["name"]] = widget.get()
-
-            elif field["name"] in ["Places", "NPCs"]:
+            elif field["name"] in ["Places", "NPCs", "Faction"]:
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
             elif field["name"] == "Portrait":
                 self.item[field["name"]] = self.portrait_path  # Use the stored path
