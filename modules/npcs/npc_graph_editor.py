@@ -282,10 +282,12 @@ class NPCGraphEditor(ctk.CTkFrame):
                 self.list_frame = ctk.CTkScrollableFrame(self)
                 self.list_frame.pack(fill="both", expand=True, padx=5, pady=5)
                 self.refresh_list()
+
             def filter_factions(self):
                 query = self.search_var.get().strip().lower()
                 self.filtered_factions = [f for f in self.factions if query in f.lower()]
                 self.refresh_list()
+
             def refresh_list(self):
                 for widget in self.list_frame.winfo_children():
                     widget.destroy()
@@ -293,11 +295,24 @@ class NPCGraphEditor(ctk.CTkFrame):
                     btn = ctk.CTkButton(self.list_frame, text=faction,
                                         command=lambda f=faction: self.select_faction(f))
                     btn.pack(fill="x", padx=5, pady=2)
+
             def select_faction(self, faction):
                 self.on_faction_selected(faction)
                 self.destroy()
+
         def on_faction_selected(faction_name):
-            faction_npcs = [npc for npc in self.npcs.values() if npc.get("Faction") == faction_name]
+            # Build a list of NPCs that have the selected faction.
+            faction_npcs = []
+            for npc in self.npcs.values():
+                faction_value = npc.get("Faction")
+                if not faction_value:
+                    continue
+                if isinstance(faction_value, list):
+                    if faction_name in faction_value:
+                        faction_npcs.append(npc)
+                else:
+                    if faction_value == faction_name:
+                        faction_npcs.append(npc)
             if not faction_npcs:
                 messagebox.showinfo("No NPCs", f"No NPCs found for faction '{faction_name}'.")
                 return
@@ -316,13 +331,24 @@ class NPCGraphEditor(ctk.CTkFrame):
                 })
                 self.node_positions[tag] = (x, y)
             self.draw_graph()
-        factions = sorted(set(npc.get("Faction", "Unknown")
-                              for npc in self.npcs.values() if npc.get("Faction")))
+
+        # Flatten factions from all NPCs.
+        all_factions = []
+        for npc in self.npcs.values():
+            faction_value = npc.get("Faction")
+            if not faction_value:
+                continue
+            if isinstance(faction_value, list):
+                all_factions.extend(faction_value)
+            else:
+                all_factions.append(faction_value)
+        factions = sorted(set(all_factions))
         if not factions:
             messagebox.showerror("Error", "No factions found in NPC data.")
             return
         dialog = FactionSelectionDialog(self, factions, on_faction_selected)
         self.wait_window(dialog)
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: start_drag
