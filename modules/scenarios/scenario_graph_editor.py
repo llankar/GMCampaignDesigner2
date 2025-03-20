@@ -106,13 +106,12 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.graph = {"nodes": [], "links": []}
         self.node_positions.clear()
 
-        # Scenario node in the center
+        # Create the scenario node in the center.
         center_x, center_y = 400, 300
         scenario_title = scenario.get("Title", "No Title")
         summary = scenario.get("Summary", "")
         if isinstance(summary, dict):
             summary = summary.get("text", "")
-
         scenario_tag = f"scenario_{scenario_title.replace(' ', '_')}"
         self.graph["nodes"].append({
             "type": "scenario",
@@ -120,76 +119,32 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             "x": center_x,
             "y": center_y,
             "color": "lightgreen",
-            "data": scenario
+            "data": scenario  # store entire scenario
         })
         self.node_positions[scenario_tag] = (center_x, center_y)
 
-        # Retrieve lists of places & NPCs
-        places_list = scenario.get("Places", [])
+        # --------------------
+        # 1) NPC nodes on the top half (arc: 30° to 150°)
+        # --------------------
         npcs_list = scenario.get("NPCs", [])
-
-        # -- 1) Place nodes on the top half (e.g., from 30° to 150°) --
-        # Adjust coverage & offset to your liking
-        places_count = len(places_list)
-        if places_count > 0:
-            coverage_places = 120   # total degrees to spread places
-            arc_start_places = 90 - (coverage_places / 2)  # e.g., 30°
-            arc_end_places   = 90 + (coverage_places / 2)  # e.g., 150°
-            offset_places    = 350  # radius of the circle from scenario center
-
-            for i, place_name in enumerate(places_list):
-                if place_name not in self.places:
-                    continue
-                # Evenly distribute angles in [arc_start_places, arc_end_places]
-                if places_count == 1:
-                    angle_deg = 90  # single place goes straight up
-                else:
-                    angle_deg = arc_start_places + i * (arc_end_places - arc_start_places) / (places_count - 1)
-                angle_rad = math.radians(angle_deg)
-                x = center_x + offset_places * math.cos(angle_rad)
-                y = center_y + offset_places * math.sin(angle_rad)
-
-                place_data = self.places[place_name]
-                place_tag = f"place_{place_name.replace(' ', '_')}"
-
-                self.graph["nodes"].append({
-                    "type": "place",
-                    "name": place_name,
-                    "x": x,
-                    "y": y,
-                    "color": "khaki",
-                    "data": place_data
-                })
-                self.node_positions[place_tag] = (x, y)
-                # Link scenario -> place
-                self.graph["links"].append({
-                    "from": scenario_tag,
-                    "to": place_tag,
-                    "text": ""
-                })
-
-        # -- 2) NPC nodes on the bottom half (e.g., from 210° to 330°) --
         npcs_count = len(npcs_list)
         if npcs_count > 0:
-            coverage_npcs = 120
-            arc_start_npcs = 270 - (coverage_npcs / 2)  # e.g., 210°
-            arc_end_npcs   = 270 + (coverage_npcs / 2)  # e.g., 330°
-            offset_npcs    = 350
+            arc_start_npcs = 30    # starting angle in degrees (directly upper right-ish)
+            arc_end_npcs   = 150   # ending angle in degrees (upper left-ish)
+            offset_npcs    = 350   # distance from the scenario node
 
-            for j, npc_name in enumerate(npcs_list):
+            for i, npc_name in enumerate(npcs_list):
                 if npc_name not in self.npcs:
                     continue
                 if npcs_count == 1:
-                    angle_deg = 270
+                    angle_deg = (arc_start_npcs + arc_end_npcs) / 2
                 else:
-                    angle_deg = arc_start_npcs + j * (arc_end_npcs - arc_start_npcs) / (npcs_count - 1)
+                    angle_deg = arc_start_npcs + i * (arc_end_npcs - arc_start_npcs) / (npcs_count - 1)
                 angle_rad = math.radians(angle_deg)
                 x = center_x + offset_npcs * math.cos(angle_rad)
                 y = center_y + offset_npcs * math.sin(angle_rad)
-
                 npc_data = self.npcs[npc_name]
                 npc_tag = f"npc_{npc_name.replace(' ', '_')}"
-
                 self.graph["nodes"].append({
                     "type": "npc",
                     "name": npc_name,
@@ -199,14 +154,49 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     "data": npc_data
                 })
                 self.node_positions[npc_tag] = (x, y)
-                # Link scenario -> npc
                 self.graph["links"].append({
                     "from": scenario_tag,
                     "to": npc_tag,
                     "text": ""
                 })
 
-        # Finally, draw the updated graph
+        # --------------------
+        # 2) Place nodes on the bottom half (arc: 210° to 330°)
+        # --------------------
+        places_list = scenario.get("Places", [])
+        places_count = len(places_list)
+        if places_count > 0:
+            arc_start_places = 210  # starting angle in degrees (lower left)
+            arc_end_places   = 330  # ending angle in degrees (lower right)
+            offset_places    = 350  # distance from the scenario node
+
+            for j, place_name in enumerate(places_list):
+                if place_name not in self.places:
+                    continue
+                if places_count == 1:
+                    angle_deg = (arc_start_places + arc_end_places) / 2
+                else:
+                    angle_deg = arc_start_places + j * (arc_end_places - arc_start_places) / (places_count - 1)
+                angle_rad = math.radians(angle_deg)
+                x = center_x + offset_places * math.cos(angle_rad)
+                y = center_y + offset_places * math.sin(angle_rad)
+                place_data = self.places[place_name]
+                place_tag = f"place_{place_name.replace(' ', '_')}"
+                self.graph["nodes"].append({
+                    "type": "place",
+                    "name": place_name,
+                    "x": x,
+                    "y": y,
+                    "color": "khaki",
+                    "data": place_data
+                })
+                self.node_positions[place_tag] = (x, y)
+                self.graph["links"].append({
+                    "from": scenario_tag,
+                    "to": place_tag,
+                    "text": ""
+                })
+
         self.draw_graph()
 
 
