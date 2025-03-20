@@ -2,6 +2,9 @@ import customtkinter as ctk
 import json
 import os
 import requests 
+import subprocess
+import time
+import shutil
 from modules.helpers import rich_text_editor, text_helpers
 from modules.helpers.rich_text_editor import RichTextEditor
 from modules.helpers.window_helper import position_window_at_top
@@ -12,6 +15,8 @@ from tkinter import filedialog,  messagebox
 FACTIONS_FILE = "data/factions.json"
 NPCS_FILE = "data/npcs.json"
 PLACES_FILE = "data/places.json"
+SWARMUI_PROCESS = None
+
 
 def load_factions_list():
     if os.path.exists(FACTIONS_FILE):
@@ -232,9 +237,39 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         self.field_widgets[field["name"]] = self.portrait_path
     
+    def launch_swarmui(self):
+        global SWARMUI_PROCESS
+        SWARMUI_CMD = "launch-windows.bat"
+        # Create a copy of the current environment and modify it as needed
+        env = os.environ.copy()
+        # Optionally remove the virtual environment variables if not needed:
+        env.pop('VIRTUAL_ENV', None)
+        # Adjust PATH if necessary to point to the system Python
+        #env["PATH"] = "C:\\Path\\to\\system\\python;" + env["PATH"]
+        
+        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
+            try:
+                SWARMUI_PROCESS = subprocess.Popen(
+                    SWARMUI_CMD,
+                    shell=True,
+                    cwd=r"E:\SwarmUI\SwarmUI",
+                    env=env
+                )
+                # Optionally, wait a little bit here for the process to initialize.
+                time.sleep(120.0)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
+    def cleanup_swarmui(self):
+        """
+        Terminate the SwarmUI process if it is running.
+        """
+        global SWARMUI_PROCESS
+        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
+            SWARMUI_PROCESS.terminate()
+    
     def create_portrait_with_swarmui(self):
         SWARM_API_URL = "http://127.0.0.1:7801"  # Change if needed
-
+        self.launch_swarmui()
         """
         Generates a portrait image using the SwarmUI API and associates the resulting
         image with the current NPC by updating its 'Portrait' field.
@@ -263,7 +298,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 "session_id": session_id,
                 "images": 1,  # Only one portrait needed
                 "prompt": prompt,
-                "negativeprompt": "blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, monstrous, too many fingers, too many legs, too many arms, bad hands, unrealistic weapons, bad grip on equipment",
+                "negativeprompt": "blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, monstrous, too many fingers, too many legs, too many arms, bad hands, unrealistic weapons, bad grip on equipment, nude",
                 "model": "cinenautsXLATRUE_cinenautsV30",
                 "width": 1024,
                 "height": 1024,
@@ -295,8 +330,12 @@ class GenericEditorWindow(ctk.CTkToplevel):
             # Associate the generated portrait with the NPC data.
             self.portrait_path = self.copy_and_resize_portrait(output_filename)
             self.portrait_label.configure(text=os.path.basename(self.portrait_path))
+            #copy the outputfilename file to the assets/generated folder
+            GENERATED_FOLDER = "assets/generated"
+            os.makedirs(GENERATED_FOLDER, exist_ok=True)
+            shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
 
-            messagebox.showinfo("Success", f"Portrait saved as {output_filename} and associated with the NPC.")
+            # messagebox.showinfo("Success", f"Portrait saved as {output_filename} and associated with the NPC.")
 
             # Optional: Update the portrait display in the UI.
             # For example, if you have a portrait label (self.portrait_label), reload the image:
