@@ -209,60 +209,108 @@ class ScenarioGraphEditor(ctk.CTkFrame):
     # Draw rectangles + text for each node. No per-node tag_bind here.
     # ─────────────────────────────────────────────────────────────────────────
     def draw_nodes(self):
-        # Create a font object for measuring text (should match the one used for create_text)
-        font_obj = tkFont.Font(family="Arial", size=9)
-        pad_x = 10  # horizontal padding
-        pad_y = 10  # vertical padding
+        """
+        Draw nodes with dynamic sizing based on text content,
+        wrapping text if it's too long, and respecting basic RTF formatting
+        (bold, italic, underline) for the entire description.
+        """
+        MAX_TEXT_WIDTH = 200  # The maximum width (in pixels) for text before wrapping
+        PAD_X = 10            # Horizontal padding inside the rectangle
+        PAD_Y = 10            # Vertical padding inside the rectangle
+
+        # A helper function to measure how large the text will be once wrapped.
+        # We create a "hidden" text item, measure its bounding box, then remove it.
+        def measure_wrapped_text(text, font_obj, wrap_width):
+            # Place the text at (0,0) with anchor="nw" so we can measure its bounding box
+            temp_id = self.canvas.create_text(
+                0, 0,
+                text=text,
+                font=font_obj,
+                width=wrap_width,      # Force wrapping at wrap_width
+                anchor="nw",
+                justify="center",      # Center text lines if you like
+                tags=("temp_measure",)
+            )
+            bbox = self.canvas.bbox(temp_id)  # (x1, y1, x2, y2)
+            self.canvas.delete(temp_id)
+            if bbox is None:
+                return (0, 0)
+            x1, y1, x2, y2 = bbox
+            return (x2 - x1, y2 - y1)
 
         for node in self.graph["nodes"]:
             node_type = node["type"]
             node_name = node["name"]
             x, y = node["x"], node["y"]
             color = node.get("color", "lightgray")
-            
-            # Determine the text to display
+
+            # Extract the node's text. For a scenario, we might have a summary dict;
+            # for NPCs/places, we might have a description dict. Adjust as needed:
             if node_type == "scenario":
-                short_desc = node["data"].get("Summary", "")
-                if isinstance(short_desc, dict):
-                    short_desc = short_desc.get("text", "")
+                raw_text = node["data"].get("Summary", "")
             else:
-                short_desc = node["data"].get("Description", "")
-                if isinstance(short_desc, dict):
-                    short_desc = short_desc.get("text", "")
-            text = f"{node_name}\n{short_desc}"
-            
-            # Split the text into lines and measure each line's width and the total height.
-            lines = text.split("\n")
-            max_line_width = max(font_obj.measure(line) for line in lines) if lines else 0
-            total_height = len(lines) * font_obj.metrics("linespace")
-            
-            # Calculate dynamic node dimensions
-            node_width = max_line_width + 2 * pad_x
-            node_height = total_height + 2 * pad_y
-            
-            # Compute rectangle boundaries based on node center (x, y)
+                raw_text = node["data"].get("Description", "")
+
+            # Combine the name and description into one block of text
+            # so the user sees the name on top, then the description
+            if isinstance(raw_text, dict):
+                # If it's a dict with 'text' and 'formatting'
+                desc_text = raw_text.get("text", "")
+                formatting = raw_text.get("formatting", {})
+                # Convert formatting flags into a tkinter font
+                weight = "bold" if formatting.get("bold") else "normal"
+                slant = "italic" if formatting.get("italic") else "roman"
+                underline = 1 if formatting.get("underline") else 0
+                desc_font = tkFont.Font(family="Arial", size=9, weight=weight, slant=slant, underline=underline)
+            else:
+                desc_text = str(raw_text)
+                desc_font = tkFont.Font(family="Arial", size=9)
+
+            # Prepend the node name on its own line
+            # If you want the name to have separate formatting, you'd do a more advanced approach
+            display_text = f"{node_name}\n{desc_text}"
+
+            # Measure how large the text will be once wrapped at MAX_TEXT_WIDTH - 2*PAD_X
+            # so there's horizontal padding inside the rectangle
+            wrap_width = MAX_TEXT_WIDTH - 2 * PAD_X
+            text_width, text_height = measure_wrapped_text(display_text, desc_font, wrap_width)
+
+            # Now compute the rectangle's final width/height
+            node_width = text_width + 2 * PAD_X
+            node_height = text_height + 2 * PAD_Y
+
+            # Center the rectangle at (x, y)
             left = x - (node_width / 2)
             top = y - (node_height / 2)
             right = x + (node_width / 2)
             bottom = y + (node_height / 2)
-            
-            # Build a unique tag for this node
+
+            # Build a unique tag for the node
             node_tag = f"{node_type}_{node_name.replace(' ', '_')}"
-            
-            # Draw the node rectangle with the computed dimensions
+
+            # Draw the node rectangle
             rect_id = self.canvas.create_rectangle(
                 left, top, right, bottom,
-                fill=color, outline="black", width=2, tags=("node", node_tag)
-            )
-            self.node_rectangles[node_tag] = rect_id
-            
-            # Draw the text centered in the node rectangle; use the same tag so that clicks on the text count.
-            self.canvas.create_text(
-                x, y, text=text,
-                fill="black", font=("Arial", 9),
-                width=node_width - 4, justify="center",
+                fill=color, outline="black", width=2,
                 tags=("node", node_tag)
             )
+            self.node_rectangles[node_tag] = rect_id
+
+            # Finally, draw the actual text inside the rectangle.
+            # We'll place it at anchor="nw" so we can offset by PAD_X, PAD_Y.
+            text_x = left + PAD_X
+            text_y = top + PAD_Y
+            self.canvas.create_text(
+                text_x, text_y,
+                text=display_text,
+                font=desc_font,
+                width=wrap_width,    # Force wrapping
+                anchor="nw",
+                justify="center",    # Or "left"/"right" if you prefer
+                tags=("node", node_tag)
+            )
+
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_links
