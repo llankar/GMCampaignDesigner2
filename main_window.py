@@ -36,7 +36,7 @@ def load_items_from_json(view, entity_name):
             items = data.get(entity_name, [])
 
             for item in items:
-                view.add_item(item)
+                view.add_items(item)
 
             messagebox.showinfo("Success", f"{len(items)} {entity_name} loaded successfully!")
     except Exception as e:
@@ -150,7 +150,6 @@ class MainWindow(ctk.CTk):
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
-
         ctk.CTkButton(self, text="Manage Factions", command=lambda: self.open_entity("factions")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Places", command=lambda: self.open_entity("places")).pack(pady=5)
         ctk.CTkButton(self, text="Manage NPCs", command=lambda: self.open_entity("npcs")).pack(pady=5)
@@ -332,9 +331,7 @@ class MainWindow(ctk.CTk):
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
              # Associate the generated portrait with the NPC data.
-            self.portrait_path = self.copy_and_resize_portrait(output_filename)
-            self.portrait_label.configure(text=os.path.basename(self.portrait_path))
-
+            npc["Portrait"] = self.copy_and_resize_portrait(npc, output_filename)
             print(f"Generated portrait for NPC '{npc_name}'")
          
         except Exception as e:
@@ -368,13 +365,29 @@ class MainWindow(ctk.CTk):
         if modified:
             try:
                 with open(npc_file, "w", encoding="utf-8") as f:
-                    json.dump(npcs, f, indent=4, ensure_ascii=False)
+                    json.dump(self.npcs, f, indent=4, ensure_ascii=False)
                 print("Updated NPC file with generated portraits.")
             except Exception as e:
                 print(f"Failed to update NPC file: {e}")
         else:
             print("No NPCs were missing portraits.")  
+    def copy_and_resize_portrait(self, npc, src_path):
+            PORTRAIT_FOLDER = "assets/portraits"
+            MAX_PORTRAIT_SIZE = (128, 128)
 
+            os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
+
+            npc_name = npc.get("Name", "Unnamed").replace(" ", "_")
+            ext = os.path.splitext(src_path)[-1].lower()
+            dest_filename = f"{npc_name}_{id(self)}{ext}"
+            dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
+
+            with Image.open(src_path) as img:
+                img = img.convert("RGB")
+                img.thumbnail(MAX_PORTRAIT_SIZE)
+                img.save(dest_path)
+
+            return dest_path
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()

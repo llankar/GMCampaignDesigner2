@@ -224,7 +224,11 @@ class GenericListView(ctk.CTkFrame):
         self.items.append(new_item)
         self.model_wrapper.save_items(self.items)
         self.filter_items()
-
+    def add_items(self, new_item):
+        """Add a new item """
+        self.items.append(new_item)
+        self.model_wrapper.save_items(self.items)
+      
     def edit_item(self, item):
         """Edit an existing item."""
         if self.open_editor(item, creation_mode=False):
