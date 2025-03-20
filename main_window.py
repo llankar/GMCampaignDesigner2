@@ -13,6 +13,7 @@ from modules.helpers.window_helper import position_window_at_top
 from docx import Document
 from modules.generic.scenario_detail_view import ScenarioDetailView
 from modules.npcs.npc_graph_editor import NPCGraphEditor  # Import the graph editor
+from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.helpers import rich_text_editor, text_helpers
@@ -157,9 +158,18 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(self, text="Export Scenarios", command=preview_and_export_scenarios).pack(pady=5)
         ctk.CTkButton(self, text="Open GM Screen", command=self.open_gm_screen).pack(pady=5)
         ctk.CTkButton(self, text="Open NPC Graph editor", command=self.open_npc_graph_editor).pack(pady=5) 
+        ctk.CTkButton(self, text="Open Scenario Graph editor", command=self.open_scenario_graph_editor).pack(pady=5) 
         ctk.CTkButton(self, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits).pack(pady=5) 
-        
-       
+    
+    def open_scenario_graph_editor(self):
+        scenario_wrapper = GenericModelWrapper("scenarios")
+        npc_wrapper = GenericModelWrapper("npcs")
+        place_wrapper = GenericModelWrapper("places")
+        root = ctk.CTk()
+        editor = ScenarioGraphEditor(root, scenario_wrapper, npc_wrapper, place_wrapper)
+        editor.pack(fill="both", expand=True)
+        root.mainloop()
+
     def open_entity(self, entity):
         window = ctk.CTkToplevel(self)
         window.title(f"Manage {entity.capitalize()}")
