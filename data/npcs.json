@@ -21,10 +21,21 @@
   {
     "Name": "Thane Coldfingers",
     "Role": "Winter Warrior",
-    "Description": "Flesh cracked with ice, driven by duty.",
+    "Description": {
+      "text": "Male fey, flesh cracked with ice, driven by duty.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Winter Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Thane_Coldfingers_2258486762768.png"
   },
   {
     "Name": "Lady Laurelindë",
@@ -49,7 +60,7 @@
     "Name": "Detective Sofia Vasquez",
     "Role": "Mortal Detective",
     "Description": {
-      "text": "Investigating supernatural affairs out of love lost to Fae.",
+      "text": "Small, fit, brunette woman. Investigating supernatural affairs out of love lost to Fae.",
       "formatting": {
         "bold": [],
         "italic": [],
@@ -61,7 +72,8 @@
     },
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Detective_Sofia_Vasquez_2258489021840.png"
   },
   {
     "Name": "The Broken Prince",
@@ -75,18 +87,40 @@
   {
     "Name": "Warden Ezekiel Cross",
     "Role": "White Council Warden",
-    "Description": "Haunted enforcer, scarred by past mistakes.",
+    "Description": {
+      "text": "Male, haunted enforcer, scarred by past mistakes.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "White Council"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Warden_Ezekiel_Cross_2258494384848.png"
   },
   {
     "Name": "Meera Kline",
     "Role": "Vengeful Witch",
-    "Description": "Tattoos pulsate with curses, hunting the Council.",
+    "Description": {
+      "text": "Witch with tattoos that pulsate with curses, hunting the Council.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
-      "None"
-    ]
+      "Winter Court"
+    ],
+    "Portrait": "assets/portraits\\Meera_Kline_3035818370192.png"
   },
   {
     "Name": "Archivist Yoko Tamura",
@@ -94,7 +128,8 @@
     "Description": "Blind but remembers every book.",
     "Faction": [
       "White Council"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Archivist_Yoko_Tamura_portrait.png"
   },
   {
     "Name": "Liam Raith",
@@ -102,7 +137,8 @@
     "Description": "White Court vampire truly in love.",
     "Faction": [
       "White Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Liam_Raith_portrait.png"
   },
   {
     "Name": "Lucinda Raith",
@@ -110,7 +146,8 @@
     "Description": "Ruthless and traditional.",
     "Faction": [
       "White Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lucinda_Raith_portrait.png"
   },
   {
     "Name": "Nicodemus Archleone",
@@ -118,15 +155,27 @@
     "Description": "Cold, calculating and utterly evil.",
     "Faction": [
       "Denarians"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Nicodemus_Archleone_portrait.png"
   },
   {
     "Name": "Pastor Caleb North",
     "Role": "Hate Preacher",
-    "Description": "Corrupted by Denarian coin.",
+    "Description": {
+      "text": "russian, smiling, mad eyes, preacher clothes",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Denarians"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Pastor_Caleb_North_3035812083856.png"
   },
   {
     "Name": "Lady Elaris",
@@ -134,13 +183,14 @@
     "Description": "Slender, ice-pale, with frost weaving her hair into a crown of sorrow. Her voice always sounds like cracking ice.",
     "Faction": [
       "Winter Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lady_Elaris_portrait.png"
   },
   {
     "Name": "Detective Irene Vale",
     "Role": "Chicago Detective",
     "Description": {
-      "text": "Tall, scarred Black woman with a weathered trench coat and haunted eyes. She carries a notebook covered in frost.",
+      "text": "Tall, scarred Black woman with a weathered trench coat and dark eyes. She carries a notebook covered in frost.",
       "formatting": {
         "bold": [],
         "italic": [],
@@ -152,7 +202,8 @@
     },
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Detective_Irene_Vale_3035818119312.png"
   },
   {
     "Name": "Sir Alden",
@@ -160,15 +211,27 @@
     "Description": "Massive knight of blue-tinged iron, his breath freezing the air. His blade thirsts for betrayal.",
     "Faction": [
       "Winter Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Sir_Alden_portrait.png"
   },
   {
     "Name": "Sister Maria Bell",
     "Role": "Knight of the Cross",
-    "Description": "Tough, compassionate, Latina woman with a tattooed rosary and a past full of regrets.",
+    "Description": {
+      "text": "Tough, compassionate, Latina woman with a tattooed rosary and a past full of regrets.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Knights of the Cross"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Sister_Maria_Bell_3035793609168.png"
   },
   {
     "Name": "Warden Lysander Black",
@@ -176,31 +239,65 @@
     "Description": "A fractured mind inhabiting a ruined body. His eyes are shattered prisms, and his speech overlaps as if spoken by many voices at once.",
     "Faction": [
       "White Council"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Warden_Lysander_Black_portrait.png"
   },
   {
     "Name": "Aiden Carver",
-    "Role": "Mourning Ghost",
-    "Description": "A young ghost, half-burned, eternally clutching a singed stuffed rabbit.",
+    "Role": "Mourning Teen",
+    "Description": {
+      "text": "A young dead looking  half-burned teen, eternally clutching a burned stuffed rabbit.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Spirits"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Aiden_Carver_2348048530832.png"
   },
   {
     "Name": "Joe Callahan",
     "Role": "Gambler",
-    "Description": "Weathered ex-con who found a Denarian coin in a storm drain — and doesn’t believe in magic.",
+    "Description": {
+      "text": "Weathered ex-con  who is a denarian — and doesn’t believe in magic.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Joe_Callahan_3035818738384.png"
   },
   {
     "Name": "Jenna Moreno",
     "Role": "Grieving Widow",
-    "Description": "Latina widow who prays nightly at her husband’s grave, unknowingly harboring a Denarian within her grief.",
+    "Description": {
+      "text": "Latina widow who prays nightly at her husband’s grave, unknowingly harboring a Denarian within her grief.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Jenna_Moreno_3035816220048.png"
   },
   {
     "Name": "Marcus Raith",
@@ -444,10 +541,21 @@
   {
     "Name": "Lily and Rose Winter",
     "Role": "Twin Club Owners",
-    "Description": "Identical platinum blonde twins who move in perfect sync. They run exclusive underground clubs and experiment with shared feeding techniques and supernatural psychology.",
+    "Description": {
+      "text": "Identical platinum blonde twins who move in perfect sync. They run exclusive underground clubs and experiment with shared feeding techniques and supernatural psychology.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "White Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lily_and_Rose_Winter_3035818845648.png"
   },
   {
     "Name": "Alexander Grey",
@@ -545,7 +653,8 @@
     "Description": "Tall, imposing man with a shaved head, pale skin, and a trench coat that cloaks him in shadows. Ex-Russian enforcer turned protector of the Fellowship’s most vulnerable after narrowly surviving infection.",
     "Faction": [
       "Red Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Vladislav_'Vlad'_Sokolov_portrait.png"
   },
   {
     "Name": "Duchess Maria Lucia de Estrella",
@@ -562,7 +671,8 @@
     "Description": "British gentleman in his fifties with meticulously groomed silver hair and a custom cane. Turned during the British Empire’s height, he controls the Red Court’s financial operations in the Midwest, with ties to mortal and supernatural banking.",
     "Faction": [
       "Red Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lord_Jonathan_Blackwood_portrait.png"
   },
   {
     "Name": "Carmen Moreno",
@@ -678,7 +788,8 @@
     "Description": "Tall, lean man with sharp features, slicked-back black hair, and a faint scar on his cheek. Always impeccably dressed in a tailored suit, with a crimson gem set into his silver ring. Mikhail’s role is murky — suspected to be a Denarian, but possibly just a red herring set up by the Red Court to divert suspicion. His evasiveness and cold professionalism make him a perfect scapegoat.",
     "Faction": [
       "Denarians"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Mikhail_Azarov_portrait.png"
   },
   {
     "Name": "Julia Foster",
@@ -686,7 +797,8 @@
     "Description": "Savvy consultant with short dark hair, a no-nonsense demeanor, and a sharp strategic mind. Julia fought her way to the top from humble origins, despising corruption, but her lack of supernatural experience leaves her vulnerable.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Julia_Foster_portrait.png"
   },
   {
     "Name": "Antonia Rosetti",
@@ -694,7 +806,8 @@
     "Description": "Tall, elegant Italian woman in her early 40s with flowing dark hair, passionate about music and lost treasures. A romantic dreamer from a family tied to the opera world, she can be dangerously naive about supernatural risks.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Antonia_Rosetti_portrait.png"
   },
   {
     "Name": "Father Michael Evans",
@@ -702,7 +815,8 @@
     "Description": "Kind-hearted priest in his late 50s with graying hair and compassionate eyes, known as a pillar of the community. A former occult dabbler, he now runs a shelter but remains haunted by his dark past.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Father_Michael_Evans_portrait.png"
   },
   {
     "Name": "Detective Susan Grant",
@@ -719,7 +833,8 @@
     "Description": "Middle-aged, balding archaeologist obsessed with ancient cultures and mysteries. His curiosity often blinds him to danger, and his willingness to take risks makes him vulnerable to supernatural lures.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Professor_Henry_Caldwell_portrait.png"
   },
   {
     "Name": "Dr. Nora Ellis",
@@ -727,7 +842,8 @@
     "Description": "Highly intelligent and reserved, Nora dresses conservatively and rarely leaves her lab. She focuses entirely on advancing medical science, unaware her research might intersect with the supernatural.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Dr._Nora_Ellis_portrait.png"
   },
   {
     "Name": "Emily Green",
@@ -735,7 +851,8 @@
     "Description": "Soft-spoken artist in her late 20s with curly hair and expressive eyes, often lost in her creative world. Her childhood visions intensified through her art, unknowingly tapping into supernatural energies.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Emily_Green_portrait.png"
   },
   {
     "Name": "Carter Finch",
@@ -743,7 +860,8 @@
     "Description": "Wiry tech expert in his early 40s, fast-talking and conspiracy-obsessed, dressing casually. Former hacker now running a cybersecurity firm, Carter’s drive to uncover hidden secrets draws him into supernatural territory.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Carter_Finch_portrait.png"
   },
   {
     "Name": "Alessandra 'Sandy' Marino",
@@ -751,7 +869,8 @@
     "Description": "Sharp, stylish attorney in her mid-30s with intimidating precision and fierce loyalty to her clients. Known for handling unusual cases, her work often brushes against supernatural law.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Alessandra_'Sandy'_Marino_portrait.png"
   },
   {
     "Name": "Stanislas 'Stan' Sokolov",
@@ -768,7 +887,8 @@
     "Description": "Warm, curly-haired woman in her mid-40s working as a history teacher by day, psychometrist by night. Marcy uses her talent for reading object history to help the Paranet track supernatural activity.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Marcy_Calhoun_portrait.png"
   },
   {
     "Name": "Diego 'D' Alvarez",
@@ -776,7 +896,8 @@
     "Description": "Stocky man in his 30s with dark hair and an easygoing demeanor, running a repair shop that doubles as a Paranet safehouse. His minor electrokinesis helps him manipulate electronics in a pinch.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Diego_'D'_Alvarez_portrait.png"
   },
   {
     "Name": "Anita Patel",
@@ -784,7 +905,8 @@
     "Description": "Petite nurse in her early 30s with practical clothing and a calming presence. Her minor biokinesis lets her ease pain and stabilize injuries, making her vital to Paranet medics.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Anita_Patel_portrait.png"
   },
   {
     "Name": "Raymond 'Ray' Sanchez",
@@ -792,7 +914,8 @@
     "Description": "Lanky Hollywood stagehand in his late 20s, usually found in Hawaiian shirts. Ray’s ability to create audio illusions makes him a valuable Paranet distraction expert.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Raymond_'Ray'_Sanchez_portrait.png"
   },
   {
     "Name": "Evelyn 'Evie' Dawson",
@@ -800,7 +923,8 @@
     "Description": "Middle-aged woman with flowing dresses and a colorful voodoo shop. Evie can talk to spirits, helping the Paranet deal with hauntings, though her gift attracts dangerous attention.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Evelyn_'Evie'_Dawson_portrait.png"
   },
   {
     "Name": "Tommy Greer",
@@ -808,7 +932,8 @@
     "Description": "Shaggy blonde barista in his mid-20s with a grunge vibe. Tommy can sense magical auras and serves as Seattle’s early warning system for supernatural spikes.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Tommy_Greer_portrait.png"
   },
   {
     "Name": "Lana Brooks",
@@ -816,15 +941,27 @@
     "Description": "Tough bar owner in her late 40s with cowboy boots and a denim wardrobe. Lana crafts protective charms and talismans while running her Nashville bar as a supernatural safehouse.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lana_Brooks_portrait.png"
   },
   {
     "Name": "Dexter 'Dex' Thompson",
-    "Role": "Glamour-Busting Photographer",
-    "Description": "Wiry photographer in his early 30s with a shaved head and mirrored sunglasses. Dex can see through illusions, glamours, and into the Nevernever, serving as Miami’s supernatural scout.",
+    "Role": "Paranormal Photographer",
+    "Description": {
+      "text": "Wiry photographer in his early 30s with a shaved head and mirrored sunglasses. Dex can see through illusions, glamours, and into the Nevernever, serving as Miami’s supernatural scout.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Dexter_'Dex'_Thompson_3035818124432.png"
   },
   {
     "Name": "Gloria 'Glo' Richmond",
@@ -832,7 +969,8 @@
     "Description": "Stocky woman in her 50s with dreadlocks and a firm sense of justice. Glo uses her heat and cold manipulation to create safehouses and protect at-risk communities from supernatural threats.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Gloria_'Glo'_Richmond_portrait.png"
   },
   {
     "Name": "Samira Khan",
@@ -840,7 +978,8 @@
     "Description": "Olive-skinned woman in her late 20s with flowing scarves and desert-friendly clothes. Samira’s tarot readings provide eerily accurate (and cryptic) insights to guide Paranet decisions.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Samira_Khan_portrait.png"
   },
   {
     "Name": "Karl 'The Baron' Dragovich",
@@ -1082,7 +1221,8 @@
     "Description": "A towering, twisted mass of tentacles and chitinous plates, radiating a field of warped gravity. Its hide is thick and its mere presence inspires terror, while its devastating tentacle strikes and gravitational pulses crush everything nearby.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Eldritch_Titan_portrait.png"
   },
   {
     "Name": "Oblivion Warden",
@@ -1090,7 +1230,8 @@
     "Description": "A shifting entity with a semi-corporeal form, flickering between dimensions. Its psychic pulses scramble minds, while its body can phase out of reality to avoid harm.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Oblivion_Warden_portrait.png"
   },
   {
     "Name": "Nightmare Ripper",
@@ -1098,7 +1239,8 @@
     "Description": "A horror formed from congealed fears, its body a rotting patchwork of shadows and bone. It manifests victims' worst nightmares and hunts them with chilling precision.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Nightmare_Ripper_portrait.png"
   },
   {
     "Name": "Veil Shifter",
@@ -1106,7 +1248,8 @@
     "Description": "A faceless creature constantly shifting its form, blending into its surroundings with illusion magic. Its bladed limbs and conjured weapons reflect the fears and aggression of its enemies.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Veil_Shifter_portrait.png"
   },
   {
     "Name": "Harbinger of the Void",
@@ -1114,7 +1257,8 @@
     "Description": "A void-touched monstrosity armored in crackling void energy, capable of firing beams of entropy and shattering reality itself with each step.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Harbinger_of_the_Void_portrait.png"
   },
   {
     "Name": "The Corruptor",
@@ -1122,7 +1266,8 @@
     "Description": "A slithering being of dripping corruption, its touch rotting both flesh and spirit. Its presence warps weapons and armor, eroding both resolve and reality.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\The_Corruptor_portrait.png"
   },
   {
     "Name": "Abyssal Herald",
@@ -1130,31 +1275,65 @@
     "Description": "A towering warlord of the void, wielding a spiked flail forged from reality itself. Its psychic commands can force enemies to turn on one another.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Abyssal_Herald_portrait.png"
   },
   {
-    "Name": "Voidling Drone",
-    "Role": "Minor Minion",
-    "Description": "A skittering, insectoid creature made of void chitin and shifting shadows, attacking in coordinated swarms that amplify their collective power.",
+    "Name": "Voidling ",
+    "Role": "Minor adversary",
+    "Description": {
+      "text": "A skittering, insectoid creature made of void chitin and shifting shadows, attacking in coordinated swarms that amplify their collective power.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Voidling__3035818453392.png"
   },
   {
     "Name": "Chained Horror",
-    "Role": "Medium Minion",
-    "Description": "A lumbering abomination bound in rusted chains, each strike lashing out at multiple foes with brutal efficiency.",
+    "Role": "Medium Horror",
+    "Description": {
+      "text": "A lumbering abomination bound in rusted chains, each strike lashing out at multiple foes with brutal efficiency.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Chained_Horror_3035816063248.png"
   },
   {
     "Name": "Eye of Despair",
-    "Role": "Lieutenant (Weak)",
-    "Description": "A floating, pulsating eye encased in semi-corporeal flesh, projecting beams of dread that paralyze and weaken all who meet its gaze.",
+    "Role": "floating eye",
+    "Description": {
+      "text": "A floating, pulsating eye encased in semi-corporeal flesh, projecting beams of dread that paralyze and weaken all who meet its gaze.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Eye_of_Despair_3035817300112.png"
   },
   {
     "Name": "Rift Stalker",
@@ -1162,7 +1341,8 @@
     "Description": "A sleek, predatory shape-shifter constantly phasing between worlds, striking from ambush before slipping back into the void.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Rift_Stalker_portrait.png"
   },
   {
     "Name": "Abyssal Hound",
@@ -1170,7 +1350,8 @@
     "Description": "A massive, emaciated beast with jagged teeth and burning eyes, its howl spreading terror before it lunges for the kill.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Abyssal_Hound_portrait.png"
   },
   {
     "Name": "Echo Wraith",
@@ -1178,15 +1359,27 @@
     "Description": "A fractured specter radiating psychic torment, every strike embedding a sliver of its essence into the victim’s mind.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Echo_Wraith_portrait.png"
   },
   {
     "Name": "Shattered Apparition",
-    "Role": "Minor Minion",
-    "Description": "A fragmented ghost-like entity, its touch embedding shards of unstable reality into its victims.",
+    "Role": "Minor adversary",
+    "Description": {
+      "text": "A fragmented entity, its touch embedding shards of unstable reality into its victims.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Shattered_Apparition_3035794241360.png"
   },
   {
     "Name": "Chaos Bringer",
@@ -1194,23 +1387,46 @@
     "Description": "A towering figure wrapped in swirling chaotic energy, lashing out with a blade infused with pure entropy.",
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Chaos_Bringer_portrait.png"
   },
   {
     "Name": "Whispering Shadow",
-    "Role": "Medium Minion",
-    "Description": "A fluid shadow with many tendrils, moving silently through darkness and striking with whispering strands of corrupted power.",
+    "Role": "Medium adversary",
+    "Description": {
+      "text": "A fluid shadow with many tendrils, moving silently through darkness and striking with whispering strands of corrupted power.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Whispering_Shadow_3035790918992.png"
   },
   {
     "Name": "Corrupt Spawn",
     "Role": "Lieutenant (Medium)",
-    "Description": "A bloated, corrupted humanoid dripping with caustic essence, each strike sapping its target’s strength while spreading its blight.",
+    "Description": {
+      "text": "A bloated, corrupted humanoid dripping with caustic essence, each strike sapping its target’s strength while spreading its blight.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Outsiders"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Corrupt_Spawn_3035817928464.png"
   },
   {
     "Name": "King Corb",
@@ -1218,7 +1434,8 @@
     "Description": "Towering, amphibious humanoid with slick, dark-green skin, webbed fingers, and a crown of living coral fused to his skull. King Corb rules the Fomor from deep beneath the sea, blending ancient sorcery with biotech mastery. He led the push into Chicago after the Red Court's fall, exploiting the chaos to seize territory and human captives.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\King_Corb_portrait.png"
   },
   {
     "Name": "Lady Morvena",
@@ -1226,7 +1443,8 @@
     "Description": "Slender Fomor noble with translucent skin, bioluminescent veins, and eyes that shift colors hypnotically. Morvena is responsible for the Fomor's horrifying biological modifications, transforming kidnapped humans into servitors with implanted gills, barnacle-like armor, and unnatural senses.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lady_Morvena_portrait.png"
   },
   {
     "Name": "Lord Balor",
@@ -1234,7 +1452,8 @@
     "Description": "Massive, heavily muscled Fomor covered in chitinous plates and wielding a spear grown from a living deep-sea predator. Balor leads Fomor assault squads, favoring brutal shock tactics and hybrid servitor forces. His reputation for cruelty is known even among his own kind.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lord_Balor_portrait.png"
   },
   {
     "Name": "Vessara the Whisper",
@@ -1242,31 +1461,65 @@
     "Description": "Slender and eel-like, with unnaturally long fingers and a voice that slips into minds like seawater. Vessara oversees the Fomor's intelligence network, using mesmerized human agents and shapeshifting servitors to infiltrate mortal organizations.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Vessara_the_Whisper_portrait.png"
   },
   {
     "Name": "Captain Dreth",
     "Role": "Slave Master",
-    "Description": "Broad-shouldered and covered in barnacle-like armor, Dreth's face is split by a lamprey-like mouth. He coordinates human abductions, overseeing the transformation of captives into servitors. Dreth views humans as raw materials, nothing more.",
+    "Description": {
+      "text": "Broad-shouldered and covered in barnacle-like armor, Dreth's face is split by a lamprey-like mouth. He coordinates human abductions, overseeing the transformation of captives into servitors. Dreth views humans as raw materials, nothing more.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
-      "Fomor"
-    ]
+      "Winter Court"
+    ],
+    "Portrait": "assets/portraits\\Captain_Dreth_3035816216528.png"
   },
   {
     "Name": "Mireana the Weaver",
     "Role": "Mutation Specialist",
-    "Description": "Spindly, tentacle-fingered Fomor clad in flowing robes made of living seaweed. Mireana handles the most delicate of hybridization processes, fusing human minds with aquatic predators to create unique servitor monstrosities.",
+    "Description": {
+      "text": "Spindly, tentacle-fingered Fomor clad in flowing robes made of living seaweed. Mireana handles the most delicate of hybridization processes, fusing human minds with aquatic predators to create unique servitor monstrosities.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
-      "Fomor"
-    ]
+      "Winter Court"
+    ],
+    "Portrait": "assets/portraits\\Mireana_the_Weaver_3035817802832.png"
   },
   {
     "Name": "Rusk the Reclaimer",
     "Role": "Artifact Hunter",
-    "Description": "Hunched, crab-like Fomor with hardened plates covering his back and dozens of tiny, glowing eyes. Rusk scours ruins and wreckage for lost magical artifacts, blending them with Fomor biotech to fuel the faction's growing power.",
+    "Description": {
+      "text": "Hunched, human crab-like Fomor with hardened plates covering his back and dozens of tiny, glowing eyes. Rusk scours ruins and wreckage for lost magical artifacts, blending them with Fomor biotech to fuel the faction's growing power.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
-      "Fomor"
-    ]
+      "Winter Court"
+    ],
+    "Portrait": "assets/portraits\\Rusk_the_Reclaimer_3035813938192.png"
   },
   {
     "Name": "The Abyss Choir",
@@ -1274,7 +1527,8 @@
     "Description": "A collective of mutated former humans fused into a single coral-and-flesh mass. The Choir's eerie song disrupts thought and magical focus, making them living weapons in both battle and interrogation.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\The_Abyss_Choir_portrait.png"
   },
   {
     "Name": "Lirak the Harvester",
@@ -1282,7 +1536,8 @@
     "Description": "Tall, sinewy Fomor wrapped in scavenged wetsuits and chainmail crafted from salvaged shipwrecks. Lirak leads surface raids, blending brutal amphibious assaults with psychological warfare, leaving cryptic symbols carved into victims’ bodies.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lirak_the_Harvester_portrait.png"
   },
   {
     "Name": "Sergeant Morloch",
@@ -1290,7 +1545,8 @@
     "Description": "Once human, now a grotesque hybrid with pale, slimy skin, bulging gills, and barnacle-encrusted limbs. Morloch commands squads of modified humans, enforcing obedience through pain implants and psychic triggers.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Sergeant_Morloch_portrait.png"
   },
   {
     "Name": "Lord Na’thraal",
@@ -1298,7 +1554,8 @@
     "Description": "A towering sea-creature with skin of barnacle armor and eyes like dead tide pools.",
     "Faction": [
       "Fomor"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Lord_Na’thraal_portrait.png"
   },
   {
     "Name": "Queen Briarheart",
@@ -1317,15 +1574,26 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\Queen_Briarheart_portrait.png"
   },
   {
     "Name": "Knight Armand St. Croix",
     "Role": "Knight of the Cross",
-    "Description": "A battle-scarred Black man with a sword cracked down its length, his faith tested to the limit.",
+    "Description": {
+      "text": "A battle-scarred Black man in modern  clothes with a sword cracked down its length, his faith tested to the limit.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Knights of the Cross"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Knight_Armand_St._Croix_3035818849488.png"
   },
   {
     "Name": "Demon Grishkar",
@@ -1333,7 +1601,8 @@
     "Description": "A monstrous figure wrapped in smoking chains, its voice like grinding metal.",
     "Faction": [
       "Demons"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Demon_Grishkar_portrait.png"
   },
   {
     "Name": "Wyld Huntress Seline",
@@ -1352,7 +1621,7 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\Wyld_Huntress_Seline_portrait.png"
   },
   {
     "Name": "Knight Captain Mariel Brightwind",
@@ -1371,15 +1640,26 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\Knight_Captain_Mariel_Brightwind_portrait.png"
   },
   {
     "Name": "Elder Tidecaller Orsk",
     "Role": "Fomor Shaman",
-    "Description": "A hunchbacked aquatic seer, his staff crusted with coral and glowing runes.",
+    "Description": {
+      "text": "A hunchbacked aquatic seer, his staff crusted with coral and glowing runes.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
-      "Fomor"
-    ]
+      "Winter Court"
+    ],
+    "Portrait": "assets/portraits\\Elder_Tidecaller_Orsk_3035817924944.png"
   },
   {
     "Name": "Detective Sofia Vasquez",
@@ -1387,15 +1667,27 @@
     "Description": "Human detective caught in supernatural war, tough as nails with eyes haunted by what she's seen.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Detective_Sofia_Vasquez_portrait.png"
   },
   {
     "Name": "Sir Elijah Castor",
     "Role": "Fallen Knight of the Cross",
-    "Description": "A weary man, his sword cracked and stained, tormented by a curse and his own faith.",
+    "Description": {
+      "text": "A weary man in leather jacket, his sword cracked and stained, tormented by a curse and his own faith.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Knights of the Cross"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Sir_Elijah_Castor_3035794228240.png"
   },
   {
     "Name": "Demon Prince Velkar",
@@ -1403,7 +1695,8 @@
     "Description": "A creature of smoke and shattered iron, with a face made of melted masks.",
     "Faction": [
       "Demons"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Demon_Prince_Velkar_portrait.png"
   },
   {
     "Name": "Sister Maria Bell",
@@ -1411,7 +1704,8 @@
     "Description": "A steadfast knight, her armor old but her heart strong.",
     "Faction": [
       "Knights of the Cross"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Sister_Maria_Bell_portrait.png"
   },
   {
     "Name": "Blacksmith Gavin Hurst",
@@ -1419,15 +1713,27 @@
     "Description": "A mortal blacksmith whose family once reforged Excalibur, now living in fear of the supernatural.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Blacksmith_Gavin_Hurst_portrait.png"
   },
   {
     "Name": "The Weeping Angel",
     "Role": "Spirit of Regret",
-    "Description": "A spectral figure clad in funeral silk, weeping tears of molten silver.",
+    "Description": {
+      "text": "A spectral figure clad in funeral silk, weeping tears of molten silver.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Spirits"
-    ]
+    ],
+    "Portrait": "assets/portraits\\The_Weeping_Angel_3035813362448.png"
   },
   {
     "Name": "The Hollow Prince",
@@ -1446,7 +1752,7 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\The_Hollow_Prince_portrait.png"
   },
   {
     "Name": "Laughing Dagger Kaelen",
@@ -1465,13 +1771,13 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\Laughing_Dagger_Kaelen_portrait.png"
   },
   {
     "Name": "Archivist Yewthorn",
     "Role": "Keeper of Fae Lore",
     "Description": {
-      "text": "A tree-like fae, with scrolls embedded in its bark, reciting history that cuts like blades.",
+      "text": "A tree-like skinned fae, with scrolls embedded in its bark, reciting history that cuts like blades.",
       "formatting": {
         "bold": [],
         "italic": [],
@@ -1484,7 +1790,7 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\Archivist_Yewthorn_3035792393616.png"
   },
   {
     "Name": "The Bound Jester",
@@ -1503,7 +1809,7 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\The_Bound_Jester_3035814547600.png"
   },
   {
     "Name": "Eleanor Drake",
@@ -1511,7 +1817,8 @@
     "Description": "A human caught in a binding curse, linked to a demon through a chain of pain.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Eleanor_Drake_portrait.png"
   },
   {
     "Name": "Demon Grishkar",
@@ -1519,7 +1826,8 @@
     "Description": "A monstrous figure wrapped in smoking chains, its voice like grinding metal.",
     "Faction": [
       "Demons"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Demon_Grishkar_portrait.png"
   },
   {
     "Name": "Chainmaker Aldous",
@@ -1527,7 +1835,8 @@
     "Description": "A long-dead mortal smith who first forged chains for demons, appearing as a ghostly figure of smoke and steel.",
     "Faction": [
       "Spirits"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Chainmaker_Aldous_portrait.png"
   },
   {
     "Name": "Sorceress Marina",
@@ -1535,7 +1844,8 @@
     "Description": "A modern-day sorceress specialized in binding and breaking infernal contracts.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Sorceress_Marina_portrait.png"
   },
   {
     "Name": "Bishop Tallow",
@@ -1543,15 +1853,27 @@
     "Description": "A priest who absorbs the curses of others into his own soul, flickering between holy and damned.",
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Bishop_Tallow_portrait.png"
   },
   {
     "Name": "The Blood Hag Mirskaya",
     "Role": "Fomor Witch",
-    "Description": "A bloated, waterlogged hag who weaves curses from human blood and lake mud.",
+    "Description": {
+      "text": "A bloated, waterlogged hag who weaves curses from human blood and lake mud.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
-      "Fomor"
-    ]
+      "Winter Court"
+    ],
+    "Portrait": "assets/portraits\\The_Blood_Hag_Mirskaya_3035793923984.png"
   },
   {
     "Name": "Wyld Healer Brialyn",
@@ -1570,7 +1892,7 @@
     "Faction": [
       "Wyldfae"
     ],
-    "Portrait": ""
+    "Portrait": "assets/portraits\\Wyld_Healer_Brialyn_portrait.png"
   },
   {
     "Name": "Captain Sofia Domingez",
@@ -1588,7 +1910,8 @@
     },
     "Faction": [
       "Mortals"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Captain_Sofia_Domingez_portrait.png"
   },
   {
     "Name": "Aszara",
@@ -1614,7 +1937,8 @@
     "Description": "Massive figure with frost-covered granite-like skin, breath misting in the air like fog. Icicles hang from his beard and his eyes glow a dull blue. Fiercely protective of Winter’s borders, he respects strength in both allies and foes.",
     "Faction": [
       "Winter Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Morran_the_Ice-Touched_portrait.png"
   },
   {
     "Name": "Vespera Coldwing",
@@ -1631,7 +1955,8 @@
     "Description": "Twisted satyr with ram horns, frost-crackling hooves, and deep blue-black skin. He wears a ragged wolf pelt cloak and hunts down violators of Winter’s law, reveling in the chase.",
     "Faction": [
       "Winter Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Orcus_Darkhoof_portrait.png"
   },
   {
     "Name": "Morwen of the Shroud",
@@ -1654,18 +1979,40 @@
   {
     "Name": "Bramble",
     "Role": "Summer Satyr Reveler",
-    "Description": "Goat-legged satyr with wild green hair tangled with flowers and vines. His eyes twinkle with mischief. Bramble spreads merriment (and chaos) at Summer revels, helping mortals who match his love for freedom and fun.",
+    "Description": {
+      "text": "Goat-legged satyr with wild green hair tangled with flowers and vines. His eyes twinkle with mischief. Bramble spreads merriment (and chaos) at Summer revels, helping mortals who match his love for freedom and fun.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Summer Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Bramble_3035816419536.png"
   },
   {
     "Name": "Liora Brightflame",
     "Role": "Summer Sprite Scout",
-    "Description": "Tiny winged creature whose body glows like a living ember. Her wings shimmer with fiery hues and leave sparks in the air. Curious and hungry for stories, Liora serves as a scout between realms.",
+    "Description": {
+      "text": "Tiny winged creature whose body glows like a living ember. Her wings shimmer with fiery hues and leave sparks in the air. Curious and hungry for stories, Liora serves as a scout between realms.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Faction": [
       "Summer Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Liora_Brightflame_3035707057616.png"
   },
   {
     "Name": "Thorne Greenheart",
@@ -1673,15 +2020,8 @@
     "Description": "Dryad with bark-like skin and hair like cascading ivy. She exudes the scent of blooming flowers. Thorne guards a sacred grove linking Summer and the mortal realm, controlling plants for both healing and defense.",
     "Faction": [
       "Summer Court"
-    ]
-  },
-  {
-    "Name": "Raul Embermane",
-    "Role": "Summer Centaur Archer",
-    "Description": "Powerful centaur with a red-gold mane and skin bronzed by the sun. Carries an enchanted yew bow. Raul patrols Summer’s borders, defending against Winter and Wyldfae threats. He values honor and bravery.",
-    "Faction": [
-      "Summer Court"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Thorne_Greenheart_portrait.png"
   },
   {
     "Name": "Griselda the Hag",
@@ -1689,7 +2029,8 @@
     "Description": "Hunched old woman with wild white hair and skin like tree bark. Her eyes glow eerie green, and she wears a cloak of owl feathers. Living deep in enchanted woods, Griselda trades in rare ingredients and dangerous secrets — always with a twist.",
     "Faction": [
       "Wyldfae"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Griselda_the_Hag_portrait.png"
   },
   {
     "Name": "Nox",
@@ -1697,7 +2038,8 @@
     "Description": "Shadowy figure with skin that absorbs light, his form shifting like smoke. Nox sells secrets to the highest bidder, playing Summer, Winter, and mortals against each other.",
     "Faction": [
       "Wyldfae"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Nox_portrait.png"
   },
   {
     "Name": "Cora Dewdrop",
@@ -1705,7 +2047,8 @@
     "Description": "Water spirit with skin shimmering like a clear stream and hair flowing like water. Cora guards a hidden healing spring, aiding respectful mortals and drowning those who threaten her waters.",
     "Faction": [
       "Wyldfae"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Cora_Dewdrop_portrait.png"
   },
   {
     "Name": "Kraig Stoneback",
@@ -1713,7 +2056,8 @@
     "Description": "Being of living rock with glowing amber eyes and moss growing on his body. Kraig protects underground realms and enforces neutrality at Wyldfae gatherings, respecting those who honor the earth.",
     "Faction": [
       "Wyldfae"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Kraig_Stoneback_portrait.png"
   },
   {
     "Name": "Puck",
@@ -1721,7 +2065,8 @@
     "Description": "Mischievous young man with wild hair, pointed ears, and a grin full of trouble. Wears a patchwork coat of leaves and feathers. Puck thrives on chaos, challenging pride and authority for fun.",
     "Faction": [
       "Wyldfae"
-    ]
+    ],
+    "Portrait": "assets/portraits\\Puck_portrait.png"
   },
   {
     "Name": "Amalia",

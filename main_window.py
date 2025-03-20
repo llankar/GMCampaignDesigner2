@@ -1,6 +1,10 @@
 import customtkinter as ctk
 import json
 import os
+import subprocess
+import time
+import requests
+import shutil
 
 from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE
 from modules.generic.generic_list_view import GenericListView
@@ -10,9 +14,13 @@ from docx import Document
 from modules.generic.scenario_detail_view import ScenarioDetailView
 from modules.npcs.npc_graph_editor import NPCGraphEditor  # Import the graph editor
 from modules.helpers.template_loader import load_template
+from modules.generic.generic_editor_window import GenericEditorWindow
+from modules.helpers import rich_text_editor, text_helpers
+from modules.helpers.rich_text_editor import RichTextEditor
+from PIL import Image, ImageTk
 
 # Other imports...
-
+SWARMUI_PROCESS = None
 
 def load_items_from_json(view, entity_name):
     file_path = filedialog.askopenfilename(
@@ -149,7 +157,9 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(self, text="Manage Scenarios", command=lambda: self.open_entity("scenarios")).pack(pady=5)
         ctk.CTkButton(self, text="Export Scenarios", command=preview_and_export_scenarios).pack(pady=5)
         ctk.CTkButton(self, text="Open GM Screen", command=self.open_gm_screen).pack(pady=5)
-        ctk.CTkButton(self, text="Manage NPC Graphs", command=self.open_npc_graph_editor).pack(pady=5)  # NEW BUTTON
+        ctk.CTkButton(self, text="Open NPC Graph editor", command=self.open_npc_graph_editor).pack(pady=5) 
+        ctk.CTkButton(self, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits).pack(pady=5) 
+        
        
     def open_entity(self, entity):
         window = ctk.CTkToplevel(self)
@@ -222,7 +232,150 @@ class MainWindow(ctk.CTk):
 
         npc_graph_editor = NPCGraphEditor(window, self.npc_wrapper, self.faction_wrapper)
         npc_graph_editor.pack(fill="both", expand=True)
+    
+    def launch_swarmui(self):
+        global SWARMUI_PROCESS
+        SWARMUI_CMD = "launch-windows.bat"
+        # Create a copy of the current environment and modify it as needed
+        env = os.environ.copy()
+        # Optionally remove the virtual environment variables if not needed:
+        env.pop('VIRTUAL_ENV', None)
+        # Adjust PATH if necessary to point to the system Python
+        #env["PATH"] = "C:\\Path\\to\\system\\python;" + env["PATH"]
+        
+        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
+            try:
+                SWARMUI_PROCESS = subprocess.Popen(
+                    SWARMUI_CMD,
+                    shell=True,
+                    cwd=r"E:\SwarmUI\SwarmUI",
+                    env=env
+                )
+                # Optionally, wait a little bit here for the process to initialize.
+                time.sleep(120.0)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
+    def cleanup_swarmui(self):
+        """
+        Terminate the SwarmUI process if it is running.
+        """
+        global SWARMUI_PROCESS
+        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
+            SWARMUI_PROCESS.terminate()
+    def generate_portrait_for_npc(self, npc):
+        """
+        Generate a portrait for a single NPC using the SwarmUI API.
+        This function assumes the SwarmUI server is available locally.
+        The generated portrait is saved locally, copied to the assets folder,
+        and the npc's "Portrait" field is updated with the file path.
+        """
+        # Ensure SwarmUI is launched.
+        self.launch_swarmui()
+        
+        SWARM_API_URL = "http://127.0.0.1:7801"
+        try:
+            # Step 1: Obtain a session from SwarmUI.
+            session_url = f"{SWARM_API_URL}/API/GetNewSession"
+            session_response = requests.post(session_url, json={}, headers={"Content-Type": "application/json"})
+            session_data = session_response.json()
+            session_id = session_data.get("session_id")
+            if not session_id:
+                print(f"Failed to obtain session ID for NPC {npc.get('Name', 'Unknown')}")
+                return
+            
+            # Step 2: Build a prompt based on the NPC's data.
+            npc_name = npc.get("Name", "Unknown")
+            npc_role = npc.get("Role", "Unknown")
+            npc_faction = npc.get("Faction", "Unknown")
+            npc_desc = npc.get("Description", "Unknown")
+            npc_desc = text_helpers.format_longtext(npc_desc)
+            prompt = f"{npc_name} {npc_desc} {npc_role} {npc_faction}"
+            
+            # Define image generation parameters.
+            prompt_data = {
+                "session_id": session_id,
+                "images": 1,
+                "prompt": prompt,
+                "negativeprompt": ("blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, "
+                                "monstrous, too many fingers, too many legs, too many arms, bad hands, "
+                                "unrealistic weapons, bad grip on equipment, nude"),
+                "model": "cinenautsXLATRUE_cinenautsV30",
+                "width": 1024,
+                "height": 1024,
+                "cfgscale": 9,
+                "steps": 20,
+                "seed": -1
+            }
+            generate_url = f"{SWARM_API_URL}/API/GenerateText2Image"
+            image_response = requests.post(generate_url, json=prompt_data, headers={"Content-Type": "application/json"})
+            image_data = image_response.json()
+            images = image_data.get("images")
+            if not images or len(images) == 0:
+                print(f"Image generation failed for NPC '{npc_name}'")
+                return
+            
+            # Step 3: Download the generated image.
+            image_url = f"{SWARM_API_URL}/{images[0]}"
+            downloaded_image = requests.get(image_url)
+            if downloaded_image.status_code != 200:
+                print(f"Failed to download generated image for NPC '{npc_name}'")
+                return
+            
+            # Step 4: Save the image locally.
+            output_filename = f"{npc_name.replace(' ', '_')}_portrait.png"
+            with open(output_filename, "wb") as f:
+                f.write(downloaded_image.content)
+            
+            # Optionally resize/copy image as done in your original code.
+            # For example, copy to assets folder:
+            GENERATED_FOLDER = "assets/generated"
+            os.makedirs(GENERATED_FOLDER, exist_ok=True)
+            shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
+             # Associate the generated portrait with the NPC data.
+            self.portrait_path = self.copy_and_resize_portrait(output_filename)
+            self.portrait_label.configure(text=os.path.basename(self.portrait_path))
+
+            print(f"Generated portrait for NPC '{npc_name}'")
+         
+        except Exception as e:
+            print(f"Error generating portrait for NPC '{npc.get('Name', 'Unknown')}': {e}")
+
+    def generate_missing_npc_portraits(self):
+        """
+        Loads all NPCs from the JSON file, iterates through them, and for each NPC that has
+        an empty 'Portrait' field, calls generate_portrait_for_npc() to generate a portrait.
+        After processing, if any NPC data is modified, the JSON file is updated.
+        """
+        npc_file = "data/npcs.json"
+        if not os.path.exists(npc_file):
+            print("NPC file does not exist.")
+            return
+        
+        try:
+            with open(npc_file, "r", encoding="utf-8") as f:
+                npcs = json.load(f)
+        except Exception as e:
+            print(f"Failed to load NPC file: {e}")
+            return
+
+        modified = False
+        for npc in npcs:
+            # Check if Portrait is missing or empty.
+            if not npc.get("Portrait", "").strip():
+                self.generate_portrait_for_npc(npc)
+                modified = True
+
+        if modified:
+            try:
+                with open(npc_file, "w", encoding="utf-8") as f:
+                    json.dump(npcs, f, indent=4, ensure_ascii=False)
+                print("Updated NPC file with generated portraits.")
+            except Exception as e:
+                print(f"Failed to update NPC file: {e}")
+        else:
+            print("No NPCs were missing portraits.")  
 
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
+    #GenericEditorWindow.cleanup_swarmui(self)
