@@ -32,6 +32,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.npc_wrapper = npc_wrapper
         self.place_wrapper = place_wrapper
 
+        self.node_images = {}  # Store PhotoImage objects here to prevent garbage collection
+
         # Preload NPC and Place data for quick lookup
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
         self.places = {pl["Name"]: pl for pl in self.place_wrapper.load_items()}
@@ -225,30 +227,49 @@ class ScenarioGraphEditor(ctk.CTkFrame):
     # FUNCTION: draw_nodes
     # Draw rectangles + text for each node. No per-node tag_bind here.
     # ─────────────────────────────────────────────────────────────────────────
+    def load_portrait(self, portrait_path, node_tag):
+        """
+        Loads a portrait from portrait_path using the new Pillow resampling method.
+        Returns a tuple (portrait_image, (width, height)). If loading fails, returns (None, (0,0)).
+        """
+        if not portrait_path or not os.path.exists(portrait_path):
+            return None, (0, 0)
+        try:
+            img = Image.open(portrait_path)
+            # Use the new Pillow constant; fallback if needed.
+            resample_method = getattr(Image, "Resampling", Image).LANCZOS
+            img.thumbnail(MAX_PORTRAIT_SIZE, resample_method)
+            portrait_image = ImageTk.PhotoImage(img, master=self.canvas)
+            self.node_images[node_tag] = portrait_image  # persist the image
+            return portrait_image, img.size
+        except Exception as e:
+            print(f"Error loading portrait for {node_tag}: {e}")
+            return None, (0, 0)
+
     def draw_nodes(self):
         """
-        Draw nodes with dynamic sizing based on text content,
-        wrapping text if it's too long, and respecting basic RTF formatting
-        (bold, italic, underline) for the entire description.
+        Draw nodes with dynamic sizing based on text content.
+        For NPC nodes, if a portrait is available, it is shown on the left,
+        with the text wrapped to the right.
         """
-        MAX_TEXT_WIDTH = 200  # The maximum width (in pixels) for text before wrapping
-        PAD_X = 10            # Horizontal padding inside the rectangle
-        PAD_Y = 10            # Vertical padding inside the rectangle
+        MAX_TEXT_WIDTH = 200            # Maximum width for text area (in pixels)
+        PAD_X = 10                      # Horizontal padding inside the rectangle
+        PAD_Y = 10                      # Vertical padding inside the rectangle
+        GAP = 5                         # Gap between portrait and text
+        portrait_image = None
 
-        # A helper function to measure how large the text will be once wrapped.
-        # We create a "hidden" text item, measure its bounding box, then remove it.
+        # Helper to measure wrapped text size.
         def measure_wrapped_text(text, font_obj, wrap_width):
-            # Place the text at (0,0) with anchor="nw" so we can measure its bounding box
             temp_id = self.canvas.create_text(
                 0, 0,
                 text=text,
                 font=font_obj,
-                width=wrap_width,      # Force wrapping at wrap_width
+                width=wrap_width,
                 anchor="nw",
-                justify="center",      # Center text lines if you like
+                justify="center",
                 tags=("temp_measure",)
             )
-            bbox = self.canvas.bbox(temp_id)  # (x1, y1, x2, y2)
+            bbox = self.canvas.bbox(temp_id)
             self.canvas.delete(temp_id)
             if bbox is None:
                 return (0, 0)
@@ -260,52 +281,56 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             node_name = node["name"]
             x, y = node["x"], node["y"]
             color = node.get("color", "lightgray")
+            node_tag = f"{node_type}_{node_name.replace(' ', '_')}"
 
-            # Extract the node's text. For a scenario, we might have a summary dict;
-            # for NPCs/places, we might have a description dict. Adjust as needed:
+            # For scenario nodes, use Summary; for others, use Description.
             if node_type == "scenario":
                 raw_text = node["data"].get("Summary", "")
             else:
                 raw_text = node["data"].get("Description", "")
 
-            # Combine the name and description into one block of text
-            # so the user sees the name on top, then the description
+            # Prepare a font; if raw_text is a dict, extract formatting.
             if isinstance(raw_text, dict):
-                # If it's a dict with 'text' and 'formatting'
-                desc_text = raw_text.get("text", "")
+                display_text = raw_text.get("text", "")
                 formatting = raw_text.get("formatting", {})
-                # Convert formatting flags into a tkinter font
                 weight = "bold" if formatting.get("bold") else "normal"
                 slant = "italic" if formatting.get("italic") else "roman"
                 underline = 1 if formatting.get("underline") else 0
-                desc_font = tkFont.Font(family="Arial", size=9, weight=weight, slant=slant, underline=underline)
+                text_font = tkFont.Font(family="Arial", size=9, weight=weight, slant=slant, underline=underline)
             else:
-                desc_text = str(raw_text)
-                desc_font = tkFont.Font(family="Arial", size=9)
+                display_text = str(raw_text)
+                text_font = tkFont.Font(family="Arial", size=9)
 
-            # Prepend the node name on its own line
-            # If you want the name to have separate formatting, you'd do a more advanced approach
-            display_text = f"{node_name}\n{desc_text}"
+            combined_text = f"{node_name}\n{display_text}"
 
-            # Measure how large the text will be once wrapped at MAX_TEXT_WIDTH - 2*PAD_X
-            # so there's horizontal padding inside the rectangle
-            wrap_width = MAX_TEXT_WIDTH - 2 * PAD_X
-            text_width, text_height = measure_wrapped_text(display_text, desc_font, wrap_width)
+            if node_type == "npc":
+                # For NPCs, check for a portrait.
+                portrait_path = node["data"].get("Portrait", "")
+                # Reuse a loaded image if available.
+                if node_tag in self.node_images:
+                    portrait_image = self.node_images[node_tag]
+                    portrait_width = portrait_image.width()
+                    portrait_height = portrait_image.height()
+                else:
+                    portrait_image, (portrait_width, portrait_height) = self.load_portrait(portrait_path, node_tag)
+                if portrait_width > 0:
+                    wrap_width = MAX_TEXT_WIDTH - portrait_width - GAP - 2 * PAD_X
+                else:
+                    wrap_width = MAX_TEXT_WIDTH - 2 * PAD_X
+                text_width, text_height = measure_wrapped_text(combined_text, text_font, wrap_width)
+                node_width = (portrait_width + GAP if portrait_width > 0 else 0) + text_width + 2 * PAD_X
+                node_height = max(portrait_height, text_height) + 2 * PAD_Y
+            else:
+                wrap_width = MAX_TEXT_WIDTH - 2 * PAD_X
+                text_width, text_height = measure_wrapped_text(combined_text, text_font, wrap_width)
+                node_width = text_width + 2 * PAD_X
+                node_height = text_height + 2 * PAD_Y
 
-            # Now compute the rectangle's final width/height
-            node_width = text_width + 2 * PAD_X
-            node_height = text_height + 2 * PAD_Y
-
-            # Center the rectangle at (x, y)
             left = x - (node_width / 2)
             top = y - (node_height / 2)
             right = x + (node_width / 2)
             bottom = y + (node_height / 2)
 
-            # Build a unique tag for the node
-            node_tag = f"{node_type}_{node_name.replace(' ', '_')}"
-
-            # Draw the node rectangle
             rect_id = self.canvas.create_rectangle(
                 left, top, right, bottom,
                 fill=color, outline="black", width=2,
@@ -313,20 +338,40 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             )
             self.node_rectangles[node_tag] = rect_id
 
-            # Finally, draw the actual text inside the rectangle.
-            # We'll place it at anchor="nw" so we can offset by PAD_X, PAD_Y.
-            text_x = left + PAD_X
-            text_y = top + PAD_Y
-            self.canvas.create_text(
-                text_x, text_y,
-                text=display_text,
-                font=desc_font,
-                width=wrap_width,    # Force wrapping
-                anchor="nw",
-                justify="center",    # Or "left"/"right" if you prefer
-                tags=("node", node_tag)
-            )
-
+            if node_type == "npc" and portrait_width > 0:
+                # Draw portrait on the left.
+                image_x = left + PAD_X + (portrait_width / 2)
+                image_y = top + PAD_Y + (portrait_height / 2)
+                self.canvas.create_image(
+                    image_x, image_y,
+                    image=portrait_image,
+                    anchor="center",
+                    tags=("node", node_tag)
+                )
+                # Draw text to the right.
+                text_x = left + PAD_X + portrait_width + GAP
+                text_y = top + PAD_Y
+                self.canvas.create_text(
+                    text_x, text_y,
+                    text=combined_text,
+                    font=text_font,
+                    width=wrap_width,
+                    anchor="nw",
+                    justify="center",
+                    tags=("node", node_tag)
+                )
+            else:
+                text_x = left + PAD_X
+                text_y = top + PAD_Y
+                self.canvas.create_text(
+                    text_x, text_y,
+                    text=combined_text,
+                    font=text_font,
+                    width=wrap_width,
+                    anchor="nw",
+                    justify="center",
+                    tags=("node", node_tag)
+                )
 
 
     # ─────────────────────────────────────────────────────────────────────────
