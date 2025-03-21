@@ -3,6 +3,7 @@
       {"name": "Name", "type": "text"},
       {"name": "Role", "type": "text"},
       {"name": "Description", "type": "longtext"},
+      {"name": "Secret", "type": "longtext"},
       {"name": "Faction", "type": "list", "linked_type": "Faction"},
       {"name": "Portrait", "type": "text"}
   ]

@@ -18,6 +18,7 @@ from modules.helpers.template_loader import load_template
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.helpers import rich_text_editor, text_helpers
 from modules.helpers.rich_text_editor import RichTextEditor
+from modules.scenarios.scenario_importer import ScenarioImportWindow
 from PIL import Image, ImageTk
 
 # Other imports...
@@ -160,7 +161,11 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(self, text="Open NPC Graph editor", command=self.open_npc_graph_editor).pack(pady=5) 
         ctk.CTkButton(self, text="Open Scenario Graph editor", command=self.open_scenario_graph_editor).pack(pady=5) 
         ctk.CTkButton(self, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits).pack(pady=5) 
-    
+        ctk.CTkButton(self, text="Import Scenario", command=self.open_scenario_importer).pack(pady=5)
+    def open_scenario_importer(self):
+        import_scenario=ScenarioImportWindow(self)
+        import_scenario.mainloop()
+
     def open_scenario_graph_editor(self):
         scenario_wrapper = GenericModelWrapper("scenarios")
         npc_wrapper = GenericModelWrapper("npcs")
@@ -376,7 +381,7 @@ class MainWindow(ctk.CTk):
         if modified:
             try:
                 with open(npc_file, "w", encoding="utf-8") as f:
-                    json.dump(self.npcs, f, indent=4, ensure_ascii=False)
+                    json.dump(npcs, f, indent=4, ensure_ascii=False)
                 print("Updated NPC file with generated portraits.")
             except Exception as e:
                 print(f"Failed to update NPC file: {e}")
