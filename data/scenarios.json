@@ -41,8 +41,8 @@
     "Title": "Feast of Hearts",
     "Summary": "A forbidden love between a White Court vampire and a Knight of the Cross triggers a supernatural scandal threatening both factions.",
     "Places": [
-      "Hell’s Gate Nightclub",
-      "St. Joseph’s Shelter",
+      "Hell\u2019s Gate Nightclub",
+      "St. Joseph\u2019s Shelter",
       "Aphrodite Lounge",
       "Whispering Alley"
     ],
@@ -50,7 +50,7 @@
       "Liam Raith",
       "Sister Maria Bell",
       "Lucinda Raith",
-      "Father Colm O’Donnell",
+      "Father Colm O\u2019Donnell",
       "Solomon Drake"
     ],
     "Secrets": ""
@@ -93,7 +93,7 @@
   },
   {
     "Title": "The Last Execution",
-    "Summary": "When a vengeful witch taps into Chicago’s ley lines, threatening to unravel the city, the White Council’s secrets come spilling out. The PCs must trace a wrongful execution to a forgotten Warden scandal, confronting ghosts, bitter survivors, and ancient guilt before the ley storm consumes them all.",
+    "Summary": "When a vengeful witch taps into Chicago\u2019s ley lines, threatening to unravel the city, the White Council\u2019s secrets come spilling out. The PCs must trace a wrongful execution to a forgotten Warden scandal, confronting ghosts, bitter survivors, and ancient guilt before the ley storm consumes them all.",
     "Places": [
       "White Council Safehouse",
       "Riverside Mausoleum",
@@ -129,7 +129,7 @@
   },
   {
     "Title": "Midsummer's Heart",
-    "Summary": "In the height of Summer, a forbidden love between a mortal and a Summer Sidhe disrupts the fragile boundary between reality and the Nevernever. As love blooms dangerously, a deadly fey hunt begins to reclaim what the Summer Court lost — while Winter spies seek to poison the romance. The PCs must protect love itself, or see Chicago swallowed by eternal Summer.",
+    "Summary": "In the height of Summer, a forbidden love between a mortal and a Summer Sidhe disrupts the fragile boundary between reality and the Nevernever. As love blooms dangerously, a deadly fey hunt begins to reclaim what the Summer Court lost \u2014 while Winter spies seek to poison the romance. The PCs must protect love itself, or see Chicago swallowed by eternal Summer.",
     "Places": [
       "The Blooming Glade",
       "Goldenroot Cafe",
@@ -147,7 +147,7 @@
   },
   {
     "Title": "Grave Promises",
-    "Summary": "The Black Court stirs — and it’s personal. One of the PCs’ mortal allies is targeted by a vampire lord who was wronged decades ago. Bound by old vengeance, the undead walk Chicago’s streets, turning old friends into unwilling enemies. The PCs must uncover who betrayed whom, before the city becomes a battlefield for ancient grudges.",
+    "Summary": "The Black Court stirs \u2014 and it\u2019s personal. One of the PCs\u2019 mortal allies is targeted by a vampire lord who was wronged decades ago. Bound by old vengeance, the undead walk Chicago\u2019s streets, turning old friends into unwilling enemies. The PCs must uncover who betrayed whom, before the city becomes a battlefield for ancient grudges.",
     "Places": [
       "Rookridge Cemetery",
       "The Bleeding House",
@@ -165,12 +165,12 @@
   },
   {
     "Title": "Dead Funny",
-    "Summary": "A mortal comedian accidentally invokes a curse during a stand-up routine, turning his audience into zombies every time he tells a joke. As Chicago descends into slapstick undead chaos, the PCs must find the source of the curse — and survive the most deadly comedy night of their lives.",
+    "Summary": "A mortal comedian accidentally invokes a curse during a stand-up routine, turning his audience into zombies every time he tells a joke. As Chicago descends into slapstick undead chaos, the PCs must find the source of the curse \u2014 and survive the most deadly comedy night of their lives.",
     "Places": [
       "The Rusty Mic Comedy Club",
       "WZRD Local Radio Station",
       "Grin & Barrow Mortuary",
-      "The Trickster’s Record Shop"
+      "The Trickster\u2019s Record Shop"
     ],
     "NPCs": [
       "Eddie Delgado",
@@ -183,7 +183,7 @@
   },
   {
     "Title": "Blood Heir",
-    "Summary": "A child born of mortal and Red Court blood is discovered in Chicago. Both sides want her — one to kill her, the other to crown her. Caught between a war and a prophecy, the PCs must decide: is this child the end of the Red Court or its rebirth?",
+    "Summary": "A child born of mortal and Red Court blood is discovered in Chicago. Both sides want her \u2014 one to kill her, the other to crown her. Caught between a war and a prophecy, the PCs must decide: is this child the end of the Red Court or its rebirth?",
     "Places": [
       "Crimson Nursery",
       "Blooded Alley",
@@ -201,7 +201,7 @@
   },
   {
     "Title": "Death in the Void",
-    "Summary": "A portal to the Outside opens beneath the Chicago River, leaking deadly energies that rot life itself. The PCs must dive into the infected underworld, navigating twisted ecosystems and corrupted ghosts, while Outsider servants offer terrible deals for survival. Life and death hang in the balance — along with Chicago’s fate.",
+    "Summary": "A portal to the Outside opens beneath the Chicago River, leaking deadly energies that rot life itself. The PCs must dive into the infected underworld, navigating twisted ecosystems and corrupted ghosts, while Outsider servants offer terrible deals for survival. Life and death hang in the balance \u2014 along with Chicago\u2019s fate.",
     "Places": [
       "The Void Scar",
       "Underwater Catacombs",
@@ -219,7 +219,7 @@
   },
   {
     "Title": "The Fractured Mind",
-    "Summary": "A catastrophic magical accident shatters Warden Lysander Black’s mind into countless spectral echoes spread across Chicago. The players must navigate fractured realities, haunted memories, and malicious spirits feeding on the wizard’s madness. Meanwhile, Denarians sense weakness and seek to corrupt the fragments before they can be reassembled.",
+    "Summary": "A catastrophic magical accident shatters Warden Lysander Black\u2019s mind into countless spectral echoes spread across Chicago. The players must navigate fractured realities, haunted memories, and malicious spirits feeding on the wizard\u2019s madness. Meanwhile, Denarians sense weakness and seek to corrupt the fragments before they can be reassembled.",
     "Places": [
       "Shattered Sanctum",
       "Dream-Spiral Library",
@@ -230,17 +230,17 @@
       "Warden Lysander Black",
       "Caretaker Miriam Harker",
       "The Echoed Child",
-      "Spirit Archivist T’kel",
+      "Spirit Archivist T\u2019kel",
       "Nicodemus Archleone"
     ],
     "Secrets": ""
   },
   {
     "Title": "Crossing Paths",
-    "Summary": "A mundane traffic accident kills a young man — and shatters a long-dormant spirit jar hidden in his trunk. The released spirit blames the mortal who hit the car, setting off a supernatural vendetta fueled by confusion and chance. The PCs must intervene before fate itself spirals out of control.",
+    "Summary": "A mundane traffic accident kills a young man \u2014 and shatters a long-dormant spirit jar hidden in his trunk. The released spirit blames the mortal who hit the car, setting off a supernatural vendetta fueled by confusion and chance. The PCs must intervene before fate itself spirals out of control.",
     "Places": [
       "Wrecked Intersection",
-      "Coroner’s Office",
+      "Coroner\u2019s Office",
       "Highway Shrine",
       "The Spirit Holding Cell"
     ],
@@ -255,11 +255,11 @@
   },
   {
     "Title": "The Coin Flip",
-    "Summary": "A street gambler finds a Denarian coin completely by accident — and miraculously resists full corruption. The coin twists reality around the gambler, making every decision a supernatural gamble. The players must retrieve the coin before the next toss determines Chicago’s fate.",
+    "Summary": "A street gambler finds a Denarian coin completely by accident \u2014 and miraculously resists full corruption. The coin twists reality around the gambler, making every decision a supernatural gamble. The players must retrieve the coin before the next toss determines Chicago\u2019s fate.",
     "Places": [
-      "Lucky Joe’s Casino",
+      "Lucky Joe\u2019s Casino",
       "Abandoned Subway Tunnel",
-      "Coin Collector’s Shop",
+      "Coin Collector\u2019s Shop",
       "Denarian Watchpoint"
     ],
     "NPCs": [
@@ -267,18 +267,18 @@
       "Nicodemus Archleone",
       "Lucky Penny",
       "Sister Francine",
-      "The Gambler’s Ghost"
+      "The Gambler\u2019s Ghost"
     ],
     "Secrets": ""
   },
   {
     "Title": "Ghostlight Vigil",
-    "Summary": "A mourning ghost can’t stop reliving their own death — and its unresolved grief is poisoning Chicago’s ley lines. To lay the spirit to rest, the players must reconstruct the night of the fire, uncover its secrets, and confront both angry spirits and mourning families.",
+    "Summary": "A mourning ghost can\u2019t stop reliving their own death \u2014 and its unresolved grief is poisoning Chicago\u2019s ley lines. To lay the spirit to rest, the players must reconstruct the night of the fire, uncover its secrets, and confront both angry spirits and mourning families.",
     "Places": [
       "Burned-Out House",
       "The Ashen Veil",
       "Old Firehouse Records Room",
-      "Mourner’s Tavern"
+      "Mourner\u2019s Tavern"
     ],
     "NPCs": [
       "Aiden Carver (Ghost)",
@@ -291,9 +291,9 @@
   },
   {
     "Title": "Mourning Star",
-    "Summary": "A grieving widow accidentally invites a Denarian into her soul while praying at her spouse’s grave. But her love is so powerful, the Fallen cannot fully corrupt her. The resulting half-possession radiates grief-fueled supernatural storms across the city. The players must either exorcise the Denarian — or weaponize her mourning into something no Denarian can endure.",
+    "Summary": "A grieving widow accidentally invites a Denarian into her soul while praying at her spouse\u2019s grave. But her love is so powerful, the Fallen cannot fully corrupt her. The resulting half-possession radiates grief-fueled supernatural storms across the city. The players must either exorcise the Denarian \u2014 or weaponize her mourning into something no Denarian can endure.",
     "Places": [
-      "Widow’s Apartment",
+      "Widow\u2019s Apartment",
       "Cemetery of St. Agatha",
       "The Lamenting Chapel",
       "Denarian Blacksite"
@@ -302,7 +302,7 @@
       "Jenna Moreno",
       "Nicodemus Archleone",
       "Serena Cho",
-      "Father Colm O’Donnell",
+      "Father Colm O\u2019Donnell",
       "The Grief-Eater"
     ],
     "Secrets": ""
@@ -348,7 +348,7 @@
   },
   {
     "Title": "Fae Encounter at the Bean",
-    "Summary": "During an equinox ritual, fae emerge through Cloud Gate’s reflective surface. The investigators must negotiate with the mischievous fae before they disrupt Chicago’s supernatural balance.",
+    "Summary": "During an equinox ritual, fae emerge through Cloud Gate\u2019s reflective surface. The investigators must negotiate with the mischievous fae before they disrupt Chicago\u2019s supernatural balance.",
     "Places": [
       "Cloud Gate"
     ],
@@ -399,8 +399,8 @@
     "Secrets": ""
   },
   {
-    "Title": "Dino’s Curse",
-    "Summary": "Nightmares and eerie sounds plague visitors near the Field Museum’s T-Rex exhibit. Investigators discover the dinosaur's remains house a bound spirit trying to escape.",
+    "Title": "Dino\u2019s Curse",
+    "Summary": "Nightmares and eerie sounds plague visitors near the Field Museum\u2019s T-Rex exhibit. Investigators discover the dinosaur's remains house a bound spirit trying to escape.",
     "Places": [
       "Field Museum of Natural History"
     ],
@@ -413,7 +413,7 @@
   },
   {
     "Title": "Vampiric Rendezvous",
-    "Summary": "Supernatural power players gather at Trump Tower’s penthouse. Investigators are hired to spy on the meeting, stumbling into a deadly struggle between vampire factions.",
+    "Summary": "Supernatural power players gather at Trump Tower\u2019s penthouse. Investigators are hired to spy on the meeting, stumbling into a deadly struggle between vampire factions.",
     "Places": [
       "Trump Tower"
     ],
@@ -426,7 +426,7 @@
   },
   {
     "Title": "Buried Secrets of Lincoln Park",
-    "Summary": "Beneath Lincoln Park’s beauty lies Chicago’s old cemetery. Construction awakens restless spirits tied to old injustices. The investigators must either lay them to rest—or help them seek revenge.",
+    "Summary": "Beneath Lincoln Park\u2019s beauty lies Chicago\u2019s old cemetery. Construction awakens restless spirits tied to old injustices. The investigators must either lay them to rest\u2014or help them seek revenge.",
     "Places": [
       "Lincoln Park"
     ],
@@ -439,7 +439,7 @@
   },
   {
     "Title": "Fire and Rebirth at Water Tower Place",
-    "Summary": "Spontaneous magical fires plague Water Tower Place, seemingly tied to its miraculous survival during the Great Fire. Investigators must uncover the building’s ancient ward—and its purpose.",
+    "Summary": "Spontaneous magical fires plague Water Tower Place, seemingly tied to its miraculous survival during the Great Fire. Investigators must uncover the building\u2019s ancient ward\u2014and its purpose.",
     "Places": [
       "Water Tower Place"
     ],
@@ -451,7 +451,7 @@
     "Secrets": ""
   },
   {
-    "Title": "The Billy Goat’s Curse Revisited",
+    "Title": "The Billy Goat\u2019s Curse Revisited",
     "Summary": "A resurgence of the infamous curse disrupts games at Wrigley Field. Investigators must determine whether belief alone powers the curse or if something darker has returned.",
     "Places": [
       "Wrigley Field"
@@ -478,7 +478,7 @@
   },
   {
     "Title": "The Curse in the Sculpture",
-    "Summary": "A necromancer has planted a cursed artifact—made from human bones—into a new sculpture exhibit. Visitors fall ill and shadows creep through the halls. The investigators must stop the necromancer’s ritual before the dead rise.",
+    "Summary": "A necromancer has planted a cursed artifact\u2014made from human bones\u2014into a new sculpture exhibit. Visitors fall ill and shadows creep through the halls. The investigators must stop the necromancer\u2019s ritual before the dead rise.",
     "Places": [
       "Art Institute of Chicago"
     ],
@@ -492,7 +492,7 @@
   {
     "Title": "Reflections of the Denarians",
     "Summary": {
-      "text": "A Denarian has corrupted Cloud Gate, using its reflective surface to trap people inside it and feed on their despair. The investigators must banish the Denarian’s influence without destroying the iconic sculpture.",
+      "text": "A Denarian has corrupted Cloud Gate, using its reflective surface to trap people inside it and feed on their despair. The investigators must banish the Denarian\u2019s influence without destroying the iconic sculpture.",
       "formatting": {
         "bold": [],
         "italic": [],
@@ -527,8 +527,8 @@
     "Secrets": ""
   },
   {
-    "Title": "A Fairy Court’s Claim",
-    "Summary": "A minor fae lord declares Millennium Park sacred fae territory, enchanting the landscape into a twilight realm. A mortal child is taken by the fae, and the investigators must decide whether to defy the White Council’s hands-off decree to save them.",
+    "Title": "A Fairy Court\u2019s Claim",
+    "Summary": "A minor fae lord declares Millennium Park sacred fae territory, enchanting the landscape into a twilight realm. A mortal child is taken by the fae, and the investigators must decide whether to defy the White Council\u2019s hands-off decree to save them.",
     "Places": [
       "Millennium Park"
     ],
@@ -540,7 +540,7 @@
     "Secrets": ""
   },
   {
-    "Title": "The Red Court’s Experiment",
+    "Title": "The Red Court\u2019s Experiment",
     "Summary": "A secret lab under the Museum of Science and Industry houses Red Court experiments on kidnapped humans, designed to create a new breed of vampires. The investigators must infiltrate the lab before the experiment is unleashed.",
     "Places": [
       "Museum of Science and Industry"
@@ -553,7 +553,7 @@
     "Secrets": ""
   },
   {
-    "Title": "The Black Court’s Feeding Grounds",
+    "Title": "The Black Court\u2019s Feeding Grounds",
     "Summary": "Something hunts near the Chicago Riverwalk, and rumors point to a nest of newly turned Black Court vampires. The investigators must clear out the nest before the infestation spreads.",
     "Places": [
       "Chicago Riverwalk"
@@ -566,7 +566,7 @@
     "Secrets": ""
   },
   {
-    "Title": "A Demon’s Fossil",
+    "Title": "A Demon\u2019s Fossil",
     "Summary": "A T-Rex skull at the Field Museum has begun whispering to night guards, driving them mad. The skull contains the essence of a prehistoric demon eager to regain power. The investigators must perform a delicate exorcism.",
     "Places": [
       "Field Museum of Natural History"
@@ -580,7 +580,7 @@
   },
   {
     "Title": "Vampiric Rendezvous Redux",
-    "Summary": "Supernatural power players are meeting secretly in Trump Tower’s penthouse. The investigators are hired to spy, but soon uncover a deadly power struggle between rival White Court and Red Court factions.",
+    "Summary": "Supernatural power players are meeting secretly in Trump Tower\u2019s penthouse. The investigators are hired to spy, but soon uncover a deadly power struggle between rival White Court and Red Court factions.",
     "Places": [
       "Trump Tower"
     ],
@@ -606,7 +606,7 @@
   },
   {
     "Title": "The Drowned War",
-    "Summary": "The Fomor are waging a hidden war beneath Lake Michigan, flooding into Chicago through ancient submerged gates. The players are caught in the middle when an ancient Wyld Fae ruler — whose respect they must earn — offers the key to closing the gates. But the Fomor won’t go down without unleashing a monstrous sea curse upon the city.",
+    "Summary": "The Fomor are waging a hidden war beneath Lake Michigan, flooding into Chicago through ancient submerged gates. The players are caught in the middle when an ancient Wyld Fae ruler \u2014 whose respect they must earn \u2014 offers the key to closing the gates. But the Fomor won\u2019t go down without unleashing a monstrous sea curse upon the city.",
     "Places": [
       "Drowned Gate",
       "Lakefront Battleground",
@@ -614,7 +614,7 @@
       "The Sunken Arena"
     ],
     "NPCs": [
-      "Lord Na’thraal",
+      "Lord Na\u2019thraal",
       "Knight Captain Mariel Brightwind",
       "Elder Tidecaller Orsk",
       "Wyld Huntress Seline",
@@ -624,12 +624,12 @@
   },
   {
     "Title": "Blood Debt of the Broken Blade",
-    "Summary": "A fallen Knight of the Cross — driven by grief and a curse laid on their blade — is hunted by a demon who once faced the sword. The players must either help the cursed Knight restore their honor, or stand against both the Knight and the demon as they drag their battle into the mortal world.",
+    "Summary": "A fallen Knight of the Cross \u2014 driven by grief and a curse laid on their blade \u2014 is hunted by a demon who once faced the sword. The players must either help the cursed Knight restore their honor, or stand against both the Knight and the demon as they drag their battle into the mortal world.",
     "Places": [
       "The Forgotten Chapel",
-      "The Knight’s Refuge",
+      "The Knight\u2019s Refuge",
       "Cursed Battlefield",
-      "Demon’s Mirror"
+      "Demon\u2019s Mirror"
     ],
     "NPCs": [
       "Sir Elijah Castor",
@@ -659,13 +659,13 @@
     "Secrets": ""
   },
   {
-    "Title": "The Demon’s Chain",
-    "Summary": "A mortal accidentally binds a demon with a cursed chain — forcing the demon to obey their commands, but also inflicting agony on the mortal every time the demon suffers. The players must break the chain before either the demon or the mortal dies from shared pain.",
+    "Title": "The Demon\u2019s Chain",
+    "Summary": "A mortal accidentally binds a demon with a cursed chain \u2014 forcing the demon to obey their commands, but also inflicting agony on the mortal every time the demon suffers. The players must break the chain before either the demon or the mortal dies from shared pain.",
     "Places": [
       "The Broken Forge",
-      "Demon’s Binding Circle",
+      "Demon\u2019s Binding Circle",
       "Pain Market",
-      "The Chainmaker’s Tomb"
+      "The Chainmaker\u2019s Tomb"
     ],
     "NPCs": [
       "Eleanor Drake",
@@ -679,7 +679,7 @@
   {
     "Title": "When Knights Fall",
     "Summary": {
-      "text": "The Fomor launch an all-out supernatural war on Chicago’s waters — and a Knight of the Cross is ambushed and left for dead. As pain cripples the Knight, the players must fight on without them — unless they can uncover an ancient Wyld Fae boon to restore the Knight’s strength.",
+      "text": "The Fomor launch an all-out supernatural war on Chicago\u2019s waters \u2014 and a Knight of the Cross is ambushed and left for dead. As pain cripples the Knight, the players must fight on without them \u2014 unless they can uncover an ancient Wyld Fae boon to restore the Knight\u2019s strength.",
       "formatting": {
         "bold": [],
         "italic": [],
@@ -697,7 +697,7 @@
     ],
     "NPCs": [
       "Knight Armand St. Croix",
-      "Lord Na’thraal",
+      "Lord Na\u2019thraal",
       "The Blood Hag Mirskaya",
       "Wyld Healer Brialyn",
       "Captain Sofia Domingez"
@@ -748,6 +748,44 @@
       "Lady Victoria Raith",
       "Dr. Elizabeth Skavis",
       "Captain Jonah Steele and Andras"
+    ]
+  },
+  {
+    "Title": "The Sun-Kissed Shadow",
+    "Summary": {
+      "text": "The Spark:\nA mysterious and violent incident during a masquerade gala at the Chicago Botanical Garden results in a powerful magical artifact going missing. Witnesses claim a renowned White Court vampire is to blame \u2014 but the accused is innocent.\n\nObjective:\nTrack the true thief, uncover the layered illusions and enchantments hiding their identity, and stop a Summer Court plot that could erupt into a full-scale fae war.\n\nImmediate Action:\nAs the masquerade descends into chaos, the PCs are pulled into a magical trap \u2014 an aggressive Summer sprite attacks them thinking one of them stole \"Titania\u2019s Whisper,\" a crown-like fae artifact. First encounter starts immediately with a fast-paced magical and physical confrontation among illusionary hedges and flowering halls.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secrets": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Places": [
+      "The Verdant Mirror",
+      "The Mirage Room",
+      "The Drowned Root",
+      "The Petal Archive"
+    ],
+    "NPCs": [
+      "Velna of the Thousand Blooms",
+      "Sylvia Heartswell",
+      "Glimmerjack the Bartender",
+      "Detective Marla Reyes",
+      "Sarai Givens"
     ]
   }
 ]
