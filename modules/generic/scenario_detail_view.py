@@ -8,6 +8,7 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.text_helpers import format_longtext
 from customtkinter import CTkLabel, CTkImage
 from modules.npcs.npc_graph_editor import NPCGraphEditor
+from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (32, 32)  # Thumbnail size for lists
@@ -312,7 +313,8 @@ class ScenarioDetailView(ctk.CTkFrame):
             self.tabs[name]["content_frame"].pack(fill="both", expand=True)
 
     def add_new_tab(self):
-        options = ["Factions", "Places", "NPCs", "Scenarios", "Note Tab", "NPC Graph"]
+        # Added "Scenario Graph Editor" to the list of options.
+        options = ["Factions", "Places", "NPCs", "Scenarios", "Note Tab", "NPC Graph", "Scenario Graph Editor"]
         popup = ctk.CTkToplevel(self)
         popup.title("Create New Tab")
         popup.geometry("300x250")
@@ -321,7 +323,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         popup.focus_force()
         for option in options:
             ctk.CTkButton(popup, text=option,
-                          command=lambda o=option: self.open_selection_window(o, popup)).pack(pady=2)
+                        command=lambda o=option: self.open_selection_window(o, popup)).pack(pady=2)
 
     def open_selection_window(self, entity_type, popup):
         popup.destroy()
@@ -336,6 +338,12 @@ class ScenarioDetailView(ctk.CTkFrame):
             self.add_tab("NPC Graph", self.create_npc_graph_frame(),
                         content_factory=lambda master: self.create_npc_graph_frame(master))
             return
+        # New branch for Scenario Graph Editor:
+        elif entity_type == "Scenario Graph Editor":
+            self.add_tab("Scenario Graph Editor", self.create_scenario_graph_frame(),
+                        content_factory=lambda master: self.create_scenario_graph_frame(master))
+            return
+
         model_wrapper = self.wrappers[entity_type]
         template = self.templates[entity_type]
         selection_popup = ctk.CTkToplevel(self)
@@ -363,6 +371,21 @@ class ScenarioDetailView(ctk.CTkFrame):
             frame,
             content_factory=lambda master: self.create_entity_frame(entity_type, item, master=master)
         )
+    def create_scenario_graph_frame(self, master=None):
+        if master is None:
+            master = self.content_area
+        frame = ctk.CTkFrame(master)
+        # Create a ScenarioGraphEditor widget.
+        # Note: Ensure that self.wrappers contains "Scenarios", "NPCs", and "Places" as required.
+        scenario_graph_editor = ScenarioGraphEditor(
+            frame,
+            self.wrappers["Scenarios"],
+            self.wrappers["NPCs"],
+            self.wrappers["Places"]
+        )
+        scenario_graph_editor.pack(fill="both", expand=True)
+        frame.graph_editor = scenario_graph_editor  # Optional: store a reference for state management.
+        return frame
 
     def create_entity_frame(self, entity_type, entity, master=None):
         if master is None:
