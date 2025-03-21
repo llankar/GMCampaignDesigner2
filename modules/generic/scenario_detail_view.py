@@ -174,6 +174,10 @@ class ScenarioDetailView(ctk.CTkFrame):
                     saved_state = old_frame.graph_editor.get_state()
                     if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
                         new_frame.graph_editor.set_state(saved_state)
+                if hasattr(old_frame, "scenario_graph_editor") and hasattr(old_frame.scenario_graph_editor, "get_state"):
+                    saved_state = old_frame.scenario_graph_editor.get_state()
+                    if saved_state and hasattr(new_frame, "scenario_graph_editor") and hasattr(new_frame.scenario_graph_editor, "set_state"):
+                        new_frame.scenario_graph_editor.set_state(saved_state)
 
         new_frame.pack(fill="both", expand=True)
         new_frame.update_idletasks()
@@ -248,6 +252,8 @@ class ScenarioDetailView(ctk.CTkFrame):
         saved_state = None
         if hasattr(current_frame, "graph_editor") and hasattr(current_frame.graph_editor, "get_state"):
             saved_state = current_frame.graph_editor.get_state()
+        if hasattr(current_frame, "scenario_graph_editor") and hasattr(current_frame.scenario_graph_editor, "get_state"):
+            saved_state = current_frame.scenario_graph_editor.get_state()
 
         # Special handling for note tabs (if any)
         current_text = ""
@@ -269,6 +275,8 @@ class ScenarioDetailView(ctk.CTkFrame):
             # Restore the graph state if available
             if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
                 new_frame.graph_editor.set_state(saved_state)
+            if saved_state and hasattr(new_frame, "scenario_graph_editor") and hasattr(new_frame.scenario_graph_editor, "set_state"):
+                new_frame.scenario_graph_editor.set_state(saved_state)
         new_frame.pack(fill="both", expand=True)
             
         self.tabs[name]["content_frame"] = new_frame
@@ -384,7 +392,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             self.wrappers["Places"]
         )
         scenario_graph_editor.pack(fill="both", expand=True)
-        frame.graph_editor = scenario_graph_editor  # Optional: store a reference for state management.
+        frame.scenario_graph_editor = scenario_graph_editor  # Optional: store a reference for state management.
         return frame
 
     def create_entity_frame(self, entity_type, entity, master=None):

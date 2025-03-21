@@ -604,3 +604,16 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     node_tag = f"place_{node['name'].replace(' ', '_')}"
                 self.node_positions[node_tag] = (node["x"], node["y"])
             self.draw_graph()
+    def get_state(self):
+        # Capture both the graph structure and the node positions.
+        return {
+            "graph": self.graph,
+            "node_positions": self.node_positions,
+            # You might also want to preserve other runtime state if needed.
+        }
+
+    def set_state(self, state):
+        self.graph = state.get("graph", {})
+        self.node_positions = state.get("node_positions", {})
+        # Redraw the graph with the restored state.
+        self.draw_graph()
