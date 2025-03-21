@@ -6,7 +6,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 
 # Configure logging for debugging.
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 # Default formatting object for text fields.
 default_formatting = {
