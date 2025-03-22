@@ -5,10 +5,10 @@ import logging
 import customtkinter as ctk
 from tkinter import messagebox
 
-# Configure logging for debugging.
+# Configure logging.
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-# Default formatting object for text fields.
+# Default formatting object.
 default_formatting = {
     "bold": [],
     "italic": [],
@@ -28,39 +28,42 @@ def remove_emojis(text):
                                u"\U000024C2-\U0001F251"
                                "]+", flags=re.UNICODE)
     cleaned = emoji_pattern.sub(r'', text)
-    logging.debug("Emojis removed from text.")
+    logging.debug("Emojis removed.")
     return cleaned
 
 def import_formatted_scenario(text):
-    # Remove emojis from input.
+    # Remove emojis.
     cleaned_text = remove_emojis(text)
-    logging.debug("Cleaned text (first 200 chars): %s", cleaned_text[:200])
+    logging.info("Cleaned text (first 200 chars): %s", cleaned_text[:200])
     
     # --- Extract Basic Scenario Info ---
     title_match = re.search(r'^Scenario Title:\s*(.+)$', cleaned_text, re.MULTILINE)
     title = title_match.group(1).strip() if title_match else "Unnamed Scenario"
-    logging.debug("Parsed Title: %s", title)
+    logging.info("Parsed Title: %s", title)
     
-    # Use the Introduction section for the scenario summary.
+    # Extract Introduction.
     intro_match = re.search(
-        r'(?i)(?:^|\n)\s*Introduction\s*\n(.*?)(?=\n\s*(?:Tied Player Characters:|Main Locations))',
+        r'(?i)(?:^|\n)\s*Introduction\s*:?\s*(.*?)(?=\n\s*(?:Tied Player Characters:|Main Locations|📍 Main Locations|Key NPCs|NPCs))',
         cleaned_text,
         re.DOTALL
     )
     introduction = intro_match.group(1).strip() if intro_match else ""
-    logging.debug("Parsed Introduction (first 100 chars): %s", introduction[:100])
+    logging.info("Parsed Introduction (first 100 chars): %s", introduction[:100])
     
-    # --- Extract Main Locations using re.split ---
+    # --- Extract Places ---
     locations = []
-    # Split the text by the "Main Locations" header (allowing extra text on the header line)
-    loc_split = re.split(r'(?mi)^\s*Main Locations.*$', cleaned_text, maxsplit=1)
+    loc_split = re.split(r'(?mi)^\s*(?:Main Locations|📍 Main Locations).*$', cleaned_text, maxsplit=1)
     if len(loc_split) > 1:
         remainder = loc_split[1]
-        # Now split off anything after a line starting with "NPCs"
-        remainder_split = re.split(r'(?mi)^\s*NPCs.*$', remainder, maxsplit=1)
-        locs_text = remainder_split[0].strip() if remainder_split else remainder.strip()
-        logging.debug("Extracted Main Locations section (first 200 chars): %s", locs_text[:200])
-        # Split location entries by a line that starts with a number and a period.
+        # Remove anything after an NPC header using string find.
+        npc_index = remainder.find("Key NPCs")
+        if npc_index == -1:
+            npc_index = remainder.find("NPCs")
+        if npc_index >= 0:
+            locs_text = remainder[:npc_index].strip()
+        else:
+            locs_text = remainder.strip()
+        logging.info("Extracted Places section (first 200 chars): %s", locs_text[:200])
         loc_entries = re.split(r'(?m)^\d+\.\s+', locs_text)
         for entry in loc_entries:
             entry = entry.strip()
@@ -84,16 +87,17 @@ def import_formatted_scenario(text):
                 "Name": loc_name,
                 "Description": description.strip()
             })
-            logging.debug("Parsed Location: %s; Description: %s", loc_name, description[:60])
+            logging.info("Parsed Place: %s; Desc snippet: %s", loc_name, description[:60])
     else:
-        logging.debug("No Main Locations section found.")
+        logging.info("No Places section found.")
     
     # --- Extract NPCs ---
     npcs = []
-    npc_match = re.search(r'(?:^|\n)\s*NPCs\s*\n(.*)', cleaned_text, re.DOTALL)
-    if npc_match:
-        npc_text = npc_match.group(1).strip()
-        logging.debug("Extracted NPCs section (first 200 chars): %s", npc_text[:200])
+    # Use re.split with a pattern that allows an optional non-word prefix (such as an emoji)
+    npc_split = re.split(r'(?mi)^\s*(?:[^\w\s]*\s*)?(?:Key NPCs|NPCs)\s*:?.*$', cleaned_text, maxsplit=1)
+    if len(npc_split) > 1:
+        npc_text = npc_split[1].strip()
+        logging.info("Extracted NPCs section (first 200 chars): %s", npc_text[:200])
         npc_entries = re.split(r'(?m)^\d+\.\s+', npc_text)
         for entry in npc_entries:
             entry = entry.strip()
@@ -149,10 +153,10 @@ def import_formatted_scenario(text):
                 "Portrait": ""
             }
             npcs.append(npc_obj)
-            logging.debug("Parsed NPC: %s; Role: %s; Desc snippet: %s; Secret snippet: %s", 
-                          npc_name, npc_role, combined_desc[:60], secret.strip()[:60])
+            logging.info("Parsed NPC: %s; Role: %s; Desc snippet: %s; Secret snippet: %s", 
+                         npc_name, npc_role, combined_desc[:60], secret.strip()[:60])
     else:
-        logging.debug("No NPCs section found.")
+        logging.info("No NPC section found.")
     
     # --- Build Scenario Entity ---
     scenario_entity = {
@@ -168,24 +172,24 @@ def import_formatted_scenario(text):
         "Places": [loc["Name"] for loc in locations],
         "NPCs": [npc["Name"] for npc in npcs]
     }
-    logging.debug("Built scenario entity: %s", scenario_entity)
+    logging.info("Built scenario entity: %s", scenario_entity)
     
     # --- JSON Helpers ---
     def load_json(filename):
         if os.path.exists(filename):
             with open(filename, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                logging.debug("Loaded %d entries from %s", len(data), filename)
+                logging.info("Loaded %d entries from %s", len(data), filename)
                 return data
-        logging.debug("File %s not found, starting with empty list.", filename)
+        logging.info("File %s not found, starting with empty list.", filename)
         return []
     
     def save_json(filename, data):
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
-            logging.debug("Saved %d entries to %s", len(data), filename)
+            logging.info("Saved %d entries to %s", len(data), filename)
     
-    # File paths (adjust as needed)
+    # File paths.
     scenarios_file = "data/scenarios.json"
     places_file = "data/places.json"
     npcs_file = "data/npcs.json"
@@ -212,15 +216,12 @@ class ScenarioImportWindow(ctk.CTkToplevel):
         self.title("Import Formatted Scenario")
         self.geometry("600x600")
         
-        # Instruction label.
         instruction_label = ctk.CTkLabel(self, text="Paste your formatted scenario text below:")
         instruction_label.pack(pady=(10, 0), padx=10)
         
-        # Long text field for scenario text input.
         self.scenario_textbox = ctk.CTkTextbox(self, wrap="word", height=400)
         self.scenario_textbox.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Button to call the import function.
         import_button = ctk.CTkButton(self, text="Import Scenario", command=self.import_scenario)
         import_button.pack(pady=(0, 10))
         
