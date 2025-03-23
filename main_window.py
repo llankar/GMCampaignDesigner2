@@ -19,6 +19,7 @@ from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.helpers import rich_text_editor, text_helpers
 from modules.helpers.rich_text_editor import RichTextEditor
 from modules.scenarios.scenario_importer import ScenarioImportWindow
+from modules.generic.export_for_foundry import preview_and_export_foundry
 from PIL import Image, ImageTk
 
 # Other imports...
@@ -74,6 +75,10 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(self, text="Open Scenario Graph editor", command=self.open_scenario_graph_editor).pack(pady=5) 
         ctk.CTkButton(self, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits).pack(pady=5) 
         ctk.CTkButton(self, text="Import Scenario", command=self.open_scenario_importer).pack(pady=5)
+        ctk.CTkButton(self, text="Export Scenarios for Foundry", command=self.export_foundry).pack(pady=5)
+
+    def export_foundry(self):
+        preview_and_export_foundry(self)
     def open_scenario_importer(self):
         import_scenario=ScenarioImportWindow(self)
         import_scenario.mainloop()
