@@ -173,13 +173,19 @@
             // Build tokens array
             let tokens = [];
             let scenarioTokens = scenario.tokens || scenario.Tokens || [];
-            for (let t of scenarioTokens) {
+            let startX = 300;          // Where the first token is placed
+            let startY = 730;          // Vertical position for all tokens
+            let offsetX = 120;         // Horizontal spacing between tokens
+
+            for (let [idx, t] of scenarioTokens.entries()) {
                 const actorId = await getOrCreateActor(t);
                 const finalTokenImg = getTokenImage(actorId);
+
+                // Each token is offset horizontally by idx * offsetX
                 tokens.push({
                     actorId: actorId,
-                    x: t.x + 400 ?? 0,
-                    y: t.y + 600 ?? 0,
+                    x: startX + (idx * offsetX),
+                    y: startY,
                     width: 1,
                     height: 1,
                     name: t.name || "",
