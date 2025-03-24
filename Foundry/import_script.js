@@ -213,7 +213,14 @@
                 description: sceneHTML,
                 tokens: tokens,
                 folder: scenarioFolder.id,
-                backgroundColor: "#222222"
+                backgroundColor: "#222222",
+
+                // Set the initial camera view
+                initial: {
+                    x: 1071,          // the X coordinate of the camera’s center
+                    y: 552,           // the Y coordinate of the camera’s center
+                    scale: 0.84       // zoom level, e.g. 0.84
+                }
             });
 
             // Delay briefly to allow the scene to render its container before adding tiles.
