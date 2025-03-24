@@ -178,8 +178,8 @@
                 const finalTokenImg = getTokenImage(actorId);
                 tokens.push({
                     actorId: actorId,
-                    x: t.x ?? 0,
-                    y: t.y ?? 0,
+                    x: t.x + 400 ?? 0,
+                    y: t.y + 600 ?? 0,
                     width: 1,
                     height: 1,
                     name: t.name || "",
@@ -203,7 +203,7 @@
                 height: sceneHeight,
                 grid: gridSize,
                 navigation: true,
-                padding: 0.25,
+                padding: 0.0,
                 description: sceneHTML,
                 tokens: tokens,
                 folder: scenarioFolder.id,
@@ -248,7 +248,7 @@
                     text: plainText,
                     shape: { "type": "r", "width": 600, "height": 300, "radius": null, "points": [] },
                     x: 660,       // center horizontally for a 1920 width scene
-                    y: 390,       // center vertically for a 1080 height scene
+                    y: 400,       // center vertically for a 1080 height scene
                     scale: 1,
                     fillColor: "#ffffff",
                     fillAlpha: 1,
@@ -259,7 +259,7 @@
                     textColor: "#000000",
                     textAlpha: 1,
                     fontSize: 24,
-                    textAlign: "left"
+                    textAlign: "center"
                 }]);
             } catch (err) {
                 console.error("Error creating text drawing:", err);
