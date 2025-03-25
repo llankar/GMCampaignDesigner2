@@ -306,7 +306,7 @@ class MainWindow(ctk.CTk):
             print("No NPCs were missing portraits.")  
     def copy_and_resize_portrait(self, npc, src_path):
             PORTRAIT_FOLDER = "assets/portraits"
-            MAX_PORTRAIT_SIZE = (128, 128)
+            MAX_PORTRAIT_SIZE = (1024, 1024)
 
             os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
 

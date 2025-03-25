@@ -369,7 +369,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
     def copy_and_resize_portrait(self, src_path):
         PORTRAIT_FOLDER = "assets/portraits"
-        MAX_PORTRAIT_SIZE = (128, 128)
+        MAX_PORTRAIT_SIZE = (1024, 1024)
 
         os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
 

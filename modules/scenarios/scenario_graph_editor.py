@@ -12,6 +12,7 @@ from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.npcs import npc_opener
+import requests  # make sure to import requests at the top
 
 
 PORTRAIT_FOLDER = "assets/portraits"
@@ -201,6 +202,48 @@ class ScenarioGraphEditor(ctk.CTkFrame):
 
         self.draw_graph()
 
+    def display_portrait_on_fire_tv(self, portrait_path):
+        """
+        Sends a JSON-RPC command to Kodi running on your Fire TV to display the image.
+        This example uses the 'Player.Open' method, which may work if Kodi is configured to display images.
+        Adjust the command as needed.
+        """
+        FIRE_TV_IP = "192.168.1.100"  # <-- Set your Fire TV's IP address here
+        KODI_PORT = 8080              # <-- Set the Kodi JSON-RPC port (usually 8080)
+        url = f"http://{FIRE_TV_IP}:{KODI_PORT}/jsonrpc"
+        
+        payload = {
+            "jsonrpc": "2.0",
+            "method": "Player.Open",
+            "params": {
+                "item": {"file": portrait_path}
+            },
+            "id": 1
+        }
+        try:
+            response = requests.post(url, json=payload)
+            response.raise_for_status()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error displaying portrait on Fire TV: {e}")
+
+    def display_on_fire_tv(self):
+        """
+        Called when the user selects "Display on Fire TV" from the node context menu.
+        It finds the portrait path from the selected NPC node and calls display_portrait_on_fire_tv.
+        """
+        if not self.selected_node or not self.selected_node.startswith("npc_"):
+            return
+        portrait_path = None
+        # Find the NPC node in our graph
+        for node in self.graph["nodes"]:
+            node_tag = f"{node['type']}_{node['name'].replace(' ', '_')}"
+            if node_tag == self.selected_node:
+                portrait_path = node["data"].get("Portrait", "")
+                break
+        if portrait_path and os.path.exists(portrait_path):
+            self.display_portrait_on_fire_tv(portrait_path)
+        else:
+            messagebox.showerror("Error", "No valid portrait found for this NPC.")
 
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -517,11 +560,15 @@ class ScenarioGraphEditor(ctk.CTkFrame):
     # ─────────────────────────────────────────────────────────────────────────
     # Context Menu for Node
     # ─────────────────────────────────────────────────────────────────────────
+    # Then, update your show_node_menu method to include the new command for NPC nodes:
     def show_node_menu(self, x, y):
         node_menu = Menu(self.canvas, tearoff=0)
         node_menu.add_command(label="Delete Node", command=self.delete_node)
         node_menu.add_separator()
         node_menu.add_command(label="Change Color", command=lambda: self.show_color_menu(x, y))
+        # If the selected node is an NPC, add a command to display its portrait on Fire TV.
+        if self.selected_node and self.selected_node.startswith("npc_"):
+            node_menu.add_command(label="Display Portrait", command=self.display_on_fire_tv)
         node_menu.post(int(x), int(y))
 
     def show_color_menu(self, x, y):

@@ -8,7 +8,7 @@ from modules.helpers.text_helpers import format_longtext
 from modules.generic.generic_editor_window import GenericEditorWindow
 
 PORTRAIT_FOLDER = "assets/portraits"
-MAX_PORTRAIT_SIZE = (128, 128)
+MAX_PORTRAIT_SIZE = (1024, 1024)
 
 
 class GenericListView(ctk.CTkFrame):
