@@ -1,0 +1,5 @@
+<window id="10100" title="NPC Portrait">
+    <controls>
+        <image id="1000" posx="0" posy="0" width="1280" height="720" />
+    </controls>
+</window>

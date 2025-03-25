@@ -11,7 +11,7 @@ from modules.npcs.npc_graph_editor import NPCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
 
 PORTRAIT_FOLDER = "assets/portraits"
-MAX_PORTRAIT_SIZE = (32, 32)  # Thumbnail size for lists
+MAX_PORTRAIT_SIZE = (64, 64)  # Thumbnail size for lists
 
 class ScenarioDetailView(ctk.CTkFrame):
     def __init__(self, master, scenario_item, *args, **kwargs):
