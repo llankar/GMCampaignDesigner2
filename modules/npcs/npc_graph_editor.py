@@ -8,6 +8,7 @@ from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 import math
+import requests
 
 from modules.npcs import npc_opener
 
@@ -98,6 +99,48 @@ class NPCGraphEditor(ctk.CTkFrame):
             return
         print(f"Opening editor for NPC: {npc_name}")
         npc_opener.open_npc_editor_window(npc_name)
+        # ─────────────────────────────────────────────────────────────────────────
+    # NEW FUNCTION: display_portrait_on_fire_tv
+    # Sends a JSON-RPC command to Kodi on a Fire TV to display an image.
+    # ─────────────────────────────────────────────────────────────────────────
+    def display_portrait_on_fire_tv(self, portrait_path):
+        # Set these to match your Fire TV's Kodi settings
+        FIRE_TV_IP = "192.168.1.100"  # Replace with your Fire TV IP address
+        KODI_PORT = 8080              # Replace with your Kodi JSON-RPC port
+        url = f"http://{FIRE_TV_IP}:{KODI_PORT}/jsonrpc"
+        payload = {
+            "jsonrpc": "2.0",
+            "method": "Player.Open",
+            "params": {
+                "item": {"file": portrait_path}
+            },
+            "id": 1
+        }
+        try:
+            response = requests.post(url, json=payload)
+            response.raise_for_status()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error displaying portrait on Fire TV: {e}")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # NEW FUNCTION: display_on_fire_tv
+    # Retrieves the portrait path from the selected NPC node and sends it to Fire TV.
+    # ─────────────────────────────────────────────────────────────────────────
+    def display_on_fire_tv(self):
+        if not self.selected_node or not self.selected_node.startswith("npc_"):
+            messagebox.showerror("Error", "No NPC selected for display.")
+            return
+        # Extract NPC name from the node tag.
+        npc_name = self.selected_node.replace("npc_", "").replace("_", " ")
+        npc_data = self.npcs.get(npc_name)
+        if not npc_data:
+            messagebox.showerror("Error", f"NPC '{npc_name}' not found.")
+            return
+        portrait_path = npc_data.get("Portrait", "")
+        if portrait_path and os.path.exists(portrait_path):
+            self.display_portrait_on_fire_tv(portrait_path)
+        else:
+            messagebox.showerror("Error", "No valid portrait found for this NPC.")
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: _on_mousewheel_y
     # Scrolls the canvas vertically based on mouse wheel input.
@@ -446,6 +489,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         node_menu.add_command(label="Delete Node", command=self.delete_node)
         node_menu.add_separator()
         node_menu.add_command(label="Change Color", command=lambda: self.show_color_menu(x, y))
+        node_menu.add_command(label="Display on Fire TV", command=self.display_on_fire_tv)
         node_menu.post(int(x), int(y))
 
     # ─────────────────────────────────────────────────────────────────────────
