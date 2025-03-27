@@ -213,7 +213,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         image_label.image = portrait_img  # persist reference
         image_label.pack(expand=True)
         logging.debug("Portrait image label created.")
-        new_x = screen_x + 1920
+        new_x = screen_x + 0 #1920
         win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
         logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")        
         # Bind a click event to close the window.
@@ -426,7 +426,7 @@ class NPCGraphEditor(ctk.CTkFrame):
             # Build a list of NPCs that have the selected faction.
             faction_npcs = []
             for npc in self.npcs.values():
-                faction_value = npc.get("Faction")
+                faction_value = npc.get("Factions")
                 if not faction_value:
                     continue
                 if isinstance(faction_value, list):
@@ -457,7 +457,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         # Flatten factions from all NPCs.
         all_factions = []
         for npc in self.npcs.values():
-            faction_value = npc.get("Faction")
+            faction_value = npc.get("Factions")
             if not faction_value:
                 continue
             if isinstance(faction_value, list):
@@ -638,7 +638,7 @@ class NPCGraphEditor(ctk.CTkFrame):
             # Get NPC data for extra fields
             npc_data = self.npcs.get(npc_name, {})
             role = npc_data.get("Role", "")
-            faction = npc_data.get("Faction", "")
+            faction = npc_data.get("Factions", "")
             
             # Build the text that includes name, role, and faction.
             wrapped_text = f"{npc_name}\nRole: {role}\nFaction: {faction}"

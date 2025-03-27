@@ -7,8 +7,7 @@ from functools import partial
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.text_helpers import format_longtext
 from customtkinter import CTkLabel, CTkImage
-from modules.npcs.npc_graph_editor import NPCGraphEditor
-from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
+from modules.generic.entity_detail_factory import create_entity_detail_frame
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)  # Thumbnail size for lists
@@ -371,8 +370,8 @@ class ScenarioDetailView(ctk.CTkFrame):
         if not item:
             messagebox.showerror("Error", f"{entity_type[:-1]} '{name}' not found.")
             return
-        # Create the initial frame using the default content_area.
-        frame = self.create_entity_frame(entity_type, item)
+        frame = create_entity_detail_frame(entity_type, item, master=self.content_area)
+        # Then add the frame to a new tab or open it in a new window.
         # Pass a factory function that recreates the frame with a given master.
         self.add_tab(
             name,

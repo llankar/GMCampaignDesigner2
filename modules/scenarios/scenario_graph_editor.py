@@ -10,6 +10,7 @@ from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.generic.generic_editor_window import GenericEditorWindow
+from modules.generic.entity_detail_factory import create_entity_detail_frame
 from modules.npcs import npc_opener
 from customtkinter import CTkImage
 import logging
@@ -17,6 +18,8 @@ from screeninfo import get_monitors
 import tkinter as tk  # standard tkinter
 import os, logging, ctypes
 from ctypes import wintypes
+from modules.generic.entity_detail_factory import create_entity_detail_frame
+            
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
@@ -34,7 +37,7 @@ def get_monitors():
                                           wintypes.LPARAM)
     ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
     return monitors
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.DEBUG)
 
 # ─────────────────────────────────────────────────────────────────────────
 # CLASS: ScenarioGraphEditor
@@ -211,7 +214,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         logging.debug("Portrait image label created.")
 
         # Move the window 1920 pixels to the right.
-        new_x = screen_x + 1920
+        new_x = screen_x + 0 # 1920
         win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
         logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")
 
@@ -563,7 +566,6 @@ class ScenarioGraphEditor(ctk.CTkFrame):
 
 
     def on_double_click(self, event):
-        """Mimics NPCGraphEditor: globally bound <Double-Button-1> on canvas."""
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
         items = self.canvas.find_closest(x, y)
@@ -571,31 +573,55 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             return
         item_id = items[0]
         tags = self.canvas.gettags(item_id)
-
-        # If line, do nothing
         if "link" in tags:
             return
 
-        node_tag = next((t for t in tags if t.startswith("scenario_")
-                         or t.startswith("npc_")
-                         or t.startswith("place_")), None)
+        node_tag = None
+        for t in tags:
+            if t.startswith("scenario_") or t.startswith("npc_") or t.startswith("place_"):
+                node_tag = t
+                break
         if not node_tag:
             return
 
-        # Open the relevant editor
         if node_tag.startswith("scenario_"):
             scenario_template = load_template("scenarios")
             if self.scenario:
                 GenericEditorWindow(None, self.scenario, scenario_template)
-        elif node_tag.startswith("npc_"):
-            npc_name = node_tag.replace("npc_", "").replace("_", " ")
-            npc_opener.open_npc_editor_window(npc_name)
-        elif node_tag.startswith("place_"):
-            place_template = load_template("places")
-            place_name = node_tag.replace("place_", "").replace("_", " ")
-            place_data = self.places.get(place_name)
-            if place_data:
-                GenericEditorWindow(None, place_data, place_template)
+        else:
+            if node_tag.startswith("npc_"):
+                entity_type = "NPCs"
+                entity_name = node_tag.replace("npc_", "").replace("_", " ")
+                entity = self.npcs.get(entity_name)
+                template_path = "npcs/npcs_template.json"
+            elif node_tag.startswith("place_"):
+                entity_type = "Places"
+                entity_name = node_tag.replace("place_", "").replace("_", " ")
+                entity = self.places.get(entity_name)
+                template_path = "places/places_template.json"
+            elif node_tag.startswith("faction_"):
+                entity_type = "Factions"
+                entity_name = node_tag.replace("faction_", "").replace("_", " ")
+                entity = self.factions.get(entity_name)
+                template_path = "factions/factions_template.json"
+            else:
+                return
+
+            if not entity:
+                messagebox.showerror("Error", f"{entity_type[:-1]} '{entity_name}' not found.")
+                return
+
+            import tkinter as tk
+            win = tk.Toplevel(self)
+            win.title(entity_name)
+            # Import the factory function.
+            # Pass your actual open_entity_tab callback if available; otherwise, None.
+            detail_frame = create_entity_detail_frame(entity_type, entity, master=win)
+            detail_frame.pack(fill="both", expand=True)
+
+
+
+
 
     def on_right_click(self, event):
         """Mimics NPCGraphEditor: globally bound <Button-3> on canvas."""

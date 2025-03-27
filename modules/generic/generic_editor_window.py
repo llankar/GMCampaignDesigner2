@@ -63,7 +63,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
-            elif field["name"] in ["NPCs", "Places", "Faction"]:
+            elif field["name"] in ["NPCs", "Places", "Factions"]:
                 self.create_dynamic_combobox_list(field)
             elif field["name"] == "Portrait":
                 self.create_portrait_field(field)
@@ -138,7 +138,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             options_list = load_npcs_list()
         elif field["name"] == "Places":
             options_list = load_places_list()
-        elif field["name"] == "Faction":
+        elif field["name"] == "Factions":
             options_list = load_factions_list()
         else:
             options_list = []
@@ -210,7 +210,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             if field["type"] == "longtext":
                 self.item[field["name"]] = widget.get_text_data()
 
-            elif field["name"] in ["Places", "NPCs", "Faction"]:
+            elif field["name"] in ["Places", "NPCs", "Factions"]:
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
             elif field["name"] == "Portrait":
                 self.item[field["name"]] = self.portrait_path  # Use the stored path
@@ -287,7 +287,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             # Build a prompt based on the current NPC's data (you can enhance this as needed)
             npc_name = self.item.get("Name", "Unknown")
             npc_role = self.item.get("Role", "Unknown")
-            npc_faction = self.item.get("Faction", "Unknown")
+            npc_faction = self.item.get("Factions", "Unknown")
             npc_desc = self.item.get("Description", "Unknown") 
             npc_desc =  text_helpers.format_longtext(npc_desc)
             npc_desc = f"{npc_desc} {npc_role} {npc_faction}"
