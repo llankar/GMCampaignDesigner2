@@ -449,7 +449,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             label.bind("<Button-1>", partial(self._on_link_clicked, linked_type, item))
 
     def _on_link_clicked(self, linked_type, item, event=None):
-        self.open_entity_tab(linked_type + "s", item)
+        self.open_entity_tab(linked_type, item)
 
     def create_note_frame(self, master=None, initial_text=""):
         if master is None:
