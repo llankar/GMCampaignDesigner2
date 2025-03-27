@@ -334,7 +334,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             GENERATED_FOLDER = "assets/generated"
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
-
+            os.remove(output_filename)  # Delete the original image file
             # messagebox.showinfo("Success", f"Portrait saved as {output_filename} and associated with the NPC.")
 
             # Optional: Update the portrait display in the UI.
@@ -382,7 +382,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             img = img.convert("RGB")
             img.thumbnail(MAX_PORTRAIT_SIZE)
             img.save(dest_path)
-
+        
         return dest_path
     class CustomDropdown(ctk.CTkToplevel):
         def __init__(self, master, options, command, **kwargs):

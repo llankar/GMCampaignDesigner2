@@ -265,6 +265,7 @@ class MainWindow(ctk.CTk):
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
              # Associate the generated portrait with the NPC data.
             npc["Portrait"] = self.copy_and_resize_portrait(npc, output_filename)
+            os.remove(output_filename)  # Delete the original image file
             print(f"Generated portrait for NPC '{npc_name}'")
          
         except Exception as e:
@@ -305,22 +306,22 @@ class MainWindow(ctk.CTk):
         else:
             print("No NPCs were missing portraits.")  
     def copy_and_resize_portrait(self, npc, src_path):
-            PORTRAIT_FOLDER = "assets/portraits"
-            MAX_PORTRAIT_SIZE = (1024, 1024)
+        PORTRAIT_FOLDER = "assets/portraits"
+        MAX_PORTRAIT_SIZE = (1024, 1024)
 
-            os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
+        os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
 
-            npc_name = npc.get("Name", "Unnamed").replace(" ", "_")
-            ext = os.path.splitext(src_path)[-1].lower()
-            dest_filename = f"{npc_name}_{id(self)}{ext}"
-            dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
+        npc_name = npc.get("Name", "Unnamed").replace(" ", "_")
+        ext = os.path.splitext(src_path)[-1].lower()
+        dest_filename = f"{npc_name}_{id(self)}{ext}"
+        dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
 
-            with Image.open(src_path) as img:
-                img = img.convert("RGB")
-                img.thumbnail(MAX_PORTRAIT_SIZE)
-                img.save(dest_path)
-
-            return dest_path
+        with Image.open(src_path) as img:
+            img = img.convert("RGB")
+            img.thumbnail(MAX_PORTRAIT_SIZE)
+            img.save(dest_path)
+       
+        return dest_path
 
     def preview_and_export_scenarios(self):
         scenario_wrapper = GenericModelWrapper("scenarios")
