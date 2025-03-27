@@ -15,6 +15,7 @@ from tkinter import filedialog,  messagebox
 FACTIONS_FILE = "data/factions.json"
 NPCS_FILE = "data/npcs.json"
 PLACES_FILE = "data/places.json"
+OBJECTS_FILE = "data/objects.json"
 SWARMUI_PROCESS = None
 
 
@@ -34,6 +35,12 @@ def load_places_list():
     if os.path.exists(PLACES_FILE):
         with open(PLACES_FILE, "r", encoding="utf-8") as f:
             return [place["Name"] for place in json.load(f)]
+    return []
+
+def load_objects_list():
+    if os.path.exists(OBJECTS_FILE):
+        with open(OBJECTS_FILE, "r", encoding="utf-8") as f:
+            return [object["Name"] for object in json.load(f)]
     return []
 
 class GenericEditorWindow(ctk.CTkToplevel):
@@ -63,7 +70,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
-            elif field["name"] in ["NPCs", "Places", "Factions"]:
+            elif field["name"] in ["NPCs", "Places", "Factions", "Objects"]:
                 self.create_dynamic_combobox_list(field)
             elif field["name"] == "Portrait":
                 self.create_portrait_field(field)
@@ -140,6 +147,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
             options_list = load_places_list()
         elif field["name"] == "Factions":
             options_list = load_factions_list()
+        elif field["name"] == "Objects":
+            options_list = load_objects_list()
         else:
             options_list = []
 
@@ -171,11 +180,14 @@ class GenericEditorWindow(ctk.CTkToplevel):
             combobox_list.remove(widget)
 
         def open_dropdown(widget, var):
-            # Position dropdown just below the widget
+            # Use the top-level window as parent so the dropdown isn’t clipped.
+            top = widget.winfo_toplevel()
             x = widget.winfo_rootx()
             y = widget.winfo_rooty() + widget.winfo_height()
-            dropdown = self.CustomDropdown(self, options=options_list, command=lambda val: var.set(val))
+            dropdown = self.CustomDropdown(top, options=options_list, command=lambda val: var.set(val))
             dropdown.geometry(f"+{x}+{y}")
+            dropdown.lift()  # Bring the dropdown to the front
+            dropdown.attributes("-topmost", True)  # Force it to stay on top
             dropdown.focus_set()
 
         for value in initial_values:
@@ -210,7 +222,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             if field["type"] == "longtext":
                 self.item[field["name"]] = widget.get_text_data()
 
-            elif field["name"] in ["Places", "NPCs", "Factions"]:
+            elif field["name"] in ["Places", "NPCs", "Factions", "Objects"]:
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
             elif field["name"] == "Portrait":
                 self.item[field["name"]] = self.portrait_path  # Use the stored path
@@ -288,9 +300,10 @@ class GenericEditorWindow(ctk.CTkToplevel):
             npc_name = self.item.get("Name", "Unknown")
             npc_role = self.item.get("Role", "Unknown")
             npc_faction = self.item.get("Factions", "Unknown")
+            npc_object = self.item.get("Objects", "Unknown")
             npc_desc = self.item.get("Description", "Unknown") 
             npc_desc =  text_helpers.format_longtext(npc_desc)
-            npc_desc = f"{npc_desc} {npc_role} {npc_faction}"
+            npc_desc = f"{npc_desc} {npc_role} {npc_faction} {npc_object}"
             prompt = f"{npc_desc}"
 
             # Step 2: Define image generation parameters

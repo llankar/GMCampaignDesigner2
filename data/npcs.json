@@ -54,7 +54,19 @@
     "Factions": [
       "Summer Court"
     ],
-    "Portrait": "assets/portraits\\Lady_Laurelindë_1299218492656.png"
+    "Portrait": "assets/portraits\\Lady_Laurelindë_1299218492656.png",
+    "Secret": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Objects": []
   },
   {
     "Name": "Detective Sofia Vasquez",
@@ -916,7 +928,10 @@
         "center": [],
         "right": []
       }
-    }
+    },
+    "Objects": [
+      "Sword of Hope"
+    ]
   },
   {
     "Name": "Alexandra 'Lexi' Cross and Vassago",
@@ -955,7 +970,10 @@
         "center": [],
         "right": []
       }
-    }
+    },
+    "Objects": [
+      "Sword of Despair"
+    ]
   },
   {
     "Name": "Lucille Voss and Marchosias",
@@ -1837,7 +1855,21 @@
     "Factions": [
       "Knights of the Cross"
     ],
-    "Portrait": "assets/portraits\\Knight_Armand_St._Croix_200.png"
+    "Portrait": "assets/portraits\\Knight_Armand_St._Croix_200.png",
+    "Secret": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Objects": [
+      "Sword of Hope"
+    ]
   },
   {
     "Name": "Demon Grishkar",
