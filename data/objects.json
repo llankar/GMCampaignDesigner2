@@ -1,0 +1,59 @@
+[
+  {
+    "Name": "Sword of Hope",
+    "Description": {
+      "text": "Sword of Hope",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secrets": {
+      "text": "Sword of Hope",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Portrait": "assets/portraits\\Sword_of_Hope_2372383557008.png"
+  },
+  {
+    "Name": "Sword of Despair",
+    "Description": {
+      "text": "Sword of Despair",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secrets": {
+      "text": "Sword of Despair",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [
+          [
+            "1.0",
+            "1.16"
+          ]
+        ],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Portrait": "assets/portraits\\Sword_of_Despair_2372469961616.png"
+  }
+]
