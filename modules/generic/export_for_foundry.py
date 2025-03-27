@@ -97,7 +97,7 @@ def preview_and_export_foundry(self):
                 token["x"] = 100
                 token["y"] = 100 * (idx + 1)
                 # Add faction info and a border color based on the first faction.
-                factions_list = npc.get("Faction", [])
+                factions_list = npc.get("Factions", [])
                 token["factions"] = factions_list
                 token["borderColor"] = faction_color_map.get(factions_list[0], "#000000") if factions_list else "#000000"
                 tokens.append(token)

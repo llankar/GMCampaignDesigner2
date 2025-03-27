@@ -149,7 +149,7 @@ def import_formatted_scenario(text):
                     "text": secret.strip(),
                     "formatting": default_formatting
                 },
-                "Faction": [],
+                "Factions": [],
                 "Portrait": ""
             }
             npcs.append(npc_obj)

@@ -20,7 +20,22 @@
   },
   {
     "Name": "Frozen Fountain",
-    "Description": "A glade where water freezes memories."
+    "Description": {
+      "text": "A glade where water freezes memories.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "NPCs": [
+      "Detective Sofia Vasquez",
+      "Liam Raith",
+      "Lucinda Raith"
+    ]
   },
   {
     "Name": "Hollow Ballroom",
@@ -180,7 +195,20 @@
   },
   {
     "Name": "Blizzard Alley",
-    "Description": "A Chicago alley locked in perpetual storm, where every gust whispers secrets."
+    "Description": {
+      "text": "A Chicago alley locked in perpetual storm, where every gust whispers secrets.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "NPCs": [
+      "Lucinda Raith"
+    ]
   },
   {
     "Name": "Hollow Mirror",

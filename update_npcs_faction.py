@@ -27,9 +27,9 @@ def transform_faction_to_list(json_file_path):
 
     # Process each item (dict) in the list
     for item in data:
-        if "Faction" in item and isinstance(item["Faction"], str):
+        if "Factions" in item and isinstance(item["Factions"], str):
             # Convert string to list
-            item["Faction"] = [item["Faction"]]
+            item["Factions"] = [item["Factions"]]
 
     # If we started with a single dict, convert back
     if single_dict_mode:

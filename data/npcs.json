@@ -13,7 +13,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Sariel_of_the_Hollow_Glade_1299218492656.png"
@@ -32,7 +32,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Thane_Coldfingers_1299218492656.png"
@@ -51,7 +51,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Summer Court"
         ],
         "Portrait": "assets/portraits\\Lady_Laurelindë_1299218492656.png"
@@ -70,7 +70,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Detective_Sofia_Vasquez_1299218492656.png"
@@ -79,7 +79,7 @@
         "Name": "The Broken Prince",
         "Role": "Wyldfae Trickster",
         "Description": "Once loved Mab, now hunted.",
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\The_Broken_Prince_1299218492656.png"
@@ -98,7 +98,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Warden_Ezekiel_Cross_1299218492656.png"
@@ -117,7 +117,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Meera_Kline_1299218492656.png"
@@ -126,7 +126,7 @@
         "Name": "Archivist Yoko Tamura",
         "Role": "Library Keeper",
         "Description": "Blind but remembers every book.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Archivist_Yoko_Tamura_portrait.png"
@@ -135,7 +135,7 @@
         "Name": "Liam Raith",
         "Role": "Lover",
         "Description": "White Court vampire truly in love.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Liam_Raith_portrait.png"
@@ -144,7 +144,7 @@
         "Name": "Lucinda Raith",
         "Role": "White Court Matriarch",
         "Description": "Ruthless and traditional.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Lucinda_Raith_portrait.png"
@@ -153,7 +153,7 @@
         "Name": "Nicodemus Archleone",
         "Role": "Denarian Mastermind",
         "Description": "Cold, calculating and utterly evil.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Nicodemus_Archleone_portrait.png"
@@ -172,7 +172,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Pastor_Caleb_North_1299218492656.png"
@@ -181,7 +181,7 @@
         "Name": "Lady Elaris",
         "Role": "Exiled Winter Lady",
         "Description": "Slender, ice-pale, with frost weaving her hair into a crown of sorrow. Her voice always sounds like cracking ice.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Lady_Elaris_portrait.png"
@@ -200,7 +200,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Detective_Irene_Vale_1299218492656.png"
@@ -209,7 +209,7 @@
         "Name": "Sir Alden",
         "Role": "Winter Knight",
         "Description": "Massive knight of blue-tinged iron, his breath freezing the air. His blade thirsts for betrayal.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Sir_Alden_portrait.png"
@@ -228,7 +228,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Knights of the Cross"
         ],
         "Portrait": "assets/portraits\\Sister_Maria_Bell_1299218492656.png"
@@ -237,7 +237,7 @@
         "Name": "Warden Lysander Black",
         "Role": "White Council Senior Wizard",
         "Description": "A fractured mind inhabiting a ruined body. His eyes are shattered prisms, and his speech overlaps as if spoken by many voices at once.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Warden_Lysander_Black_portrait.png"
@@ -256,7 +256,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Spirits"
         ],
         "Portrait": "assets/portraits\\Aiden_Carver_1299218492656.png"
@@ -275,7 +275,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Joe_Callahan_1299218492656.png"
@@ -294,7 +294,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Jenna_Moreno_1299218492656.png"
@@ -313,7 +313,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Marcus_Raith_1299218492656.png"
@@ -332,7 +332,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Alaric_Raith_1299218492656.png"
@@ -351,7 +351,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Selena_Raith_1299218492656.png"
@@ -370,16 +370,16 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Gideon_Raith_1299218492656.png"
     },
     {
         "Name": "Diana Raith",
-        "Role": "Faction Liaison",
+        "Role": "Factions Liaison",
         "Description": {
-            "text": "Ethereal beauty with pale skin and silver-blue eyes, often wearing flowing gowns that enhance her ghostly aura. Acts as a liaison between House Raith and magical factions, unmatched in charm but harboring secret ambitions for more power.",
+            "text": "Ethereal beauty with pale skin and silver-blue eyes, often wearing flowing gowns that enhance her ghostly aura. Acts as a liaison between House Raith and magical Factionss, unmatched in charm but harboring secret ambitions for more power.",
             "formatting": {
                 "bold": [],
                 "italic": [],
@@ -389,7 +389,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Diana_Raith_1299218492656.png"
@@ -398,7 +398,7 @@
         "Name": "Matthias Raith",
         "Role": "Political Advisor",
         "Description": "Calm and serene with short-cropped brown hair and a well-groomed beard. Matthias advises Lara Raith, using his mastery of reading desires and predicting outcomes, while secretly nursing ambitions of his own.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Matthias_Raith_1299218492656.png"
@@ -407,7 +407,7 @@
         "Name": "Lady Victoria Raith",
         "Role": "Media Manipulator",
         "Description": "Statuesque with platinum blonde hair, ice-blue eyes, and avant-garde fashion sense. Manages high-end fashion magazines and modeling agencies, using them as feeding grounds while competing with Lara for influence.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Lady_Victoria_Raith_1299218492656.png"
@@ -416,7 +416,7 @@
         "Name": "Lord Dominic Malvora",
         "Role": "Security Mogul",
         "Description": "Distinguished man in his forties with salt-and-pepper hair and dark eyes that absorb light. Head of Malvora's Chicago operations, running a private security firm and mastering fear-based feeding techniques.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Lord_Dominic_Malvora_1299218492656.png"
@@ -425,7 +425,7 @@
         "Name": "Natasha Malvora",
         "Role": "Fear Entertainer",
         "Description": "Young woman with raven-black hair, purple highlights, and gothic-inspired attire. Runs underground horror venues, experiments with digital fear, and cultivates influence among younger supernatural circles.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Natasha_Malvora_1299218492656.png"
@@ -434,7 +434,7 @@
         "Name": "Isadora Malvora",
         "Role": "Fear Psychologist",
         "Description": "Long jet-black hair, pale blue eyes, and dark Victorian dresses. Fascinated by the psychology of fear, Isadora holds private experiments to explore mortal terror, balancing cruelty with intellectual curiosity.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Isadora_Malvora_1299218492656.png"
@@ -443,7 +443,7 @@
         "Name": "Cyrus Malvora",
         "Role": "Rogue Terrorist",
         "Description": "Gaunt with thin graying hair, a ghostly presence wrapped in shabby suits. Black sheep of House Malvora, Cyrus feeds on urban legends by terrorizing isolated communities.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Cyrus_Malvora_1299218492656.png"
@@ -452,7 +452,7 @@
         "Name": "Vera Malvora",
         "Role": "Sadistic Therapist",
         "Description": "Warm and motherly appearance with golden curls and a bright smile hiding deep cruelty. Masquerades as a therapist to expose and feed on her clients' fears, building a network of indebted mortals.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Vera_Malvora_1299218492656.png"
@@ -461,7 +461,7 @@
         "Name": "Remy Malvora",
         "Role": "Fear Stalker",
         "Description": "Rugged and feral with long unkempt hair and predatory eyes. A hunter by nature, Remy stalks victims through the city’s dark corners, preferring action to politics.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Remy_Malvora_1299218492656.png"
@@ -470,7 +470,7 @@
         "Name": "Elena Malvora",
         "Role": "Mass Hysteria Specialist",
         "Description": "Striking woman with auburn hair and dramatic flair. Creates large-scale fear events, driving entire crowds to madness while pursuing personal ambitions at any cost.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Elena_Malvora_1299218492656.png"
@@ -479,7 +479,7 @@
         "Name": "Dr. Elizabeth Skavis",
         "Role": "Despair Doctor",
         "Description": "Elegant woman with auburn hair, wire-rimmed glasses, and precise movements. A psychiatrist feeding on despair through exclusive mental health clinics, she studies supernatural depression.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Dr._Elizabeth_Skavis_1299218492656.png"
@@ -488,7 +488,7 @@
         "Name": "James Skavis",
         "Role": "Despair Poet",
         "Description": "Thin professor with gold-rimmed glasses and vintage suits. Runs literary societies and uses tragic poetry readings as feeding grounds, blending academia with supernatural despair.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\James_Skavis_1299218492656.png"
@@ -497,7 +497,7 @@
         "Name": "Benedict Skavis",
         "Role": "Despair Counselor",
         "Description": "Slender with silver hair and perpetually frowning. Acts as a 'counselor' who deepens his victims' depression, believing that life itself is too cruel to deserve hope.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Benedict_Skavis_1299218492656.png"
@@ -506,7 +506,7 @@
         "Name": "Livia Skavis",
         "Role": "Despair Artist",
         "Description": "Ethereal with ash-colored hair and tear-filled eyes. Once an artist herself, Livia now inspires tragic beauty in others before feeding, especially drawn to poets and musicians.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Livia_Skavis_1299218492656.png"
@@ -515,7 +515,7 @@
         "Name": "Victor Skavis",
         "Role": "Grief Predator",
         "Description": "Tall and gaunt with haunted eyes, wearing simple dark clothes. Poses as a grief counselor, feeding on mourners by pulling them deeper into despair.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Victor_Skavis_1299218492656.png"
@@ -524,7 +524,7 @@
         "Name": "Marcella Skavis",
         "Role": "Isolation Seductress",
         "Description": "Raven-haired with moonlight skin, moving with languid grace. Seduces the lonely, feeding off their hopelessness, often targeting hospital patients and support groups.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Marcella_Skavis_1299218492656.png"
@@ -533,7 +533,7 @@
         "Name": "Darius Skavis",
         "Role": "Economic Despair Architect",
         "Description": "Weary man in worn suits with tired eyes. Uses financial manipulation and social ruin to spread despair, enjoying both large-scale suffering and personal tragedy.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Darius_Skavis_1299218492656.png"
@@ -552,7 +552,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Lily_and_Rose_Winter_1299218492656.png"
@@ -561,7 +561,7 @@
         "Name": "Alexander Grey",
         "Role": "Independent Matchmaker",
         "Description": "Androgynous shapeshifter with fluid grace and cutting-edge fashion. Runs a supernatural matchmaking service while navigating politics between all White Court Houses.",
-        "Faction": [
+        "Factions": [
             "White Court"
         ],
         "Portrait": "assets/portraits\\Alexander_Grey_1299218492656.png"
@@ -570,7 +570,7 @@
         "Name": "Isabella 'Izzy' Ramos",
         "Role": "Fellowship Liaison",
         "Description": "Petite Latina woman with tight black curls, dark eyes flickering between kindness and predatory gleam, dressed in layered scarves, heavy jewelry, and combat boots. Former social worker from Mexico City, now a liaison between the Fellowship and supernatural groups after a Red Court attack left her infected.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Isabella_'Izzy'_Ramos_1299218492656.png"
@@ -579,7 +579,7 @@
         "Name": "Akio Tanaka",
         "Role": "Martial Mentor",
         "Description": "Tall, slender Japanese man with sharp features, low ponytail, and minimalist grey clothing. Former monk turned martial artist, infected in a ritual gone wrong, now mentoring recruits in self-defense and hunger control.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Akio_Tanaka_1299218492656.png"
@@ -588,7 +588,7 @@
         "Name": "Rosa Martinez",
         "Role": "Combat Medic",
         "Description": "Muscular middle-aged woman with sun-kissed skin, numerous scars, and shaved head. Ex-military medic who uses her medical expertise to heal infected comrades and develop protocols to handle Red Court abilities.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Rosa_Martinez_1299218492656.png"
@@ -597,7 +597,7 @@
         "Name": "Sebastian 'Bash' Blake",
         "Role": "Street Guardian",
         "Description": "Broad-shouldered African American man with a disarming smile, favoring hoodies, sneakers, and fingerless gloves. Former gang mediator, now using his infection-enhanced strength to protect marginalized communities as part of the Fellowship.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Sebastian_'Bash'_Blake_1299218492656.png"
@@ -606,7 +606,7 @@
         "Name": "Claire Fontaine",
         "Role": "Lorekeeper",
         "Description": "Delicate Englishwoman with fair skin, curly blonde hair, round glasses, and a haunting glow in her eyes. Historian and linguist infected while researching vampire lore, now a critical researcher for the Fellowship.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Claire_Fontaine_1299218492656.png"
@@ -615,7 +615,7 @@
         "Name": "Mateo Delgado",
         "Role": "Tactical Mastermind",
         "Description": "Tall, wiry man with hollow cheeks and sharp bones, often in tattered earthy clothes. Former guerrilla fighter from Central America, now a strategist for Fellowship cells, feared for his ruthless efficiency.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Mateo_Delgado_1299218492656.png"
@@ -624,7 +624,7 @@
         "Name": "Evelyn Cho",
         "Role": "Sniper Leader",
         "Description": "Athletic woman with piercing gaze, shoulder-length black hair, and a calm demeanor. Olympic archer turned Fellowship sniper, leveraging her precision to stay effective while keeping her hunger in check.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Evelyn_Cho_1299218492656.png"
@@ -633,7 +633,7 @@
         "Name": "Carter Finch",
         "Role": "Digital Spy",
         "Description": "Wiry man in his forties with piercing blue eyes and vintage band shirts under his leather jacket. Former hacker and black-market info broker, now running the Fellowship’s digital intelligence network.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Carter_Finch_1299218492656.png"
@@ -642,7 +642,7 @@
         "Name": "Alessandra 'Sandy' Marino",
         "Role": "Legal Manipulator",
         "Description": "Striking Italian woman with classical beauty, dark curls, and elegant but practical clothing. Former Naples prosecutor infected while handling a Red Court case, now erasing records and legally protecting the Fellowship.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Alessandra_'Sandy'_Marino_1299218492656.png"
@@ -651,7 +651,7 @@
         "Name": "Vladislav 'Vlad' Sokolov",
         "Role": "Bodyguard",
         "Description": "Tall, imposing man with a shaved head, pale skin, and a trench coat that cloaks him in shadows. Ex-Russian enforcer turned protector of the Fellowship’s most vulnerable after narrowly surviving infection.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Vladislav_'Vlad'_Sokolov_portrait.png"
@@ -660,7 +660,7 @@
         "Name": "Duchess Maria Lucia de Estrella",
         "Role": "Red Court Aristocrat",
         "Description": "Striking woman in her thirties with long black hair and a silver streak, wearing 1940s vintage couture. Former Spanish noble, one of North America's oldest Red Court vampires, seeking to rebuild her power in Chicago after losing ground to the White Council.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Duchess_Maria_Lucia_de_Estrella_1299218492656.png"
@@ -669,7 +669,7 @@
         "Name": "Lord Jonathan Blackwood",
         "Role": "Financial Mastermind",
         "Description": "British gentleman in his fifties with meticulously groomed silver hair and a custom cane. Turned during the British Empire’s height, he controls the Red Court’s financial operations in the Midwest, with ties to mortal and supernatural banking.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Lord_Jonathan_Blackwood_portrait.png"
@@ -678,7 +678,7 @@
         "Name": "Carmen Moreno",
         "Role": "Security Chief",
         "Description": "Athletic woman in her mid-twenties with short spiky hair, leather jacket, and visible scars in her true form. Former special forces soldier, now head of security for Red Court operations in Chicago.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Carmen_Moreno_1299218492656.png"
@@ -687,7 +687,7 @@
         "Name": "Dr. Nicolas Mendoza",
         "Role": "Vampiric Researcher",
         "Description": "Distinguished man in his forties with wire-rimmed glasses and salt-and-pepper hair. Former medical doctor, now overseeing the Red Court’s blood supply while researching vampirism’s biological aspects.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Dr._Nicolas_Mendoza_1299218492656.png"
@@ -696,7 +696,7 @@
         "Name": "Alexandra 'Lexi' Varez",
         "Role": "Digital Operator",
         "Description": "Tech executive in her twenties, always equipped with cutting-edge gadgets and a curated social media presence. Recently turned, she runs Red Court’s digital operations, maintaining darknet communications.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Alexandra_'Lexi'_Varez_1299218492656.png"
@@ -705,7 +705,7 @@
         "Name": "Miguel 'The Artist' Rossi",
         "Role": "Artistic Forger",
         "Description": "Bohemian artist in his thirties with paint-stained hands and artistic clothing. Turned in the 1960s art scene, Miguel uses his galleries as fronts for forgery, antiquities, and safe houses.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Miguel_'The_Artist'_Rossi_1299218492656.png"
@@ -714,7 +714,7 @@
         "Name": "Isabella and Diego Luna",
         "Role": "Spy Twins",
         "Description": "Identical twins in their late teens, moving in eerie synchronicity and wearing coordinated outfits. Turned together in the 1850s, they work as spies and information brokers, gathering secrets for the Court.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Isabella_and_Diego_Luna_1299218492656.png"
@@ -723,7 +723,7 @@
         "Name": "Alberto 'The Keeper' Novar",
         "Role": "Safehouse Master",
         "Description": "Burly man in his sixties with heavily scarred true form and practical working-class clothes. Former enforcer turned keeper of vampire safe houses, with unmatched knowledge of Chicago’s supernatural hideouts.",
-        "Faction": [
+        "Factions": [
             "Red Court"
         ],
         "Portrait": "assets/portraits\\Alberto_'The_Keeper'_Novar_1299218492656.png"
@@ -732,7 +732,7 @@
         "Name": "Marcus 'Mark' Shaw and Ophiriel",
         "Role": "Warrior of Ruin",
         "Description": "Tall, athletic man in his mid-thirties, with a muscular build, close-cropped dark hair, square jaw, and piercing gray eyes. Fitted tactical gear favors practicality over style. Former military or mercenary, now host to Ophiriel, the Fallen Angel of War and Ruin. Ophiriel manifests as scarred bronze armor and grants Mark devastating combat powers, from kinetic redirection to rending claws and war cries.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Marcus_'Mark'_Shaw_and_Ophiriel_1299218492656.png"
@@ -741,7 +741,7 @@
         "Name": "Alexandra 'Lexi' Cross and Vassago",
         "Role": "Master Manipulator",
         "Description": "Lithe woman in her late twenties with blonde hair in a sleek bob, favoring stylish but understated clothing. Predatory green eyes hide her inner demon. Former con artist, now host to Vassago, the Serpent of Secrets. Vassago grants telepathy, illusion-casting, and a venomous bite that traps victims in nightmares.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Alexandra_'Lexi'_Cross_and_Vassago_1299218492656.png"
@@ -750,7 +750,7 @@
         "Name": "Captain Jonah Steele and Andras",
         "Role": "The Inciter",
         "Description": "Broad-shouldered man in his fifties with a military bearing, salt-and-pepper hair, and a permanent scowl. His combat gear is practical and worn. A decorated officer before falling to Andras, the Angel of Strife, who grants him the power to manipulate lightning, unleash war cries that incite violence, and channel his rage into tactical brilliance.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Captain_Jonah_Steele_and_Andras_1299218492656.png"
@@ -759,7 +759,7 @@
         "Name": "Lucille Voss and Marchosias",
         "Role": "Hellfire Huntress",
         "Description": "Petite woman in her early thirties with pale skin, dark wavy hair, and gothic vintage style. Her eyes burn with cold calculation. Once a reclusive scholar, Lucille now hosts Marchosias, the Black Wolf of Hellfire. She shifts between human and beast, hunts with supernatural senses, and wields black flames that devour both flesh and spirit.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Lucille_Voss_and_Marchosias_1299218492656.png"
@@ -768,7 +768,7 @@
         "Name": "Frederick 'Freddie' Winters and Orobas",
         "Role": "Phantom Infiltrator",
         "Description": "Tall, lanky man with short blonde hair and wire-frame glasses, dressed in well-tailored suits hiding his feverish intensity. Former intelligence analyst, now host to Orobas, the Shadow Horse. Freddie can become invisible, phase through walls, and rewrite memories, making him the ultimate infiltrator.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Frederick_'Freddie'_Winters_and_Orobas_1299218492656.png"
@@ -777,7 +777,7 @@
         "Name": "Diana Vale and Barbatos",
         "Role": "Whispering Tyrant",
         "Description": "Elegant middle-aged woman with silver hair, sharp features, and evening wear that commands attention. A former socialite and occultist, Diana became the vessel for Barbatos, the Black Owl. With telekinesis, mind control, and access to ancient secrets, she weaves schemes that ensnare enemies and allies alike.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Diana_Vale_and_Barbatos_1299218492656.png"
@@ -786,7 +786,7 @@
         "Name": "Mikhail Azarov",
         "Role": "Denarian Suspect and Scapegoat",
         "Description": "Tall, lean man with sharp features, slicked-back black hair, and a faint scar on his cheek. Always impeccably dressed in a tailored suit, with a crimson gem set into his silver ring. Mikhail’s role is murky — suspected to be a Denarian, but possibly just a red herring set up by the Red Court to divert suspicion. His evasiveness and cold professionalism make him a perfect scapegoat.",
-        "Faction": [
+        "Factions": [
             "Denarians"
         ],
         "Portrait": "assets/portraits\\Mikhail_Azarov_portrait.png"
@@ -795,7 +795,7 @@
         "Name": "Julia Foster",
         "Role": "Political Consultant",
         "Description": "Savvy consultant with short dark hair, a no-nonsense demeanor, and a sharp strategic mind. Julia fought her way to the top from humble origins, despising corruption, but her lack of supernatural experience leaves her vulnerable.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Julia_Foster_portrait.png"
@@ -804,7 +804,7 @@
         "Name": "Antonia Rosetti",
         "Role": "Music Historian",
         "Description": "Tall, elegant Italian woman in her early 40s with flowing dark hair, passionate about music and lost treasures. A romantic dreamer from a family tied to the opera world, she can be dangerously naive about supernatural risks.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Antonia_Rosetti_portrait.png"
@@ -813,7 +813,7 @@
         "Name": "Father Michael Evans",
         "Role": "Community Priest",
         "Description": "Kind-hearted priest in his late 50s with graying hair and compassionate eyes, known as a pillar of the community. A former occult dabbler, he now runs a shelter but remains haunted by his dark past.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Father_Michael_Evans_portrait.png"
@@ -822,7 +822,7 @@
         "Name": "Detective Susan Grant",
         "Role": "Tenacious Detective",
         "Description": "Gruff, no-nonsense detective with practical clothes and a sharp glare. Known for her tough justice streak, she secretly acknowledges the supernatural after several close encounters.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Detective_Susan_Grant_1299218492656.png"
@@ -831,7 +831,7 @@
         "Name": "Professor Henry Caldwell",
         "Role": "Obsession-Driven Archaeologist",
         "Description": "Middle-aged, balding archaeologist obsessed with ancient cultures and mysteries. His curiosity often blinds him to danger, and his willingness to take risks makes him vulnerable to supernatural lures.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Professor_Henry_Caldwell_portrait.png"
@@ -840,7 +840,7 @@
         "Name": "Dr. Nora Ellis",
         "Role": "Dedicated Biochemist",
         "Description": "Highly intelligent and reserved, Nora dresses conservatively and rarely leaves her lab. She focuses entirely on advancing medical science, unaware her research might intersect with the supernatural.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Dr._Nora_Ellis_portrait.png"
@@ -849,7 +849,7 @@
         "Name": "Emily Green",
         "Role": "Visionary Artist",
         "Description": "Soft-spoken artist in her late 20s with curly hair and expressive eyes, often lost in her creative world. Her childhood visions intensified through her art, unknowingly tapping into supernatural energies.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Emily_Green_portrait.png"
@@ -858,7 +858,7 @@
         "Name": "Carter Finch",
         "Role": "Cybersecurity Specialist",
         "Description": "Wiry tech expert in his early 40s, fast-talking and conspiracy-obsessed, dressing casually. Former hacker now running a cybersecurity firm, Carter’s drive to uncover hidden secrets draws him into supernatural territory.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Carter_Finch_portrait.png"
@@ -867,7 +867,7 @@
         "Name": "Alessandra 'Sandy' Marino",
         "Role": "High-Profile Attorney",
         "Description": "Sharp, stylish attorney in her mid-30s with intimidating precision and fierce loyalty to her clients. Known for handling unusual cases, her work often brushes against supernatural law.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Alessandra_'Sandy'_Marino_portrait.png"
@@ -876,7 +876,7 @@
         "Name": "Stanislas 'Stan' Sokolov",
         "Role": "Ex-Enforcer Bodyguard",
         "Description": "Tall, intimidating man in his early 40s with piercing eyes, a quiet demeanor, and a faint Russian accent. Formerly a mob enforcer, now a loyal protector haunted by his violent past.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Stanislas_'Stan'_Sokolov_1299218492656.png"
@@ -885,7 +885,7 @@
         "Name": "Marcy Calhoun",
         "Role": "Psychometry Teacher",
         "Description": "Warm, curly-haired woman in her mid-40s working as a history teacher by day, psychometrist by night. Marcy uses her talent for reading object history to help the Paranet track supernatural activity.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Marcy_Calhoun_portrait.png"
@@ -894,7 +894,7 @@
         "Name": "Diego 'D' Alvarez",
         "Role": "Mechanic and Paranet Host",
         "Description": "Stocky man in his 30s with dark hair and an easygoing demeanor, running a repair shop that doubles as a Paranet safehouse. His minor electrokinesis helps him manipulate electronics in a pinch.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Diego_'D'_Alvarez_portrait.png"
@@ -903,7 +903,7 @@
         "Name": "Anita Patel",
         "Role": "Healer Nurse",
         "Description": "Petite nurse in her early 30s with practical clothing and a calming presence. Her minor biokinesis lets her ease pain and stabilize injuries, making her vital to Paranet medics.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Anita_Patel_portrait.png"
@@ -912,7 +912,7 @@
         "Name": "Raymond 'Ray' Sanchez",
         "Role": "Sound Illusionist",
         "Description": "Lanky Hollywood stagehand in his late 20s, usually found in Hawaiian shirts. Ray’s ability to create audio illusions makes him a valuable Paranet distraction expert.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Raymond_'Ray'_Sanchez_portrait.png"
@@ -921,7 +921,7 @@
         "Name": "Evelyn 'Evie' Dawson",
         "Role": "Medium and Shop Owner",
         "Description": "Middle-aged woman with flowing dresses and a colorful voodoo shop. Evie can talk to spirits, helping the Paranet deal with hauntings, though her gift attracts dangerous attention.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Evelyn_'Evie'_Dawson_portrait.png"
@@ -930,7 +930,7 @@
         "Name": "Tommy Greer",
         "Role": "Aura Spotter",
         "Description": "Shaggy blonde barista in his mid-20s with a grunge vibe. Tommy can sense magical auras and serves as Seattle’s early warning system for supernatural spikes.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Tommy_Greer_portrait.png"
@@ -939,7 +939,7 @@
         "Name": "Lana Brooks",
         "Role": "Charm-Casting Bar Owner",
         "Description": "Tough bar owner in her late 40s with cowboy boots and a denim wardrobe. Lana crafts protective charms and talismans while running her Nashville bar as a supernatural safehouse.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Lana_Brooks_portrait.png"
@@ -958,7 +958,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Dexter_'Dex'_Thompson_1299218492656.png"
@@ -967,7 +967,7 @@
         "Name": "Gloria 'Glo' Richmond",
         "Role": "Thermokinetic Social Worker",
         "Description": "Stocky woman in her 50s with dreadlocks and a firm sense of justice. Glo uses her heat and cold manipulation to create safehouses and protect at-risk communities from supernatural threats.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Gloria_'Glo'_Richmond_portrait.png"
@@ -976,7 +976,7 @@
         "Name": "Samira Khan",
         "Role": "Tarot Diviner",
         "Description": "Olive-skinned woman in her late 20s with flowing scarves and desert-friendly clothes. Samira’s tarot readings provide eerily accurate (and cryptic) insights to guide Paranet decisions.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Samira_Khan_portrait.png"
@@ -985,7 +985,7 @@
         "Name": "Karl 'The Baron' Dragovich",
         "Role": "War Strategist",
         "Description": "Tall and skeletal, with pale, waxy skin stretched tight over his skull and faintly glowing red eyes. Wears a tattered 19th-century Russian military uniform adorned with tarnished medals. Once a Russian noble turned during a revolution, Karl delights in brutality and city sieges. He holds a particular vendetta against the White Court.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Karl_'The_Baron'_Dragovich_1299218492656.png"
@@ -994,7 +994,7 @@
         "Name": "Lavinia Crane",
         "Role": "Dark Muse",
         "Description": "Decrepit beauty with silver hair floating like it’s underwater, wearing ancient, flowing gowns. Once a renowned opera singer, Lavinia now leads a cult that worships her, feeding her both blood and adoration.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Lavinia_Crane_1299218492656.png"
@@ -1003,7 +1003,7 @@
         "Name": "Matthias 'The Butcher' Kroll",
         "Role": "Terror Enforcer",
         "Description": "Burly and scarred, with rotting flesh under a bloodstained butcher's apron, always clutching a cleaver. A serial killer before turning, Matthias became a Black Court enforcer, gleefully spreading fear.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Matthias_'The_Butcher'_Kroll_1299218492656.png"
@@ -1012,7 +1012,7 @@
         "Name": "Esmeralda Wraithchild",
         "Role": "Twisted Child Predator",
         "Description": "Small, frail girl with translucent skin and gleaming teeth, dressed in a Victorian mourning gown. Turned as a child, Esmeralda lures families into traps using her innocent appearance and inhuman cruelty.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Esmeralda_Wraithchild_1299218492656.png"
@@ -1021,7 +1021,7 @@
         "Name": "Gideon Blackwood",
         "Role": "Necromancer Archivist",
         "Description": "Gaunt, corpse-like figure in robes covered in occult symbols, with unnaturally long clawed fingers. Once a mortal necromancer, Gideon joined the Black Court to unlock forbidden knowledge, now commanding undead minions.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Gideon_Blackwood_1299218492656.png"
@@ -1030,7 +1030,7 @@
         "Name": "Sophia von Hohenheim",
         "Role": "Blood Alchemist",
         "Description": "Striking yet horrifying in black lace, her stitched-shut lips giving her a macabre silence. A former aristocratic alchemist obsessed with immortality, Sophia now experiments with blood magic to create vampiric monstrosities.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Sophia_von_Hohenheim_1299218492656.png"
@@ -1039,7 +1039,7 @@
         "Name": "Rupert 'The Rat' Muldoon",
         "Role": "Skulking Informant",
         "Description": "Small and wiry, with sagging gray skin, clawed fingers, and rodent-like movements. A thief turned vampire, Rupert excels at infiltrating mortal society, spying, and selling out anyone to save himself.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Rupert_'The_Rat'_Muldoon_1299218492656.png"
@@ -1048,7 +1048,7 @@
         "Name": "Carmilla 'The Siren' di Rossi",
         "Role": "Seductive Manipulator",
         "Description": "Mesmerizing beauty hiding subtle decay, with intricate silver and obsidian jewelry enhancing her allure. Former ruler of a small Italian village, Carmilla uses seduction and influence to maintain power and security for the Black Court.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Carmilla_'The_Siren'_di_Rossi_1299218492656.png"
@@ -1057,7 +1057,7 @@
         "Name": "Alaric 'The Judge' Van Aalten",
         "Role": "Inquisitor Executioner",
         "Description": "Skeletal figure in ancient judge's robes, with a powdered wig atop his head and rings taken from his victims. Once a fanatical inquisitor, Alaric now conducts 'trials' before sentencing enemies to gruesome deaths.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Alaric_'The_Judge'_Van_Aalten_1299218492656.png"
@@ -1066,7 +1066,7 @@
         "Name": "Ingrid Bludrose",
         "Role": "Blood Hunt Mistress",
         "Description": "Tall and draped in a ragged red cloak, with decomposed features and lips stained eternally red. Ingrid commands ghouls and lesser vampires, leading brutal blood hunts across Europe to satisfy her insatiable hunger.",
-        "Faction": [
+        "Factions": [
             "Black Court"
         ],
         "Portrait": "assets/portraits\\Ingrid_Bludrose_1299218492656.png"
@@ -1075,7 +1075,7 @@
         "Name": "Aisling O'Donnell",
         "Role": "Geomancer and Celtic Expert",
         "Description": "Slender woman in her forties with fiery red hair and piercing green eyes, often clad in earth-toned robes with Celtic knotwork. Aisling, from a druidic lineage in Ireland, is the Council’s authority on ancient Celtic magic and ley lines. Known for her skill in weaving wards with natural elements, she mediates supernatural disputes across Europe, especially involving the fae.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Aisling_O'Donnell_1299218492656.png"
@@ -1084,7 +1084,7 @@
         "Name": "Emilio Velasco",
         "Role": "Veteran Warden",
         "Description": "Stocky man in his early sixties, with salt-and-pepper hair, a weathered face, and a worn leather jacket paired with a wide-brimmed hat. Emilio fights rogue supernatural threats along the Mexico-U.S. border, specializing in combat magic and spirit banishment. Haunted by the loss of his family to the Red Court, he prioritizes protecting innocent lives over Council politics.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Emilio_Velasco_1299218492656.png"
@@ -1093,7 +1093,7 @@
         "Name": "Miyuki Tanaka",
         "Role": "Spirit Binder",
         "Description": "Petite woman in her early thirties with straight black hair, blending modern professional style with kimono-inspired elements. Trained by her onmyoji grandfather, Miyuki binds spirits, purifies hauntings, and handles negotiations with yokai and ghosts. Her respect for traditional Japanese magic sometimes clashes with the Council’s rigid ways.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Miyuki_Tanaka_1299218492656.png"
@@ -1102,7 +1102,7 @@
         "Name": "Jean-Baptiste Moreau",
         "Role": "Illusion Master",
         "Description": "Tall, elegant man in his fifties with silver hair, neatly trimmed beard, tailored suits, and a dark cloak pinned with an antique silver clasp. A former Sorbonne scholar, Jean-Baptiste is a leading authority on illusions, magical constructs, and theory. His belief in Council superiority sometimes blinds him to unorthodox solutions.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Jean-Baptiste_Moreau_1299218492656.png"
@@ -1111,7 +1111,7 @@
         "Name": "Fatima al-Hussein",
         "Role": "Necromantic Guardian",
         "Description": "Striking woman in her late forties with dark curly hair and amber eyes, dressed in Egyptian robes adorned with hieroglyphs. Fatima, a descendant of Egyptian sorcerers, guards Egypt’s magical heritage, specializing in ancient curses and necromancy. Fiercely protective of her homeland’s traditions, she resents the Council’s artifact-hunting mindset.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Fatima_al-Hussein_1299218492656.png"
@@ -1120,7 +1120,7 @@
         "Name": "Anatoly Sokolov",
         "Role": "Siberian Warden",
         "Description": "Grizzled, middle-aged man with a muscular build, thick beard, and heavy winter clothing suited for Siberia. A former military officer turned Warden, Anatoly uses brutal tactics and potent wards to guard Eastern Europe against supernatural incursions, believing Council authority must be upheld at all costs.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Anatoly_Sokolov_1299218492656.png"
@@ -1129,7 +1129,7 @@
         "Name": "Nina Guerrero",
         "Role": "Nature Mystic",
         "Description": "Tall, athletic woman in her late twenties with dark skin, dreadlocked hair adorned with beads, and colorful flowing clothes. A practitioner of Candomblé, Nina balances relationships between humans and supernatural beings in the Amazon, blending spirit magic with herbal remedies. She often clashes with the Council’s bureaucracy.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Nina_Guerrero_1299218492656.png"
@@ -1138,7 +1138,7 @@
         "Name": "Catherine Wallace",
         "Role": "Ley Line Tracker",
         "Description": "Wiry woman in her early forties with sun-bleached blonde hair, tanned skin, and practical outdoorsy clothing. A product of Australia’s Outback, Catherine combines Aboriginal traditions with Council training, specializing in tracking supernatural disturbances and communing with nature spirits.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Catherine_Wallace_1299218492656.png"
@@ -1147,7 +1147,7 @@
         "Name": "Hassan al-Khalid",
         "Role": "Dreamwalker and Investigator",
         "Description": "Tall, lean man in his early fifties with a neatly trimmed beard and intense dark eyes, alternating between traditional Moroccan robes and modern suits. A master dreamwalker from a family of Berber mystics, Hassan specializes in mind magic and interrogation, tracking even the most elusive mages through their dreams.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Hassan_al-Khalid_1299218492656.png"
@@ -1155,8 +1155,8 @@
     {
         "Name": "Mariana Torres",
         "Role": "Diplomat and Negotiator",
-        "Description": "Charismatic woman in her mid-thirties with curly dark hair, modern stylish clothing, and silver jewelry. Once a lawyer, Mariana now brokers supernatural peace in South America, using her legal mind to negotiate with supernatural factions and enforce the Unseelie Accords.",
-        "Faction": [
+        "Description": "Charismatic woman in her mid-thirties with curly dark hair, modern stylish clothing, and silver jewelry. Once a lawyer, Mariana now brokers supernatural peace in South America, using her legal mind to negotiate with supernatural Factionss and enforce the Unseelie Accords.",
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Mariana_Torres_1299218492656.png"
@@ -1165,7 +1165,7 @@
         "Name": "Evelyn 'Evie' Matthews",
         "Role": "Spirit Guide",
         "Description": "Statuesque woman in her late thirties with wild curly hair streaked with silver, dressed in flowing or vintage clothes adorned with charms and beads. Raised in New Orleans’ rich supernatural culture, Evie blends Hoodoo with Council magic, specializing in communicating with and guiding spirits.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Evelyn_'Evie'_Matthews_1299218492656.png"
@@ -1174,7 +1174,7 @@
         "Name": "Nathaniel Greene",
         "Role": "Ancient Lore Expert",
         "Description": "Wiry man in his fifties with sharp features, thinning brown hair, and perpetual reading glasses over tweed jackets. A former Harvard professor turned Council scholar, Nathaniel excels at decoding ancient texts, rituals, and artifacts, but his academic obsession sometimes clouds his judgment.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Nathaniel_Greene_1299218492656.png"
@@ -1183,7 +1183,7 @@
         "Name": "Josephine 'Jo' Tyler",
         "Role": "Warden Investigator",
         "Description": "Strong-built woman in her early forties with short-cropped hair, runic tattoos up her arms, and practical outdoor gear. Formerly a Seattle private investigator, Jo combines street smarts with ward magic, handling rogue practitioners and supernatural disappearances along the Pacific coast.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Josephine_'Jo'_Tyler_1299218492656.png"
@@ -1192,7 +1192,7 @@
         "Name": "Arno Fischer",
         "Role": "Surveillance Mage",
         "Description": "Tall, severe man in his late fifties with iron-gray hair, impeccable suits, and a silver cane focus. A former East German Stasi agent turned Warden, Arno excels at wards, counter-surveillance, and tracking rogue magic across Central Europe, driven by rigid discipline and loyalty to the Council.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Arno_Fischer_1299218492656.png"
@@ -1201,7 +1201,7 @@
         "Name": "Elena Povar",
         "Role": "Fate Weaver",
         "Description": "Petite woman in her thirties with dark curls, embroidered shawls, and silver jewelry, carrying a carved wooden staff. From a Romani witchcraft lineage, Elena specializes in divination and fate magic, serving as a bridge between the Council and Europe’s supernatural underworld.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Elena_Povar_1299218492656.png"
@@ -1210,7 +1210,7 @@
         "Name": "Dino Luca",
         "Role": "Charming Duelist",
         "Description": "Handsome man in his early forties with dark curly hair, a roguish smile, tailored suits with colorful flair, and a custom enchanted rapier. Born to Italian nobility, Dino blends enchantment, blood magic, and political intrigue, balancing loyalties between the White Council and the Vatican’s magical arm.",
-        "Faction": [
+        "Factions": [
             "White Council"
         ],
         "Portrait": "assets/portraits\\Dino_Luca_1299218492656.png"
@@ -1219,7 +1219,7 @@
         "Name": "Eldritch Titan",
         "Role": "Strong Villain",
         "Description": "A towering, twisted mass of tentacles and chitinous plates, radiating a field of warped gravity. Its hide is thick and its mere presence inspires terror, while its devastating tentacle strikes and gravitational pulses crush everything nearby.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Eldritch_Titan_portrait.png"
@@ -1228,7 +1228,7 @@
         "Name": "Oblivion Warden",
         "Role": "Medium Villain",
         "Description": "A shifting entity with a semi-corporeal form, flickering between dimensions. Its psychic pulses scramble minds, while its body can phase out of reality to avoid harm.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Oblivion_Warden_portrait.png"
@@ -1237,7 +1237,7 @@
         "Name": "Nightmare Ripper",
         "Role": "Strong Villain",
         "Description": "A horror formed from congealed fears, its body a rotting patchwork of shadows and bone. It manifests victims' worst nightmares and hunts them with chilling precision.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Nightmare_Ripper_portrait.png"
@@ -1246,7 +1246,7 @@
         "Name": "Veil Shifter",
         "Role": "Medium Villain",
         "Description": "A faceless creature constantly shifting its form, blending into its surroundings with illusion magic. Its bladed limbs and conjured weapons reflect the fears and aggression of its enemies.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Veil_Shifter_portrait.png"
@@ -1255,7 +1255,7 @@
         "Name": "Harbinger of the Void",
         "Role": "Strong Villain",
         "Description": "A void-touched monstrosity armored in crackling void energy, capable of firing beams of entropy and shattering reality itself with each step.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Harbinger_of_the_Void_portrait.png"
@@ -1264,7 +1264,7 @@
         "Name": "The Corruptor",
         "Role": "Medium Villain",
         "Description": "A slithering being of dripping corruption, its touch rotting both flesh and spirit. Its presence warps weapons and armor, eroding both resolve and reality.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\The_Corruptor_portrait.png"
@@ -1273,7 +1273,7 @@
         "Name": "Abyssal Herald",
         "Role": "Strong Villain",
         "Description": "A towering warlord of the void, wielding a spiked flail forged from reality itself. Its psychic commands can force enemies to turn on one another.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Abyssal_Herald_portrait.png"
@@ -1292,7 +1292,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Voidling__1299218492656.png"
@@ -1311,7 +1311,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Chained_Horror_1299218492656.png"
@@ -1330,7 +1330,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Eye_of_Despair_1299218492656.png"
@@ -1339,7 +1339,7 @@
         "Name": "Rift Stalker",
         "Role": "Medium Minion",
         "Description": "A sleek, predatory shape-shifter constantly phasing between worlds, striking from ambush before slipping back into the void.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Rift_Stalker_portrait.png"
@@ -1348,7 +1348,7 @@
         "Name": "Abyssal Hound",
         "Role": "Strong Minion",
         "Description": "A massive, emaciated beast with jagged teeth and burning eyes, its howl spreading terror before it lunges for the kill.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Abyssal_Hound_portrait.png"
@@ -1357,7 +1357,7 @@
         "Name": "Echo Wraith",
         "Role": "Lieutenant (Medium)",
         "Description": "A fractured specter radiating psychic torment, every strike embedding a sliver of its essence into the victim’s mind.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Echo_Wraith_portrait.png"
@@ -1376,7 +1376,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Shattered_Apparition_1299218492656.png"
@@ -1385,7 +1385,7 @@
         "Name": "Chaos Bringer",
         "Role": "Lieutenant (Strong)",
         "Description": "A towering figure wrapped in swirling chaotic energy, lashing out with a blade infused with pure entropy.",
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Chaos_Bringer_portrait.png"
@@ -1404,7 +1404,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Whispering_Shadow_1299218492656.png"
@@ -1423,7 +1423,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Corrupt_Spawn_1299218492656.png"
@@ -1432,7 +1432,7 @@
         "Name": "King Corb",
         "Role": "Ruler of the Fomor",
         "Description": "Towering, amphibious humanoid with slick, dark-green skin, webbed fingers, and a crown of living coral fused to his skull. King Corb rules the Fomor from deep beneath the sea, blending ancient sorcery with biotech mastery. He led the push into Chicago after the Red Court's fall, exploiting the chaos to seize territory and human captives.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\King_Corb_portrait.png"
@@ -1441,7 +1441,7 @@
         "Name": "Lady Morvena",
         "Role": "Biotech Alchemist",
         "Description": "Slender Fomor noble with translucent skin, bioluminescent veins, and eyes that shift colors hypnotically. Morvena is responsible for the Fomor's horrifying biological modifications, transforming kidnapped humans into servitors with implanted gills, barnacle-like armor, and unnatural senses.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\Lady_Morvena_portrait.png"
@@ -1450,7 +1450,7 @@
         "Name": "Lord Balor",
         "Role": "War Leader",
         "Description": "Massive, heavily muscled Fomor covered in chitinous plates and wielding a spear grown from a living deep-sea predator. Balor leads Fomor assault squads, favoring brutal shock tactics and hybrid servitor forces. His reputation for cruelty is known even among his own kind.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\Lord_Balor_portrait.png"
@@ -1459,7 +1459,7 @@
         "Name": "Vessara the Whisper",
         "Role": "Spy Mistress",
         "Description": "Slender and eel-like, with unnaturally long fingers and a voice that slips into minds like seawater. Vessara oversees the Fomor's intelligence network, using mesmerized human agents and shapeshifting servitors to infiltrate mortal organizations.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\Vessara_the_Whisper_portrait.png"
@@ -1478,7 +1478,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Captain_Dreth_1299218492656.png"
@@ -1497,7 +1497,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Mireana_the_Weaver_1299218492656.png"
@@ -1506,7 +1506,7 @@
         "Name": "Rusk the Reclaimer",
         "Role": "Artifact Hunter",
         "Description": {
-            "text": "Hunched, human crab-like Fomor with hardened plates covering his back and dozens of tiny, glowing eyes. Rusk scours ruins and wreckage for lost magical artifacts, blending them with Fomor biotech to fuel the faction's growing power.",
+            "text": "Hunched, human crab-like Fomor with hardened plates covering his back and dozens of tiny, glowing eyes. Rusk scours ruins and wreckage for lost magical artifacts, blending them with Fomor biotech to fuel the Factions's growing power.",
             "formatting": {
                 "bold": [],
                 "italic": [],
@@ -1516,7 +1516,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Rusk_the_Reclaimer_1299218492656.png"
@@ -1525,7 +1525,7 @@
         "Name": "The Abyss Choir",
         "Role": "Psychic Enforcers",
         "Description": "A collective of mutated former humans fused into a single coral-and-flesh mass. The Choir's eerie song disrupts thought and magical focus, making them living weapons in both battle and interrogation.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\The_Abyss_Choir_portrait.png"
@@ -1534,7 +1534,7 @@
         "Name": "Lirak the Harvester",
         "Role": "Surface Raider",
         "Description": "Tall, sinewy Fomor wrapped in scavenged wetsuits and chainmail crafted from salvaged shipwrecks. Lirak leads surface raids, blending brutal amphibious assaults with psychological warfare, leaving cryptic symbols carved into victims’ bodies.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\Lirak_the_Harvester_portrait.png"
@@ -1543,7 +1543,7 @@
         "Name": "Sergeant Morloch",
         "Role": "Servitor Handler",
         "Description": "Once human, now a grotesque hybrid with pale, slimy skin, bulging gills, and barnacle-encrusted limbs. Morloch commands squads of modified humans, enforcing obedience through pain implants and psychic triggers.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\Sergeant_Morloch_portrait.png"
@@ -1552,7 +1552,7 @@
         "Name": "Lord Na’thraal",
         "Role": "Fomor Warlord",
         "Description": "A towering sea-creature with skin of barnacle armor and eyes like dead tide pools.",
-        "Faction": [
+        "Factions": [
             "Fomor"
         ],
         "Portrait": "assets/portraits\\Lord_Na’thraal_1299218492656.png"
@@ -1571,7 +1571,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Queen_Briarheart_portrait.png"
@@ -1590,7 +1590,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Knights of the Cross"
         ],
         "Portrait": "assets/portraits\\Knight_Armand_St._Croix_1299218492656.png"
@@ -1599,7 +1599,7 @@
         "Name": "Demon Grishkar",
         "Role": "Bound Demon",
         "Description": "A monstrous figure wrapped in smoking chains, its voice like grinding metal.",
-        "Faction": [
+        "Factions": [
             "Demons"
         ],
         "Portrait": "assets/portraits\\Demon_Grishkar_portrait.png"
@@ -1618,7 +1618,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Wyld_Huntress_Seline_portrait.png"
@@ -1637,7 +1637,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Knight_Captain_Mariel_Brightwind_portrait.png"
@@ -1656,7 +1656,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Elder_Tidecaller_Orsk_1299218492656.png"
@@ -1665,7 +1665,7 @@
         "Name": "Detective Sofia Vasquez",
         "Role": "Chicago Cop",
         "Description": "Human detective caught in supernatural war, tough as nails with eyes haunted by what she's seen.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Detective_Sofia_Vasquez_portrait.png"
@@ -1684,7 +1684,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Knights of the Cross"
         ],
         "Portrait": "assets/portraits\\Sir_Elijah_Castor_1299218492656.png"
@@ -1693,7 +1693,7 @@
         "Name": "Demon Prince Velkar",
         "Role": "Vengeful Demon",
         "Description": "A creature of smoke and shattered iron, with a face made of melted masks.",
-        "Faction": [
+        "Factions": [
             "Demons"
         ],
         "Portrait": "assets/portraits\\Demon_Prince_Velkar_portrait.png"
@@ -1702,7 +1702,7 @@
         "Name": "Sister Maria Bell",
         "Role": "Knight of the Cross",
         "Description": "A steadfast knight, her armor old but her heart strong.",
-        "Faction": [
+        "Factions": [
             "Knights of the Cross"
         ],
         "Portrait": "assets/portraits\\Sister_Maria_Bell_portrait.png"
@@ -1711,7 +1711,7 @@
         "Name": "Blacksmith Gavin Hurst",
         "Role": "Cursed Smith",
         "Description": "A mortal blacksmith whose family once reforged Excalibur, now living in fear of the supernatural.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Blacksmith_Gavin_Hurst_portrait.png"
@@ -1730,7 +1730,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Spirits"
         ],
         "Portrait": "assets/portraits\\The_Weeping_Angel_1299218492656.png"
@@ -1749,7 +1749,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\The_Hollow_Prince_portrait.png"
@@ -1768,7 +1768,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Laughing_Dagger_Kaelen_1299218492656.png"
@@ -1787,7 +1787,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Archivist_Yewthorn_1299218492656.png"
@@ -1806,7 +1806,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\The_Bound_Jester_1299218492656.png"
@@ -1815,7 +1815,7 @@
         "Name": "Eleanor Drake",
         "Role": "Mortal Cursed by Demon",
         "Description": "A human caught in a binding curse, linked to a demon through a chain of pain.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Eleanor_Drake_portrait.png"
@@ -1824,7 +1824,7 @@
         "Name": "Demon Grishkar",
         "Role": "Bound Demon",
         "Description": "A monstrous figure wrapped in smoking chains, its voice like grinding metal.",
-        "Faction": [
+        "Factions": [
             "Demons"
         ],
         "Portrait": "assets/portraits\\Demon_Grishkar_portrait.png"
@@ -1833,7 +1833,7 @@
         "Name": "Chainmaker Aldous",
         "Role": "Legendary Smith",
         "Description": "A long-dead mortal smith who first forged chains for demons, appearing as a ghostly figure of smoke and steel.",
-        "Faction": [
+        "Factions": [
             "Spirits"
         ],
         "Portrait": "assets/portraits\\Chainmaker_Aldous_portrait.png"
@@ -1842,7 +1842,7 @@
         "Name": "Sorceress Marina",
         "Role": "Occult Expert",
         "Description": "A modern-day sorceress specialized in binding and breaking infernal contracts.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Sorceress_Marina_portrait.png"
@@ -1851,7 +1851,7 @@
         "Name": "Bishop Tallow",
         "Role": "Sin-Eater Priest",
         "Description": "A priest who absorbs the curses of others into his own soul, flickering between holy and damned.",
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Bishop_Tallow_portrait.png"
@@ -1870,7 +1870,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\The_Blood_Hag_Mirskaya_1299218492656.png"
@@ -1889,7 +1889,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Wyld_Healer_Brialyn_portrait.png"
@@ -1908,7 +1908,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Captain_Sofia_Domingez_portrait.png"
@@ -1917,7 +1917,7 @@
         "Name": "Aszara",
         "Role": "Winter Lady",
         "Description": "Inhumanly beautiful woman with pale skin, long shimmering silver hair, and piercing ice blue eyes. Wears a formfitting white fur and delicate ice crystal gown accentuating her ethereal form. As Mab's Winter Lady, Azsara personifies winter's cruel, unmerciful aspects, delighting in mortals' anguish and binding souls to the Winter Court through tempting bargains.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Aszara_1299218492656.png"
@@ -1926,7 +1926,7 @@
         "Name": "Isolde Frostwhisper",
         "Role": "Winter Sidhe Diplomat",
         "Description": "Tall, ethereal figure with pale, almost translucent skin and hair as white as fresh snow. Wears a gown of glimmering ice crystals. Known for her sharp wit and cutting tongue, Isolde handles negotiations for Winter, seeking influence even if it means making deals with mortals.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Isolde_Frostwhisper_1299218492656.png"
@@ -1935,7 +1935,7 @@
         "Name": "Morran the Ice-Touched",
         "Role": "Winter Troll Guardian",
         "Description": "Massive figure with frost-covered granite-like skin, breath misting in the air like fog. Icicles hang from his beard and his eyes glow a dull blue. Fiercely protective of Winter’s borders, he respects strength in both allies and foes.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Morran_the_Ice-Touched_portrait.png"
@@ -1944,7 +1944,7 @@
         "Name": "Vespera Coldwing",
         "Role": "Winter Pixie Spy",
         "Description": "Delicate, small creature with wings shimmering like frost-covered glass. Her faint blue skin and moonlight hair give her an eerie beauty. Vespera delights in secrets and serves as a messenger and spy for Winter.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Vespera_Coldwing_1299218492656.png"
@@ -1953,7 +1953,7 @@
         "Name": "Orcus Darkhoof",
         "Role": "Winter Satyr Hunter",
         "Description": "Twisted satyr with ram horns, frost-crackling hooves, and deep blue-black skin. He wears a ragged wolf pelt cloak and hunts down violators of Winter’s law, reveling in the chase.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Orcus_Darkhoof_portrait.png"
@@ -1962,7 +1962,7 @@
         "Name": "Morwen of the Shroud",
         "Role": "Winter Banshee Herald",
         "Description": "Spectral figure with flowing black hair and a face hidden behind a veil of shadows. Her mournful wail freezes hearts. Morwen heralds doom and serves as a harbinger of Winter’s wrath, secretly yearning for freedom from her role.",
-        "Faction": [
+        "Factions": [
             "Winter Court"
         ],
         "Portrait": "assets/portraits\\Morwen_of_the_Shroud_1299218492656.png"
@@ -1971,7 +1971,7 @@
         "Name": "Caelia Sunblade",
         "Role": "Summer Sidhe Warrior",
         "Description": "Golden-haired Sidhe with skin glowing faintly with warmth. Wears armor made of bronze leaves that shift and grow. Caelia protects Summer’s borders and values the balance between Summer and Winter, though her adherence to Summer’s principles can be rigid.",
-        "Faction": [
+        "Factions": [
             "Summer Court"
         ],
         "Portrait": "assets/portraits\\Caelia_Sunblade_1299218492656.png"
@@ -1990,7 +1990,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Summer Court"
         ],
         "Portrait": "assets/portraits\\Bramble_1299218492656.png"
@@ -2009,7 +2009,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Summer Court"
         ],
         "Portrait": "assets/portraits\\Liora_Brightflame_1299218492656.png"
@@ -2018,7 +2018,7 @@
         "Name": "Thorne Greenheart",
         "Role": "Summer Dryad Guardian",
         "Description": "Dryad with bark-like skin and hair like cascading ivy. She exudes the scent of blooming flowers. Thorne guards a sacred grove linking Summer and the mortal realm, controlling plants for both healing and defense.",
-        "Faction": [
+        "Factions": [
             "Summer Court"
         ],
         "Portrait": "assets/portraits\\Thorne_Greenheart_portrait.png"
@@ -2027,7 +2027,7 @@
         "Name": "Griselda the Hag",
         "Role": "Wyldfae Hedge Witch",
         "Description": "Hunched old woman with wild white hair and skin like tree bark. Her eyes glow eerie green, and she wears a cloak of owl feathers. Living deep in enchanted woods, Griselda trades in rare ingredients and dangerous secrets — always with a twist.",
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Griselda_the_Hag_portrait.png"
@@ -2036,7 +2036,7 @@
         "Name": "Nox",
         "Role": "Wyldfae Darkling Spy",
         "Description": "Shadowy figure with skin that absorbs light, his form shifting like smoke. Nox sells secrets to the highest bidder, playing Summer, Winter, and mortals against each other.",
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Nox_portrait.png"
@@ -2045,7 +2045,7 @@
         "Name": "Cora Dewdrop",
         "Role": "Wyldfae Naiad Guardian",
         "Description": "Water spirit with skin shimmering like a clear stream and hair flowing like water. Cora guards a hidden healing spring, aiding respectful mortals and drowning those who threaten her waters.",
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Cora_Dewdrop_portrait.png"
@@ -2054,7 +2054,7 @@
         "Name": "Kraig Stoneback",
         "Role": "Wyldfae Earth Elemental",
         "Description": "Being of living rock with glowing amber eyes and moss growing on his body. Kraig protects underground realms and enforces neutrality at Wyldfae gatherings, respecting those who honor the earth.",
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Kraig_Stoneback_portrait.png"
@@ -2063,7 +2063,7 @@
         "Name": "Puck",
         "Role": "Wyldfae Trickster",
         "Description": "Mischievous young man with wild hair, pointed ears, and a grin full of trouble. Wears a patchwork coat of leaves and feathers. Puck thrives on chaos, challenging pride and authority for fun.",
-        "Faction": [
+        "Factions": [
             "Wyldfae"
         ],
         "Portrait": "assets/portraits\\Puck_portrait.png"
@@ -2082,7 +2082,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Summer Court"
         ],
         "Portrait": "assets/portraits\\Amalia_1299218492656.png"
@@ -2101,7 +2101,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Summer Court"
         ],
         "Portrait": "assets/portraits\\Rob_1299218492656.png"
@@ -2120,7 +2120,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\Rory_'Frostbite'_Mallory_1299218492656.png"
@@ -2139,7 +2139,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Dr._Elise_Navarro_1299218492656.png"
@@ -2158,7 +2158,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Mortals"
         ],
         "Portrait": "assets/portraits\\Detective_Sam_Brody_1299218492656.png"
@@ -2177,7 +2177,7 @@
                 "right": []
             }
         },
-        "Faction": [
+        "Factions": [
             "Outsiders"
         ],
         "Portrait": "assets/portraits\\The_Voice_Beneath_the_Ice_1299218492656.png"
@@ -2207,7 +2207,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Velna_of_the_Thousand_Blooms_1299218492656.png"
     },
     {
@@ -2235,7 +2235,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Sylvia_Heartswell_1299218492656.png"
     },
     {
@@ -2263,7 +2263,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Glimmerjack_the_Bartender_1299218492656.png"
     },
     {
@@ -2291,7 +2291,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Detective_Marla_Reyes_1299218492656.png"
     },
     {
@@ -2319,7 +2319,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Sarai_Givens_1299218492656.png"
     },
     {
@@ -2347,7 +2347,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Fae_Spirit_of_Spiteful_Love_1299218492656.png"
     },
     {
@@ -2375,7 +2375,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Emmeline_Vail_(Ghost)_1299218492656.png"
     },
     {
@@ -2403,7 +2403,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Ettelwin_Crook_1299218492656.png"
     },
     {
@@ -2421,7 +2421,7 @@
             }
         },
         "Secret": {
-            "text": "Concept: Mail Carrier Who Knows Too Much Défaut: Oathbound to the Postal Oath — even to spirits Compétences: Survie (d8), Ressource (d6), Relation (d8), Perception (d8), Enquête (d6) Atouts: Sacred Seal (+2 Perception when tracking cursed items) Oath of Delivery (May safely pass through minor fae barriers) Letter Shield (Mail satchel blocks one magical attack per scene) Secrets & Clues Rosamund can only be truly defeated by delivering Emmeline’s final, honest letter. Ettelwin’s ritual was partially fueled by Summer Court magic — a forbidden love affair. The curse spreads through wax seals bearing Rosamund’s sigil. Willa’s route map contains glyphs that form a protective seal against the curse. The original “binding poem” exists in a vault in the Post Office’s dead letter section. Emmeline still loves Ettelwin, but doesn’t forgive him — that conflict empowers Rosamund. The Post Office overlaps a forgotten Summer demesne once given as a romantic gift. A Remorse Wraith reveals that Rosamund regrets her creation — but cannot die without closure. The Violet Court may still exist — an exile faction of Summer Fae who manipulate emotions. Rosamund's influence extends through mirrors and screens — even modern texts may carry her curse.",
+            "text": "Concept: Mail Carrier Who Knows Too Much Défaut: Oathbound to the Postal Oath — even to spirits Compétences: Survie (d8), Ressource (d6), Relation (d8), Perception (d8), Enquête (d6) Atouts: Sacred Seal (+2 Perception when tracking cursed items) Oath of Delivery (May safely pass through minor fae barriers) Letter Shield (Mail satchel blocks one magical attack per scene) Secrets & Clues Rosamund can only be truly defeated by delivering Emmeline’s final, honest letter. Ettelwin’s ritual was partially fueled by Summer Court magic — a forbidden love affair. The curse spreads through wax seals bearing Rosamund’s sigil. Willa’s route map contains glyphs that form a protective seal against the curse. The original “binding poem” exists in a vault in the Post Office’s dead letter section. Emmeline still loves Ettelwin, but doesn’t forgive him — that conflict empowers Rosamund. The Post Office overlaps a forgotten Summer demesne once given as a romantic gift. A Remorse Wraith reveals that Rosamund regrets her creation — but cannot die without closure. The Violet Court may still exist — an exile Factions of Summer Fae who manipulate emotions. Rosamund's influence extends through mirrors and screens — even modern texts may carry her curse.",
             "formatting": {
                 "bold": [],
                 "italic": [],
@@ -2431,7 +2431,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Willa_Nkomo_1299218492656.png"
     },
     {
@@ -2459,7 +2459,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Arcane_Geologist_and_Paranormal_Engineer_1299218492656.png"
     },
     {
@@ -2487,7 +2487,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Milo_Trask_1299218492656.png"
     },
     {
@@ -2515,7 +2515,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\The_Ferruling_Host_1299218492656.png"
     },
     {
@@ -2543,7 +2543,7 @@
                 "right": []
             }
         },
-        "Faction": [],
+        "Factions": [],
         "Portrait": "assets/portraits\\Wyrshae,_the_Hollow_Whisperer_1299218492656.png"
     }
 ]

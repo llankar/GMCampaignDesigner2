@@ -218,7 +218,7 @@ class MainWindow(ctk.CTk):
             # Step 2: Build a prompt based on the NPC's data.
             npc_name = npc.get("Name", "Unknown")
             npc_role = npc.get("Role", "Unknown")
-            npc_faction = npc.get("Faction", "Unknown")
+            npc_faction = npc.get("Factions", "Unknown")
             npc_desc = npc.get("Description", "Unknown")
             npc_desc = text_helpers.format_longtext(npc_desc)
             prompt = f"{npc_name} {npc_desc} {npc_role} {npc_faction}"
