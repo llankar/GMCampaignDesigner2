@@ -8,9 +8,30 @@ from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 import math
-import requests
-
+import logging
+from screeninfo import get_monitors
 from modules.npcs import npc_opener
+from customtkinter import CTkImage
+import tkinter as tk  # standard tkinter
+from PIL import Image, ImageTk
+import os, logging, ctypes
+from ctypes import wintypes
+
+# Helper function to get monitor information using ctypes and Windows API.
+def get_monitors():
+    monitors = []
+    def monitor_enum_proc(hMonitor, hdcMonitor, lprcMonitor, dwData):
+        rect = lprcMonitor.contents
+        monitors.append((rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top))
+        return True
+    MonitorEnumProc = ctypes.WINFUNCTYPE(wintypes.BOOL,
+                                          wintypes.HMONITOR,
+                                          wintypes.HDC,
+                                          ctypes.POINTER(wintypes.RECT),
+                                          wintypes.LPARAM)
+    ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
+    return monitors
+logging.basicConfig(level=logging.DEBUG)
 
 # Constants for portrait folder and max portrait size
 PORTRAIT_FOLDER = "assets/portraits"
@@ -100,47 +121,112 @@ class NPCGraphEditor(ctk.CTkFrame):
         print(f"Opening editor for NPC: {npc_name}")
         npc_opener.open_npc_editor_window(npc_name)
         # ─────────────────────────────────────────────────────────────────────────
-    # NEW FUNCTION: display_portrait_on_fire_tv
-    # Sends a JSON-RPC command to Kodi on a Fire TV to display an image.
-    # ─────────────────────────────────────────────────────────────────────────
-    def display_portrait_on_fire_tv(self, portrait_path):
-        # Set these to match your Fire TV's Kodi settings
-        FIRE_TV_IP = "192.168.1.100"  # Replace with your Fire TV IP address
-        KODI_PORT = 8080              # Replace with your Kodi JSON-RPC port
-        url = f"http://{FIRE_TV_IP}:{KODI_PORT}/jsonrpc"
-        payload = {
-            "jsonrpc": "2.0",
-            "method": "Player.Open",
-            "params": {
-                "item": {"file": portrait_path}
-            },
-            "id": 1
-        }
-        try:
-            response = requests.post(url, json=payload)
-            response.raise_for_status()
-        except Exception as e:
-            messagebox.showerror("Error", f"Error displaying portrait on Fire TV: {e}")
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # NEW FUNCTION: display_on_fire_tv
-    # Retrieves the portrait path from the selected NPC node and sends it to Fire TV.
-    # ─────────────────────────────────────────────────────────────────────────
-    def display_on_fire_tv(self):
+    def display_portrait_window(self):
+        """Display the NPC's portrait in a normal window (with decorations) that is
+        sized and positioned to cover the second monitor (if available).  
+        """
+        logging.debug("Entering display_portrait_window")
+        
+        # Check if a valid NPC is selected.
         if not self.selected_node or not self.selected_node.startswith("npc_"):
-            messagebox.showerror("Error", "No NPC selected for display.")
+            messagebox.showerror("Error", "No NPC selected.")
+            logging.error("No NPC selected.")
             return
+
         # Extract NPC name from the node tag.
         npc_name = self.selected_node.replace("npc_", "").replace("_", " ")
+        logging.debug(f"Extracted NPC name: {npc_name}")
+
         npc_data = self.npcs.get(npc_name)
         if not npc_data:
             messagebox.showerror("Error", f"NPC '{npc_name}' not found.")
+            logging.error(f"NPC '{npc_name}' not found.")
             return
+
         portrait_path = npc_data.get("Portrait", "")
-        if portrait_path and os.path.exists(portrait_path):
-            self.display_portrait_on_fire_tv(portrait_path)
-        else:
+        logging.debug(f"Portrait path: {portrait_path}")
+        if not portrait_path or not os.path.exists(portrait_path):
             messagebox.showerror("Error", "No valid portrait found for this NPC.")
+            logging.error("No valid portrait found.")
+            return
+
+        try:
+            img = Image.open(portrait_path)
+            logging.debug(f"Image opened successfully, original size: {img.size}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error loading portrait: {e}")
+            logging.exception("Error loading portrait:")
+            return
+
+        # Obtain monitor information using ctypes.
+        monitors = get_monitors()
+        logging.debug("Detected monitors: " + str(monitors))
+
+        # Choose the second monitor if available; otherwise, use the primary monitor.
+        if len(monitors) > 1:
+            target_monitor = monitors[1]
+            logging.debug(f"Using second monitor: {target_monitor}")
+        else:
+            target_monitor = monitors[0]
+            logging.debug("Only one monitor available; using primary monitor.")
+
+        screen_x, screen_y, screen_width, screen_height = target_monitor
+        logging.debug(f"Target screen: ({screen_x}, {screen_y}, {screen_width}, {screen_height})")
+
+        # Scale the image if it's larger than the monitor dimensions (without upscaling).
+        img_width, img_height = img.size
+        scale = min(screen_width / img_width, screen_height / img_height, 1)
+        new_size = (int(img_width * scale), int(img_height * scale))
+        logging.debug(f"Scaling factor: {scale}, new image size: {new_size}")
+        if scale < 1:
+            resample_method = getattr(Image, "Resampling", Image).LANCZOS
+            img = img.resize(new_size, resample_method)
+            logging.debug("Image resized.")
+        else:
+            logging.debug("No resizing needed.")
+
+        portrait_img = ImageTk.PhotoImage(img)
+        # Persist the image reference to prevent garbage collection.
+        self.node_images[f"window_{npc_name}"] = portrait_img
+
+        # Create a normal Toplevel window (with standard window decorations).
+        win = tk.Toplevel(self)
+        win.title(npc_name)
+        # Set the window geometry to match the target monitor's dimensions and position.
+        win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
+        win.update_idletasks()
+        logging.debug("Window created on target monitor with screen size.")
+
+        # Create a frame with a black background to hold the content.
+        content_frame = tk.Frame(win, bg="black")
+        content_frame.pack(fill="both", expand=True)
+
+        # Add a label to display the NPC name.
+        name_label = tk.Label(content_frame, text=npc_name,
+                            font=("Arial", 40, "bold"),
+                            fg="white", bg="black")
+        name_label.pack(pady=20)
+        logging.debug("NPC name label created.")
+
+        # Add a label to display the portrait image.
+        image_label = tk.Label(content_frame, image=portrait_img, bg="black")
+        image_label.image = portrait_img  # persist reference
+        image_label.pack(expand=True)
+        logging.debug("Portrait image label created.")
+        new_x = screen_x + 1920
+        win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
+        logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")        
+        # Bind a click event to close the window.
+        win.bind("<Button-1>", lambda e: win.destroy())
+        logging.debug("Window displayed; waiting for click to close.")
+
+
+
+
+
+
+
+
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: _on_mousewheel_y
     # Scrolls the canvas vertically based on mouse wheel input.
@@ -489,7 +575,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         node_menu.add_command(label="Delete Node", command=self.delete_node)
         node_menu.add_separator()
         node_menu.add_command(label="Change Color", command=lambda: self.show_color_menu(x, y))
-        node_menu.add_command(label="Display on Fire TV", command=self.display_on_fire_tv)
+        node_menu.add_command(label="Display Portrait Window", command=self.display_portrait_window)
         node_menu.post(int(x), int(y))
 
     # ─────────────────────────────────────────────────────────────────────────
