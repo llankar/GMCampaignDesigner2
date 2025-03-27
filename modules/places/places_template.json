@@ -1,6 +1,7 @@
 {
   "fields": [
       {"name": "Name", "type": "text"},
-      {"name": "Description", "type": "longtext"}
+      {"name": "Description", "type": "longtext"},
+      {"name": "NPCs", "type": "list", "linked_type": "NPC"}
   ]
 }

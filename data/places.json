@@ -1,7 +1,22 @@
 [
   {
     "Name": "Arctis Tor",
-    "Description": "Shifting ice palaces echoing with lost voices."
+    "Description": {
+      "text": "Shifting ice palaces echoing with lost voices.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "NPCs": [
+      "Lady Laurelindë",
+      "Sariel of the Hollow Glade",
+      "The Broken Prince"
+    ]
   },
   {
     "Name": "Frozen Fountain",
@@ -32,11 +47,11 @@
     "Description": "Modern tower unraveling with ley line backlash."
   },
   {
-    "Name": "Hell\u2019s Gate Nightclub",
+    "Name": "Hell’s Gate Nightclub",
     "Description": "Neutral ground for the White Court."
   },
   {
-    "Name": "St. Joseph\u2019s Shelter",
+    "Name": "St. Joseph’s Shelter",
     "Description": "A church refuge hiding forbidden lovers."
   },
   {
@@ -57,7 +72,7 @@
   },
   {
     "Name": "McKenzie Pier",
-    "Description": "Smuggler\u2019s dock for supernatural goods."
+    "Description": "Smuggler’s dock for supernatural goods."
   },
   {
     "Name": "Obsidian Crypt",
@@ -85,11 +100,11 @@
   },
   {
     "Name": "Goldenroot Cafe",
-    "Description": "A cafe that blooms \u2014 literally \u2014 when love is in the air."
+    "Description": "A cafe that blooms — literally — when love is in the air."
   },
   {
     "Name": "The Sunlit Court",
-    "Description": "Summer\u2019s throne room, where sunlight is both beauty and blade."
+    "Description": "Summer’s throne room, where sunlight is both beauty and blade."
   },
   {
     "Name": "Hidden Garden in Lincoln Park",
@@ -105,7 +120,7 @@
   },
   {
     "Name": "Abandoned Funeral Parlor",
-    "Description": "Once a sanctuary for the dead \u2014 now claimed by Black Court squatters."
+    "Description": "Once a sanctuary for the dead — now claimed by Black Court squatters."
   },
   {
     "Name": "Shadow Market Underpass",
@@ -113,7 +128,7 @@
   },
   {
     "Name": "The Rusty Mic Comedy Club",
-    "Description": "Chicago\u2019s grimiest stand-up venue, now cursed with undead punchlines."
+    "Description": "Chicago’s grimiest stand-up venue, now cursed with undead punchlines."
   },
   {
     "Name": "WZRD Local Radio Station",
@@ -124,7 +139,7 @@
     "Description": "A funeral home with a dark sense of humor."
   },
   {
-    "Name": "The Trickster\u2019s Record Shop",
+    "Name": "The Trickster’s Record Shop",
     "Description": "A shop haunted by every joke ever told."
   },
   {
@@ -173,7 +188,7 @@
   },
   {
     "Name": "Shattered Sanctum",
-    "Description": "Warden Black\u2019s sanctum collapsed into fragments of unstable reality \u2014 a maze of frozen memories."
+    "Description": "Warden Black’s sanctum collapsed into fragments of unstable reality — a maze of frozen memories."
   },
   {
     "Name": "Dream-Spiral Library",
@@ -185,14 +200,14 @@
   },
   {
     "Name": "Memory Well",
-    "Description": "A deep well where lost memories pool \u2014 and occasionally speak."
+    "Description": "A deep well where lost memories pool — and occasionally speak."
   },
   {
     "Name": "Wrecked Intersection",
     "Description": "The crossroads where accident and fate collided, now glowing faintly at dusk."
   },
   {
-    "Name": "Coroner\u2019s Office",
+    "Name": "Coroner’s Office",
     "Description": "Where mundane and supernatural deaths collide in files nobody wants to open."
   },
   {
@@ -201,10 +216,10 @@
   },
   {
     "Name": "The Spirit Holding Cell",
-    "Description": "A warded prison for unstable spirits \u2014 creaking at the edges."
+    "Description": "A warded prison for unstable spirits — creaking at the edges."
   },
   {
-    "Name": "Lucky Joe\u2019s Casino",
+    "Name": "Lucky Joe’s Casino",
     "Description": "A crumbling gambling den where fortune and fate blur."
   },
   {
@@ -212,7 +227,7 @@
     "Description": "A forgotten rail tunnel haunted by lost wagers and unlucky souls."
   },
   {
-    "Name": "Coin Collector\u2019s Shop",
+    "Name": "Coin Collector’s Shop",
     "Description": "A mundane antique shop unknowingly hiding an ancient evil."
   },
   {
@@ -232,11 +247,11 @@
     "Description": "Where the history of every fatal fire in Chicago resides."
   },
   {
-    "Name": "Mourner\u2019s Tavern",
+    "Name": "Mourner’s Tavern",
     "Description": "A hidden bar where spirits gather to drink memories."
   },
   {
-    "Name": "Widow\u2019s Apartment",
+    "Name": "Widow’s Apartment",
     "Description": "A small home drowning in memories and flickering candles."
   },
   {
@@ -253,7 +268,7 @@
   },
   {
     "Name": "The Loop",
-    "Description": "The core of Chicago\u2019s downtown, filled with skyscrapers, iconic landmarks, and supernatural hotspots. Statues like Ceres and the Picasso hum with hidden power. The Civic Opera House is haunted, and Fort Kennedy hides ancient secrets."
+    "Description": "The core of Chicago’s downtown, filled with skyscrapers, iconic landmarks, and supernatural hotspots. Statues like Ceres and the Picasso hum with hidden power. The Civic Opera House is haunted, and Fort Kennedy hides ancient secrets."
   },
   {
     "Name": "Near North Side",
@@ -265,7 +280,7 @@
   },
   {
     "Name": "Cabrini-Green",
-    "Description": "Once a dangerous housing project, now gentrified \u2014 but haunted by past violence. Built on Death Corner, the air is thick with old grudges and spirits who refuse to leave."
+    "Description": "Once a dangerous housing project, now gentrified — but haunted by past violence. Built on Death Corner, the air is thick with old grudges and spirits who refuse to leave."
   },
   {
     "Name": "Lincoln Park",
@@ -273,7 +288,7 @@
   },
   {
     "Name": "Near West Side",
-    "Description": "Home to UIC with its eerie brutalist buildings. Beneath the Kennedy Expressway lies Chicago\u2019s goblin market, and Bloody Maxwell still radiates corruption under its new fa\u00e7ade."
+    "Description": "Home to UIC with its eerie brutalist buildings. Beneath the Kennedy Expressway lies Chicago’s goblin market, and Bloody Maxwell still radiates corruption under its new façade."
   },
   {
     "Name": "Pilsen",
@@ -285,15 +300,15 @@
   },
   {
     "Name": "Bronzeville",
-    "Description": "Once the beating heart of Black culture, Bronzeville\u2019s jazz clubs and theaters still host spectral performers. Spirits of past leaders occasionally offer advice to the living."
+    "Description": "Once the beating heart of Black culture, Bronzeville’s jazz clubs and theaters still host spectral performers. Spirits of past leaders occasionally offer advice to the living."
   },
   {
     "Name": "Uptown",
-    "Description": "Faded glamor and hidden power. The Aragon Ballroom and Green Mill are haunted by performers who never left, and the area\u2019s cultural melting pot has birthed unique magical traditions."
+    "Description": "Faded glamor and hidden power. The Aragon Ballroom and Green Mill are haunted by performers who never left, and the area’s cultural melting pot has birthed unique magical traditions."
   },
   {
     "Name": "The Grey City",
-    "Description": "The forgotten parts of Chicago \u2014 identical houses, abandoned alleys, and bars where reality feels thinner than it should. This is where memories, people, and even whole buildings disappear."
+    "Description": "The forgotten parts of Chicago — identical houses, abandoned alleys, and bars where reality feels thinner than it should. This is where memories, people, and even whole buildings disappear."
   },
   {
     "Name": "Art Institute of Chicago",
@@ -301,15 +316,15 @@
   },
   {
     "Name": "Cloud Gate (The Bean)",
-    "Description": "A reflective sculpture suspected of thaumaturgical properties, showing one\u2019s true self at the right time. Used by diviners and scryers, but its visions are not always kind. Fae activity peaks here during equinoxes."
+    "Description": "A reflective sculpture suspected of thaumaturgical properties, showing one’s true self at the right time. Used by diviners and scryers, but its visions are not always kind. Fae activity peaks here during equinoxes."
   },
   {
     "Name": "Millennium Park",
-    "Description": "A public space built atop a thin veil between worlds. The Pritzker Pavilion\u2019s canopy amplifies both sound and magic. Hidden gateways within the gardens are said to lead to other realms during solstices."
+    "Description": "A public space built atop a thin veil between worlds. The Pritzker Pavilion’s canopy amplifies both sound and magic. Hidden gateways within the gardens are said to lead to other realms during solstices."
   },
   {
     "Name": "Museum of Science and Industry",
-    "Description": "A place where magic and technology blur. The captured U-Boat sits atop a ley-line nexus, and the coal mine exhibit\u2019s deepest tunnels connect to Undertown."
+    "Description": "A place where magic and technology blur. The captured U-Boat sits atop a ley-line nexus, and the coal mine exhibit’s deepest tunnels connect to Undertown."
   },
   {
     "Name": "Chicago Riverwalk",
@@ -345,7 +360,7 @@
   },
   {
     "Name": "Wyld Glade of Stones",
-    "Description": "A hidden grove where Wyld Fae judge mortals\u2019 worth."
+    "Description": "A hidden grove where Wyld Fae judge mortals’ worth."
   },
   {
     "Name": "The Sunken Arena",
@@ -356,7 +371,7 @@
     "Description": "A crumbling chapel where Knights of the Cross once prayed."
   },
   {
-    "Name": "The Knight\u2019s Refuge",
+    "Name": "The Knight’s Refuge",
     "Description": "A hidden sanctuary known only to fallen Knights."
   },
   {
@@ -364,8 +379,8 @@
     "Description": "A scarred plain where ancient battles replay endlessly."
   },
   {
-    "Name": "Demon\u2019s Mirror",
-    "Description": "A reflective portal that holds a demon\u2019s true name."
+    "Name": "Demon’s Mirror",
+    "Description": "A reflective portal that holds a demon’s true name."
   },
   {
     "Name": "The Thorned Throne",
@@ -388,7 +403,7 @@
     "Description": "Where cursed chains are forged from mortal regrets."
   },
   {
-    "Name": "Demon\u2019s Binding Circle",
+    "Name": "Demon’s Binding Circle",
     "Description": "A circle etched in bone, binding demon and mortal."
   },
   {
@@ -396,7 +411,7 @@
     "Description": "A supernatural bazaar where pain itself is currency."
   },
   {
-    "Name": "The Chainmaker\u2019s Tomb",
+    "Name": "The Chainmaker’s Tomb",
     "Description": "Grave of the first mortal who bound a demon."
   },
   {
@@ -405,7 +420,7 @@
   },
   {
     "Name": "Wyld Grove of Mercy",
-    "Description": "A grove where Wyld Fae grant mercy \u2014 if respect is earned."
+    "Description": "A grove where Wyld Fae grant mercy — if respect is earned."
   },
   {
     "Name": "The Drowned Chapel",
@@ -413,54 +428,54 @@
   },
   {
     "Name": "The Verdant Mirror",
-    "Description": "A maze of flowering halls and greenhouse domes, filled with glowing pollen and whispering plants. Strange bioluminescent orchids reflect illusions of visitors' past sins. Every path is reshaped nightly by Summer fae magic.  Fantastic Elements:  Illusion-choked hedges hiding paths (must overcome or dispel). Night-blooming flowers that whisper secrets when touched. A tree rooted in both Faerie and Earth; bleeding golden sap. Clues Found:  A fallen brooch with the sigil of Titania, cracked and embedded with obsidian. An enchanted invitation showing a different guest list \u2014 altered via glamour. Witness: Sylvia Heartswell, fae-blooded florist, saw a figure vanish through a living wall. Pollen-scented illusion left behind by the real thief, masking true identity."
+    "Description": "A maze of flowering halls and greenhouse domes, filled with glowing pollen and whispering plants. Strange bioluminescent orchids reflect illusions of visitors' past sins. Every path is reshaped nightly by Summer fae magic.  Fantastic Elements:  Illusion-choked hedges hiding paths (must overcome or dispel). Night-blooming flowers that whisper secrets when touched. A tree rooted in both Faerie and Earth; bleeding golden sap. Clues Found:  A fallen brooch with the sigil of Titania, cracked and embedded with obsidian. An enchanted invitation showing a different guest list — altered via glamour. Witness: Sylvia Heartswell, fae-blooded florist, saw a figure vanish through a living wall. Pollen-scented illusion left behind by the real thief, masking true identity."
   },
   {
     "Name": "The Mirage Room",
-    "Description": "A lounge of shifting light and time-bending drinks. Mirrors do not reflect truth but inner essence. Summer Courtiers use it as a neutral parley space. It appears in Chicago only on solstice nights through a hidden door in a parking garage.  Fantastic Elements:  Drinks that alter memory or clarity \u2014 necessary to learn hidden truths. Patrons speak in riddles and layered metaphors. Mirror-chamber where identity is fluid. Clues Found:  A bartender fae (Glimmerjack) swears the accused White Court vampire was never there that night. A mirror image of the real thief is caught in a silver mirror \u2014 distorted but traceable. A stolen scent vial, used to impersonate someone with fae magic. Fae contract with Titania\u2019s seal, half-burned \u2014 incomplete glamour recipe."
+    "Description": "A lounge of shifting light and time-bending drinks. Mirrors do not reflect truth but inner essence. Summer Courtiers use it as a neutral parley space. It appears in Chicago only on solstice nights through a hidden door in a parking garage.  Fantastic Elements:  Drinks that alter memory or clarity — necessary to learn hidden truths. Patrons speak in riddles and layered metaphors. Mirror-chamber where identity is fluid. Clues Found:  A bartender fae (Glimmerjack) swears the accused White Court vampire was never there that night. A mirror image of the real thief is caught in a silver mirror — distorted but traceable. A stolen scent vial, used to impersonate someone with fae magic. Fae contract with Titania’s seal, half-burned — incomplete glamour recipe."
   },
   {
     "Name": "The Drowned Root",
-    "Description": "A forgotten section of the Botanical Garden, now a wild knot of carnivorous vines, faerie-rooted trees, and magical rot. Dangerous and out of sync with the mortal world. The air here is sticky with ancient Summer energy.  Fantastic Elements:  Trees whisper in Titania\u2019s voice. Time moves backward in pockets. Vines react to lies \u2014 physically restraining liars. Clues Found:  A summer cloak, once worn by a courtier, pinned with white hair. The name \u201cVelna\u201d carved into bark \u2014 glowing with truth-ward. Recovered fae spell circle remnants, a perfect duplication ritual. Broken crown-shaped roots, pulsing \u2014 suggest a ritual site."
+    "Description": "A forgotten section of the Botanical Garden, now a wild knot of carnivorous vines, faerie-rooted trees, and magical rot. Dangerous and out of sync with the mortal world. The air here is sticky with ancient Summer energy.  Fantastic Elements:  Trees whisper in Titania’s voice. Time moves backward in pockets. Vines react to lies — physically restraining liars. Clues Found:  A summer cloak, once worn by a courtier, pinned with white hair. The name “Velna” carved into bark — glowing with truth-ward. Recovered fae spell circle remnants, a perfect duplication ritual. Broken crown-shaped roots, pulsing — suggest a ritual site."
   },
   {
     "Name": "The Petal Archive",
-    "Description": "A hidden archive run by the Supernatural Expert and Sorceress PC. It houses old tomes on magical botany, some bound in living bark. A portal to the Nevernever is embedded inside a garden fountain.  Fantastic Elements:  Floating books rearrange themselves to prevent falsehood. A faerie-lantern hanging in stasis, pulsing with old secrets. A protective spirit of knowledge in the shape of a hummingbird. Clues Found:  A grimoire showing Titania\u2019s Whisper allows one to rewrite appearance and identity. Student intern (Sarai) reveals a Summer Court envoy threatened the librarian days ago. Broken stasis cage for a powerful seed \u2014 now missing. Glyph of unmaking found burnt into a tome's cover."
+    "Description": "A hidden archive run by the Supernatural Expert and Sorceress PC. It houses old tomes on magical botany, some bound in living bark. A portal to the Nevernever is embedded inside a garden fountain.  Fantastic Elements:  Floating books rearrange themselves to prevent falsehood. A faerie-lantern hanging in stasis, pulsing with old secrets. A protective spirit of knowledge in the shape of a hummingbird. Clues Found:  A grimoire showing Titania’s Whisper allows one to rewrite appearance and identity. Student intern (Sarai) reveals a Summer Court envoy threatened the librarian days ago. Broken stasis cage for a powerful seed — now missing. Glyph of unmaking found burnt into a tome's cover."
   },
   {
-    "Name": "All are interconnected by threads of emotion \u2014 cursed love, obsessive jealousy, and twisted longing. Each holds keys to the larger mystery and can be explored in any order.",
+    "Name": "All are interconnected by threads of emotion — cursed love, obsessive jealousy, and twisted longing. Each holds keys to the larger mystery and can be explored in any order.",
     "Description": ""
   },
   {
     "Name": "South Chicago Post Office (Main Location)",
-    "Description": "A partly abandoned federal post office with crumbling stonework and iron lattice windows. Some parts still operate by day, but other wings remain locked, filled with old, unclaimed letters. Faint whispers echo through the letter chutes. At night, it becomes a spectral warren of flickering lights and misplaced passion.  Fantastic Elements:  Letters fly on their own at night, carried by spectral hands. A haunted mail sorting machine that \"rewrites\" feelings encoded in ink. A locker sealed by a kiss \u2014 only opens for someone truly heartbroken. Clues Found:  A letter written in blood and tears, addressed to \u201cThe Violet Court.\u201d Wax stamp sigil: a heart pierced by two thorns \u2014 unknown fae house. A partially burned envelope with perfume linked to a vanished mortal woman named Emmeline Vail. A schedule showing letters only go out during the \u201cwitching hour,\u201d regardless of posted time."
+    "Description": "A partly abandoned federal post office with crumbling stonework and iron lattice windows. Some parts still operate by day, but other wings remain locked, filled with old, unclaimed letters. Faint whispers echo through the letter chutes. At night, it becomes a spectral warren of flickering lights and misplaced passion.  Fantastic Elements:  Letters fly on their own at night, carried by spectral hands. A haunted mail sorting machine that \"rewrites\" feelings encoded in ink. A locker sealed by a kiss — only opens for someone truly heartbroken. Clues Found:  A letter written in blood and tears, addressed to “The Violet Court.” Wax stamp sigil: a heart pierced by two thorns — unknown fae house. A partially burned envelope with perfume linked to a vanished mortal woman named Emmeline Vail. A schedule showing letters only go out during the “witching hour,” regardless of posted time."
   },
   {
-    "Name": "The Abandoned Lovers\u2019 Park",
-    "Description": "A once-charming park, now overgrown and suffused with weeping willows. Statues of lovers seem to cry when unattended. Urban legend says the park was a gift from a fae court to a mortal woman, but was cursed when love turned to rejection.  Fantastic Elements:  A dry fountain that flows with blood during eclipses. Trees speak the names of lost lovers when touched. Shadowy figures (Remorse Wraiths) linger near benches, whispering regrets. Clues Found:  A tree carving of \u201cE + R\u201d \u2014 their story repeats every 7 years, with new victims. Ghosts reenact a tragic proposal gone wrong. If interrupted, they reveal the name \u201cRosamund of Thorns.\u201d An amulet of thorned ivy \u2014 still magically warm with rage. Beneath a bench: a hidden love letter never delivered, addressed to \u201cMy Night-Blooming Star.\u201d"
+    "Name": "The Abandoned Lovers’ Park",
+    "Description": "A once-charming park, now overgrown and suffused with weeping willows. Statues of lovers seem to cry when unattended. Urban legend says the park was a gift from a fae court to a mortal woman, but was cursed when love turned to rejection.  Fantastic Elements:  A dry fountain that flows with blood during eclipses. Trees speak the names of lost lovers when touched. Shadowy figures (Remorse Wraiths) linger near benches, whispering regrets. Clues Found:  A tree carving of “E + R” — their story repeats every 7 years, with new victims. Ghosts reenact a tragic proposal gone wrong. If interrupted, they reveal the name “Rosamund of Thorns.” An amulet of thorned ivy — still magically warm with rage. Beneath a bench: a hidden love letter never delivered, addressed to “My Night-Blooming Star.”"
   },
   {
-    "Name": "The Red Room \u2014 Secret Archive in the Post Office Basement",
-    "Description": "A sealed, dim red-lit chamber that archivists forgot. Lined with red file cabinets filled with \u201cdead letters\u201d \u2014 ones never delivered. The air here is thick with the scent of roses and ozone.  Fantastic Elements:  Files reorganize themselves into poetic patterns. A chain-letter entity bound in a rusted mailbox: \"The Echo Bride\" \u2014 if read aloud, it curses the speaker. A romantic typewriter that writes new messages when touched by blood. Clues Found:  Emmeline's last letter to Rosamund \u2014 ripped, inked with final tears. Sketches of a ritual that imbues letters with emotional anchors. A hidden address linked to an old \u201cemotion broker\u201d named Ettelwin Crook. A ghost archivist who mistakes the PCs for lost lovers \u2014 can only be dismissed by correctly finishing a love poem."
+    "Name": "The Red Room — Secret Archive in the Post Office Basement",
+    "Description": "A sealed, dim red-lit chamber that archivists forgot. Lined with red file cabinets filled with “dead letters” — ones never delivered. The air here is thick with the scent of roses and ozone.  Fantastic Elements:  Files reorganize themselves into poetic patterns. A chain-letter entity bound in a rusted mailbox: \"The Echo Bride\" — if read aloud, it curses the speaker. A romantic typewriter that writes new messages when touched by blood. Clues Found:  Emmeline's last letter to Rosamund — ripped, inked with final tears. Sketches of a ritual that imbues letters with emotional anchors. A hidden address linked to an old “emotion broker” named Ettelwin Crook. A ghost archivist who mistakes the PCs for lost lovers — can only be dismissed by correctly finishing a love poem."
   },
   {
-    "Name": "Ettelwin Crook\u2019s Loft \u2014 \u201cThe Heart Binders' Den\u201d",
-    "Description": "A now-abandoned artist\u2019s loft lined with heart-shaped sculptures and bound journals. Ettelwin was once a wizard who tried to weaponize human emotion through ink and voice.  Fantastic Elements:  Journals that bleed when lies are spoken nearby. Portraits with eyes that follow visitors, shifting expressions from love to hate. A soul-phylactery: a ring box containing a whispering echo of Ettelwin\u2019s broken heart. Clues Found:  The ritual that birthed Rosamund \u2014 a fae spirit of scorned love and beauty. Emmeline\u2019s brush \u2014 made from Summer Court rose thorns. Mirror that shows visitors their \u201cgreatest romantic mistake.\u201d Ettelwin\u2019s confession: he tried to trap Rosamund in a letter but failed \u2014 she infected the postal network.  \ud83e\uddcd"
+    "Name": "Ettelwin Crook’s Loft — “The Heart Binders' Den”",
+    "Description": "A now-abandoned artist’s loft lined with heart-shaped sculptures and bound journals. Ettelwin was once a wizard who tried to weaponize human emotion through ink and voice.  Fantastic Elements:  Journals that bleed when lies are spoken nearby. Portraits with eyes that follow visitors, shifting expressions from love to hate. A soul-phylactery: a ring box containing a whispering echo of Ettelwin’s broken heart. Clues Found:  The ritual that birthed Rosamund — a fae spirit of scorned love and beauty. Emmeline’s brush — made from Summer Court rose thorns. Mirror that shows visitors their “greatest romantic mistake.” Ettelwin’s confession: he tried to trap Rosamund in a letter but failed — she infected the postal network.  🧍"
   },
   {
     "Name": "Coal Plant Exterior",
-    "Description": "A crumbling, soot-black facility, overgrown with dry vines. Rusted conveyors hang like skeletal arms. Massive storage tanks have collapsed, forming pits of oily water and clotted coal ash.  Fantastic Elements:  Wind sounds like whispered warnings when passing cracked pipes.  The old admin office clocks still tick\u2026 synchronized.  Glowing soot symbols appear after midnight.  Clues Found:  Student satchel fused with melted rock, containing a broken spirit compass.  Journal page detailing \u201clight beneath the black.\u201d  A bone fragment scorched with silver runes \u2014 not human.  Ash-stained ID tag: Dr. E. H. Morrow \u2014 Department of Arcane Geology."
+    "Description": "A crumbling, soot-black facility, overgrown with dry vines. Rusted conveyors hang like skeletal arms. Massive storage tanks have collapsed, forming pits of oily water and clotted coal ash.  Fantastic Elements:  Wind sounds like whispered warnings when passing cracked pipes.  The old admin office clocks still tick… synchronized.  Glowing soot symbols appear after midnight.  Clues Found:  Student satchel fused with melted rock, containing a broken spirit compass.  Journal page detailing “light beneath the black.”  A bone fragment scorched with silver runes — not human.  Ash-stained ID tag: Dr. E. H. Morrow — Department of Arcane Geology."
   },
   {
     "Name": "Collapsed Tunnels",
-    "Description": "Accessed via a collapsed shaft, these tunnels descend into the earth, past layers of industrial stone and untouched caverns. Faint phosphorescent moss grows along walls etched with ancient sigils.  Fantastic Elements:  A thermal sinkhole that breathes every hour.  Lava-worms that sing to each other in harmonic pulses.  A cracked stone altar bleeding obsidian sap.  Clues Found:  Student beacon pulsing next to a fae-cast circle of containment.  Old miner\u2019s helmet enchanted with a night-seeing glamour.  Blood trail that climbs walls instead of following gravity.  Half-buried Summer Court blade \u2014 ancient and dormant."
+    "Description": "Accessed via a collapsed shaft, these tunnels descend into the earth, past layers of industrial stone and untouched caverns. Faint phosphorescent moss grows along walls etched with ancient sigils.  Fantastic Elements:  A thermal sinkhole that breathes every hour.  Lava-worms that sing to each other in harmonic pulses.  A cracked stone altar bleeding obsidian sap.  Clues Found:  Student beacon pulsing next to a fae-cast circle of containment.  Old miner’s helmet enchanted with a night-seeing glamour.  Blood trail that climbs walls instead of following gravity.  Half-buried Summer Court blade — ancient and dormant."
   },
   {
     "Name": "Furnace Heart",
-    "Description": "The deepest furnace, its walls collapsed inward revealing a spherical chamber of mirror-black obsidian. A slow-burning magical flame still floats in the center. Shadowy figures flit across the walls.  Fantastic Elements:  Flame feeds off strong memories \u2014 PCs lose a moment of their past to pass.  Echoes form words \u2014 always questions.  Six-sided fae door made of compressed shadow, locked by bloodline.  Clues Found:  A student\u2019s voice trapped in a molten shard: \u201cDon\u2019t wake it\u2026 please\u2026\u201d  Sigil of a deep-earth fae court: The Hollow Crown.  Fragment of a broken oathstone \u2014 used to seal ancient pacts.  Fused bones of something with two hearts and wings."
+    "Description": "The deepest furnace, its walls collapsed inward revealing a spherical chamber of mirror-black obsidian. A slow-burning magical flame still floats in the center. Shadowy figures flit across the walls.  Fantastic Elements:  Flame feeds off strong memories — PCs lose a moment of their past to pass.  Echoes form words — always questions.  Six-sided fae door made of compressed shadow, locked by bloodline.  Clues Found:  A student’s voice trapped in a molten shard: “Don’t wake it… please…”  Sigil of a deep-earth fae court: The Hollow Crown.  Fragment of a broken oathstone — used to seal ancient pacts.  Fused bones of something with two hearts and wings."
   },
   {
     "Name": "Abandoned Rail Yard",
-    "Description": "Old industrial rail cars and maintenance sheds remain rusted in place, some halfway swallowed by earth. One freight car sits perfectly untouched \u2014 unnaturally pristine \u2014 sealed in lead and iron.  Fantastic Elements:  A railcar door sealed with fae-iron and blessed coal dust.  An unmelting coal piece that burns blue \u2014 whispers in dreams.  Overturned shed hiding a hexed transit map showing lost Chicago tunnels.  Clues Found:  Map etched on flesh parchment leading deeper into fae-underground.  Symbol of a gate \u2014 an ancient Way \u2014 set to reopen under a specific star alignment.  Dream journal left by a student who foresaw their own transformation.  Graffiti in infernal runes reading: \u201cLet nothing rise.\u201d  \ud83e\uddcd"
+    "Description": "Old industrial rail cars and maintenance sheds remain rusted in place, some halfway swallowed by earth. One freight car sits perfectly untouched — unnaturally pristine — sealed in lead and iron.  Fantastic Elements:  A railcar door sealed with fae-iron and blessed coal dust.  An unmelting coal piece that burns blue — whispers in dreams.  Overturned shed hiding a hexed transit map showing lost Chicago tunnels.  Clues Found:  Map etched on flesh parchment leading deeper into fae-underground.  Symbol of a gate — an ancient Way — set to reopen under a specific star alignment.  Dream journal left by a student who foresaw their own transformation.  Graffiti in infernal runes reading: “Let nothing rise.”  🧍"
   }
 ]
