@@ -31,7 +31,7 @@ def get_monitors():
                                           wintypes.LPARAM)
     ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
     return monitors
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 
 # Constants for portrait folder and max portrait size
 PORTRAIT_FOLDER = "assets/portraits"
@@ -219,13 +219,6 @@ class NPCGraphEditor(ctk.CTkFrame):
         # Bind a click event to close the window.
         win.bind("<Button-1>", lambda e: win.destroy())
         logging.debug("Window displayed; waiting for click to close.")
-
-
-
-
-
-
-
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: _on_mousewheel_y
