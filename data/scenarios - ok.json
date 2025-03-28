@@ -49,7 +49,9 @@
     "NPCs": [
       "Liam Raith",
       "Sister Maria Bell",
-      "Lucinda Raith"
+      "Lucinda Raith",
+      "Father Colm O’Donnell",
+      "Solomon Drake"
     ],
     "Secrets": ""
   },
@@ -62,7 +64,13 @@
       "McKenzie Pier",
       "Obsidian Crypt"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Isabel Montez",
+      "Felix Grant",
+      "Mila Van Dorn",
+      "Arturo Vasquez",
+      "Khanji the Vulture"
+    ],
     "Secrets": ""
   },
   {
@@ -115,6 +123,7 @@
       "Warden Ezekiel Cross",
       "Meera Kline",
       "Archivist Yoko Tamura",
+      "Chloe Morris",
       "Bishop Tallow"
     ],
     "Secrets": ""
@@ -130,7 +139,10 @@
     ],
     "NPCs": [
       "Pastor Caleb North",
-      "Nicodemus Archleone"
+      "Nicodemus Archleone",
+      "Serena Cho",
+      "Detective Roberta Kim",
+      "Ilya Petrov"
     ],
     "Secrets": ""
   },
@@ -143,7 +155,13 @@
       "The Sunlit Court",
       "Hidden Garden in Lincoln Park"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Lady Fianna",
+      "Jason Klein",
+      "Sir Brightthorn",
+      "The Laughing Gardener",
+      "Winter Spy Kaelen"
+    ],
     "Secrets": ""
   },
   {
@@ -155,7 +173,13 @@
       "Abandoned Funeral Parlor",
       "Shadow Market Underpass"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Countess Erzabet",
+      "Detective Mark Reed",
+      "Father Tomas",
+      "Jillian Crow",
+      "The Bone Harbinger"
+    ],
     "Secrets": ""
   },
   {
@@ -167,7 +191,13 @@
       "Grin & Barrow Mortuary",
       "The Trickster’s Record Shop"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Eddie Delgado",
+      "Lucy 'Laughing Lucy' Bishop",
+      "Frankie Bones",
+      "Morgue Technician Kim",
+      "The Trickster Spirit"
+    ],
     "Secrets": ""
   },
   {
@@ -180,7 +210,11 @@
       "Safehouse of the Bear"
     ],
     "NPCs": [
-      "Sorceress Marina"
+      "Isabel Montez",
+      "The Child in Red",
+      "Hunter Varek",
+      "Sorceress Marina",
+      "Werebear Sergei"
     ],
     "Secrets": ""
   },
@@ -193,7 +227,13 @@
       "Broken River Lock",
       "The Rotting Veil"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Eryx the Unborn",
+      "Detective Lana Grey",
+      "Doctor Felix Wong",
+      "Outsider Servant Kk-Thral",
+      "The Drowned Queen"
+    ],
     "Secrets": ""
   },
   {
@@ -207,6 +247,9 @@
     ],
     "NPCs": [
       "Warden Lysander Black",
+      "Caretaker Miriam Harker",
+      "The Echoed Child",
+      "Spirit Archivist T’kel",
       "Nicodemus Archleone"
     ],
     "Secrets": ""
@@ -220,7 +263,13 @@
       "Highway Shrine",
       "The Spirit Holding Cell"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Detective Alana Fisk",
+      "Coroner Ezra Lutz",
+      "Spirit of Amara",
+      "Truck Driver Felix Reed",
+      "Archivist Matteo"
+    ],
     "Secrets": ""
   },
   {
@@ -234,7 +283,10 @@
     ],
     "NPCs": [
       "Joe Callahan",
-      "Nicodemus Archleone"
+      "Nicodemus Archleone",
+      "Lucky Penny",
+      "Sister Francine",
+      "The Gambler’s Ghost"
     ],
     "Secrets": ""
   },
@@ -247,7 +299,13 @@
       "Old Firehouse Records Room",
       "Mourner’s Tavern"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Aiden Carver (Ghost)",
+      "Detective Roberta Kim",
+      "Medium Evelyn Frost",
+      "Firefighter Max Reyes",
+      "Angry Spirit Ember"
+    ],
     "Secrets": ""
   },
   {
@@ -261,7 +319,10 @@
     ],
     "NPCs": [
       "Jenna Moreno",
-      "Nicodemus Archleone"
+      "Nicodemus Archleone",
+      "Serena Cho",
+      "Father Colm O’Donnell",
+      "The Grief-Eater"
     ],
     "Secrets": ""
   },
@@ -271,7 +332,11 @@
     "Places": [
       "Art Institute of Chicago"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Museum Curator",
+      "Occult Expert",
+      "Restless Spirit"
+    ],
     "Secrets": ""
   },
   {
@@ -280,7 +345,11 @@
     "Places": [
       "Art Institute of Chicago"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Local Occult Scholar",
+      "Museum Staff",
+      "Bound Guardian"
+    ],
     "Secrets": ""
   },
   {
@@ -289,7 +358,11 @@
     "Places": [
       "Cloud Gate"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Local Mystic",
+      "Doomed Bystanders",
+      "Conspiracy Cultist"
+    ],
     "Secrets": ""
   },
   {
@@ -298,7 +371,11 @@
     "Places": [
       "Cloud Gate"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Fae Emissary",
+      "Guardian of the Gate",
+      "Ritual Witness"
+    ],
     "Secrets": ""
   },
   {
@@ -307,7 +384,11 @@
     "Places": [
       "Millennium Park"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Occult Scientist",
+      "Park Staff",
+      "Rift Entity"
+    ],
     "Secrets": ""
   },
   {
@@ -316,7 +397,11 @@
     "Places": [
       "Museum of Science and Industry"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Museum Curator",
+      "Ghostly Captain",
+      "Undersea Entity"
+    ],
     "Secrets": ""
   },
   {
@@ -325,7 +410,11 @@
     "Places": [
       "Chicago Riverwalk"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "River Historian",
+      "Restless Spirits",
+      "Hidden Conspirator"
+    ],
     "Secrets": ""
   },
   {
@@ -334,7 +423,11 @@
     "Places": [
       "Field Museum of Natural History"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Museum Staff",
+      "Spirit of the Past",
+      "Reluctant Guardian"
+    ],
     "Secrets": ""
   },
   {
@@ -343,7 +436,11 @@
     "Places": [
       "Trump Tower"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "White Court Power Broker",
+      "Red Court Survivor",
+      "Mysterious Benefactor"
+    ],
     "Secrets": ""
   },
   {
@@ -352,7 +449,11 @@
     "Places": [
       "Lincoln Park"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Local Historian",
+      "Construction Foreman",
+      "Angry Ghost"
+    ],
     "Secrets": ""
   },
   {
@@ -361,7 +462,11 @@
     "Places": [
       "Water Tower Place"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Fire Investigator",
+      "Building Spirit",
+      "Arsonist Mage"
+    ],
     "Secrets": ""
   },
   {
@@ -370,7 +475,11 @@
     "Places": [
       "Wrigley Field"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Sports Historian",
+      "Cursed Fan",
+      "Goat Spirit"
+    ],
     "Secrets": ""
   },
   {
@@ -379,7 +488,11 @@
     "Places": [
       "Art Institute of Chicago"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Missing Curator",
+      "White Court Vampire Art Collector",
+      "Museum Staff"
+    ],
     "Secrets": ""
   },
   {
@@ -388,7 +501,11 @@
     "Places": [
       "Art Institute of Chicago"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Necromancer",
+      "Museum Curator",
+      "Unwilling Docent"
+    ],
     "Secrets": ""
   },
   {
@@ -421,7 +538,11 @@
       "Cloud Gate",
       "Millennium Park"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Fomor Sorcerer",
+      "Park Security",
+      "Escaped Creatures"
+    ],
     "Secrets": ""
   },
   {
@@ -430,7 +551,11 @@
     "Places": [
       "Millennium Park"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Fae Lord",
+      "Taken Child",
+      "White Council Observer"
+    ],
     "Secrets": ""
   },
   {
@@ -439,7 +564,11 @@
     "Places": [
       "Museum of Science and Industry"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Red Court Scientists",
+      "Kidnapped Humans",
+      "Rebel Lab Tech"
+    ],
     "Secrets": ""
   },
   {
@@ -448,7 +577,11 @@
     "Places": [
       "Chicago Riverwalk"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Black Court Spawn",
+      "Terrified Witness",
+      "Local Vampire Hunter"
+    ],
     "Secrets": ""
   },
   {
@@ -457,7 +590,11 @@
     "Places": [
       "Field Museum of Natural History"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Possessed Guard",
+      "Ancient Demon",
+      "Museum Director"
+    ],
     "Secrets": ""
   },
   {
@@ -466,7 +603,11 @@
     "Places": [
       "Trump Tower"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "White Court Power Broker",
+      "Red Court Survivor",
+      "Anonymous Benefactor"
+    ],
     "Secrets": ""
   },
   {
@@ -475,7 +616,11 @@
     "Places": [
       "Millennium Park"
     ],
-    "NPCs": [],
+    "NPCs": [
+      "Necromancer",
+      "Unquiet Dead",
+      "Ley Line Expert"
+    ],
     "Secrets": ""
   },
   {
