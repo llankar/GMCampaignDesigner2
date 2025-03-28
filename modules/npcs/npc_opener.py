@@ -4,7 +4,6 @@ from tkinter import messagebox
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_editor_window import GenericEditorWindow
-from modules.generic.scenario_detail_view import ScenarioDetailView
 
 def open_npc_editor_window(npc_name):
     """
