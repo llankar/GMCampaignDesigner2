@@ -10,7 +10,6 @@ from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.generic.generic_editor_window import GenericEditorWindow
-from modules.generic.entity_detail_factory import create_entity_detail_frame
 from modules.npcs import npc_opener
 from customtkinter import CTkImage
 import logging
@@ -18,7 +17,7 @@ from screeninfo import get_monitors
 import tkinter as tk  # standard tkinter
 import os, logging, ctypes
 from ctypes import wintypes
-from modules.generic.entity_detail_factory import create_entity_detail_frame
+from modules.generic.entity_detail_factory import create_entity_detail_frame, open_entity_window
             
 
 PORTRAIT_FOLDER = "assets/portraits"
@@ -616,7 +615,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             win.title(entity_name)
             # Import the factory function.
             # Pass your actual open_entity_tab callback if available; otherwise, None.
-            detail_frame = create_entity_detail_frame(entity_type, entity, master=win)
+            detail_frame = create_entity_detail_frame(entity_type, entity, master=win, open_entity_callback=open_entity_window)
             detail_frame.pack(fill="both", expand=True)
 
 

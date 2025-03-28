@@ -31,13 +31,15 @@ def insert_longtext(parent, header, content):
     box.configure(state="disabled")
     box.pack(fill="x", padx=10, pady=5)
 
-def insert_links(parent, header, items, linked_type, master):
+def insert_links(parent, header, items, linked_type, open_entity_callback):
     ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
     for item in items:
         label = CTkLabel(parent, text=item, text_color="blue", cursor="hand2")
         label.pack(anchor="w", padx=10)
-        # Capture the current 'item' by assigning it to a default parameter (i)
-        label.bind("<Button-1>", lambda event, l=linked_type, i=item, m=master: open_entity_tab(l, i, m))
+        if open_entity_callback is not None:
+            # Capture the current values with lambda defaults.
+            label.bind("<Button-1>", lambda event, l=linked_type, i=item: open_entity_callback(l, i))
+
 
 def open_entity_tab(entity_type , name, master):
     wrapper = wrappers[entity_type]
@@ -67,25 +69,9 @@ def open_entity_tab(entity_type , name, master):
 
     
    
-def create_entity_detail_frame(entity_type, entity, master): 
-    """
-    Create and return a CTkFrame displaying the details of an entity.
-    This function uses a template (loaded dynamically based on entity_type)
-    to determine which fields to display. It shows a portrait (if available),
-    text fields, longtext fields, and clickable lists (via insert_links) that
-    use open_entity_callback to open a detailed view for linked entities.
-    
-    Parameters:
-      - entity_type: e.g., "NPCs" or "Places"
-      - entity: a dictionary containing the entity's data.
-      - master: the parent widget for the returned frame.
-      - open_entity_callback: an optional callback that takes (entity_type, entity_name)
-         and opens the detailed view for that entity.
-    """
-    # Load the template based on entity_type. Adjust the path if needed.
-    template = load_template(entity_type.lower() )
-    
-
+def create_entity_detail_frame(entity_type, entity, master, open_entity_callback=None):
+    # Load the template based on entity_type (e.g., "npcs" for "NPCs")
+    template = load_template(entity_type.lower())
     frame = ctk.CTkFrame(master)
     frame.portrait_images = {}  # local cache to keep image references
 
@@ -104,7 +90,6 @@ def create_entity_detail_frame(entity_type, entity, master):
         except Exception as e:
             print(f"[DEBUG] Error loading portrait for {entity.get('Name','')}: {e}")
 
-    # Iterate over template fields and add each field to the frame.
     for field in template["fields"]:
         field_name = field["name"]
         field_type = field["type"]
@@ -118,7 +103,33 @@ def create_entity_detail_frame(entity_type, entity, master):
         elif field_type == "list":
             linked_type = field.get("linked_type", None)
             if linked_type:
-                print(f"[DEBUG] name={field_name} entity= {entity.get(field_name)}")
-                insert_links(frame, field_name, entity.get(field_name, []), linked_type, master)
-            
+                insert_links(frame, field_name, entity.get(field_name, []), linked_type, open_entity_callback)
     return frame
+
+def open_entity_window(entity_type, name):
+        # Look up the entity using the wrappers dictionary.
+        wrapper = wrappers[entity_type]
+        items = wrapper.load_items()
+        key = "Title" if entity_type == "Scenarios" else "Name"
+        entity = next((i for i in items if i.get(key) == name), None)
+        if not entity:
+            messagebox.showerror("Error", f"{entity_type[:-1]} '{name}' not found.")
+            return
+
+        # Create a new window.
+        new_window = ctk.CTkToplevel()
+        new_window.title(f"{entity_type[:-1]}: {name}")
+        new_window.geometry("1000x600")
+        new_window.minsize(1000, 600)
+        new_window.configure(padx=10, pady=10)
+
+        # Create a scrollable container inside the new window.
+        scrollable_container = ctk.CTkScrollableFrame(new_window)
+        scrollable_container.pack(fill="both", expand=True)
+
+        # Build the detail frame and pack it into the container.
+        detail_frame = create_entity_detail_frame(
+            entity_type, entity, master=scrollable_container,
+            open_entity_callback=open_entity_window  # Pass this same callback if you want links inside to work similarly.
+        )
+        detail_frame.pack(fill="both", expand=True)
