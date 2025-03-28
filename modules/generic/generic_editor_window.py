@@ -154,6 +154,12 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         initial_values = self.item.get(field["name"], [])
 
+        def remove_this(row, entry_widget):
+            """Removes the given row and its entry from the combobox_list."""
+            row.destroy()
+            if entry_widget in combobox_list:
+                combobox_list.remove(entry_widget)
+
         def add_combobox(initial_value=None):
             row = ctk.CTkFrame(container)
             row.pack(fill="x", pady=2)
@@ -172,7 +178,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
             # Button to open dropdown:
             btn = ctk.CTkButton(row, text="▼", width=30, command=lambda: open_dropdown(entry, var))
             btn.pack(side="left", padx=5)
-            
+            # - button to remove this entry.
+            remove_btn = ctk.CTkButton(row, text="-", width=30, command=lambda: remove_this(row, entry))
+            remove_btn.pack(side="left", padx=5)
             combobox_list.append(entry)
 
         def remove_this(row, widget):

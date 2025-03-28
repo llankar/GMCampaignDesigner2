@@ -75,7 +75,17 @@
   },
   {
     "Title": "Shattered Frost",
-    "Summary": "The Winter Court teeters on the edge of civil war after Lady Elaris, former confidante of Queen Mab, is cast out for her affair with a Wyldfae Prince. Twisted by jealousy and heartbreak, she turns a Chicago art exhibit into a supernatural trap, where emotions bleed into the Nevernever itself. The PCs must navigate lethal Fae politics, supernatural betrayals, and mortal fallout before Mab's wrath descends.",
+    "Summary": {
+      "text": "The Winter Court teeters on the edge of civil war after Lady Elaris, former confidante of Queen Mab, is cast out for her affair with a Wyldfae Prince. Twisted by jealousy and heartbreak, she turns a Chicago art exhibit into a supernatural trap, where emotions bleed into the Nevernever itself. The PCs must navigate lethal Fae politics, supernatural betrayals, and mortal fallout before Mab's wrath descends.",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
     "Places": [
       "Arctis Tor",
       "Frosted Gallery",
@@ -85,11 +95,20 @@
     "NPCs": [
       "Lady Elaris",
       "Detective Irene Vale",
-      "Sir Alden",
-      "Professor Eliza Trent",
-      "The Hollow Man"
+      "Sir Alden"
     ],
-    "Secrets": ""
+    "Secrets": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Objects": []
   },
   {
     "Title": "The Last Execution",
