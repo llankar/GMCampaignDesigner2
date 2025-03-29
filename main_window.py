@@ -62,10 +62,17 @@ class MainWindow(ctk.CTk):
         self.title("GMCampaignDesigner")
         position_window_at_top(self)
         self.geometry("600x800")
+        self.models_path = r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion"
+        self.model_options = self.get_available_models()
+        if not self.model_options:
+            self.model_options = ["default_model"]
+
+        self.selected_model = ctk.StringVar(value=self.model_options[0])   
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
+
         ctk.CTkButton(self, text="Manage Factions", command=lambda: self.open_entity("factions")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Places", command=lambda: self.open_entity("places")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Objects", command=lambda: self.open_entity("objects")).pack(pady=5)
@@ -78,7 +85,18 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(self, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits).pack(pady=5) 
         ctk.CTkButton(self, text="Import Scenario", command=self.open_scenario_importer).pack(pady=5)
         ctk.CTkButton(self, text="Export Scenarios for Foundry", command=self.export_foundry).pack(pady=5)
-
+       
+    def get_available_models(self):
+        try:
+            return sorted([
+                os.path.splitext(f)[0]
+                for f in os.listdir(self.models_path)
+                if f.endswith(".safetensors")
+            ])
+        except Exception as e:
+            print(f"Failed to load models: {e}")
+            return []
+    
     def export_foundry(self):
         preview_and_export_foundry(self)
     def open_scenario_importer(self):
@@ -233,7 +251,7 @@ class MainWindow(ctk.CTk):
                 "negativeprompt": ("blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, "
                                 "monstrous, too many fingers, too many legs, too many arms, bad hands, "
                                 "unrealistic weapons, bad grip on equipment, nude"),
-                "model": "cinenautsXLATRUE_cinenautsV30",
+                "model": self.selected_model.get(),
                 "width": 1024,
                 "height": 1024,
                 "cfgscale": 9,
@@ -279,6 +297,23 @@ class MainWindow(ctk.CTk):
         an empty 'Portrait' field, calls generate_portrait_for_npc() to generate a portrait.
         After processing, if any NPC data is modified, the JSON file is updated.
         """
+        def confirm_model_and_continue():
+            self.selected_model.set(model_var.get())
+            top.destroy()
+            self.generate_portraits_continue()
+
+        top = ctk.CTkToplevel(self)
+        top.title("Select AI Model")
+        top.geometry("400x200")
+        top.transient(self)
+        top.grab_set()
+
+        ctk.CTkLabel(top, text="Select AI Model to use for portrait generation:").pack(pady=20)
+        model_var = ctk.StringVar(value=self.model_options[0])
+        ctk.CTkOptionMenu(top, values=self.model_options, variable=model_var).pack(pady=10)
+        ctk.CTkButton(top, text="Continue", command=confirm_model_and_continue).pack(pady=10)
+        
+    def generate_portraits_continue(self):
         npc_file = "data/npcs.json"
         if not os.path.exists(npc_file):
             print("NPC file does not exist.")
@@ -307,6 +342,7 @@ class MainWindow(ctk.CTk):
                 print(f"Failed to update NPC file: {e}")
         else:
             print("No NPCs were missing portraits.")  
+
     def copy_and_resize_portrait(self, npc, src_path):
         PORTRAIT_FOLDER = "assets/portraits"
         MAX_PORTRAIT_SIZE = (1024, 1024)

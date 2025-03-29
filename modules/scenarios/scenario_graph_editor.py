@@ -373,7 +373,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         For NPC nodes, if a portrait is available, it is shown on the left,
         with the text wrapped to the right.
         """
-        MAX_TEXT_WIDTH = 200            # Maximum width for text area (in pixels)
+        MAX_TEXT_WIDTH = 500            # Maximum width for text area (in pixels)
         PAD_X = 10                      # Horizontal padding inside the rectangle
         PAD_Y = 10                      # Vertical padding inside the rectangle
         GAP = 5                         # Gap between portrait and text

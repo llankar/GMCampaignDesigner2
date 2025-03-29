@@ -99,6 +99,8 @@ def import_formatted_scenario(text):
         npc_text = npc_split[1].strip()
         logging.info("Extracted NPCs section (first 200 chars): %s", npc_text[:200])
         npc_entries = re.split(r'(?m)^\d+\.\s+', npc_text)
+        if npc_entries and not npc_entries[0].strip():
+            npc_entries = npc_entries[1:]
         for entry in npc_entries:
             entry = entry.strip()
             if not entry:
