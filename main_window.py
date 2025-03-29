@@ -21,6 +21,7 @@ from modules.helpers.rich_text_editor import RichTextEditor
 from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
 from PIL import Image, ImageTk
+from modules.helpers.config_helper import ConfigHelper
 
 # Other imports...
 SWARMUI_PROCESS = None
@@ -62,7 +63,7 @@ class MainWindow(ctk.CTk):
         self.title("GMCampaignDesigner")
         position_window_at_top(self)
         self.geometry("600x800")
-        self.models_path = r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion"
+        self.models_path = ConfigHelper.get("Paths", "models_path", fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
         self.model_options = self.get_available_models()
         if not self.model_options:
             self.model_options = ["default_model"]
