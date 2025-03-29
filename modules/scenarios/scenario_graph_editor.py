@@ -18,7 +18,8 @@ import tkinter as tk  # standard tkinter
 import os, logging, ctypes
 from ctypes import wintypes
 from modules.generic.entity_detail_factory import create_entity_detail_frame, open_entity_window
-            
+from modules.helpers.config_helper import ConfigHelper
+           
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
@@ -373,7 +374,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         For NPC nodes, if a portrait is available, it is shown on the left,
         with the text wrapped to the right.
         """
-        MAX_TEXT_WIDTH = 500            # Maximum width for text area (in pixels)
+        MAX_TEXT_WIDTH = int(ConfigHelper.get("Size", "max_text_width", fallback=500))
         PAD_X = 10                      # Horizontal padding inside the rectangle
         PAD_Y = 10                      # Vertical padding inside the rectangle
         GAP = 5                         # Gap between portrait and text
