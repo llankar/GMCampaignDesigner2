@@ -22,6 +22,7 @@ from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
 from PIL import Image, ImageTk
 from modules.helpers.config_helper import ConfigHelper
+from modules.helpers.swarmui_helper import get_available_models
 
 # Other imports...
 SWARMUI_PROCESS = None
@@ -63,12 +64,10 @@ class MainWindow(ctk.CTk):
         self.title("GMCampaignDesigner")
         position_window_at_top(self)
         self.geometry("600x800")
-        self.models_path = ConfigHelper.get("Paths", "models_path", fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
-        self.model_options = self.get_available_models()
-        if not self.model_options:
-            self.model_options = ["default_model"]
 
-        self.selected_model = ctk.StringVar(value=self.model_options[0])   
+        self.models_path = ConfigHelper.get("Paths", "models_path", fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
+        self.model_options = get_available_models()
+        
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
@@ -86,17 +85,7 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(self, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits).pack(pady=5) 
         ctk.CTkButton(self, text="Import Scenario", command=self.open_scenario_importer).pack(pady=5)
         ctk.CTkButton(self, text="Export Scenarios for Foundry", command=self.export_foundry).pack(pady=5)
-       
-    def get_available_models(self):
-        try:
-            return sorted([
-                os.path.splitext(f)[0]
-                for f in os.listdir(self.models_path)
-                if f.endswith(".safetensors")
-            ])
-        except Exception as e:
-            print(f"Failed to load models: {e}")
-            return []
+    
     
     def export_foundry(self):
         preview_and_export_foundry(self)
@@ -299,7 +288,7 @@ class MainWindow(ctk.CTk):
         After processing, if any NPC data is modified, the JSON file is updated.
         """
         def confirm_model_and_continue():
-            self.selected_model.set(model_var.get())
+            ConfigHelper.set("LastUsed", "model", self.selected_model.get())
             top.destroy()
             self.generate_portraits_continue()
 
@@ -310,8 +299,14 @@ class MainWindow(ctk.CTk):
         top.grab_set()
 
         ctk.CTkLabel(top, text="Select AI Model to use for portrait generation:").pack(pady=20)
-        model_var = ctk.StringVar(value=self.model_options[0])
-        ctk.CTkOptionMenu(top, values=self.model_options, variable=model_var).pack(pady=10)
+       
+        last_model = ConfigHelper.get("LastUsed", "model", fallback=None)
+        if last_model in self.model_options:
+            self.selected_model = ctk.StringVar(value=last_model)
+        else:
+            self.selected_model = ctk.StringVar(value=self.model_options[0])
+
+        ctk.CTkOptionMenu(top, values=self.model_options, variable=self.selected_model).pack(pady=10)
         ctk.CTkButton(top, text="Continue", command=confirm_model_and_continue).pack(pady=10)
         
     def generate_portraits_continue(self):

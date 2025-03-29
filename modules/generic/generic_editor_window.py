@@ -10,7 +10,8 @@ from modules.helpers.rich_text_editor import RichTextEditor
 from modules.helpers.window_helper import position_window_at_top
 from PIL import Image, ImageTk
 from tkinter import filedialog,  messagebox
-
+from modules.helpers.swarmui_helper import get_available_models
+from modules.helpers.config_helper import ConfigHelper
 
 FACTIONS_FILE = "data/factions.json"
 NPCS_FILE = "data/npcs.json"
@@ -288,12 +289,43 @@ class GenericEditorWindow(ctk.CTkToplevel):
             SWARMUI_PROCESS.terminate()
     
     def create_portrait_with_swarmui(self):
-        SWARM_API_URL = "http://127.0.0.1:7801"  # Change if needed
+      
         self.launch_swarmui()
+        # Ask for model
+        model_options = get_available_models()
+        if not model_options:
+            messagebox.showerror("Error", "No models available in SwarmUI models folder.")
+            return
+
+        # Pop-up to select model
+        top = ctk.CTkToplevel(self)
+        top.title("Select AI Model")
+        top.geometry("400x200")
+        top.transient(self)
+        top.grab_set()
+
+        model_var = ctk.StringVar(value=model_options[0])
+        last_model = ConfigHelper.get("LastUsed", "model", fallback=None)
+        
+        if last_model in model_options:
+            selected_model = ctk.StringVar(value=last_model)
+        else:
+            selected_model = ctk.StringVar(value=model_options[0])
+        ctk.CTkLabel(top, text="Select AI Model for this NPC:").pack(pady=20)
+        ctk.CTkOptionMenu(top, values=model_options, variable=selected_model).pack(pady=10)
+
+        def on_confirm():
+            top.destroy()
+            ConfigHelper.set("LastUsed", "model", selected_model.get())
+            self.generate_portrait(selected_model.get())
+        ctk.CTkButton(top, text="Generate", command=on_confirm).pack(pady=10)
+
+    def generate_portrait(self, selected_model):
         """
         Generates a portrait image using the SwarmUI API and associates the resulting
         image with the current NPC by updating its 'Portrait' field.
         """
+        SWARM_API_URL = "http://127.0.0.1:7801"  # Change if needed
         try:
             # Step 1: Obtain a new session from SwarmUI
             session_url = f"{SWARM_API_URL}/API/GetNewSession"
@@ -320,7 +352,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 "images": 1,  # Only one portrait needed
                 "prompt": prompt,
                 "negativeprompt": "blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, monstrous, too many fingers, too many legs, too many arms, bad hands, unrealistic weapons, bad grip on equipment, nude",
-                "model": "cinenautsXLATRUE_cinenautsV30",
+                "model": selected_model,
                 "width": 1024,
                 "height": 1024,
                 "cfgscale": 9,
@@ -367,8 +399,6 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
-
-
 
     def select_portrait(self):
         file_path = filedialog.askopenfilename(

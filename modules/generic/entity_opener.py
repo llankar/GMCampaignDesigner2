@@ -34,3 +34,4 @@ def open_detached_npc(npc_name):
     #    (no new tabs, no attach/detach)
     entity_frame = detail_view.create_entity_frame("NPCs", item)
     entity_frame.pack(fill="both", expand=True)
+    
