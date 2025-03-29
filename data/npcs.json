@@ -2845,5 +2845,34 @@
     },
     "Factions": [],
     "Portrait": "assets/portraits\\Wyrshae,_the_Hollow_Whisperer_1299218492656.png"
+  },
+  {
+    "Name": "The Killer",
+    "Role": "Hitman",
+    "Description": {
+      "text": "a dark haired, green eyed modern mob hitman\n",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Secret": {
+      "text": "",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "Factions": [],
+    "Objects": [],
+    "Portrait": "assets/portraits\\The_Killer_2783345766288.png"
   }
 ]

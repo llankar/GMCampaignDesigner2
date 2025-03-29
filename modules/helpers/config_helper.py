@@ -7,12 +7,11 @@ class ConfigHelper:
 
     @classmethod
     def load_config(cls, file_path="config/config.ini"):
-        if cls._config is None:
-            cls._config = configparser.ConfigParser()
-            if os.path.exists(file_path):
-                cls._config.read(file_path)
-            else:
-                print(f"Warning: config file '{file_path}' not found.")
+        cls._config = configparser.ConfigParser()
+        if os.path.exists(file_path):
+            cls._config.read(file_path)
+        else:
+            print(f"Warning: config file '{file_path}' not found.")
         return cls._config
 
     @classmethod
@@ -23,3 +22,18 @@ class ConfigHelper:
         except Exception as e:
             print(f"Config error: [{section}] {key} — {e}")
             return fallback
+
+    def set(section, key, value, file_path="config/config.ini"):
+        config = configparser.ConfigParser()
+        if os.path.exists(file_path):
+            config.read(file_path)
+
+        if not config.has_section(section):
+            config.add_section(section)
+
+        config.set(section, key, str(value))
+
+        with open(file_path, "w", encoding="utf-8") as configfile:
+            config.write(configfile)
+
+
