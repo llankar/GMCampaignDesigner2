@@ -1,30 +1,51 @@
-from modules.generic.generic_editor_window import GenericEditorWindow
-import orjson
-import os
+import sqlite3
+import json
+from db.db import get_connection
 
 class GenericModelWrapper:
     def __init__(self, entity_type):
         self.entity_type = entity_type
-        self.data_file = os.path.join("data", f"{entity_type}.json")
-        self._cache = None
+        # Assume your table name is the same as the entity type (e.g., "npcs")
+        self.table = entity_type  
 
     def load_items(self):
-        if self._cache is not None:
-            return self._cache
-        if not os.path.exists(self.data_file):
-            self._cache = []
-        else:
-            with open(self.data_file, "rb") as f:
-                self._cache = orjson.loads(f.read())
-        return self._cache
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM {self.table}")
+        rows = cursor.fetchall()
+        items = []
+        for row in rows:
+            item = {}
+            for key in row.keys():
+                value = row[key]
+                # Decode only likely JSON: starts with {, [, or "
+                if isinstance(value, str) and value.strip().startswith(("{", "[", "\"")):
+                    try:
+                        item[key] = json.loads(value)
+                    except (TypeError, json.JSONDecodeError):
+                        item[key] = value
+                else:
+                    item[key] = value
+            items.append(item)
+        conn.close()
+        return items
+
 
     def save_items(self, items):
-        with open(self.data_file, "wb") as f:
-            f.write(orjson.dumps(items, option=orjson.OPT_INDENT_2))
-        self._cache = items  # Refresh the cache
-
-
-    def edit_item(self, item, creation_mode=False):
-        editor = GenericEditorWindow(self.master, item, self.template, creation_mode)
-        self.master.wait_window(editor)
-        return editor.saved
+        conn = get_connection()
+        cursor = conn.cursor()
+        # For each item, use INSERT OR REPLACE (assuming a UNIQUE key like Name or Title)
+        for item in items:
+            keys = list(item.keys())
+            values = []
+            for key in keys:
+                val = item[key]
+                if isinstance(val, (list, dict)):
+                    val = json.dumps(val)
+                values.append(val)
+            placeholders = ", ".join("?" for _ in keys)
+            cols = ", ".join(keys)
+            sql = f"INSERT OR REPLACE INTO {self.table} ({cols}) VALUES ({placeholders})"
+            cursor.execute(sql, values)
+        conn.commit()
+        conn.close()
