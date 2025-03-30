@@ -119,6 +119,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
         if isinstance(value, dict):
             editor.load_text_data(value)
         else:
+            if not isinstance(value, str):
+                value = str(value)
             editor.text_widget.insert("1.0", value)
 
         editor.pack(fill="both", expand=True, pady=5)
@@ -164,7 +166,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         else:
             options_list = []
 
-        initial_values = self.item.get(field["name"], [])
+        initial_values = self.item.get(field["name"]) or []
 
         def remove_this(row, entry_widget):
             """Removes the given row and its entry from the combobox_list."""
@@ -238,18 +240,22 @@ class GenericEditorWindow(ctk.CTkToplevel):
     def save(self):
         for field in self.template["fields"]:
             widget = self.field_widgets[field["name"]]
-
             if field["type"] == "longtext":
-                self.item[field["name"]] = widget.get_text_data()
-
+                data = widget.get_text_data()
+                # If data is a dict and the text is empty, store empty string
+                if isinstance(data, dict) and not data.get("text", "").strip():
+                    self.item[field["name"]] = ""
+                else:
+                    self.item[field["name"]] = data
             elif field["name"] in ["Places", "NPCs", "Factions", "Objects"]:
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
             elif field["name"] == "Portrait":
-                self.item[field["name"]] = self.portrait_path  # Use the stored path
+                self.item[field["name"]] = self.portrait_path
             else:
                 self.item[field["name"]] = widget.get()
         self.saved = True
         self.destroy()
+
     def create_portrait_field(self, field):
         # Create a main frame for the portrait field
         frame = ctk.CTkFrame(self.scroll_frame)

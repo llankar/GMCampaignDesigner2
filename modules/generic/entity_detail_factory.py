@@ -103,7 +103,7 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
         elif field_type == "list":
             linked_type = field.get("linked_type", None)
             if linked_type:
-                insert_links(frame, field_name, entity.get(field_name, []), linked_type, open_entity_callback)
+                insert_links(frame, field_name, entity.get(field_name) or [], linked_type, open_entity_callback)
     return frame
 
 def open_entity_window(entity_type, name):
