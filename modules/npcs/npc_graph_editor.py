@@ -3,7 +3,6 @@ import os
 import customtkinter as ctk
 from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
-from modules.generic import entity_opener
 from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.generic.generic_model_wrapper import GenericModelWrapper
@@ -11,7 +10,6 @@ import math
 import logging
 from screeninfo import get_monitors
 from modules.npcs import npc_opener
-from customtkinter import CTkImage
 import tkinter as tk  # standard tkinter
 from PIL import Image, ImageTk
 import os, logging, ctypes

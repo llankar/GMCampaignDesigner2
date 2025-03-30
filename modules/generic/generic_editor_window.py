@@ -47,7 +47,6 @@ def load_objects_list():
 class GenericEditorWindow(ctk.CTkToplevel):
     def __init__(self, master, item, template, creation_mode=False):
         super().__init__(master)
-
         self.item = item
         self.template = template
         self.saved = False
@@ -66,15 +65,26 @@ class GenericEditorWindow(ctk.CTkToplevel):
         self.scroll_frame = ctk.CTkScrollableFrame(self.main_frame)
         self.scroll_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
-        for field in template["fields"]:
-            ctk.CTkLabel(self.scroll_frame, text=field["name"]).pack(pady=(5, 0), anchor="w")
+        # --- Reorder fields so that "Portrait" comes first ---
+        fields = self.template["fields"]
+        portrait_field = None
+        other_fields = []
+        for field in fields:
+            if field["name"] == "Portrait":
+                portrait_field = field
+            else:
+                other_fields.append(field)
 
+        if portrait_field:
+            ctk.CTkLabel(self.scroll_frame, text=portrait_field["name"]).pack(pady=(5, 0), anchor="w")
+            self.create_portrait_field(portrait_field)
+
+        for field in other_fields:
+            ctk.CTkLabel(self.scroll_frame, text=field["name"]).pack(pady=(5, 0), anchor="w")
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
             elif field["name"] in ["NPCs", "Places", "Factions", "Objects"]:
                 self.create_dynamic_combobox_list(field)
-            elif field["name"] == "Portrait":
-                self.create_portrait_field(field)
             else:
                 self.create_text_entry(field)
 
@@ -95,6 +105,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         # Optionally, adjust window position.
         position_window_at_top(self)
+
 
 
 
@@ -240,23 +251,35 @@ class GenericEditorWindow(ctk.CTkToplevel):
         self.saved = True
         self.destroy()
     def create_portrait_field(self, field):
+        # Create a main frame for the portrait field
         frame = ctk.CTkFrame(self.scroll_frame)
         frame.pack(fill="x", pady=5)
 
         self.portrait_path = self.item.get("Portrait", "")
 
+        # Create a separate frame for the image and center it
+        image_frame = ctk.CTkFrame(frame)
+        image_frame.pack(fill="x", pady=5)
+        
         if self.portrait_path and os.path.exists(self.portrait_path):
-            image = Image.open(self.portrait_path).resize((64, 64))
-            self.portrait_image = ctk.CTkImage(light_image=image, size=(64, 64))
-            self.portrait_label = ctk.CTkLabel(frame, image=self.portrait_image, text="")
+            image = Image.open(self.portrait_path).resize((256, 256))
+            self.portrait_image = ctk.CTkImage(light_image=image, size=(256, 256))
+            self.portrait_label = ctk.CTkLabel(image_frame, image=self.portrait_image, text="")
         else:
-            self.portrait_label = ctk.CTkLabel(frame, text="[No Image]")
-        self.portrait_label.pack(side="left", padx=5)
-
-        ctk.CTkButton(frame, text="Select Portrait", command=self.select_portrait).pack(side="left", padx=5)
-        ctk.CTkButton(frame, text="Create Portrait with description", command=self.create_portrait_with_swarmui).pack(side="left", padx=5)
+            self.portrait_label = ctk.CTkLabel(image_frame, text="[No Image]")
+        
+        # Pack without specifying a side to center the widget
+        self.portrait_label.pack(pady=5)
+        
+        # Create a frame for the buttons and pack them (they'll appear below the centered image)
+        button_frame = ctk.CTkFrame(frame)
+        button_frame.pack(pady=5)
+        
+        ctk.CTkButton(button_frame, text="Select Portrait", command=self.select_portrait).pack(side="left", padx=5)
+        ctk.CTkButton(button_frame, text="Create Portrait with description", command=self.create_portrait_with_swarmui).pack(side="left", padx=5)
 
         self.field_widgets[field["name"]] = self.portrait_path
+
     
     def launch_swarmui(self):
         global SWARMUI_PROCESS
