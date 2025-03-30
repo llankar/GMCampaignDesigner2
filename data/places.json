@@ -505,5 +505,22 @@
   {
     "Name": "Abandoned Rail Yard",
     "Description": "Old industrial rail cars and maintenance sheds remain rusted in place, some halfway swallowed by earth. One freight car sits perfectly untouched — unnaturally pristine — sealed in lead and iron.  Fantastic Elements:  A railcar door sealed with fae-iron and blessed coal dust.  An unmelting coal piece that burns blue — whispers in dreams.  Overturned shed hiding a hexed transit map showing lost Chicago tunnels.  Clues Found:  Map etched on flesh parchment leading deeper into fae-underground.  Symbol of a gate — an ancient Way — set to reopen under a specific star alignment.  Dream journal left by a student who foresaw their own transformation.  Graffiti in infernal runes reading: “Let nothing rise.”  🧍"
+  },
+  {
+    "Name": "candido candoï",
+    "Description": {
+      "text": "Ville de 7000 habitants du brésil",
+      "formatting": {
+        "bold": [],
+        "italic": [],
+        "underline": [],
+        "left": [],
+        "center": [],
+        "right": []
+      }
+    },
+    "NPCs": [
+      "Duchess Maria Lucia de Estrella"
+    ]
   }
 ]
