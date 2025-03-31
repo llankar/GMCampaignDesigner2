@@ -75,14 +75,12 @@ class GenericListView(ctk.CTkFrame):
 
     def refresh_list(self):
         self.tree.delete(*self.tree.get_children())
-
+        unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
         for item in self.filtered_items:
-            unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
             raw_val = item.get(unique_field, "")
             if isinstance(raw_val, dict):
                 raw_val = raw_val.get("text", "")
             unique_value = sanitize_id(raw_val or f"item_{int(time.time() * 1000)}")
-
             if self.has_portrait:
                 portrait_path = item.get("Portrait", "")
                 if portrait_path and os.path.exists(portrait_path):
@@ -90,32 +88,25 @@ class GenericListView(ctk.CTkFrame):
                     if not image:
                         image = self.load_image_thumbnail(portrait_path)
                         self.image_cache[portrait_path] = image
-                    tree_text = ""
                 else:
-                    image = None
-                    tree_text = "[No Image]"
-
-                # Include Name explicitly in columns since tree_text is for images
-                values = [self.clean_value(item.get(col, "")) for col in self.columns]
-
+                    image = ""
+                # Utiliser le champ unique (par exemple, 'Name') comme texte dans la colonne d'arbre
+                tree_text = self.clean_value(item.get(unique_field, ""))
+                # Construire la liste des valeurs en retirant le champ unique pour éviter la duplication
+                values = [self.clean_value(item.get(col, "")) for col in self.columns if col != unique_field]
                 try:
                     self.tree.insert("", "end", iid=unique_value, text=tree_text, image=image, values=values)
                 except Exception as e:
                     print("[ERROR] inserting item with portrait:", e, unique_value, values)
-
-            else:  # Entities without portraits
-                # Explicitly remove the unique_field (usually 'Name') from the columns to avoid duplication
-                values = [
-                    self.clean_value(item.get(col, "")) 
-                    for col in self.columns if col != unique_field
-                ]
-
+            else:
+                # Branche pour les entités sans portrait (inchangée)
+                values = [self.clean_value(item.get(col, "")) for col in self.columns if col != unique_field]
                 tree_text = self.clean_value(raw_val)
-
                 try:
                     self.tree.insert("", "end", iid=unique_value, text=tree_text, values=values)
                 except Exception as e:
                     print("[ERROR] inserting item without portrait:", e, unique_value, values)
+
 
 
     def clean_value(self, val):
