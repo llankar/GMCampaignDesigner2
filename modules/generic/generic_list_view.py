@@ -25,20 +25,27 @@ class GenericListView(ctk.CTkFrame):
 
         self.items = self.model_wrapper.load_items()
         self.filtered_items = self.items.copy()
+        # We'll keep image cache if needed for later but not used in Treeview columns now.
         self.image_cache = {}
 
+        # Check if template includes a Portrait field.
         self.has_portrait = any(f["name"] == "Portrait" for f in self.template["fields"])
         
-        # Columns setup: Portrait in '#0', rest in columns
+        # Determine the unique field (e.g., "Name") – first non-Portrait field.
         unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
+        self.unique_field = unique_field
 
+        # Build extra columns.
+        # If a portrait exists, we want a separate "Portrait" column plus any other fields
+        # excluding the unique field.
         if self.has_portrait:
-            self.columns = [f["name"] for f in self.template["fields"] if f["name"] != "Portrait"]
+            # The first extra column is "Portrait", then any other field except Portrait and unique field.
+            self.columns = ["Portrait"] + [f["name"] for f in self.template["fields"] 
+                                           if f["name"] not in ["Portrait", unique_field]]
         else:
-            # Do not include unique_field in columns if there's no portrait
-            self.columns = [f["name"] for f in self.template["fields"] if f["name"] not in ["Portrait", unique_field]]
+            self.columns = [f["name"] for f in self.template["fields"] if f["name"] != unique_field]
 
-        # Search bar
+        # Setup search bar.
         search_frame = ctk.CTkFrame(self)
         search_frame.pack(fill="x", padx=5, pady=5)
         ctk.CTkLabel(search_frame, text="Search:").pack(side="left", padx=5)
@@ -49,42 +56,22 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkButton(search_frame, text="Filter", command=lambda: self.filter_items(self.search_var.get())).pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Add", command=self.add_item).pack(side="left", padx=5)
 
-        # Treeview frame
+        # Setup Treeview frame.
         tree_frame = ctk.CTkFrame(self)
         tree_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Proper tree setup to allow image display
+        # Create the Treeview.
+        # Using show="tree headings" to display column #0 (the tree column) and the additional columns.
         self.tree = ttk.Treeview(tree_frame, columns=self.columns, show="tree headings", selectmode="browse")
         
-        self.tree.heading("#0", text="Name" if self.has_portrait else "Name")
-        self.tree.column("#0", width=60 if self.has_portrait else 150, anchor="center")
-        # Make sure self.unique_field is defined in __init__:
-        unique_field = next(
-            (f["name"] for f in self.template["fields"] if f["name"] != "Portrait"),
-            None
-        )
-        self.unique_field = unique_field
-
-        if self.has_portrait:
-            # Set up the special first column (#0) with the unique field ("Name")
-            self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
-            self.tree.column("#0", width=180, anchor="w")
-            # Set up the remaining columns
-            for idx, col in enumerate(self.columns):
-                if idx < len(self.columns) - 1:
-                    header_text = self.columns[idx + 1]
-                else:
-                    header_text = ""  # For the last column, no header text is used
-                self.tree.heading(col, text=header_text, command=lambda c=col: self.sort_column(c))
-                self.tree.column(col, width=150, anchor="w")
-        else:
-            # Without portrait, first column still displays "Name"
-            self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
-            self.tree.column("#0", width=180, anchor="w")
-            for idx, col in enumerate(self.columns):
-                header_text = self.columns[idx]
-                self.tree.heading(col, text=header_text, command=lambda c=col: self.sort_column(c))
-                self.tree.column(col, width=150, anchor="w")
+        # Column #0 is dedicated to the Name (unique field).
+        self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
+        self.tree.column("#0", width=180, anchor="w")
+        
+        # Set up the extra columns.
+        for col in self.columns:
+            self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c))
+            self.tree.column(col, width=150, anchor="w")
 
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=vsb.set)
@@ -98,39 +85,48 @@ class GenericListView(ctk.CTkFrame):
 
     def refresh_list(self):
         self.tree.delete(*self.tree.get_children())
-        unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
-        for item in self.filtered_items:
-            raw_val = item.get(unique_field, "")
+        self.batch_index = 0
+        self.batch_size = 50  # Adjust batch size if needed.
+        self.insert_next_batch()
+
+    def insert_next_batch(self):
+        end_index = min(self.batch_index + self.batch_size, len(self.filtered_items))
+        for i in range(self.batch_index, end_index):
+            item = self.filtered_items[i]
+            # Get the unique field value for column #0.
+            raw_val = item.get(self.unique_field, "")
             if isinstance(raw_val, dict):
                 raw_val = raw_val.get("text", "")
             unique_value = sanitize_id(raw_val or f"item_{int(time.time() * 1000)}")
+            name_text = self.clean_value(item.get(self.unique_field, ""))
+            
             if self.has_portrait:
+                # For the portrait column, if a portrait was chosen and file exists, show a placeholder (e.g., basename) 
+                # Otherwise, use an empty string.
                 portrait_path = item.get("Portrait", "")
                 if portrait_path and os.path.exists(portrait_path):
-                    image = self.image_cache.get(portrait_path)
-                    if not image:
-                        image = self.load_image_thumbnail(portrait_path)
-                        self.image_cache[portrait_path] = image
+                    # Option: use the file basename as an indicator.
+                    portrait_text = os.path.basename(portrait_path)
                 else:
-                    image = ""
-                # Utiliser le champ unique (par exemple, 'Name') comme texte dans la colonne d'arbre
-                tree_text = self.clean_value(item.get(unique_field, ""))
-                # Construire la liste des valeurs en retirant le champ unique pour éviter la duplication
-                values = [self.clean_value(item.get(col, "")) for col in self.columns if col != unique_field]
+                    portrait_text = ""
+                # For remaining extra columns, build values for each.
+                # Note: self.columns[0] is "Portrait", so we skip it here.
+                extra_values = tuple(self.clean_value(item.get(col, "")) for col in self.columns[1:])
+                # Build the full tuple: first element for the "Portrait" column, then extra columns.
+                values = (portrait_text,) + extra_values
                 try:
-                    self.tree.insert("", "end", iid=unique_value, text=tree_text, image=image, values=values)
+                    self.tree.insert("", "end", iid=unique_value, text=name_text, values=values)
                 except Exception as e:
                     print("[ERROR] inserting item with portrait:", e, unique_value, values)
             else:
-                # Branche pour les entités sans portrait (inchangée)
-                values = [self.clean_value(item.get(col, "")) for col in self.columns if col != unique_field]
-                tree_text = self.clean_value(raw_val)
+                values = tuple(self.clean_value(item.get(col, "")) for col in self.columns)
                 try:
-                    self.tree.insert("", "end", iid=unique_value, text=tree_text, values=values)
+                    self.tree.insert("", "end", iid=unique_value, text=name_text, values=values)
                 except Exception as e:
                     print("[ERROR] inserting item without portrait:", e, unique_value, values)
-
-
+        self.batch_index = end_index
+        if self.batch_index < len(self.filtered_items):
+            self.after(50, self.insert_next_batch)
 
     def clean_value(self, val):
         if val is None:
@@ -151,8 +147,8 @@ class GenericListView(ctk.CTkFrame):
             return None
 
     def sort_column(self, column_name):
-        # Determine the effective sort column (sort key) using your existing logic.
-        if self.has_portrait: 
+        # Determine effective sort key (refine this as needed)
+        if self.has_portrait:
             try:
                 idx = self.columns.index(column_name)
             except ValueError:
@@ -173,26 +169,20 @@ class GenericListView(ctk.CTkFrame):
                 else:
                     sort_col = column_name
 
-        # Initialize the sort_directions dictionary if not present
         if not hasattr(self, "sort_directions"):
             self.sort_directions = {}
-
-        # Get the current sort direction for the determined key (default is ascending: True)
         ascending = self.sort_directions.get(sort_col, True)
-        # Toggle the direction for the next sort call
         self.sort_directions[sort_col] = not ascending
 
-        # Sort the filtered items using the determined sort key and the current direction.
         self.filtered_items.sort(key=lambda x: str(x.get(sort_col, "")), reverse=not ascending)
         self.refresh_list()
-
 
     def on_double_click(self, event):
         item_id = self.tree.focus()
         if not item_id:
             return
-        unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
-        found_item = next((item for item in self.filtered_items if sanitize_id(str(item.get(unique_field, ""))) == item_id), None)
+        found_item = next((item for item in self.filtered_items 
+                           if sanitize_id(str(item.get(self.unique_field, ""))) == item_id), None)
         if found_item:
             editor = GenericEditorWindow(self.master, found_item, self.template, creation_mode=False)
             self.master.wait_window(editor)
@@ -207,18 +197,16 @@ class GenericListView(ctk.CTkFrame):
         self.tree.selection_set(item_id)
         menu = tk.Menu(self, tearoff=0)
         menu.add_command(label="Delete", command=lambda: self.delete_item_by_id(item_id))
-        if self.has_portrait:
-            menu.add_command(label="Update Portrait", command=lambda: self.update_portrait(item_id))
         menu.post(event.x_root, event.y_root)
 
     def delete_item_by_id(self, item_id):
-        unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
-        self.items = [item for item in self.items if sanitize_id(str(item.get(unique_field, ""))) != item_id]
+        self.items = [item for item in self.items 
+                      if sanitize_id(str(item.get(self.unique_field, ""))) != item_id]
         self.model_wrapper.save_items(self.items)
         self.filter_items(self.search_var.get())
 
     def update_portrait(self, item_id):
-        # implement portrait update logic if necessary
+        # Implement portrait update logic if necessary.
         pass
 
     def add_item(self):
