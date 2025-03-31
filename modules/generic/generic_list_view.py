@@ -56,12 +56,35 @@ class GenericListView(ctk.CTkFrame):
         # Proper tree setup to allow image display
         self.tree = ttk.Treeview(tree_frame, columns=self.columns, show="tree headings", selectmode="browse")
         
-        self.tree.heading("#0", text="Portrait" if self.has_portrait else "Name")
+        self.tree.heading("#0", text="Name" if self.has_portrait else "Name")
         self.tree.column("#0", width=60 if self.has_portrait else 150, anchor="center")
+        # Make sure self.unique_field is defined in __init__:
+        unique_field = next(
+            (f["name"] for f in self.template["fields"] if f["name"] != "Portrait"),
+            None
+        )
+        self.unique_field = unique_field
 
-        for col in self.columns:
-            self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c))
-            self.tree.column(col, width=150, anchor="w")
+        if self.has_portrait:
+            # Set up the special first column (#0) with the unique field ("Name")
+            self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
+            self.tree.column("#0", width=180, anchor="w")
+            # Set up the remaining columns
+            for idx, col in enumerate(self.columns):
+                if idx < len(self.columns) - 1:
+                    header_text = self.columns[idx + 1]
+                else:
+                    header_text = ""  # For the last column, no header text is used
+                self.tree.heading(col, text=header_text, command=lambda c=col: self.sort_column(c))
+                self.tree.column(col, width=150, anchor="w")
+        else:
+            # Without portrait, first column still displays "Name"
+            self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
+            self.tree.column("#0", width=180, anchor="w")
+            for idx, col in enumerate(self.columns):
+                header_text = self.columns[idx]
+                self.tree.heading(col, text=header_text, command=lambda c=col: self.sort_column(c))
+                self.tree.column(col, width=150, anchor="w")
 
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=vsb.set)
@@ -128,8 +151,41 @@ class GenericListView(ctk.CTkFrame):
             return None
 
     def sort_column(self, column_name):
-        self.filtered_items.sort(key=lambda x: str(x.get(column_name, "")))
+        # Determine the effective sort column (sort key) using your existing logic.
+        if self.has_portrait: 
+            try:
+                idx = self.columns.index(column_name)
+            except ValueError:
+                sort_col = column_name
+            else:
+                if idx < len(self.columns) - 1:
+                    sort_col = self.columns[idx + 1]
+                else:
+                    sort_col = column_name
+        else:
+            try:
+                idx = self.columns.index(column_name)
+            except ValueError:
+                sort_col = column_name
+            else:
+                if idx < len(self.columns):
+                    sort_col = self.columns[idx]
+                else:
+                    sort_col = column_name
+
+        # Initialize the sort_directions dictionary if not present
+        if not hasattr(self, "sort_directions"):
+            self.sort_directions = {}
+
+        # Get the current sort direction for the determined key (default is ascending: True)
+        ascending = self.sort_directions.get(sort_col, True)
+        # Toggle the direction for the next sort call
+        self.sort_directions[sort_col] = not ascending
+
+        # Sort the filtered items using the determined sort key and the current direction.
+        self.filtered_items.sort(key=lambda x: str(x.get(sort_col, "")), reverse=not ascending)
         self.refresh_list()
+
 
     def on_double_click(self, event):
         item_id = self.tree.focus()

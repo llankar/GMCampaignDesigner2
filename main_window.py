@@ -98,6 +98,7 @@ class MainWindow(ctk.CTk):
         npc_wrapper = GenericModelWrapper("npcs")
         place_wrapper = GenericModelWrapper("places")
         root = ctk.CTk()
+        root.title("Scenario Graph Editor")
         root.geometry("1500x700")
         editor = ScenarioGraphEditor(root, scenario_wrapper, npc_wrapper, place_wrapper)
         editor.pack(fill="both", expand=True)
