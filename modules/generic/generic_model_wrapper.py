@@ -34,7 +34,20 @@ class GenericModelWrapper:
     def save_items(self, items):
         conn = get_connection()
         cursor = conn.cursor()
-        # For each item, use INSERT OR REPLACE (assuming a UNIQUE key like Name or Title)
+        
+        # Détermine le champ unique à utiliser
+        if items:
+            sample_item = items[0]
+            if "Name" in sample_item:
+                unique_field = "Name"
+            elif "Title" in sample_item:
+                unique_field = "Title"
+            else:
+                unique_field = list(sample_item.keys())[0]
+        else:
+            unique_field = "Name"  # Valeur par défaut si la liste est vide
+
+        # Insertion ou mise à jour (INSERT OR REPLACE)
         for item in items:
             keys = list(item.keys())
             values = []
@@ -47,5 +60,19 @@ class GenericModelWrapper:
             cols = ", ".join(keys)
             sql = f"INSERT OR REPLACE INTO {self.table} ({cols}) VALUES ({placeholders})"
             cursor.execute(sql, values)
+        
+        # Gestion du cas de suppression :
+        # On construit la liste des identifiants uniques présents dans les items
+        unique_ids = [item[unique_field] for item in items if unique_field in item]
+        
+        if unique_ids:
+            placeholders = ", ".join("?" for _ in unique_ids)
+            delete_sql = f"DELETE FROM {self.table} WHERE {unique_field} NOT IN ({placeholders})"
+            cursor.execute(delete_sql, unique_ids)
+        else:
+            # S'il n'y a aucun item, supprimer tous les enregistrements de la table
+            delete_sql = f"DELETE FROM {self.table}"
+            cursor.execute(delete_sql)
+        
         conn.commit()
         conn.close()
