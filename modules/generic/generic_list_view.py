@@ -25,27 +25,18 @@ class GenericListView(ctk.CTkFrame):
 
         self.items = self.model_wrapper.load_items()
         self.filtered_items = self.items.copy()
-        # We'll keep image cache if needed for later but not used in Treeview columns now.
-        self.image_cache = {}
+        # We no longer need an image cache since portraits are removed.
+        # self.image_cache = {}
 
-        # Check if template includes a Portrait field.
-        self.has_portrait = any(f["name"] == "Portrait" for f in self.template["fields"])
-        
-        # Determine the unique field (e.g., "Name") – first non-Portrait field.
+        # Remove portrait column altogether.
+        # Even if the template includes "Portrait", we ignore it.
         unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
         self.unique_field = unique_field
 
-        # Build extra columns.
-        # If a portrait exists, we want a separate "Portrait" column plus any other fields
-        # excluding the unique field.
-        if self.has_portrait:
-            # The first extra column is "Portrait", then any other field except Portrait and unique field.
-            self.columns = ["Portrait"] + [f["name"] for f in self.template["fields"] 
-                                           if f["name"] not in ["Portrait", unique_field]]
-        else:
-            self.columns = [f["name"] for f in self.template["fields"] if f["name"] != unique_field]
+        # Define extra columns as every field except "Portrait" and the unique field.
+        self.columns = [f["name"] for f in self.template["fields"] if f["name"] not in ["Portrait", unique_field]]
 
-        # Setup search bar.
+        # Setup search bar
         search_frame = ctk.CTkFrame(self)
         search_frame.pack(fill="x", padx=5, pady=5)
         ctk.CTkLabel(search_frame, text="Search:").pack(side="left", padx=5)
@@ -56,19 +47,18 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkButton(search_frame, text="Filter", command=lambda: self.filter_items(self.search_var.get())).pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Add", command=self.add_item).pack(side="left", padx=5)
 
-        # Setup Treeview frame.
+        # Setup Treeview frame
         tree_frame = ctk.CTkFrame(self)
         tree_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Create the Treeview.
-        # Using show="tree headings" to display column #0 (the tree column) and the additional columns.
+        # Create the Treeview with extra columns defined in self.columns.
         self.tree = ttk.Treeview(tree_frame, columns=self.columns, show="tree headings", selectmode="browse")
         
-        # Column #0 is dedicated to the Name (unique field).
+        # Column #0 displays only the unique field ("Name").
         self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
         self.tree.column("#0", width=180, anchor="w")
-        
-        # Set up the extra columns.
+
+        # Setup extra columns using their own names as headers.
         for col in self.columns:
             self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c))
             self.tree.column(col, width=150, anchor="w")
@@ -84,46 +74,27 @@ class GenericListView(ctk.CTkFrame):
         self.refresh_list()
 
     def refresh_list(self):
+        # Clear the treeview and begin batch insertion.
         self.tree.delete(*self.tree.get_children())
         self.batch_index = 0
-        self.batch_size = 50  # Adjust batch size if needed.
+        self.batch_size = 50  # Adjust as needed
         self.insert_next_batch()
 
     def insert_next_batch(self):
         end_index = min(self.batch_index + self.batch_size, len(self.filtered_items))
         for i in range(self.batch_index, end_index):
             item = self.filtered_items[i]
-            # Get the unique field value for column #0.
             raw_val = item.get(self.unique_field, "")
             if isinstance(raw_val, dict):
                 raw_val = raw_val.get("text", "")
             unique_value = sanitize_id(raw_val or f"item_{int(time.time() * 1000)}")
             name_text = self.clean_value(item.get(self.unique_field, ""))
-            
-            if self.has_portrait:
-                # For the portrait column, if a portrait was chosen and file exists, show a placeholder (e.g., basename) 
-                # Otherwise, use an empty string.
-                portrait_path = item.get("Portrait", "")
-                if portrait_path and os.path.exists(portrait_path):
-                    # Option: use the file basename as an indicator.
-                    portrait_text = os.path.basename(portrait_path)
-                else:
-                    portrait_text = ""
-                # For remaining extra columns, build values for each.
-                # Note: self.columns[0] is "Portrait", so we skip it here.
-                extra_values = tuple(self.clean_value(item.get(col, "")) for col in self.columns[1:])
-                # Build the full tuple: first element for the "Portrait" column, then extra columns.
-                values = (portrait_text,) + extra_values
-                try:
-                    self.tree.insert("", "end", iid=unique_value, text=name_text, values=values)
-                except Exception as e:
-                    print("[ERROR] inserting item with portrait:", e, unique_value, values)
-            else:
-                values = tuple(self.clean_value(item.get(col, "")) for col in self.columns)
-                try:
-                    self.tree.insert("", "end", iid=unique_value, text=name_text, values=values)
-                except Exception as e:
-                    print("[ERROR] inserting item without portrait:", e, unique_value, values)
+            # Build values for extra columns: use empty string if missing.
+            values = tuple(self.clean_value(item.get(col, "")) for col in self.columns)
+            try:
+                self.tree.insert("", "end", iid=unique_value, text=name_text, values=values)
+            except Exception as e:
+                print("[ERROR] inserting item:", e, unique_value, values)
         self.batch_index = end_index
         if self.batch_index < len(self.filtered_items):
             self.after(50, self.insert_next_batch)
@@ -137,37 +108,17 @@ class GenericListView(ctk.CTkFrame):
             return ", ".join(self.clean_value(elem) for elem in val if elem is not None)
         return str(val).replace("{", "").replace("}", "").strip()
 
-    def load_image_thumbnail(self, path):
-        try:
-            img = Image.open(path)
-            img.thumbnail((32, 32))
-            return ImageTk.PhotoImage(img)
-        except Exception as e:
-            print(f"[ERROR] loading image: {path}, {e}")
-            return None
-
     def sort_column(self, column_name):
-        # Determine effective sort key (refine this as needed)
-        if self.has_portrait:
-            try:
-                idx = self.columns.index(column_name)
-            except ValueError:
-                sort_col = column_name
-            else:
-                if idx < len(self.columns) - 1:
-                    sort_col = self.columns[idx + 1]
-                else:
-                    sort_col = column_name
+        # Determine effective sort key.
+        try:
+            idx = self.columns.index(column_name)
+        except ValueError:
+            sort_col = column_name
         else:
-            try:
-                idx = self.columns.index(column_name)
-            except ValueError:
-                sort_col = column_name
+            if idx < len(self.columns):
+                sort_col = self.columns[idx]
             else:
-                if idx < len(self.columns):
-                    sort_col = self.columns[idx]
-                else:
-                    sort_col = column_name
+                sort_col = column_name
 
         if not hasattr(self, "sort_directions"):
             self.sort_directions = {}
@@ -204,10 +155,6 @@ class GenericListView(ctk.CTkFrame):
                       if sanitize_id(str(item.get(self.unique_field, ""))) != item_id]
         self.model_wrapper.save_items(self.items)
         self.filter_items(self.search_var.get())
-
-    def update_portrait(self, item_id):
-        # Implement portrait update logic if necessary.
-        pass
 
     def add_item(self):
         new_item = {}
