@@ -426,7 +426,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             elif field_type == "list":
                 linked_type = field.get("linked_type", None)
                 if linked_type:
-                    self.insert_links(frame, field_name, entity.get(field_name, []), linked_type)
+                    self.insert_links(frame, field_name, entity.get(field_name) or [], linked_type)
         return frame
 
     def insert_text(self, parent, header, content):
