@@ -1,3 +1,4 @@
+import sqlite3
 import customtkinter as ctk
 import json
 import os
@@ -23,6 +24,7 @@ from modules.generic.export_for_foundry import preview_and_export_foundry
 from PIL import Image, ImageTk
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.swarmui_helper import get_available_models
+
 
 # Other imports...
 SWARMUI_PROCESS = None
@@ -61,6 +63,8 @@ def apply_formatting(run, formatting):
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
+          # Initialize the database (creates campaign.db and tables only if it doesn't exist)
+        self.init_db()
         self.title("GMCampaignDesigner")
         position_window_at_top(self)
         self.geometry("600x800")
@@ -447,6 +451,71 @@ class MainWindow(ctk.CTk):
 
         doc.save(file_path)
         messagebox.showinfo("Export Successful", f"Scenario exported successfully to:\n{file_path}")
+    
+    def init_db(self):
+        db_path = "campaign.db"
+        # Connect to the database (creates the file if it doesn't exist)
+        self.conn = sqlite3.connect(db_path)
+        self.conn.row_factory = sqlite3.Row  # so you can access columns by name
+        self.cursor = self.conn.cursor()
+        
+        # Create the nodes table if it doesn't exist
+        # NPCs – using fields from npcs_template.json
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS npcs (
+                Name TEXT PRIMARY KEY,
+                Role TEXT,
+                Description TEXT,
+                Secret TEXT,
+                Factions TEXT,
+                Objects TEXT,
+                Portrait TEXT
+            )
+        ''')
+        
+        # Scenarios – using fields from scenarios_template.json
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS scenarios (
+                Title TEXT PRIMARY KEY,
+                Summary TEXT,
+                Secrets TEXT,
+                Places TEXT,
+                NPCs TEXT,
+                Objects TEXT
+            )
+        ''')
+        
+        # Factions – using fields from factions_template.json
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS factions (
+                Name TEXT PRIMARY KEY,
+                Description TEXT,
+                Secrets TEXT
+            )
+        ''')
+        
+        # Places – using fields from places_template.json
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS places (
+                Name TEXT PRIMARY KEY,
+                Description TEXT,
+                NPCs TEXT
+            )
+        ''')
+        
+        # Objects – using fields from objects_template.json
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS objects (
+                Name TEXT PRIMARY KEY,
+                Description TEXT,
+                Secrets TEXT,
+                Portrait TEXT
+            )
+        ''')
+        
+        self.conn.commit()
+        self.conn.close()
+        
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
