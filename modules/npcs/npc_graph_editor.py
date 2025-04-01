@@ -542,57 +542,7 @@ class NPCGraphEditor(ctk.CTkFrame):
                         arrow_id = self.draw_arrowhead(x2, y2, x1, y1, tag2)
                         canvas_ids["arrows"].append(arrow_id)
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # FUNCTION: start_drag
-    # Begins the node drag operation by identifying the node under the cursor.
-    # ─────────────────────────────────────────────────────────────────────────
-    def start_drag(self, event):
-        x = self.canvas.canvasx(event.x)
-        y = self.canvas.canvasy(event.y)
-        item = self.canvas.find_closest(x, y)
-        if not item:
-            return
-        tags = self.canvas.gettags(item[0])
-        self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
-        if self.selected_node:
-            self.selected_items = self.canvas.find_withtag(self.selected_node)
-            self.drag_start = (x, y)
-
-
-    def on_drag(self, event):
-        if not self.selected_node or not self.drag_start:
-            return
-
-        x = self.canvas.canvasx(event.x)
-        y = self.canvas.canvasy(event.y)
-        dx = x - self.drag_start[0]
-        dy = y - self.drag_start[1]
-
-        for item in self.selected_items:
-            self.canvas.move(item, dx, dy)
-
-        old_x, old_y = self.node_positions[self.selected_node]
-        new_x, new_y = old_x + dx, old_y + dy
-        self.node_positions[self.selected_node] = (new_x, new_y)
-        self.drag_start = (x, y)
-
-        # Update only relevant links visually
-        self.update_links_positions_for_node(self.selected_node)
-
-        bbox = self.canvas.bbox("all")
-        if bbox:
-            padding = 50
-            scroll_region = (bbox[0] - padding, bbox[1] - padding,
-                            bbox[2] + padding, bbox[3] + padding)
-            self.canvas.configure(scrollregion=scroll_region)
-
-
-    def end_drag(self, event):
-        self.selected_node = None
-        self.selected_items = []
-        self.drag_start = None
-
-
+    
     def update_links_for_node(self, node_tag):
         # Delete only existing links and associated arrowheads/text
         self.canvas.delete("link")
@@ -713,26 +663,6 @@ class NPCGraphEditor(ctk.CTkFrame):
         if self.selected_node in self.node_positions:
             del self.node_positions[self.selected_node]
         self.draw_graph()
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # FUNCTION: draw_graph
-    # Clears and redraws the entire graph (nodes and links) on the canvas.
-    # ─────────────────────────────────────────────────────────────────────────
-    def draw_graph(self):
-        # Clear all canvas items but DO NOT clear the node_images cache.
-        self.canvas.delete("all")
-        self.node_bboxes = {}
-        self.draw_nodes()
-        self.draw_all_links()
-        self.canvas.tag_raise("arrowhead")
-        self.canvas.tag_raise("link_text")
-        self.canvas.update_idletasks()
-        bbox = self.canvas.bbox("all")
-        if bbox:
-            padding = 50
-            scroll_region = (bbox[0] - padding, bbox[1] - padding,
-                            bbox[2] + padding, bbox[3] + padding)
-            self.canvas.configure(scrollregion=scroll_region)
 
     def redraw_after_drag(self):
         self.draw_graph()
@@ -915,6 +845,8 @@ class NPCGraphEditor(ctk.CTkFrame):
                 self.graph = json.load(f)
             if "shapes" not in self.graph:
                 self.graph["shapes"] = []
+            
+            # Reload node positions and links as before...
             self.node_positions = {
                 f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
                 for n in self.graph["nodes"]
@@ -923,7 +855,30 @@ class NPCGraphEditor(ctk.CTkFrame):
                 node["color"] = node.get("color", "lightblue")
             for link in self.graph["links"]:
                 link["arrow_mode"] = link.get("arrow_mode", "both")
+            
+            # Rebuild shapes from saved data.
+            self.shapes.clear()
+            # Sort shapes by their z-order so that lower ones are drawn first.
+            shapes_sorted = sorted(self.graph.get("shapes", []), key=lambda s: s.get("z", 0))
+            for shape in shapes_sorted:
+                self.shapes[shape["tag"]] = shape
+            
+            # Update shape_counter so that new shapes will have unique tags.
+            max_counter = -1
+            for shape in self.graph["shapes"]:
+                try:
+                    # Assume tag format is "shape_<number>"
+                    num = int(shape["tag"].split("_")[1])
+                    if num > max_counter:
+                        max_counter = num
+                except (IndexError, ValueError):
+                    pass
+            self.shape_counter = max_counter + 1
+
             self.draw_graph()
+
+
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: change_node_color
@@ -958,13 +913,117 @@ class NPCGraphEditor(ctk.CTkFrame):
                 command=lambda c=color: self.change_shape_color(shape_tag, c)
             )
 
+         # Add a Resize option
         shape_menu.add_cascade(label="Change Color", menu=color_menu)
         shape_menu.add_separator()
-        shape_menu.add_command(label="Bring to Front", command=lambda: self.canvas.tag_raise(shape_tag))
-        shape_menu.add_command(label="Send to Back", command=lambda: self.canvas.tag_lower(shape_tag))
+        shape_menu.add_command(label="Change shape size", command=lambda: self.activate_resize_mode(shape_tag))
+        shape_menu.add_separator()
+        shape_menu.add_command(label="Bring to Front", command=lambda: self.bring_to_front(shape_tag))
+        shape_menu.add_command(label="Send to Back", command=lambda: self.send_to_back(shape_tag))  
         shape_menu.add_separator()
         shape_menu.add_command(label="Delete Shape", command=lambda: self.delete_shape(shape_tag))
         shape_menu.post(int(x), int(y))
+
+    def bring_to_front(self, shape_tag):
+        # Raise the shape on the canvas.
+        self.canvas.tag_raise(shape_tag)
+        shape = self.shapes.get(shape_tag)
+        if shape:
+            # Set the shape's z property to a value higher than all others.
+            max_z = max((s.get("z", 0) for s in self.shapes.values()), default=0)
+            shape["z"] = max_z + 1
+            # Update the order in the graph's shapes list.
+            self.graph["shapes"].sort(key=lambda s: s.get("z", 0))
+
+    def send_to_back(self, shape_tag):
+        # Lower the shape on the canvas.
+        self.canvas.tag_lower(shape_tag)
+        shape = self.shapes.get(shape_tag)
+        if shape:
+            # Set the shape's z property to a value lower than all others.
+            min_z = min((s.get("z", 0) for s in self.shapes.values()), default=0)
+            shape["z"] = min_z - 1
+            self.graph["shapes"].sort(key=lambda s: s.get("z", 0))
+
+    def activate_resize_mode(self, shape_tag):
+        shape = self.shapes.get(shape_tag)
+        if not shape:
+            return
+
+        # Calculate bottom-right corner (if that’s your chosen anchor).
+        x, y, w, h = shape["x"], shape["y"], shape["w"], shape["h"]
+        corner_x = x + w // 2
+        corner_y = y + h // 2
+
+        handle_size = 10
+        handle_id = self.canvas.create_rectangle(
+            corner_x - handle_size // 2, corner_y - handle_size // 2,
+            corner_x + handle_size // 2, corner_y + handle_size // 2,
+            fill="gray", tags=("resize_handle", shape_tag)
+        )
+
+        # Ensure the handle is on top
+        self.canvas.tag_raise(handle_id)
+
+        # Bind events to the handle
+        self.canvas.tag_bind(handle_id, "<Button-1>", self.start_resizing, add="+")
+        self.canvas.tag_bind(handle_id, "<B1-Motion>", self.do_resizing, add="+")
+        self.canvas.tag_bind(handle_id, "<ButtonRelease-1>", self.end_resizing, add="+")
+
+    def start_resizing(self, event):
+        # Retrieve the shape tag from the current item.
+        self.resizing_shape_tag = self.canvas.gettags("current")[1]  # second tag is shape_tag
+        shape = self.shapes.get(self.resizing_shape_tag)
+        if not shape:
+            return
+        # Store the shape's center as a fixed anchor.
+        self.resize_center = (shape["x"], shape["y"])
+        # Record the starting mouse position (if needed for reference)
+        self.resize_start = (self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
+        self.original_width = shape["w"]
+        self.original_height = shape["h"]
+
+    def do_resizing(self, event):
+        if not self.resizing_shape_tag:
+            return
+        shape = self.shapes.get(self.resizing_shape_tag)
+        if not shape:
+            return
+        # Use the stored center as the anchor.
+        cx, cy = self.resize_center
+        current_x = self.canvas.canvasx(event.x)
+        current_y = self.canvas.canvasy(event.y)
+        # Calculate new dimensions relative to the fixed center.
+        new_width = max(10, 2 * (current_x - cx))
+        new_height = max(10, 2 * (current_y - cy))
+        shape["w"] = new_width
+        shape["h"] = new_height
+
+        # Recompute the bounding box so the center remains unchanged.
+        left   = cx - new_width / 2
+        top    = cy - new_height / 2
+        right  = cx + new_width / 2
+        bottom = cy + new_height / 2
+
+        # Update the canvas coordinates for the shape.
+        self.canvas.coords(shape["canvas_id"], left, top, right, bottom)
+
+        # Move the resize handle to the new bottom-right corner.
+        handle_id = shape.get("resize_handle")
+        if handle_id:
+            self.canvas.coords(handle_id,
+                            right - 5, bottom - 5,
+                            right + 5, bottom + 5)
+
+    def end_resizing(self, event):
+        # Clean up the resize mode; remove the handle.
+        shape = self.shapes.get(self.resizing_shape_tag)
+        if shape and "resize_handle" in shape:
+            self.canvas.delete(shape["resize_handle"])
+            del shape["resize_handle"]
+        self.resizing_shape_tag = None
+        self.resize_start = None
+        self.resize_center = None
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: distance_point_to_line
@@ -1024,33 +1083,41 @@ class NPCGraphEditor(ctk.CTkFrame):
         shape["canvas_id"] = shape_id
 
     def draw_all_shapes(self):
-        for shape in self.graph.get("shapes", []):
+        # Sort shapes based on the stored z-index.
+        shapes_sorted = sorted(self.graph.get("shapes", []), key=lambda s: s.get("z", 0))
+        for shape in shapes_sorted:
             self.shapes[shape["tag"]] = shape
             self.draw_shape(shape)
 
     def save_graph(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".json")
         if file_path:
+            # Save node positions, etc.
             for node in self.graph["nodes"]:
                 tag = f"npc_{node['npc_name'].replace(' ', '_')}"
                 x, y = self.node_positions.get(tag, (node["x"], node["y"]))
                 node["x"] = x
                 node["y"] = y
+
             for link in self.graph["links"]:
                 if "arrow_mode" not in link:
                     link["arrow_mode"] = "both"
-           # Ensure shape coordinates are updated
+
+            # Update each shape's data.
             for shape in self.graph.get("shapes", []):
-                canvas_id = shape.get("canvas_id")
-                if canvas_id:
-                    coords = self.canvas.coords(canvas_id)
-                    if coords and len(coords) == 4:
-                        shape["x1"], shape["y1"], shape["x2"], shape["y2"] = coords
-            for shape in self.graph.get("shapes", []):
-                shape.pop("canvas_id", None)
+                tag = shape["tag"]
+                if tag in self.shapes:
+                    shape_obj = self.shapes[tag]
+                    shape["x"] = shape_obj["x"]
+                    shape["y"] = shape_obj["y"]
+                    shape["w"] = shape_obj["w"]
+                    shape["h"] = shape_obj["h"]
+                    shape["z"] = shape_obj.get("z", 0)
+                    shape.pop("canvas_id", None)
+                    shape.pop("resize_handle", None)
+
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(self.graph, f, indent=2)
-
 
     def draw_graph(self):
         self.canvas.delete("all")
@@ -1059,8 +1126,6 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.draw_all_shapes()
         self.draw_nodes()
         self.draw_all_links()
-        self.canvas.tag_raise("arrowhead")
-        self.canvas.tag_raise("link_text")
         self.canvas.update_idletasks()
         bbox = self.canvas.bbox("all")
         if bbox:
@@ -1068,6 +1133,9 @@ class NPCGraphEditor(ctk.CTkFrame):
             scroll_region = (bbox[0] - padding, bbox[1] - padding,
                              bbox[2] + padding, bbox[3] + padding)
             self.canvas.configure(scrollregion=scroll_region)
+        self.canvas.tag_lower("node", "link")
+        self.canvas.tag_lower("node", "shape")
+        self.canvas.tag_lower("shape", "link")
 
     def start_drag(self, event):
         x = self.canvas.canvasx(event.x)
