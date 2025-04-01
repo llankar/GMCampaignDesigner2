@@ -4,6 +4,8 @@ import json
 import logging
 import customtkinter as ctk
 from tkinter import messagebox
+from modules.helpers.text_helpers import format_longtext
+from modules.generic.generic_model_wrapper import GenericModelWrapper
 
 # Configure logging.
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -55,7 +57,6 @@ def import_formatted_scenario(text):
     loc_split = re.split(r'(?mi)^\s*(?:Main Locations|📍 Main Locations).*$', cleaned_text, maxsplit=1)
     if len(loc_split) > 1:
         remainder = loc_split[1]
-        # Remove anything after an NPC header using string find.
         npc_index = remainder.find("Key NPCs")
         if npc_index == -1:
             npc_index = remainder.find("NPCs")
@@ -93,7 +94,6 @@ def import_formatted_scenario(text):
     
     # --- Extract NPCs ---
     npcs = []
-    # Use re.split with a pattern that allows an optional non-word prefix (such as an emoji)
     npc_split = re.split(r'(?mi)^\s*(?:[^\w\s]*\s*)?(?:Key NPCs|NPCs)\s*:?.*$', cleaned_text, maxsplit=1)
     if len(npc_split) > 1:
         npc_text = npc_split[1].strip()
@@ -176,42 +176,32 @@ def import_formatted_scenario(text):
     }
     logging.info("Built scenario entity: %s", scenario_entity)
     
-    # --- JSON Helpers ---
-    def load_json(filename):
-        if os.path.exists(filename):
-            with open(filename, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                logging.info("Loaded %d entries from %s", len(data), filename)
-                return data
-        logging.info("File %s not found, starting with empty list.", filename)
-        return []
+    # --- Save to the Database using Wrappers (append new records) ---
+    scenario_wrapper = GenericModelWrapper("scenarios")
+    places_wrapper = GenericModelWrapper("places")
+    npcs_wrapper = GenericModelWrapper("npcs")
     
-    def save_json(filename, data):
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-            logging.info("Saved %d entries to %s", len(data), filename)
+    # Load existing items from the database.
+    existing_scenarios = scenario_wrapper.load_items()
+    existing_places = places_wrapper.load_items()
+    existing_npcs = npcs_wrapper.load_items()
     
-    # File paths.
-    scenarios_file = "data/scenarios.json"
-    places_file = "data/places.json"
-    npcs_file = "data/npcs.json"
+    # Combine existing items with the new ones.
+    combined_scenarios = existing_scenarios + [scenario_entity]
+    combined_places = existing_places + locations
+    combined_npcs = existing_npcs + npcs
     
-    scenarios_data = load_json(scenarios_file)
-    places_data = load_json(places_file)
-    npcs_data = load_json(npcs_file)
+    # Save the combined lists back to the database.
+    scenario_wrapper.save_items(combined_scenarios)
+    places_wrapper.save_items(combined_places)
+    npcs_wrapper.save_items(combined_npcs)
     
-    scenarios_data.append(scenario_entity)
-    for loc in locations:
-        places_data.append(loc)
-    for npc in npcs:
-        npcs_data.append(npc)
-    
-    save_json(scenarios_file, scenarios_data)
-    save_json(places_file, places_data)
-    save_json(npcs_file, npcs_data)
-    
-    logging.info("Scenario imported successfully!")
+    logging.info("Scenario imported successfully using the database (appended to existing data)!")
 
+# ─────────────────────────────────────────────────────────────────────────
+# CLASS: ScenarioImportWindow
+# A window that allows users to paste scenario text for import.
+# ─────────────────────────────────────────────────────────────────────────
 class ScenarioImportWindow(ctk.CTkToplevel):
     def __init__(self, master=None):
         super().__init__(master)
@@ -234,3 +224,4 @@ class ScenarioImportWindow(ctk.CTkToplevel):
             messagebox.showinfo("Success", "Scenario imported successfully!")
         except Exception as e:
             messagebox.showerror("Error", f"Error importing scenario:\n{str(e)}")
+
