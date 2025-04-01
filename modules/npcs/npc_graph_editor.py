@@ -3,6 +3,7 @@ import os
 import customtkinter as ctk
 from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
+from modules.generic.generic_list_selection_view import GenericListSelectionView
 from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.generic.generic_model_wrapper import GenericModelWrapper
@@ -348,12 +349,42 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Opens an NPC selection dialog and binds the next click to place the NPC.
     # ─────────────────────────────────────────────────────────────────────────
     def add_npc(self):
-        def on_npc_selected(npc):
-            self.pending_npc = npc
+        def on_npc_selected(npc_name):
+            # Lookup the full NPC dictionary using the npc wrapper.
+            npc_list = self.npc_wrapper.load_items()
+            selected_npc = None
+            for npc in npc_list:
+                if npc.get("Name") == npc_name:
+                    selected_npc = npc
+                    break
+            if not selected_npc:
+                messagebox.showerror("Error", f"NPC '{npc_name}' not found.")
+                return
+            self.pending_npc = selected_npc
+            if dialog.winfo_exists():
+                dialog.destroy()
             self.canvas.bind("<Button-1>", self.place_pending_npc)
+
         npc_template = load_template("npcs")
-        dialog = EntitySelectionDialog(self, "NPCs", self.npc_wrapper, npc_template, on_npc_selected)
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Select NPC")
+        dialog.geometry("600x500")
+        dialog.transient(self)
+        dialog.grab_set()
+        dialog.focus_force()
+        # The new GenericListSelectionView returns the NPC name (string)
+        selection_view = GenericListSelectionView(
+            dialog,
+            "NPCs",
+            self.npc_wrapper,
+            npc_template,
+            on_select_callback=lambda et, npc: on_npc_selected(npc)
+        )
+        selection_view.pack(fill="both", expand=True)
         dialog.wait_window()
+
+
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: place_pending_npc
@@ -381,46 +412,37 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Opens a faction selection dialog and adds all NPCs from the selected faction.
     # ─────────────────────────────────────────────────────────────────────────
     def add_faction(self):
-        class FactionSelectionDialog(ctk.CTkToplevel):
-            def __init__(self, master, factions, on_faction_selected):
-                super().__init__(master)
-                self.title("Select Faction")
-                self.geometry("400x300")
-                self.transient(master)
-                self.grab_set()
-                self.focus_force()
-                self.factions = factions
-                self.filtered_factions = list(factions)
-                self.on_faction_selected = on_faction_selected
-                self.search_var = ctk.StringVar()
-                search_frame = ctk.CTkFrame(self)
-                search_frame.pack(fill="x", padx=5, pady=5)
-                ctk.CTkLabel(search_frame, text="Search Faction:").pack(side="left", padx=5)
-                search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var)
-                search_entry.pack(side="left", fill="x", expand=True, padx=5)
-                search_entry.bind("<KeyRelease>", lambda event: self.filter_factions())
-                self.list_frame = ctk.CTkScrollableFrame(self)
-                self.list_frame.pack(fill="both", expand=True, padx=5, pady=5)
-                self.refresh_list()
+        # Flatten factions from all NPCs.
+        all_factions = []
+        for npc in self.npcs.values():
+            faction_value = npc.get("Factions")
+            if not faction_value:
+                continue
+            if isinstance(faction_value, list):
+                all_factions.extend(faction_value)
+            else:
+                all_factions.append(faction_value)
+        factions = sorted(set(all_factions))
+        if not factions:
+            messagebox.showerror("Error", "No factions found in NPC data.")
+            return
 
-            def filter_factions(self):
-                query = self.search_var.get().strip().lower()
-                self.filtered_factions = [f for f in self.factions if query in f.lower()]
-                self.refresh_list()
+        # Wrap each faction string in a dictionary with a "Name" field.
+        items = [{"Name": f} for f in factions]
+        # Define a simple template for factions.
+        template = {"fields": [{"name": "Name", "type": "text"}]}
+        
+        # Create a dummy model wrapper that returns our wrapped faction items.
+        class DummyModelWrapper:
+            def load_items(self):
+                return items
+        dummy_wrapper = DummyModelWrapper()
 
-            def refresh_list(self):
-                for widget in self.list_frame.winfo_children():
-                    widget.destroy()
-                for faction in self.filtered_factions:
-                    btn = ctk.CTkButton(self.list_frame, text=faction,
-                                        command=lambda f=faction: self.select_faction(f))
-                    btn.pack(fill="x", padx=5, pady=2)
-
-            def select_faction(self, faction):
-                self.on_faction_selected(faction)
-                self.destroy()
-
+        # Define the callback.
         def on_faction_selected(faction_name):
+            # Close the selection popup immediately.
+            if selection_popup.winfo_exists():
+                selection_popup.destroy()
             # Build a list of NPCs that have the selected faction.
             faction_npcs = []
             for npc in self.npcs.values():
@@ -452,22 +474,26 @@ class NPCGraphEditor(ctk.CTkFrame):
                 self.node_positions[tag] = (x, y)
             self.draw_graph()
 
-        # Flatten factions from all NPCs.
-        all_factions = []
-        for npc in self.npcs.values():
-            faction_value = npc.get("Factions")
-            if not faction_value:
-                continue
-            if isinstance(faction_value, list):
-                all_factions.extend(faction_value)
-            else:
-                all_factions.append(faction_value)
-        factions = sorted(set(all_factions))
-        if not factions:
-            messagebox.showerror("Error", "No factions found in NPC data.")
-            return
-        dialog = FactionSelectionDialog(self, factions, on_faction_selected)
-        self.wait_window(dialog)
+        # Create a new selection popup.
+        selection_popup = ctk.CTkToplevel(self)
+        selection_popup.title("Select Faction")
+        selection_popup.geometry("600x500")
+        selection_popup.transient(self.winfo_toplevel())
+        selection_popup.grab_set()
+        selection_popup.focus_force()
+        
+        from modules.generic.generic_list_selection_view import GenericListSelectionView
+        # Instantiate the selection view with our dummy wrapper.
+        selection_view = GenericListSelectionView(
+            selection_popup,
+            "Factions",
+            dummy_wrapper,
+            template,
+            on_select_callback=lambda et, faction: on_faction_selected(faction)
+        )
+        selection_view.pack(fill="both", expand=True)
+        selection_popup.wait_window()
+
 
 
     # ─────────────────────────────────────────────────────────────────────────
