@@ -10,6 +10,7 @@ from customtkinter import CTkLabel, CTkImage
 from modules.generic.entity_detail_factory import create_entity_detail_frame
 from modules.npcs.npc_graph_editor import NPCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
+from modules.generic.generic_list_selection_view import GenericListSelectionView   
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)  # Thumbnail size for lists
@@ -339,7 +340,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         if entity_type == "Note Tab":
             self.add_tab(
                 f"Note {len(self.tabs) + 1}",
-                self.create_note_frame(), 
+                self.create_note_frame(),
                 content_factory=lambda master, initial_text="": self.create_note_frame(master=master, initial_text=initial_text)
             )
             return
@@ -347,7 +348,6 @@ class ScenarioDetailView(ctk.CTkFrame):
             self.add_tab("NPC Graph", self.create_npc_graph_frame(),
                         content_factory=lambda master: self.create_npc_graph_frame(master))
             return
-        # New branch for Scenario Graph Editor:
         elif entity_type == "Scenario Graph Editor":
             self.add_tab("Scenario Graph Editor", self.create_scenario_graph_frame(),
                         content_factory=lambda master: self.create_scenario_graph_frame(master))
@@ -361,8 +361,11 @@ class ScenarioDetailView(ctk.CTkFrame):
         selection_popup.transient(self.winfo_toplevel())
         selection_popup.grab_set()
         selection_popup.focus_force()
-        view = EntitySelectionView(selection_popup, entity_type, model_wrapper, template, self)
+        # Use the new GenericListSelectionView (import it accordingly)
+        view = GenericListSelectionView(selection_popup, entity_type, model_wrapper, template, self.open_entity_tab)
+
         view.pack(fill="both", expand=True)
+
 
     def open_entity_tab(self, entity_type, name):
         wrapper = self.wrappers[entity_type]
