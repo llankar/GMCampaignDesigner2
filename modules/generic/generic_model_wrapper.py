@@ -10,6 +10,7 @@ class GenericModelWrapper:
 
     def load_items(self):
         conn = get_connection()
+        conn.row_factory = sqlite3.Row  # This makes rows behave like dictionaries.
         cursor = conn.cursor()
         cursor.execute(f"SELECT * FROM {self.table}")
         rows = cursor.fetchall()

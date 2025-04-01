@@ -76,12 +76,13 @@ class MainWindow(ctk.CTk):
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
-
+                # Add a new button to change the database storage.
+        ctk.CTkButton(self, text="Change Data Storage", command=self.change_database_storage).pack(pady=5)
+        ctk.CTkButton(self, text="Manage Scenarios", command=lambda: self.open_entity("scenarios")).pack(pady=5)
+        ctk.CTkButton(self, text="Manage NPCs", command=lambda: self.open_entity("npcs")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Factions", command=lambda: self.open_entity("factions")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Places", command=lambda: self.open_entity("places")).pack(pady=5)
         ctk.CTkButton(self, text="Manage Objects", command=lambda: self.open_entity("objects")).pack(pady=5)
-        ctk.CTkButton(self, text="Manage NPCs", command=lambda: self.open_entity("npcs")).pack(pady=5)
-        ctk.CTkButton(self, text="Manage Scenarios", command=lambda: self.open_entity("scenarios")).pack(pady=5)
         ctk.CTkButton(self, text="Export Scenarios", command=self.preview_and_export_scenarios).pack(pady=5)
         ctk.CTkButton(self, text="Open GM Screen", command=self.open_gm_screen).pack(pady=5)
         ctk.CTkButton(self, text="Open NPC Graph editor", command=self.open_npc_graph_editor).pack(pady=5) 
@@ -453,7 +454,7 @@ class MainWindow(ctk.CTk):
         messagebox.showinfo("Export Successful", f"Scenario exported successfully to:\n{file_path}")
     
     def init_db(self):
-        db_path = "campaign.db"
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
         # Connect to the database (creates the file if it doesn't exist)
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row  # so you can access columns by name
@@ -515,7 +516,86 @@ class MainWindow(ctk.CTk):
         
         self.conn.commit()
         self.conn.close()
+    def change_database_storage(self):
+        """
+        Allows the user to change the current database.
+        The user can choose an existing database file or create a new one.
+        The selected path is saved to config.ini and used for the rest of the application.
+        """
+        # Ask the user whether they want to open an existing database or create a new one.
+        choice = messagebox.askquestion("Change Database", "Do you want to open an existing database file?")
+        if choice == "yes":
+            # User will select an existing database file.
+            file_path = filedialog.askopenfilename(
+                title="Select Database",
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
+            )
+            if not file_path:
+                return
+            new_db_path = file_path
+        else:
+            # User chooses to create a new database.
+            new_db_path = filedialog.asksaveasfilename(
+                title="Create New Database",
+                defaultextension=".db",
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
+            )
+            if not new_db_path:
+                return
+            # Connect to the new database file (this will create it)
+            conn = sqlite3.connect(new_db_path)
+            cursor = conn.cursor()
+            # Create the required tables.
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS nodes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    npc_name TEXT,
+                    x INTEGER,
+                    y INTEGER,
+                    color TEXT
+                )
+            ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS links (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    npc_name1 TEXT,
+                    npc_name2 TEXT,
+                    text TEXT,
+                    arrow_mode TEXT
+                )
+            ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS shapes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    type TEXT,
+                    x INTEGER,
+                    y INTEGER,
+                    w INTEGER,
+                    h INTEGER,
+                    color TEXT,
+                    tag TEXT,
+                    z INTEGER
+                )
+            ''')
+            conn.commit()
+            conn.close()
+
+        # Save new db path to config.
+        ConfigHelper.set("Database", "path", new_db_path)
+        messagebox.showinfo("Database Changed", f"Database changed to:\n{new_db_path}")
         
+        # Reinitialize the database connection.
+        self.init_db()
+        
+        # Re-create the model wrappers to use the new database.
+        self.place_wrapper = GenericModelWrapper("places")
+        self.npc_wrapper = GenericModelWrapper("npcs")
+        self.faction_wrapper = GenericModelWrapper("factions")
+        self.object_wrapper = GenericModelWrapper("objects")
+        
+        # Optionally, notify the user that the change is now active.
+        messagebox.showinfo("Database Update", "The new database is now active. You may continue using the application.")
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()

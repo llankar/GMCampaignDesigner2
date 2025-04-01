@@ -1,12 +1,11 @@
 # db.py
 import sqlite3
-
-DB_FILE = "campaign.db"
+from modules.helpers.config_helper import ConfigHelper
 
 def get_connection():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row  # so you can access columns by name
-    return conn
+    # Read the database path from the config; default to "campaign.db"
+    db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+    return sqlite3.connect(db_path)
 
 def initialize_db():
     conn = get_connection()
