@@ -49,6 +49,7 @@ class NPCGraphEditor(ctk.CTkFrame):
     # ─────────────────────────────────────────────────────────────────────────
     def __init__(self, master, npc_wrapper: GenericModelWrapper, faction_wrapper: GenericModelWrapper, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
+        self.link_canvas_ids = {}
         self.npc_wrapper = npc_wrapper
         self.faction_wrapper = faction_wrapper
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
@@ -86,6 +87,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.canvas.bind("<Button-1>", self.start_drag)
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<Button-3>", self.on_right_click)
+        self.canvas.bind("<ButtonRelease-1>", self.end_drag)
         
         # Bind mouse wheel scrolling (Windows and Linux)
         self.canvas.bind("<MouseWheel>", self._on_mousewheel_y)
@@ -494,7 +496,38 @@ class NPCGraphEditor(ctk.CTkFrame):
         selection_view.pack(fill="both", expand=True)
         selection_popup.wait_window()
 
+    def update_links_positions_for_node(self, node_tag):
+        node_name = node_tag.replace("npc_", "").replace("_", " ")
+        for link in self.graph["links"]:
+            if node_name in (link["npc_name1"], link["npc_name2"]):
+                key = (link["npc_name1"], link["npc_name2"])
+                canvas_ids = self.link_canvas_ids.get(key)
+                if canvas_ids:
+                    tag1 = f"npc_{link['npc_name1'].replace(' ', '_')}"
+                    tag2 = f"npc_{link['npc_name2'].replace(' ', '_')}"
+                    x1, y1 = self.node_positions.get(tag1, (0, 0))
+                    x2, y2 = self.node_positions.get(tag2, (0, 0))
 
+                    # Update line coordinates directly
+                    self.canvas.coords(canvas_ids["line"], x1, y1, x2, y2)
+
+                    # Update text position
+                    mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
+                    self.canvas.coords(canvas_ids["text"], mid_x, mid_y)
+
+                    # Delete old arrowheads
+                    for arrow_id in canvas_ids["arrows"]:
+                        self.canvas.delete(arrow_id)
+                    canvas_ids["arrows"] = []
+
+                    # Redraw arrowheads at new position
+                    arrow_mode = link.get("arrow_mode", "end")
+                    if arrow_mode in ("start", "both"):
+                        arrow_id = self.draw_arrowhead(x1, y1, x2, y2, tag1)
+                        canvas_ids["arrows"].append(arrow_id)
+                    if arrow_mode in ("end", "both"):
+                        arrow_id = self.draw_arrowhead(x2, y2, x1, y1, tag2)
+                        canvas_ids["arrows"].append(arrow_id)
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: start_drag
@@ -512,29 +545,59 @@ class NPCGraphEditor(ctk.CTkFrame):
             self.selected_items = self.canvas.find_withtag(self.selected_node)
             self.drag_start = (x, y)
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # FUNCTION: on_drag
-    # Handles the node dragging operation and updates node positions.
-    # ─────────────────────────────────────────────────────────────────────────
+
     def on_drag(self, event):
         if not self.selected_node or not self.drag_start:
             return
+
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
         dx = x - self.drag_start[0]
         dy = y - self.drag_start[1]
+
         for item in self.selected_items:
             self.canvas.move(item, dx, dy)
+
         old_x, old_y = self.node_positions[self.selected_node]
-        self.node_positions[self.selected_node] = (old_x + dx, old_y + dy)
+        new_x, new_y = old_x + dx, old_y + dy
+        self.node_positions[self.selected_node] = (new_x, new_y)
         self.drag_start = (x, y)
+
+        # Update only relevant links visually
+        self.update_links_positions_for_node(self.selected_node)
+
         bbox = self.canvas.bbox("all")
         if bbox:
             padding = 50
             scroll_region = (bbox[0] - padding, bbox[1] - padding,
-                             bbox[2] + padding, bbox[3] + padding)
+                            bbox[2] + padding, bbox[3] + padding)
             self.canvas.configure(scrollregion=scroll_region)
-        self.draw_graph()
+
+
+    def end_drag(self, event):
+        self.selected_node = None
+        self.selected_items = []
+        self.drag_start = None
+
+
+    def update_links_for_node(self, node_tag):
+        # Delete only existing links and associated arrowheads/text
+        self.canvas.delete("link")
+        self.canvas.delete("arrowhead")
+        self.canvas.delete("link_text")
+
+        # Redraw only links involving the moved node
+        node_name = node_tag.replace("npc_", "").replace("_", " ")
+        affected_links = [
+            link for link in self.graph["links"]
+            if link["npc_name1"] == node_name or link["npc_name2"] == node_name
+        ]
+        for link in affected_links:
+            self.draw_one_link(link)
+
+        self.canvas.tag_lower("link")
+        self.canvas.tag_raise("arrowhead")
+        self.canvas.tag_raise("link_text")
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: on_right_click
@@ -629,8 +692,8 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Clears and redraws the entire graph (nodes and links) on the canvas.
     # ─────────────────────────────────────────────────────────────────────────
     def draw_graph(self):
+        # Clear all canvas items but DO NOT clear the node_images cache.
         self.canvas.delete("all")
-        self.node_images.clear()
         self.node_bboxes = {}
         self.draw_nodes()
         self.draw_all_links()
@@ -641,8 +704,13 @@ class NPCGraphEditor(ctk.CTkFrame):
         if bbox:
             padding = 50
             scroll_region = (bbox[0] - padding, bbox[1] - padding,
-                             bbox[2] + padding, bbox[3] + padding)
+                            bbox[2] + padding, bbox[3] + padding)
             self.canvas.configure(scrollregion=scroll_region)
+
+    def redraw_after_drag(self):
+        self.draw_graph()
+        self._redraw_scheduled = False
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_nodes
@@ -734,19 +802,31 @@ class NPCGraphEditor(ctk.CTkFrame):
         tag2 = f"npc_{link['npc_name2'].replace(' ', '_')}"
         x1, y1 = self.node_positions.get(tag1, (0, 0))
         x2, y2 = self.node_positions.get(tag2, (0, 0))
-        self.canvas.create_line(x1, y1, x2, y2, fill="black", tags=("link",))
+
+        line_id = self.canvas.create_line(x1, y1, x2, y2, fill="black", tags=("link",))
         arrow_mode = link.get("arrow_mode", "end")
+
+        arrow_ids = []
         if arrow_mode in ("start", "both"):
-            self.draw_arrowhead(x1, y1, x2, y2, tag1)
+            arrow_ids.append(self.draw_arrowhead(x1, y1, x2, y2, tag1))
         if arrow_mode in ("end", "both"):
-            self.draw_arrowhead(x2, y2, x1, y1, tag2)
-        mid_x = (x1 + x2) / 2
-        mid_y = (y1 + y2) / 2
-        self.canvas.create_text(mid_x, mid_y,
-                                text=link["text"],
-                                fill="red",
-                                font=("Arial", 10, "bold"),
-                                tags=("link", "link_text"))
+            arrow_ids.append(self.draw_arrowhead(x2, y2, x1, y1, tag2))
+
+        mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
+        text_id = self.canvas.create_text(mid_x, mid_y,
+                                        text=link["text"],
+                                        fill="red",
+                                        font=("Arial", 10, "bold"),
+                                        tags=("link_text",))
+
+        # Store Canvas IDs clearly linked by npc pair
+        key = (link["npc_name1"], link["npc_name2"])
+        self.link_canvas_ids[key] = {
+            "line": line_id,
+            "arrows": arrow_ids,
+            "text": text_id
+        }
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_arrowhead
@@ -761,18 +841,23 @@ class NPCGraphEditor(ctk.CTkFrame):
         half_w = (right - left) / 2
         half_h = (bottom - top) / 2
         node_radius = math.sqrt(half_w**2 + half_h**2)
-        arrow_offset_extra = -20  # Adjust this to change arrow proximity to the node
+        arrow_offset_extra = -20
         arrow_offset = node_radius + arrow_offset_extra
         arrow_apex_x = start_x + arrow_offset * math.cos(angle)
         arrow_apex_y = start_y + arrow_offset * math.sin(angle)
-        self.canvas.create_polygon(arrow_apex_x, arrow_apex_y,
-                                   arrow_apex_x + arrow_length * math.cos(angle + math.pi / 6),
-                                   arrow_apex_y + arrow_length * math.sin(angle + math.pi / 6),
-                                   arrow_apex_x + arrow_length * math.cos(angle - math.pi / 6),
-                                   arrow_apex_y + arrow_length * math.sin(angle - math.pi / 6),
-                                   fill="black",
-                                   outline="black",
-                                   tags=("link", "arrowhead"))
+
+        # RETURN the polygon ID so it can be deleted later
+        return self.canvas.create_polygon(
+            arrow_apex_x, arrow_apex_y,
+            arrow_apex_x + arrow_length * math.cos(angle + math.pi / 6),
+            arrow_apex_y + arrow_length * math.sin(angle + math.pi / 6),
+            arrow_apex_x + arrow_length * math.cos(angle - math.pi / 6),
+            arrow_apex_y + arrow_length * math.sin(angle - math.pi / 6),
+            fill="black",
+            outline="black",
+            tags=("link", "arrowhead")
+    )
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: save_graph
