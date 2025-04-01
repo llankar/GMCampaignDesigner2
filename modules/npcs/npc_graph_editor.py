@@ -55,14 +55,21 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
         
         # Graph structure to hold nodes and links
-        self.graph = {"nodes": [], "links": []}
-        
+        self.graph = {
+            "nodes": [],
+            "links": [],
+            "shapes": []  # 
+        }
+        self.shapes = {}  # this is for managing shape canvas objects
+        self.shape_counter = 0  # if not already added
+
         # Dictionaries for node data
         self.node_positions = {}  # Current (x, y) positions of nodes
         self.node_images = {}     # Loaded images for node portraits
         self.node_rectangles = {} # Canvas rectangle IDs (for color changes)
         self.node_bboxes = {}     # Bounding boxes for nodes (used for arrow offsets)
-        
+        self.shape_counter = 0  # For unique shape tags
+
         # Variables for selection and dragging
         self.selected_node = None
         self.selected_items = []  # All canvas items belonging to the selected node
@@ -260,11 +267,17 @@ class NPCGraphEditor(ctk.CTkFrame):
     def init_toolbar(self):
         toolbar = ctk.CTkFrame(self)
         toolbar.pack(fill="x", padx=5, pady=5)
+
         ctk.CTkButton(toolbar, text="Add NPC", command=self.add_npc).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Add Faction", command=self.add_faction).pack(side="left", padx=5)
+        ctk.CTkButton(toolbar, text="Add Link", command=self.start_link_creation).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Save", command=self.save_graph).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Load", command=self.load_graph).pack(side="left", padx=5)
-        ctk.CTkButton(toolbar, text="Add Link", command=self.start_link_creation).pack(side="left", padx=5)
+
+        # 🆕 Add Shape Buttons
+        ctk.CTkButton(toolbar, text="Add Rectangle", command=lambda: self.add_shape("rectangle")).pack(side="left", padx=5)
+        ctk.CTkButton(toolbar, text="Add Oval", command=lambda: self.add_shape("oval")).pack(side="left", padx=5)
+        
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: start_link_creation
@@ -598,6 +611,15 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.canvas.tag_lower("link")
         self.canvas.tag_raise("arrowhead")
         self.canvas.tag_raise("link_text")
+    
+    def delete_shape(self, tag):
+        # Delete from canvas
+        self.canvas.delete(tag)
+        # Delete from internal storage
+        if tag in self.shapes:
+            del self.shapes[tag]
+        self.graph["shapes"] = [s for s in self.graph["shapes"] if s["tag"] != tag]
+    
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: on_right_click
@@ -609,14 +631,19 @@ class NPCGraphEditor(ctk.CTkFrame):
         item = self.canvas.find_closest(x, y)
         if not item:
             return
+
         tags = self.canvas.gettags(item[0])
         if "link" in tags:
             self.show_link_menu(int(x), int(y))
             self.selected_link = self.get_link_by_position(x, y)
-        else:
+        elif any(tag.startswith("npc_") for tag in tags):
             self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
-            if self.selected_node:
-                self.show_node_menu(x, y)
+            self.show_node_menu(x, y)
+        elif any(tag.startswith("shape_") for tag in tags):
+            shape_tag = next((t for t in tags if t.startswith("shape_")), None)
+            if shape_tag:
+                self.show_shape_menu(x, y, shape_tag)
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: show_color_menu
@@ -886,6 +913,8 @@ class NPCGraphEditor(ctk.CTkFrame):
         if file_path:
             with open(file_path, "r", encoding="utf-8") as f:
                 self.graph = json.load(f)
+            if "shapes" not in self.graph:
+                self.graph["shapes"] = []
             self.node_positions = {
                 f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
                 for n in self.graph["nodes"]
@@ -908,6 +937,34 @@ class NPCGraphEditor(ctk.CTkFrame):
                 if node["npc_name"] == self.selected_node.replace("npc_", "").replace("_", " "):
                     node["color"] = color
                     break
+    def change_shape_color(self, tag, color):
+        self.canvas.itemconfig(tag, fill=color)
+        shape = self.shapes.get(tag)
+        if shape:
+            shape["color"] = color
+
+    def show_shape_menu(self, x, y, shape_tag):
+        shape_menu = Menu(self.canvas, tearoff=0)
+
+        # Color submenu
+        color_menu = Menu(shape_menu, tearoff=0)
+        COLORS = [
+            "red", "green", "blue", "yellow", "purple",
+            "orange", "pink", "cyan", "magenta", "lightgray"
+        ]
+        for color in COLORS:
+            color_menu.add_command(
+                label=color,
+                command=lambda c=color: self.change_shape_color(shape_tag, c)
+            )
+
+        shape_menu.add_cascade(label="Change Color", menu=color_menu)
+        shape_menu.add_separator()
+        shape_menu.add_command(label="Bring to Front", command=lambda: self.canvas.tag_raise(shape_tag))
+        shape_menu.add_command(label="Send to Back", command=lambda: self.canvas.tag_lower(shape_tag))
+        shape_menu.add_separator()
+        shape_menu.add_command(label="Delete Shape", command=lambda: self.delete_shape(shape_tag))
+        shape_menu.post(int(x), int(y))
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: distance_point_to_line
@@ -941,3 +998,110 @@ class NPCGraphEditor(ctk.CTkFrame):
             if distance < threshold:
                 return link
         return None
+
+
+    def add_shape(self, shape_type):
+        x, y = 200, 200
+        width, height = 120, 80
+        tag = f"shape_{self.shape_counter}"
+        self.shape_counter += 1
+        shape = {"type": shape_type, "x": x, "y": y, "w": width, "h": height, "color": "lightgray", "tag": tag}
+        self.graph["shapes"].append(shape)
+        self.shapes[tag] = shape
+        self.draw_shape(shape)
+
+    def draw_shape(self, shape):
+        x, y, w, h = shape["x"], shape["y"], shape["w"], shape["h"]
+        left = x - w//2
+        top = y - h//2
+        right = x + w//2
+        bottom = y + h//2
+        tag = shape["tag"]
+        if shape["type"] == "rectangle":
+            shape_id = self.canvas.create_rectangle(left, top, right, bottom, fill=shape["color"], tags=(tag, "shape"))
+        else:
+            shape_id = self.canvas.create_oval(left, top, right, bottom, fill=shape["color"], tags=(tag, "shape"))
+        shape["canvas_id"] = shape_id
+
+    def draw_all_shapes(self):
+        for shape in self.graph.get("shapes", []):
+            self.shapes[shape["tag"]] = shape
+            self.draw_shape(shape)
+
+    def save_graph(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".json")
+        if file_path:
+            for node in self.graph["nodes"]:
+                tag = f"npc_{node['npc_name'].replace(' ', '_')}"
+                x, y = self.node_positions.get(tag, (node["x"], node["y"]))
+                node["x"] = x
+                node["y"] = y
+            for link in self.graph["links"]:
+                if "arrow_mode" not in link:
+                    link["arrow_mode"] = "both"
+           # Ensure shape coordinates are updated
+            for shape in self.graph.get("shapes", []):
+                canvas_id = shape.get("canvas_id")
+                if canvas_id:
+                    coords = self.canvas.coords(canvas_id)
+                    if coords and len(coords) == 4:
+                        shape["x1"], shape["y1"], shape["x2"], shape["y2"] = coords
+            for shape in self.graph.get("shapes", []):
+                shape.pop("canvas_id", None)
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(self.graph, f, indent=2)
+
+
+    def draw_graph(self):
+        self.canvas.delete("all")
+        self.node_images.clear()
+        self.node_bboxes = {}
+        self.draw_all_shapes()
+        self.draw_nodes()
+        self.draw_all_links()
+        self.canvas.tag_raise("arrowhead")
+        self.canvas.tag_raise("link_text")
+        self.canvas.update_idletasks()
+        bbox = self.canvas.bbox("all")
+        if bbox:
+            padding = 50
+            scroll_region = (bbox[0] - padding, bbox[1] - padding,
+                             bbox[2] + padding, bbox[3] + padding)
+            self.canvas.configure(scrollregion=scroll_region)
+
+    def start_drag(self, event):
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        item = self.canvas.find_closest(x, y)
+        if not item:
+            return
+        tags = self.canvas.gettags(item[0])
+        self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
+        self.selected_shape = next((t for t in tags if t.startswith("shape_")), None)
+        self.selected_items = self.canvas.find_withtag(self.selected_node or self.selected_shape)
+        self.drag_start = (x, y)
+
+    def on_drag(self, event):
+        if not (self.selected_node or self.selected_shape) or not self.drag_start:
+            return
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        dx = x - self.drag_start[0]
+        dy = y - self.drag_start[1]
+        for item in self.selected_items:
+            self.canvas.move(item, dx, dy)
+        if self.selected_node:
+            old_x, old_y = self.node_positions[self.selected_node]
+            self.node_positions[self.selected_node] = (old_x + dx, old_y + dy)
+            self.update_links_positions_for_node(self.selected_node)
+        if self.selected_shape:
+            shape = self.shapes[self.selected_shape]
+            shape["x"] += dx
+            shape["y"] += dy
+        self.drag_start = (x, y)
+
+    def end_drag(self, event):
+        self.selected_node = None
+        self.selected_shape = None
+        self.selected_items = []
+        self.drag_start = None
