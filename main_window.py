@@ -104,6 +104,40 @@ class MainWindow(ctk.CTk):
         self.models_path = ConfigHelper.get("Paths", "models_path", fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
         self.model_options = get_available_models()
 
+        # Create a container for the database display with a blue border.
+        db_container = ctk.CTkFrame(
+            sidebar_inner, 
+            fg_color="transparent", 
+            border_color="#005fa3", 
+            border_width=2, 
+            corner_radius=8
+        )
+        db_container.pack(pady=(0, 10), anchor="center", fill="x", padx=5)
+
+        # Create a label for the title "Database:" inside the container.
+        db_title_label = ctk.CTkLabel(
+            db_container, 
+            text="Database:", 
+            font=("Segoe UI", 16, "bold"), 
+            fg_color="transparent", 
+            text_color="white"
+        )
+        db_title_label.pack(pady=(5, 0), anchor="center")
+
+        # Get the current database name without the .db extension.
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+        db_name = os.path.splitext(os.path.basename(db_path))[0]
+
+        # Create a label for the actual database name.
+        self.db_name_label = ctk.CTkLabel(
+            db_container, 
+            text=db_name, 
+            font=("Segoe UI", 14, "italic"), 
+            fg_color="transparent", 
+            text_color="white"
+        )
+        self.db_name_label.pack(pady=(0, 5), anchor="center")
+
         # Wrappers
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
@@ -112,20 +146,33 @@ class MainWindow(ctk.CTk):
 
         # Button configuration
         button_config = {"width": 180, "anchor": "center"}
+        db_frame = ctk.CTkFrame(sidebar_inner, fg_color="transparent", border_width=2, border_color="#2E4A5F", corner_radius=8)
+        db_frame.pack(fill="x", pady=5, padx=5)
+        ctk.CTkLabel(db_frame, text="Database Tools", font=("Helvetica", 16, "bold"), fg_color="transparent").pack(pady=(5, 2))
+        ctk.CTkButton(db_frame, text="Change Data Storage", command=self.change_database_storage, **button_config).pack(pady=5)
 
-        ctk.CTkButton(sidebar_inner, text="Change Data Storage", command=self.change_database_storage, **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Manage Scenarios", command=lambda: self.open_entity("scenarios"), **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Manage NPCs", command=lambda: self.open_entity("npcs"), **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Manage Factions", command=lambda: self.open_entity("factions"), **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Manage Places", command=lambda: self.open_entity("places"), **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Manage Objects", command=lambda: self.open_entity("objects"), **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Export Scenarios", command=self.preview_and_export_scenarios, **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Open GM Screen", command=self.open_gm_screen, **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Open NPC Graph Editor", command=self.open_npc_graph_editor, **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Open Scenario Graph Editor", command=self.open_scenario_graph_editor, **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits, **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Import Scenario", command=self.open_scenario_importer, **button_config).pack(pady=5)
-        ctk.CTkButton(sidebar_inner, text="Export Scenarios for Foundry", command=self.export_foundry, **button_config).pack(pady=5)
+        db_frame = ctk.CTkFrame(sidebar_inner, fg_color="transparent", border_width=2, border_color="#2E4A5F", corner_radius=8)
+        db_frame.pack(fill="x", pady=5, padx=5)
+        ctk.CTkLabel(db_frame, text="Managing", font=("Helvetica", 16, "bold"), fg_color="transparent").pack(pady=(5, 2))
+        ctk.CTkButton(db_frame, text="Manage Scenarios", command=lambda: self.open_entity("scenarios"), **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Manage NPCs", command=lambda: self.open_entity("npcs"), **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Manage Factions", command=lambda: self.open_entity("factions"), **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Manage Places", command=lambda: self.open_entity("places"), **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Manage Objects", command=lambda: self.open_entity("objects"), **button_config).pack(pady=5)
+
+        db_frame = ctk.CTkFrame(sidebar_inner, fg_color="transparent", border_width=2, border_color="#2E4A5F", corner_radius=8)
+        db_frame.pack(fill="x", pady=5, padx=5)
+        ctk.CTkLabel(db_frame, text="Tools", font=("Helvetica", 16, "bold"), fg_color="transparent").pack(pady=(5, 2))
+        ctk.CTkButton(db_frame, text="Export Scenarios", command=self.preview_and_export_scenarios, **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Open GM Screen", command=self.open_gm_screen, **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Open NPC Graph Editor", command=self.open_npc_graph_editor, **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Open Scenario Graph Editor", command=self.open_scenario_graph_editor, **button_config).pack(pady=5)
+        db_frame = ctk.CTkFrame(sidebar_inner, fg_color="transparent", border_width=2, border_color="#2E4A5F", corner_radius=8)
+        db_frame.pack(fill="x", pady=5, padx=5)
+        ctk.CTkLabel(db_frame, text="Generating", font=("Helvetica", 16, "bold"), fg_color="transparent").pack(pady=(5, 2))
+        ctk.CTkButton(db_frame, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits, **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Import Scenario", command=self.open_scenario_importer, **button_config).pack(pady=5)
+        ctk.CTkButton(db_frame, text="Export Scenarios for Foundry", command=self.export_foundry, **button_config).pack(pady=5)
         # Add an Exit button at the bottom of the sidebar.
         ctk.CTkButton(sidebar_inner, text="Exit", command=self.destroy, fg_color="red", hover_color="#AA0000", **button_config).pack(pady=5, side="bottom")
 
@@ -269,13 +316,13 @@ class MainWindow(ctk.CTk):
             conn.close()
 
         ConfigHelper.set("Database", "path", new_db_path)
-        messagebox.showinfo("Database Changed", f"Database changed to:\n{new_db_path}")
         self.init_db()
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
-        messagebox.showinfo("Database Update", "The new database is now active. You may continue using the application.")
+        db_name = os.path.splitext(os.path.basename(new_db_path))[0]
+        self.db_name_label.configure(text=f"{db_name}")
 
     def init_db(self):
         db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
