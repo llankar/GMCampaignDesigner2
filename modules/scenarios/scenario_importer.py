@@ -181,17 +181,14 @@ def import_formatted_scenario(text):
     places_wrapper = GenericModelWrapper("places")
     npcs_wrapper = GenericModelWrapper("npcs")
     
-    # Load existing items from the database.
     existing_scenarios = scenario_wrapper.load_items()
     existing_places = places_wrapper.load_items()
     existing_npcs = npcs_wrapper.load_items()
     
-    # Combine existing items with the new ones.
     combined_scenarios = existing_scenarios + [scenario_entity]
     combined_places = existing_places + locations
     combined_npcs = existing_npcs + npcs
     
-    # Save the combined lists back to the database.
     scenario_wrapper.save_items(combined_scenarios)
     places_wrapper.save_items(combined_places)
     npcs_wrapper.save_items(combined_npcs)
@@ -211,7 +208,8 @@ class ScenarioImportWindow(ctk.CTkToplevel):
         instruction_label = ctk.CTkLabel(self, text="Paste your formatted scenario text below:")
         instruction_label.pack(pady=(10, 0), padx=10)
         
-        self.scenario_textbox = ctk.CTkTextbox(self, wrap="word", height=400)
+        # Create a CTkTextbox with a dark background and white text.
+        self.scenario_textbox = ctk.CTkTextbox(self, wrap="word", height=400, fg_color="#2B2B2B", text_color="white")
         self.scenario_textbox.pack(fill="both", expand=True, padx=10, pady=10)
         
         import_button = ctk.CTkButton(self, text="Import Scenario", command=self.import_scenario)
@@ -224,4 +222,3 @@ class ScenarioImportWindow(ctk.CTkToplevel):
             messagebox.showinfo("Success", "Scenario imported successfully!")
         except Exception as e:
             messagebox.showerror("Error", f"Error importing scenario:\n{str(e)}")
-

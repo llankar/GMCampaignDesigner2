@@ -16,6 +16,9 @@ from PIL import Image, ImageTk
 import os, logging, ctypes
 from ctypes import wintypes
 
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
 # Helper function to get monitor information using ctypes and Windows API.
 def get_monitors():
     monitors = []
@@ -80,7 +83,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.init_toolbar()
         self.canvas_frame = ctk.CTkFrame(self)
         self.canvas_frame.pack(fill="both", expand=True)
-        self.canvas = ctk.CTkCanvas(self.canvas_frame, bg="#ffffff", highlightthickness=0)
+        self.canvas = ctk.CTkCanvas(self.canvas_frame, bg="#2B2B2B", highlightthickness=0)
         self.h_scrollbar = ttk.Scrollbar(self.canvas_frame, orient="horizontal", command=self.canvas.xview)
         self.v_scrollbar = ttk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(xscrollcommand=self.h_scrollbar.set, yscrollcommand=self.v_scrollbar.set)
@@ -198,7 +201,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.node_images[f"window_{npc_name}"] = portrait_img
 
         # Create a normal Toplevel window (with standard window decorations).
-        win = tk.Toplevel(self)
+        win = ctk.CTkToplevel(self)
         win.title(npc_name)
         # Set the window geometry to match the target monitor's dimensions and position.
         win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
@@ -206,18 +209,18 @@ class NPCGraphEditor(ctk.CTkFrame):
         logging.debug("Window created on target monitor with screen size.")
 
         # Create a frame with a black background to hold the content.
-        content_frame = tk.Frame(win, bg="black")
+        content_frame = tk.Frame(win, bg="white")
         content_frame.pack(fill="both", expand=True)
 
         # Add a label to display the NPC name.
         name_label = tk.Label(content_frame, text=npc_name,
                             font=("Arial", 40, "bold"),
-                            fg="white", bg="black")
+                            fg="white", bg="white")
         name_label.pack(pady=20)
         logging.debug("NPC name label created.")
 
         # Add a label to display the portrait image.
-        image_label = tk.Label(content_frame, image=portrait_img, bg="black")
+        image_label = tk.Label(content_frame, image=portrait_img, bg="white")
         image_label.image = portrait_img  # persist reference
         image_label.pack(expand=True)
         logging.debug("Portrait image label created.")
@@ -383,7 +386,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         npc_template = load_template("npcs")
         dialog = ctk.CTkToplevel(self)
         dialog.title("Select NPC")
-        dialog.geometry("600x500")
+        dialog.geometry("900x800")
         dialog.transient(self)
         dialog.grab_set()
         dialog.focus_force()

@@ -106,25 +106,22 @@ class GenericEditorWindow(ctk.CTkToplevel):
         # Optionally, adjust window position.
         position_window_at_top(self)
 
-
-
-
-    # === Création des champs ===
-
     def create_longtext_field(self, field):
         value = self.item.get(field["name"], "")
-
         editor = RichTextEditor(self.scroll_frame)
-
+        # Configure the text widget to have a dark background and white text.
+        # (Assuming editor.text_widget is a CTkTextbox)
+        editor.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
+        
         if isinstance(value, dict):
             editor.load_text_data(value)
         else:
             if not isinstance(value, str):
                 value = str(value)
             editor.text_widget.insert("1.0", value)
-
         editor.pack(fill="both", expand=True, pady=5)
         self.field_widgets[field["name"]] = editor
+
 
     def on_combo_mousewheel(self, event, combobox):
         # Get the current selection and available options.

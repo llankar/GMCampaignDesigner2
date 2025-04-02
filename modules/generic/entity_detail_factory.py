@@ -34,7 +34,7 @@ def insert_longtext(parent, header, content):
 def insert_links(parent, header, items, linked_type, open_entity_callback):
     ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
     for item in items:
-        label = CTkLabel(parent, text=item, text_color="blue", cursor="hand2")
+        label = CTkLabel(parent, text=item, text_color="#00BFFF", cursor="hand2")
         label.pack(anchor="w", padx=10)
         if open_entity_callback is not None:
             # Capture the current values with lambda defaults.

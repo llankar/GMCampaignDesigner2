@@ -6,11 +6,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from PIL import Image, ImageTk
 
-from modules.helpers.text_helpers import format_longtext
 from modules.generic.generic_editor_window import GenericEditorWindow
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (1024, 1024)
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 
 def sanitize_id(s):
     sanitized = re.sub(r'[^a-zA-Z0-9]+', '_', str(s))
@@ -47,13 +48,29 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkButton(search_frame, text="Filter", command=lambda: self.filter_items(self.search_var.get())).pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Add", command=self.add_item).pack(side="left", padx=5)
 
-        # Setup Treeview frame
-        tree_frame = ctk.CTkFrame(self)
+        # Setup Treeview frame with a dark background.
+        tree_frame = ctk.CTkFrame(self, fg_color="#2B2B2B")
         tree_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
+        # Create a local ttk style for the Treeview.
+        style = ttk.Style(self)
+        style.theme_use("clam")
+        style.configure("Custom.Treeview",
+                        background="#2B2B2B",      # dark gray for cells
+                        fieldbackground="#2B2B2B", # dark gray for the empty area
+                        foreground="white",       # white text
+                        rowheight=25)
+        style.configure("Custom.Treeview.Heading",
+                        background="#2B2B2B",
+                        foreground="white")
+        style.map("Custom.Treeview", background=[("selected", "#2B2B2B")])
+
         # Create the Treeview with extra columns defined in self.columns.
-        self.tree = ttk.Treeview(tree_frame, columns=self.columns, show="tree headings", selectmode="browse")
-        
+        self.tree = ttk.Treeview(tree_frame,
+                                 columns=self.columns,
+                                 show="tree headings",
+                                 selectmode="browse",
+                                 style="Custom.Treeview")
         # Column #0 displays only the unique field ("Name").
         self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
         self.tree.column("#0", width=180, anchor="w")

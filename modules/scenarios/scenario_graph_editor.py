@@ -23,6 +23,9 @@ from modules.helpers.config_helper import ConfigHelper
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
+
 # Helper function to get monitor information using ctypes and Windows API.
 def get_monitors():
     monitors = []
@@ -77,7 +80,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         # Create canvas with scrollbars
         self.canvas_frame = ctk.CTkFrame(self)
         self.canvas_frame.pack(fill="both", expand=True)
-        self.canvas = ctk.CTkCanvas(self.canvas_frame, bg="#ffffff", highlightthickness=0)
+        self.canvas = ctk.CTkCanvas(self.canvas_frame, bg="#2B2B2B", highlightthickness=0)
         self.h_scrollbar = ttk.Scrollbar(self.canvas_frame, orient="horizontal", command=self.canvas.xview)
         self.v_scrollbar = ttk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(xscrollcommand=self.h_scrollbar.set, yscrollcommand=self.v_scrollbar.set)
@@ -86,7 +89,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.v_scrollbar.grid(row=0, column=1, sticky="ns")
         self.canvas_frame.grid_rowconfigure(0, weight=1)
         self.canvas_frame.grid_columnconfigure(0, weight=1)
-
+        
         # Global mouse events (like NPCGraphEditor)
         self.canvas.bind("<Button-1>", self.start_drag)
         self.canvas.bind("<B1-Motion>", self.on_drag)
@@ -185,7 +188,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             logging.debug("No resizing needed.")
 
         # Create a normal Toplevel window.
-        win = tk.Toplevel(self)
+        win = ctk.CTkToplevel(self)
         win.title(npc_name)
         win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
         win.update_idletasks()
@@ -197,18 +200,18 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.node_images[f"window_{npc_name}"] = portrait_img
 
         # Create a frame with a black background to hold the content.
-        content_frame = tk.Frame(win, bg="black")
+        content_frame = tk.Frame(win, bg="white")
         content_frame.pack(fill="both", expand=True)
 
         # Display the NPC name.
         name_label = tk.Label(content_frame, text=npc_name,
                             font=("Arial", 40, "bold"),
-                            fg="white", bg="black")
+                            fg="white", bg="white")
         name_label.pack(pady=20)
         logging.debug("NPC name label created.")
 
         # Display the portrait image.
-        image_label = tk.Label(content_frame, image=portrait_img, bg="white")
+        image_label = tk.Label(content_frame, image=portrait_img, bg="#2B2B2B")
         image_label.image = portrait_img  # Persist reference
         image_label.pack(expand=True)
         logging.debug("Portrait image label created.")
