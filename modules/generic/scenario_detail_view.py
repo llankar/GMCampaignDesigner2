@@ -52,7 +52,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         self.tab_bar_container.pack(side="top", fill="x")
 
         # The scrollable canvas for tabs
-        self.tab_bar_canvas = ctk.CTkCanvas(self.tab_bar_container, height=40, highlightthickness=0)
+        self.tab_bar_canvas = ctk.CTkCanvas(self.tab_bar_container, height=40, highlightthickness=0, bg="#2B2B2B")
         self.tab_bar_canvas.pack(side="top", fill="x", expand=True)
 
         # Horizontal scrollbar at the bottom
@@ -450,7 +450,7 @@ class ScenarioDetailView(ctk.CTkFrame):
     def insert_links(self, parent, header, items, linked_type):
         ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
         for item in items:
-            label = ctk.CTkLabel(parent, text=item, text_color="blue", cursor="hand2")
+            label = ctk.CTkLabel(parent, text=item, text_color="#00BFFF", cursor="hand2")
             label.pack(anchor="w", padx=10)
             label.bind("<Button-1>", partial(self._on_link_clicked, linked_type, item))
 

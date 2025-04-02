@@ -25,9 +25,10 @@ from PIL import Image, ImageTk
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.swarmui_helper import get_available_models
 
-
 # Other imports...
 SWARMUI_PROCESS = None
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 
 def load_items_from_json(view, entity_name):
     file_path = filedialog.askopenfilename(
@@ -49,7 +50,6 @@ def load_items_from_json(view, entity_name):
     except Exception as e:
         messagebox.showerror("Error", f"Failed to load {entity_name}: {e}")
 
-
 def apply_formatting(run, formatting):
     if formatting.get('bold'):
         run.bold = True
@@ -58,78 +58,92 @@ def apply_formatting(run, formatting):
     if formatting.get('underline'):
         run.underline = True
 
-
-
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
-          # Initialize the database (creates campaign.db and tables only if it doesn't exist)
-        self.init_db()
-        self.title("GMCampaignDesigner")
-        position_window_at_top(self)
-        self.geometry("600x800")
 
+        self.title("GMCampaignDesigner")
+        self.geometry("1920x980")
+        self.minsize(1920, 980)
+        position_window_at_top(self)
+        self.iconbitmap("assets\\GMCampaignDesigner.ico")
+
+        self.init_db()
+
+        # Create the main layout frame
+        main_frame = ctk.CTkFrame(self)
+        main_frame.pack(fill="both", expand=True)
+
+        # Sidebar frame on the left
+        sidebar_frame = ctk.CTkFrame(main_frame, width=220)
+        sidebar_frame.pack(side="left", fill="y", padx=10, pady=10)
+        sidebar_frame.pack_propagate(False)  # prevent auto-resizing to fit content
+
+        # Inner frame inside the sidebar for better control over padding and centering
+        sidebar_inner = ctk.CTkFrame(sidebar_frame, fg_color="transparent")
+        sidebar_inner.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Content frame placeholder (store as instance variable)
+        self.content_frame = ctk.CTkFrame(main_frame)
+        self.content_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+
+        # Load logo and place it in the sidebar inner frame
+        logo_image = Image.open("assets\\GMCampaignDesigner logo.png").resize((100, 100))
+        
+        logo = ctk.CTkImage(light_image=logo_image, dark_image=logo_image, size=(100, 100))
+        self.logo_image = logo
+        logo_label = ctk.CTkLabel(sidebar_inner, image=logo, text="")
+        logo_label.pack(pady=(0, 20), anchor="center")
+
+        # Optional: Add a header label to introduce the sidebar buttons
+        header_label = ctk.CTkLabel(sidebar_inner, text="Campaign Tools", font=("Helvetica", 16, "bold"))
+        header_label.pack(pady=(0, 10), anchor="center")
+
+        # Model loading
         self.models_path = ConfigHelper.get("Paths", "models_path", fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
         self.model_options = get_available_models()
-        
+
+        # Wrappers
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
-                # Add a new button to change the database storage.
-        ctk.CTkButton(self, text="Change Data Storage", command=self.change_database_storage).pack(pady=5)
-        ctk.CTkButton(self, text="Manage Scenarios", command=lambda: self.open_entity("scenarios")).pack(pady=5)
-        ctk.CTkButton(self, text="Manage NPCs", command=lambda: self.open_entity("npcs")).pack(pady=5)
-        ctk.CTkButton(self, text="Manage Factions", command=lambda: self.open_entity("factions")).pack(pady=5)
-        ctk.CTkButton(self, text="Manage Places", command=lambda: self.open_entity("places")).pack(pady=5)
-        ctk.CTkButton(self, text="Manage Objects", command=lambda: self.open_entity("objects")).pack(pady=5)
-        ctk.CTkButton(self, text="Export Scenarios", command=self.preview_and_export_scenarios).pack(pady=5)
-        ctk.CTkButton(self, text="Open GM Screen", command=self.open_gm_screen).pack(pady=5)
-        ctk.CTkButton(self, text="Open NPC Graph editor", command=self.open_npc_graph_editor).pack(pady=5) 
-        ctk.CTkButton(self, text="Open Scenario Graph editor", command=self.open_scenario_graph_editor).pack(pady=5) 
-        ctk.CTkButton(self, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits).pack(pady=5) 
-        ctk.CTkButton(self, text="Import Scenario", command=self.open_scenario_importer).pack(pady=5)
-        ctk.CTkButton(self, text="Export Scenarios for Foundry", command=self.export_foundry).pack(pady=5)
-    
-    
-    def export_foundry(self):
-        preview_and_export_foundry(self)
-    def open_scenario_importer(self):
-        import_scenario=ScenarioImportWindow(self)
-        import_scenario.mainloop()
 
-    def open_scenario_graph_editor(self):
-        scenario_wrapper = GenericModelWrapper("scenarios")
-        npc_wrapper = GenericModelWrapper("npcs")
-        place_wrapper = GenericModelWrapper("places")
-        root = ctk.CTk()
-        root.title("Scenario Graph Editor")
-        root.geometry("1500x700")
-        editor = ScenarioGraphEditor(root, scenario_wrapper, npc_wrapper, place_wrapper)
-        editor.pack(fill="both", expand=True)
-        root.mainloop()
+        # Button configuration
+        button_config = {"width": 180, "anchor": "center"}
+
+        ctk.CTkButton(sidebar_inner, text="Change Data Storage", command=self.change_database_storage, **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Manage Scenarios", command=lambda: self.open_entity("scenarios"), **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Manage NPCs", command=lambda: self.open_entity("npcs"), **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Manage Factions", command=lambda: self.open_entity("factions"), **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Manage Places", command=lambda: self.open_entity("places"), **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Manage Objects", command=lambda: self.open_entity("objects"), **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Export Scenarios", command=self.preview_and_export_scenarios, **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Open GM Screen", command=self.open_gm_screen, **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Open NPC Graph Editor", command=self.open_npc_graph_editor, **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Open Scenario Graph Editor", command=self.open_scenario_graph_editor, **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits, **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Import Scenario", command=self.open_scenario_importer, **button_config).pack(pady=5)
+        ctk.CTkButton(sidebar_inner, text="Export Scenarios for Foundry", command=self.export_foundry, **button_config).pack(pady=5)
+
+    def clear_content(self):
+        # Clear all widgets from the content frame
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
 
     def open_entity(self, entity):
-        window = ctk.CTkToplevel(self)
-        window.title(f"Manage {entity.capitalize()}")
-        window.geometry("1500x700")
-        window.transient(self)
-        window.lift()
-        window.focus_force()
-
+        self.clear_content()
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(fill="both", expand=True)
         model_wrapper = GenericModelWrapper(entity)
-        model_wrapper.master = window
         template = load_template(entity)
-
-        view = GenericListView(window, model_wrapper, template)
+        view = GenericListView(container, model_wrapper, template)
         view.pack(fill="both", expand=True)
+        load_button = ctk.CTkButton(container,
+                                    text=f"Load {entity.capitalize()}",
+                                    command=lambda: load_items_from_json(view, entity))
+        load_button.pack(pady=5)
 
-        if entity in ["factions", "places", "npcs", "scenarios"]:
-            ctk.CTkButton(
-                window,
-                text=f"Load {entity.capitalize()}",
-                command=lambda: load_items_from_json(view, entity)
-            ).pack(pady=5)
     def open_gm_screen(self):
         scenario_wrapper = GenericModelWrapper("scenarios")
         scenarios = scenario_wrapper.load_items()
@@ -138,78 +152,179 @@ class MainWindow(ctk.CTk):
             messagebox.showwarning("No Scenarios", "No scenarios available.")
             return
 
-        select_win = ctk.CTkToplevel(self)
-        select_win.title("Select Scenario")
-        select_win.geometry("800x600")
+        self.clear_content()
+        container = ctk.CTkFrame(self.content_frame, fg_color="#2B2B2B")
+        container.pack(fill="both", expand=True)
 
-        scenario_titles = [scenario["Title"] for scenario in scenarios]
+        select_label = ctk.CTkLabel(container, text="Select a Scenario", font=("Helvetica", 16, "bold"), fg_color="#2B2B2B", text_color="white")
+        select_label.pack(pady=10)
 
-        listbox = Listbox(select_win, selectmode="single", height=15)
+        listbox = Listbox(container, selectmode="single", height=15, bg="#2B2B2B", fg="white", highlightthickness=0, bd=0)
         listbox.pack(fill="both", expand=True, padx=10, pady=10)
 
-        for title in scenario_titles:
-            listbox.insert("end", title)
+        for scenario in scenarios:
+            listbox.insert("end", scenario["Title"])
 
         def open_selected_scenario():
             selection = listbox.curselection()
             if not selection:
                 messagebox.showwarning("No Selection", "Please select a scenario.")
                 return
-
             selected_scenario = scenarios[selection[0]]
-
-            gm_screen_win = ctk.CTkToplevel(self)
-            gm_screen_win.title("GM Screen")
-            gm_screen_win.geometry("1280x720")
-
-            scenario_detail_view = ScenarioDetailView(gm_screen_win, scenario_item=selected_scenario)
+            self.clear_content()
+            detail_container = ctk.CTkFrame(self.content_frame)
+            detail_container.pack(fill="both", expand=True)
+            scenario_detail_view = ScenarioDetailView(detail_container, scenario_item=selected_scenario)
             scenario_detail_view.pack(fill="both", expand=True)
 
-            # Properly destroy select_win after safely opening the new window
-            select_win.after(100, select_win.destroy)
+        open_button = ctk.CTkButton(container, text="Open Scenario", command=open_selected_scenario)
+        open_button.pack(pady=10)
 
-        ctk.CTkButton(select_win, text="Open Scenario", command=open_selected_scenario).pack(pady=10)
-    
     def open_npc_graph_editor(self):
-        window = ctk.CTkToplevel(self)
-        window.title("NPC Graph Editor")
-        window.geometry("1280x720")
-        window.transient(self)
-        window.lift()
-        window.focus_force()
-
-        npc_graph_editor = NPCGraphEditor(window, self.npc_wrapper, self.faction_wrapper)
+        self.clear_content()
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(fill="both", expand=True)
+        npc_graph_editor = NPCGraphEditor(container, self.npc_wrapper, self.faction_wrapper)
         npc_graph_editor.pack(fill="both", expand=True)
-    
-    def launch_swarmui(self):
-        global SWARMUI_PROCESS
-        SWARMUI_CMD = "launch-windows.bat"
-        # Create a copy of the current environment and modify it as needed
-        env = os.environ.copy()
-        # Optionally remove the virtual environment variables if not needed:
-        env.pop('VIRTUAL_ENV', None)
-        # Adjust PATH if necessary to point to the system Python
-        #env["PATH"] = "C:\\Path\\to\\system\\python;" + env["PATH"]
-        
-        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
-            try:
-                SWARMUI_PROCESS = subprocess.Popen(
-                    SWARMUI_CMD,
-                    shell=True,
-                    cwd=r"E:\SwarmUI\SwarmUI",
-                    env=env
+
+    def open_scenario_graph_editor(self):
+        self.clear_content()
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(fill="both", expand=True)
+        scenario_wrapper = GenericModelWrapper("scenarios")
+        npc_wrapper = GenericModelWrapper("npcs")
+        place_wrapper = GenericModelWrapper("places")
+        editor = ScenarioGraphEditor(container, scenario_wrapper, npc_wrapper, place_wrapper)
+        editor.pack(fill="both", expand=True)
+
+    def export_foundry(self):
+        preview_and_export_foundry(self)
+
+    def open_scenario_importer(self):
+        self.clear_content()
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(fill="both", expand=True)
+        import_scenario = ScenarioImportWindow(container)
+     
+    def change_database_storage(self):
+        """
+        Allows the user to change the current database.
+        The user can choose an existing database file or create a new one.
+        The selected path is saved to config.ini and used for the rest of the application.
+        """
+        choice = messagebox.askquestion("Change Database", "Do you want to open an existing database file?")
+        if choice == "yes":
+            file_path = filedialog.askopenfilename(
+                title="Select Database",
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
+            )
+            if not file_path:
+                return
+            new_db_path = file_path
+        else:
+            new_db_path = filedialog.asksaveasfilename(
+                title="Create New Database",
+                defaultextension=".db",
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
+            )
+            if not new_db_path:
+                return
+            conn = sqlite3.connect(new_db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS nodes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    npc_name TEXT,
+                    x INTEGER,
+                    y INTEGER,
+                    color TEXT
                 )
-                # Optionally, wait a little bit here for the process to initialize.
-                time.sleep(120.0)
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
-    def cleanup_swarmui(self):
-        """
-        Terminate the SwarmUI process if it is running.
-        """
-        global SWARMUI_PROCESS
-        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
-            SWARMUI_PROCESS.terminate()
+            ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS links (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    npc_name1 TEXT,
+                    npc_name2 TEXT,
+                    text TEXT,
+                    arrow_mode TEXT
+                )
+            ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS shapes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    type TEXT,
+                    x INTEGER,
+                    y INTEGER,
+                    w INTEGER,
+                    h INTEGER,
+                    color TEXT,
+                    tag TEXT,
+                    z INTEGER
+                )
+            ''')
+            conn.commit()
+            conn.close()
+
+        ConfigHelper.set("Database", "path", new_db_path)
+        messagebox.showinfo("Database Changed", f"Database changed to:\n{new_db_path}")
+        self.init_db()
+        self.place_wrapper = GenericModelWrapper("places")
+        self.npc_wrapper = GenericModelWrapper("npcs")
+        self.faction_wrapper = GenericModelWrapper("factions")
+        self.object_wrapper = GenericModelWrapper("objects")
+        messagebox.showinfo("Database Update", "The new database is now active. You may continue using the application.")
+
+    def init_db(self):
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+        self.conn = sqlite3.connect(db_path)
+        self.conn.row_factory = sqlite3.Row  # so you can access columns by name
+        self.cursor = self.conn.cursor()
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS npcs (
+                Name TEXT PRIMARY KEY,
+                Role TEXT,
+                Description TEXT,
+                Secret TEXT,
+                Factions TEXT,
+                Objects TEXT,
+                Portrait TEXT
+            )
+        ''')
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS scenarios (
+                Title TEXT PRIMARY KEY,
+                Summary TEXT,
+                Secrets TEXT,
+                Places TEXT,
+                NPCs TEXT,
+                Objects TEXT
+            )
+        ''')
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS factions (
+                Name TEXT PRIMARY KEY,
+                Description TEXT,
+                Secrets TEXT
+            )
+        ''')
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS places (
+                Name TEXT PRIMARY KEY,
+                Description TEXT,
+                NPCs TEXT
+            )
+        ''')
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS objects (
+                Name TEXT PRIMARY KEY,
+                Description TEXT,
+                Secrets TEXT,
+                Portrait TEXT
+            )
+        ''')
+        self.conn.commit()
+        self.conn.close()
+
     def generate_portrait_for_npc(self, npc):
         """
         Generate a portrait for a single NPC using the SwarmUI API.
@@ -217,12 +332,10 @@ class MainWindow(ctk.CTk):
         The generated portrait is saved locally, copied to the assets folder,
         and the npc's "Portrait" field is updated with the file path.
         """
-        # Ensure SwarmUI is launched.
         self.launch_swarmui()
         
         SWARM_API_URL = "http://127.0.0.1:7801"
         try:
-            # Step 1: Obtain a session from SwarmUI.
             session_url = f"{SWARM_API_URL}/API/GetNewSession"
             session_response = requests.post(session_url, json={}, headers={"Content-Type": "application/json"})
             session_data = session_response.json()
@@ -231,7 +344,6 @@ class MainWindow(ctk.CTk):
                 print(f"Failed to obtain session ID for NPC {npc.get('Name', 'Unknown')}")
                 return
             
-            # Step 2: Build a prompt based on the NPC's data.
             npc_name = npc.get("Name", "Unknown")
             npc_role = npc.get("Role", "Unknown")
             npc_faction = npc.get("Factions", "Unknown")
@@ -239,14 +351,13 @@ class MainWindow(ctk.CTk):
             npc_desc = text_helpers.format_longtext(npc_desc)
             prompt = f"{npc_name} {npc_desc} {npc_role} {npc_faction}"
             
-            # Define image generation parameters.
             prompt_data = {
                 "session_id": session_id,
                 "images": 1,
                 "prompt": prompt,
                 "negativeprompt": ("blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, "
-                                "monstrous, too many fingers, too many legs, too many arms, bad hands, "
-                                "unrealistic weapons, bad grip on equipment, nude"),
+                                     "monstrous, too many fingers, too many legs, too many arms, bad hands, "
+                                     "unrealistic weapons, bad grip on equipment, nude"),
                 "model": self.selected_model.get(),
                 "width": 1024,
                 "height": 1024,
@@ -262,26 +373,21 @@ class MainWindow(ctk.CTk):
                 print(f"Image generation failed for NPC '{npc_name}'")
                 return
             
-            # Step 3: Download the generated image.
             image_url = f"{SWARM_API_URL}/{images[0]}"
             downloaded_image = requests.get(image_url)
             if downloaded_image.status_code != 200:
                 print(f"Failed to download generated image for NPC '{npc_name}'")
                 return
             
-            # Step 4: Save the image locally.
             output_filename = f"{npc_name.replace(' ', '_')}_portrait.png"
             with open(output_filename, "wb") as f:
                 f.write(downloaded_image.content)
             
-            # Optionally resize/copy image as done in your original code.
-            # For example, copy to assets folder:
             GENERATED_FOLDER = "assets/generated"
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
-             # Associate the generated portrait with the NPC data.
             npc["Portrait"] = self.copy_and_resize_portrait(npc, output_filename)
-            os.remove(output_filename)  # Delete the original image file
+            os.remove(output_filename)
             print(f"Generated portrait for NPC '{npc_name}'")
          
         except Exception as e:
@@ -330,7 +436,6 @@ class MainWindow(ctk.CTk):
 
         modified = False
         for npc in npcs:
-            # Check if Portrait is missing or empty.
             if not npc.get("Portrait", "").strip():
                 self.generate_portrait_for_npc(npc)
                 modified = True
@@ -395,7 +500,6 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(selection_window, text="Export Selected", command=export_selected).pack(pady=5)
 
     def preview_and_save(self, selected_scenarios):
-        
         place_items = {place["Name"]: place for place in self.place_wrapper.load_items()}
         npc_items = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
 
@@ -416,7 +520,6 @@ class MainWindow(ctk.CTk):
             secrets = scenario.get("Secrets", "No secrets provided.")
             doc.add_heading(title, level=2)
             
-            # Export Summary using current formatting logic
             doc.add_heading("Summary", level=3)
             if isinstance(summary, dict):
                 p = doc.add_paragraph()
@@ -425,7 +528,6 @@ class MainWindow(ctk.CTk):
             else:
                 doc.add_paragraph(str(summary))
             
-            # Export Secrets using current formatting logic
             doc.add_heading("Secrets", level=3)
             if isinstance(secrets, dict):
                 p = doc.add_paragraph()
@@ -452,149 +554,29 @@ class MainWindow(ctk.CTk):
 
         doc.save(file_path)
         messagebox.showinfo("Export Successful", f"Scenario exported successfully to:\n{file_path}")
-    
-    def init_db(self):
-        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
-        # Connect to the database (creates the file if it doesn't exist)
-        self.conn = sqlite3.connect(db_path)
-        self.conn.row_factory = sqlite3.Row  # so you can access columns by name
-        self.cursor = self.conn.cursor()
-        
-        # Create the nodes table if it doesn't exist
-        # NPCs – using fields from npcs_template.json
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS npcs (
-                Name TEXT PRIMARY KEY,
-                Role TEXT,
-                Description TEXT,
-                Secret TEXT,
-                Factions TEXT,
-                Objects TEXT,
-                Portrait TEXT
-            )
-        ''')
-        
-        # Scenarios – using fields from scenarios_template.json
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS scenarios (
-                Title TEXT PRIMARY KEY,
-                Summary TEXT,
-                Secrets TEXT,
-                Places TEXT,
-                NPCs TEXT,
-                Objects TEXT
-            )
-        ''')
-        
-        # Factions – using fields from factions_template.json
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS factions (
-                Name TEXT PRIMARY KEY,
-                Description TEXT,
-                Secrets TEXT
-            )
-        ''')
-        
-        # Places – using fields from places_template.json
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS places (
-                Name TEXT PRIMARY KEY,
-                Description TEXT,
-                NPCs TEXT
-            )
-        ''')
-        
-        # Objects – using fields from objects_template.json
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS objects (
-                Name TEXT PRIMARY KEY,
-                Description TEXT,
-                Secrets TEXT,
-                Portrait TEXT
-            )
-        ''')
-        
-        self.conn.commit()
-        self.conn.close()
-    def change_database_storage(self):
-        """
-        Allows the user to change the current database.
-        The user can choose an existing database file or create a new one.
-        The selected path is saved to config.ini and used for the rest of the application.
-        """
-        # Ask the user whether they want to open an existing database or create a new one.
-        choice = messagebox.askquestion("Change Database", "Do you want to open an existing database file?")
-        if choice == "yes":
-            # User will select an existing database file.
-            file_path = filedialog.askopenfilename(
-                title="Select Database",
-                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
-            )
-            if not file_path:
-                return
-            new_db_path = file_path
-        else:
-            # User chooses to create a new database.
-            new_db_path = filedialog.asksaveasfilename(
-                title="Create New Database",
-                defaultextension=".db",
-                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
-            )
-            if not new_db_path:
-                return
-            # Connect to the new database file (this will create it)
-            conn = sqlite3.connect(new_db_path)
-            cursor = conn.cursor()
-            # Create the required tables.
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS nodes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    npc_name TEXT,
-                    x INTEGER,
-                    y INTEGER,
-                    color TEXT
-                )
-            ''')
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS links (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    npc_name1 TEXT,
-                    npc_name2 TEXT,
-                    text TEXT,
-                    arrow_mode TEXT
-                )
-            ''')
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS shapes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type TEXT,
-                    x INTEGER,
-                    y INTEGER,
-                    w INTEGER,
-                    h INTEGER,
-                    color TEXT,
-                    tag TEXT,
-                    z INTEGER
-                )
-            ''')
-            conn.commit()
-            conn.close()
 
-        # Save new db path to config.
-        ConfigHelper.set("Database", "path", new_db_path)
-        messagebox.showinfo("Database Changed", f"Database changed to:\n{new_db_path}")
+    def launch_swarmui(self):
+        global SWARMUI_PROCESS
+        SWARMUI_CMD = "launch-windows.bat"
+        env = os.environ.copy()
+        env.pop('VIRTUAL_ENV', None)
         
-        # Reinitialize the database connection.
-        self.init_db()
-        
-        # Re-create the model wrappers to use the new database.
-        self.place_wrapper = GenericModelWrapper("places")
-        self.npc_wrapper = GenericModelWrapper("npcs")
-        self.faction_wrapper = GenericModelWrapper("factions")
-        self.object_wrapper = GenericModelWrapper("objects")
-        
-        # Optionally, notify the user that the change is now active.
-        messagebox.showinfo("Database Update", "The new database is now active. You may continue using the application.")
+        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
+            try:
+                SWARMUI_PROCESS = subprocess.Popen(
+                    SWARMUI_CMD,
+                    shell=True,
+                    cwd=r"E:\SwarmUI\SwarmUI",
+                    env=env
+                )
+                time.sleep(120.0)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
+
+    def cleanup_swarmui(self):
+        global SWARMUI_PROCESS
+        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
+            SWARMUI_PROCESS.terminate()
 
 if __name__ == "__main__":
     app = MainWindow()
