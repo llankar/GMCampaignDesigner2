@@ -65,6 +65,7 @@ class MainWindow(ctk.CTk):
         self.title("GMCampaignDesigner")
         self.geometry("1920x980")
         self.minsize(1920, 980)
+        self.attributes("-fullscreen", True)
         position_window_at_top(self)
         self.iconbitmap("assets\\GMCampaignDesigner.ico")
 
@@ -125,6 +126,8 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(sidebar_inner, text="Generate NPC Portraits", command=self.generate_missing_npc_portraits, **button_config).pack(pady=5)
         ctk.CTkButton(sidebar_inner, text="Import Scenario", command=self.open_scenario_importer, **button_config).pack(pady=5)
         ctk.CTkButton(sidebar_inner, text="Export Scenarios for Foundry", command=self.export_foundry, **button_config).pack(pady=5)
+        # Add an Exit button at the bottom of the sidebar.
+        ctk.CTkButton(sidebar_inner, text="Exit", command=self.destroy, fg_color="red", hover_color="#AA0000", **button_config).pack(pady=5, side="bottom")
 
     def clear_content(self):
         # Clear all widgets from the content frame
