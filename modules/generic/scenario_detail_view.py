@@ -357,7 +357,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         template = self.templates[entity_type]
         selection_popup = ctk.CTkToplevel(self)
         selection_popup.title(f"Select {entity_type}")
-        selection_popup.geometry("800x800")
+        selection_popup.geometry("1200x800")
         selection_popup.transient(self.winfo_toplevel())
         selection_popup.grab_set()
         selection_popup.focus_force()

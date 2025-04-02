@@ -386,7 +386,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         npc_template = load_template("npcs")
         dialog = ctk.CTkToplevel(self)
         dialog.title("Select NPC")
-        dialog.geometry("900x800")
+        dialog.geometry("1200x800")
         dialog.transient(self)
         dialog.grab_set()
         dialog.focus_force()
@@ -495,12 +495,12 @@ class NPCGraphEditor(ctk.CTkFrame):
         # Create a new selection popup.
         selection_popup = ctk.CTkToplevel(self)
         selection_popup.title("Select Faction")
-        selection_popup.geometry("600x500")
+        selection_popup.geometry("1200x800")
         selection_popup.transient(self.winfo_toplevel())
         selection_popup.grab_set()
         selection_popup.focus_force()
         
-        from modules.generic.generic_list_selection_view import GenericListSelectionView
+        
         # Instantiate the selection view with our dummy wrapper.
         selection_view = GenericListSelectionView(
             selection_popup,
@@ -1133,12 +1133,21 @@ class NPCGraphEditor(ctk.CTkFrame):
         bbox = self.canvas.bbox("all")
         if bbox:
             padding = 50
-            scroll_region = (bbox[0] - padding, bbox[1] - padding,
-                             bbox[2] + padding, bbox[3] + padding)
-            self.canvas.configure(scrollregion=scroll_region)
-        self.canvas.tag_lower("node", "link")
-        self.canvas.tag_lower("node", "shape")
-        self.canvas.tag_lower("shape", "link")
+            self.canvas.configure(scrollregion=(
+                bbox[0] - padding, bbox[1] - padding,
+                bbox[2] + padding, bbox[3] + padding
+            ))
+        # Check if there are any "link" items before using them as reference.
+        if self.canvas.find_withtag("link"):
+            self.canvas.tag_lower("node", "link")
+        else:
+            self.canvas.tag_lower("node")
+        # Lower "shape" below "link" if possible.
+        if self.canvas.find_withtag("shape") and self.canvas.find_withtag("link"):
+            self.canvas.tag_lower("shape", "link")
+        elif self.canvas.find_withtag("shape"):
+            self.canvas.tag_lower("shape")
+
 
     def start_drag(self, event):
         x = self.canvas.canvasx(event.x)

@@ -70,12 +70,21 @@ class GenericListSelectionView(ctk.CTkFrame):
     def refresh_list(self):
         self.tree.delete(*self.tree.get_children())
         for item in self.filtered_items:
+            # For the unique field (usually "Name")
             raw_val = item.get(self.unique_field, "")
             if isinstance(raw_val, dict):
                 raw_val = raw_val.get("text", "")
             iid = self.sanitize_id(raw_val or f"item_{int(time.time()*1000)}")
-            values = [str(item.get(col, "")) for col in self.columns]
+            
+            # For the extra columns, if the value is a dict, show just the "text"
+            def get_display_value(val):
+                if isinstance(val, dict):
+                    return val.get("text", "")
+                return str(val)
+            
+            values = [get_display_value(item.get(col, "")) for col in self.columns]
             self.tree.insert("", "end", iid=iid, text=raw_val, values=values)
+
 
     def filter_items(self):
         query = self.search_var.get().strip().lower()
