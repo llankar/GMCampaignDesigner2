@@ -19,7 +19,7 @@ import os, logging, ctypes
 from ctypes import wintypes
 from modules.generic.entity_detail_factory import create_entity_detail_frame, open_entity_window
 from modules.helpers.config_helper import ConfigHelper
-           
+from modules.helpers.text_helpers import format_longtext          
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
@@ -56,7 +56,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.scenario_wrapper = scenario_wrapper
         self.npc_wrapper = npc_wrapper
         self.place_wrapper = place_wrapper
-
+        self.node_bboxes = {}
         self.node_images = {}  # Store PhotoImage objects here to prevent garbage collection
 
         # Preload NPC and Place data for quick lookup
@@ -238,16 +238,16 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         center_x, center_y = 400, 300
         scenario_title = scenario.get("Title", "No Title")
         summary = scenario.get("Summary", "")
-        if isinstance(summary, dict):
-            summary = summary.get("text", "")
+        # Use the existing text helper to process the summary
+        summary = format_longtext(summary)
         scenario_tag = f"scenario_{scenario_title.replace(' ', '_')}"
         self.graph["nodes"].append({
             "type": "scenario",
             "name": scenario_title,
             "x": center_x,
             "y": center_y,
-            "color": "lightgreen",
-            "data": scenario  # store entire scenario
+            "color": "darkolivegreen",
+            "data": {**scenario, "Summary": summary}
         })
         self.node_positions[scenario_tag] = (center_x, center_y)
 
@@ -257,9 +257,9 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         npcs_list = scenario.get("NPCs", [])
         npcs_count = len(npcs_list)
         if npcs_count > 0:
-            arc_start_npcs = 30    # starting angle in degrees (directly upper right-ish)
-            arc_end_npcs   = 150   # ending angle in degrees (upper left-ish)
-            offset_npcs    = 350   # distance from the scenario node
+            arc_start_npcs = 30    # starting angle in degrees (upper right-ish)
+            arc_end_npcs = 150     # ending angle in degrees (upper left-ish)
+            offset_npcs = 350      # distance from the scenario node
 
             for i, npc_name in enumerate(npcs_list):
                 if npc_name not in self.npcs:
@@ -272,13 +272,17 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 x = center_x + offset_npcs * math.cos(angle_rad)
                 y = center_y + offset_npcs * math.sin(angle_rad)
                 npc_data = self.npcs[npc_name]
+                # Process NPC Description using your existing helper to remove RTF formatting.
+                desc = npc_data.get("Description", "")
+                desc = format_longtext(desc)
+                npc_data["Description"] = desc
                 npc_tag = f"npc_{npc_name.replace(' ', '_')}"
                 self.graph["nodes"].append({
                     "type": "npc",
                     "name": npc_name,
                     "x": x,
                     "y": y,
-                    "color": "lightblue",
+                    "color": "darkslateblue",
                     "data": npc_data
                 })
                 self.node_positions[npc_tag] = (x, y)
@@ -295,8 +299,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         places_count = len(places_list)
         if places_count > 0:
             arc_start_places = 210  # starting angle in degrees (lower left)
-            arc_end_places   = 330  # ending angle in degrees (lower right)
-            offset_places    = 350  # distance from the scenario node
+            arc_end_places = 330    # ending angle in degrees (lower right)
+            offset_places = 350     # distance from the scenario node
 
             for j, place_name in enumerate(places_list):
                 if place_name not in self.places:
@@ -309,13 +313,17 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 x = center_x + offset_places * math.cos(angle_rad)
                 y = center_y + offset_places * math.sin(angle_rad)
                 place_data = self.places[place_name]
+                # Process Place Description using the text helper.
+                pd = place_data.get("Description", "")
+                pd = format_longtext(pd)
+                place_data["Description"] = pd
                 place_tag = f"place_{place_name.replace(' ', '_')}"
                 self.graph["nodes"].append({
                     "type": "place",
                     "name": place_name,
                     "x": x,
                     "y": y,
-                    "color": "khaki",
+                    "color": "sienna",
                     "data": place_data
                 })
                 self.node_positions[place_tag] = (x, y)
@@ -326,6 +334,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 })
 
         self.draw_graph()
+
 
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -372,131 +381,142 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             return None, (0, 0)
 
     def draw_nodes(self):
-        """
-        Draw nodes with dynamic sizing based on text content.
-        For NPC nodes, if a portrait is available, it is shown on the left,
-        with the text wrapped to the right.
-        """
-        MAX_TEXT_WIDTH = int(ConfigHelper.get("Size", "max_text_width", fallback=500))
-        PAD_X = 10                      # Horizontal padding inside the rectangle
-        PAD_Y = 10                      # Vertical padding inside the rectangle
-        GAP = 5                         # Gap between portrait and text
-        portrait_image = None
+        # Path to your custom overlay PNG
+        node_png_path = os.path.join("assets", "scenario_node.png")
+        # Maximum dimensions for overlay if needed
+        MAX_OVERLAY_WIDTH = 200
+        MAX_OVERLAY_HEIGHT = 200
+        GAP = 5      # gap between portrait and text
+        PAD = 10     # padding around content
+        NPC_TEXT_WRAP = 120  # maximum width for text in NPC nodes
 
-        # Helper to measure wrapped text size.
-        def measure_wrapped_text(text, font_obj, wrap_width):
-            temp_id = self.canvas.create_text(
-                0, 0,
-                text=text,
-                font=font_obj,
-                width=wrap_width,
-                anchor="nw",
-                justify="center",
-                tags=("temp_measure",)
-            )
-            bbox = self.canvas.bbox(temp_id)
-            self.canvas.delete(temp_id)
-            if bbox is None:
-                return (0, 0)
-            x1, y1, x2, y2 = bbox
-            return (x2 - x1, y2 - y1)
+        # Define darker default colors for each node type:
+        default_colors = {
+            "scenario": "darkolivegreen",
+            "npc": "darkslateblue",
+            "place": "sienna"
+        }
+
+        # Ensure node_bboxes exists
+        if not hasattr(self, "node_bboxes"):
+            self.node_bboxes = {}
+        else:
+            self.node_bboxes.clear()
 
         for node in self.graph["nodes"]:
-            node_type = node["type"]
+            node_type = node["type"]  # e.g., "scenario", "npc", "place"
             node_name = node["name"]
             x, y = node["x"], node["y"]
-            color = node.get("color", "lightgray")
+
+            # Use the node's color if set; otherwise, use the darker default for its type.
+            color = node.get("color", default_colors.get(node_type, "darkslategray"))
             node_tag = f"{node_type}_{node_name.replace(' ', '_')}"
 
-            # For scenario nodes, use Summary; for others, use Description.
+            # For text content, use 'Summary' for scenario nodes; otherwise, use 'Description'
             if node_type == "scenario":
-                raw_text = node["data"].get("Summary", "")
+                text_content = f"{node_name}\n{node['data'].get('Summary', '')}"
             else:
-                raw_text = node["data"].get("Description", "")
+                text_content = f"{node_name}\n{node['data'].get('Description', '')}"
 
-            # Prepare a font; if raw_text is a dict, extract formatting.
-            if isinstance(raw_text, dict):
-                display_text = raw_text.get("text", "")
-                formatting = raw_text.get("formatting", {})
-                weight = "bold" if formatting.get("bold") else "normal"
-                slant = "italic" if formatting.get("italic") else "roman"
-                underline = 1 if formatting.get("underline") else 0
-                text_font = tkFont.Font(family="Arial", size=9, weight=weight, slant=slant, underline=underline)
+            # Create a text font; white text for contrast
+            text_font = tkFont.Font(family="Arial", size=9, weight="bold")
+
+            # Measure text size with a forced wrap width
+            forced_wrap = NPC_TEXT_WRAP if node_type == "npc" else MAX_OVERLAY_WIDTH - 2 * PAD
+            temp_id = self.canvas.create_text(0, 0, text=text_content, font=text_font, width=forced_wrap, anchor="nw")
+            bbox = self.canvas.bbox(temp_id)
+            self.canvas.delete(temp_id)
+            if bbox:
+                text_w = bbox[2] - bbox[0]
+                text_h = bbox[3] - bbox[1]
             else:
-                display_text = str(raw_text)
-                text_font = tkFont.Font(family="Arial", size=9)
+                text_w, text_h = (80, 40)
 
-            combined_text = f"{node_name}\n{display_text}"
-
+            # For NPC nodes, load portrait if available
+            portrait = None
+            p_w = p_h = 0
             if node_type == "npc":
-                # For NPCs, check for a portrait.
-                portrait_path = node["data"].get("Portrait", "")
-                # Reuse a loaded image if available.
-                if node_tag in self.node_images:
-                    portrait_image = self.node_images[node_tag]
-                    portrait_width = portrait_image.width()
-                    portrait_height = portrait_image.height()
-                else:
-                    portrait_image, (portrait_width, portrait_height) = self.load_portrait(portrait_path, node_tag)
-                if portrait_width > 0:
-                    wrap_width = MAX_TEXT_WIDTH - portrait_width - GAP - 2 * PAD_X
-                else:
-                    wrap_width = MAX_TEXT_WIDTH - 2 * PAD_X
-                text_width, text_height = measure_wrapped_text(combined_text, text_font, wrap_width)
-                node_width = (portrait_width + GAP if portrait_width > 0 else 0) + text_width + 2 * PAD_X
-                node_height = max(portrait_height, text_height) + 2 * PAD_Y
+                portrait, (p_w, p_h) = self.load_portrait(node["data"].get("Portrait", ""), node_tag)
+
+            # Determine desired dimensions:
+            if node_type == "npc" and portrait and p_w > 0:
+                # Node width = portrait width + GAP + text width + padding on both sides
+                desired_width = p_w + GAP + text_w + 2 * PAD
+                # Height is the max of portrait height or text height plus padding
+                desired_height = max(p_h, text_h) + 2 * PAD
             else:
-                wrap_width = MAX_TEXT_WIDTH - 2 * PAD_X
-                text_width, text_height = measure_wrapped_text(combined_text, text_font, wrap_width)
-                node_width = text_width + 2 * PAD_X
-                node_height = text_height + 2 * PAD_Y
+                # For non-NPC nodes or if no portrait, ensure a minimum size
+                desired_width = max(text_w + 2 * PAD, MAX_OVERLAY_WIDTH)
+                desired_height = max(text_h + 2 * PAD, MAX_OVERLAY_HEIGHT)
 
-            left = x - (node_width / 2)
-            top = y - (node_height / 2)
-            right = x + (node_width / 2)
-            bottom = y + (node_height / 2)
+            # Load the overlay image and resize it to the desired dimensions.
+            try:
+                overlay_img = Image.open(node_png_path)
+                overlay_img = overlay_img.resize((int(desired_width), int(desired_height)), Image.Resampling.LANCZOS)
+            except Exception as e:
+                print(f"Error loading overlay: {e}")
+                overlay_img = None
 
+            # Compute bounding box based on desired dimensions (centered at (x, y))
+            left = x - (desired_width / 2)
+            top = y - (desired_height / 2)
+            right = x + (desired_width / 2)
+            bottom = y + (desired_height / 2)
+
+            # Draw a solid colored rectangle as the background (no border)
             rect_id = self.canvas.create_rectangle(
                 left, top, right, bottom,
-                fill=color, outline="black", width=2,
+                fill=color, outline="", width=0,
                 tags=("node", node_tag)
             )
             self.node_rectangles[node_tag] = rect_id
 
-            if node_type == "npc" and portrait_width > 0:
-                # Draw portrait on the left.
-                image_x = left + PAD_X + (portrait_width / 2)
-                image_y = top + PAD_Y + (portrait_height / 2)
+            # Draw the overlay image on top, if available
+            if overlay_img:
+                overlay_photo = ImageTk.PhotoImage(overlay_img, master=self.canvas)
+                if not hasattr(self, "node_holder_images"):
+                    self.node_holder_images = {}
+                self.node_holder_images[node_tag] = overlay_photo
+                self.canvas.create_image(x, y, image=overlay_photo, tags=("node", node_tag))
+
+            # Draw node content:
+            if node_type == "npc" and portrait and p_w > 0:
+                # Draw the portrait on the left.
+                portrait_x = left + PAD + (p_w / 2)
+                portrait_y = y  # vertically centered
                 self.canvas.create_image(
-                    image_x, image_y,
-                    image=portrait_image,
+                    portrait_x, portrait_y,
+                    image=portrait,
                     anchor="center",
                     tags=("node", node_tag)
                 )
-                # Draw text to the right.
-                text_x = left + PAD_X + portrait_width + GAP
-                text_y = top + PAD_Y
+                # Draw the text to the right of the portrait.
+                text_x = portrait_x + (p_w / 2) + GAP + (text_w / 2)
                 self.canvas.create_text(
-                    text_x, text_y,
-                    text=combined_text,
+                    text_x, y,
+                    text=text_content,
                     font=text_font,
-                    width=wrap_width,
-                    anchor="nw",
-                    justify="center",
+                    fill="white",
+                    width=forced_wrap,
+                    anchor="center",
                     tags=("node", node_tag)
                 )
             else:
-                text_x = left + PAD_X
-                text_y = top + PAD_Y
+                # For scenario or place nodes (or NPC nodes without portrait), center the text.
                 self.canvas.create_text(
-                    text_x, text_y,
-                    text=combined_text,
+                    x, y,
+                    text=text_content,
                     font=text_font,
-                    width=wrap_width,
-                    anchor="nw",
-                    justify="center",
+                    fill="white",
+                    width=desired_width - 2 * PAD,
+                    anchor="center",
                     tags=("node", node_tag)
                 )
+
+            # Save the node bounding box for link calculations.
+            self.node_bboxes[node_tag] = (left, top, right, bottom)
+
+
 
 
     # ─────────────────────────────────────────────────────────────────────────
