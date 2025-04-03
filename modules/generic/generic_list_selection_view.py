@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import customtkinter as ctk
 import time
 import re
@@ -37,23 +37,23 @@ class GenericListSelectionView(ctk.CTkFrame):
         style = ttk.Style(self)
         style.theme_use("clam")
         style.configure("Custom.Treeview",
-                        background="#2B2B2B",
-                        fieldbackground="#2B2B2B",
-                        foreground="white",
+                        background="#2B2B2B",      # dark gray for cells
+                        fieldbackground="#2B2B2B", # dark gray for empty area
+                        foreground="white",       # white text
                         rowheight=25,
-                        font=("Sego UI", 10))
+                        font=("Segoe UI", 10))
         style.configure("Custom.Treeview.Heading",
                         background="#2B2B2B",
                         foreground="white",
-                        font=("Sego UI", 10, "bold"))
+                        font=("Segoe UI", 10, "bold"))
         style.map("Custom.Treeview", background=[("selected", "#2B2B2B")])
 
         # --- Create the Treeview using the custom style ---
         self.tree = ttk.Treeview(tree_frame,
-                                 columns=self.columns,
-                                 show="tree headings",
-                                 selectmode="browse",
-                                 style="Custom.Treeview")
+                                columns=self.columns,
+                                show="tree headings",
+                                selectmode="browse",
+                                style="Custom.Treeview")
         self.tree.heading("#0", text=self.unique_field)
         self.tree.column("#0", width=150, anchor="w")
         for col in self.columns:
@@ -69,6 +69,19 @@ class GenericListSelectionView(ctk.CTkFrame):
         self.tree.bind("<Double-1>", self.on_double_click)
         self.refresh_list()
 
+        ctk.CTkButton(self, text="Open Selected", command=self.open_selected).pack(side="bottom", pady=5)
+
+        # --- Center the window if master is a Toplevel ---
+        if isinstance(self.master, tk.Toplevel):
+            self.master.update_idletasks()
+            width = self.master.winfo_width()
+            height = self.master.winfo_height()
+            screen_width = self.master.winfo_screenwidth()
+            screen_height = self.master.winfo_screenheight()
+            x = (screen_width - width) // 2
+            y = (screen_height - height) // 2
+            self.master.geometry(f"{width}x{height}+{x}+{y}")
+
     def refresh_list(self):
         self.tree.delete(*self.tree.get_children())
         for item in self.filtered_items:
@@ -77,16 +90,15 @@ class GenericListSelectionView(ctk.CTkFrame):
             if isinstance(raw_val, dict):
                 raw_val = raw_val.get("text", "")
             iid = self.sanitize_id(raw_val or f"item_{int(time.time()*1000)}")
-            
+
             # For the extra columns, if the value is a dict, show just the "text"
             def get_display_value(val):
                 if isinstance(val, dict):
                     return val.get("text", "")
                 return str(val)
-            
+
             values = [get_display_value(item.get(col, "")) for col in self.columns]
             self.tree.insert("", "end", iid=iid, text=raw_val, values=values)
-
 
     def filter_items(self):
         query = self.search_var.get().strip().lower()
@@ -94,8 +106,7 @@ class GenericListSelectionView(ctk.CTkFrame):
             self.filtered_items = self.items.copy()
         else:
             self.filtered_items = [
-                item for item in self.items
-                if any(query in str(v).lower() for v in item.values())
+                item for item in self.items if any(query in str(v).lower() for v in item.values())
             ]
         self.refresh_list()
 
@@ -110,6 +121,17 @@ class GenericListSelectionView(ctk.CTkFrame):
         if selected_item and self.on_select_callback:
             entity_name = selected_item.get("Name", selected_item.get("Title", "Unnamed"))
             self.on_select_callback(self.entity_type, entity_name)
+
+    def open_selected(self):
+        if self.filtered_items:
+            # Open the first item by default
+            self.select_entity(self.filtered_items[0])
+        else:
+            messagebox.showwarning("No Selection", f"No {self.entity_type} available to select.")
+
+    def select_entity(self, item):
+        self.on_select_callback(self.entity_type, item.get("Name", item.get("Title", "Unnamed")))
+        self.destroy()
 
     def sanitize_id(self, s):
         return re.sub(r'[^a-zA-Z0-9]+', '_', str(s)).strip('_')
