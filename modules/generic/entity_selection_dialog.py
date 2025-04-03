@@ -12,11 +12,20 @@ class EntitySelectionDialog(ctk.CTkToplevel):
     def __init__(self, master, entity_type, model_wrapper, template, on_entity_selected):
         super().__init__(master)
         self.title(f"Select {entity_type}")
-        self.geometry("1200x800")
-        self.transient(master)  # Key to staying on top
-        self.grab_set()         # Key to blocking background clicks
-        self.focus_force()      # Optional - directly focus the window
-        
+
+        # Center the window on the screen.
+        width = 1200
+        height = 800
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.geometry(f"{width}x{height}+{x}+{y}")
+
+        self.transient(master)  # Stay on top of the master window
+        self.grab_set()         # Block background clicks
+        self.focus_force()      # Focus on the dialog
+
         self.entity_type = entity_type
         self.model_wrapper = model_wrapper
         self.template = template
@@ -97,7 +106,6 @@ class EntitySelectionDialog(ctk.CTkToplevel):
             value = item.get(field["name"], "")
             if field.get("type") == "longtext":
                 value = format_longtext(value, max_length=200)
-
             label = ctk.CTkLabel(self.table_frame, text=value, anchor="w")
             label.grid(row=row_index, column=col_index, sticky="w", padx=5, pady=2)
             label.bind("<Button-1>", lambda e, i=item: self.select_entity(i))
