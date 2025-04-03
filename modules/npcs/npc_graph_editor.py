@@ -680,8 +680,8 @@ class NPCGraphEditor(ctk.CTkFrame):
     # ─────────────────────────────────────────────────────────────────────────
     def draw_nodes(self):
         NODE_WIDTH = 150
-        TEXT_LINE_HEIGHT = 25
-        TEXT_PADDING = 5
+        TEXT_LINE_HEIGHT = 20
+        TEXT_PADDING = 10
 
         # Path to your node PNG file
         node_holder_path = os.path.join("assets", "npc_node.png")
@@ -694,12 +694,20 @@ class NPCGraphEditor(ctk.CTkFrame):
             # NPC data
             npc_data = self.npcs.get(npc_name, {})
             role = npc_data.get("Role", "")
-            faction = npc_data.get("Factions", "")
 
-            # Build text (you can adjust this as needed)
-            wrapped_text = f"{npc_name}\n{role}\n{faction}"
-            lines = wrapped_text.splitlines()
-            number_of_lines = len(lines)
+            # Handle Factions to avoid showing Python list/dict with braces
+            faction_value = npc_data.get("Factions", "")
+            if isinstance(faction_value, list):
+                faction_text = ", ".join(str(f) for f in faction_value)
+            elif isinstance(faction_value, (set, dict)):
+                faction_text = ", ".join(str(f) for f in faction_value)
+            else:
+                faction_text = str(faction_value) if faction_value else ""
+
+            # Build text lines: first is name, then role, then faction.
+            lines = [npc_name, role, faction_text]
+            # Filter out any empty strings
+            lines = [line for line in lines if line.strip()]
 
             # Handle portrait if available
             portrait_path = npc_data.get("Portrait", "")
@@ -719,12 +727,10 @@ class NPCGraphEditor(ctk.CTkFrame):
                 self.node_images[npc_name] = photo
 
             # Calculate node height based on portrait and text
-            node_height = portrait_height + (number_of_lines * TEXT_LINE_HEIGHT) \
-                        + (TEXT_PADDING if has_portrait else 0) + 10
+            node_height = portrait_height + (len(lines) * TEXT_LINE_HEIGHT) + TEXT_PADDING + 20
 
-            # Use the node's color for the background
-            node_color ="#1D3572"
             # Draw a colored rectangle as the background
+            node_color = node.get("color", "#1D3572")
             rect_id = self.canvas.create_rectangle(
                 x - NODE_WIDTH // 2, y - node_height // 2,
                 x + NODE_WIDTH // 2, y + node_height // 2,
@@ -735,19 +741,16 @@ class NPCGraphEditor(ctk.CTkFrame):
             )
             self.node_rectangles[tag] = rect_id
 
-            # Draw the custom PNG overlay on top of the colored background,
-            # if it exists. This PNG should have transparency where you want the
-            # background color to show through.
+            # Draw the PNG overlay if it exists
             if os.path.exists(node_holder_path):
                 holder_img = Image.open(node_holder_path)
                 holder_img = holder_img.resize((NODE_WIDTH, node_height), Image.Resampling.LANCZOS)
                 holder_photo = ImageTk.PhotoImage(holder_img)
-                # Store the image reference to avoid garbage collection.
                 if not hasattr(self, "node_holder_images"):
                     self.node_holder_images = {}
                 self.node_holder_images[npc_name] = holder_photo
                 self.canvas.create_image(x, y, image=holder_photo, tags=(tag,))
-            
+
             # Store bounding box for link calculations
             left = x - (NODE_WIDTH // 2)
             top = y - (node_height // 2)
@@ -755,35 +758,29 @@ class NPCGraphEditor(ctk.CTkFrame):
             bottom = y + (node_height // 2)
             self.node_bboxes[tag] = (left, top, right, bottom)
 
-            # Draw portrait if available; adjust vertical positioning as desired
+            # Determine vertical starting point
+            current_y = top + TEXT_PADDING
             if has_portrait:
-                # Position portrait 10 pixels from top edge
-                portrait_y = top + 10 + (portrait_height // 2)
-                self.canvas.create_image(x, portrait_y,
+                portrait_center_y = current_y + (portrait_height // 2)
+                self.canvas.create_image(x, portrait_center_y,
                                         image=self.node_images[npc_name],
                                         tags=(tag,))
-                # Place text below the portrait with extra vertical gap (e.g. 30 pixels)
-                text_y = portrait_y + (portrait_height // 2) + 30
-            else:
-                # If no portrait, center the text vertically
-                text_y = y
+                current_y += portrait_height + TEXT_PADDING
 
-            # Draw the node text in white for better contrast
-            self.canvas.create_text(
-                x, text_y,
-                text=wrapped_text,
-                fill="white",
-                font=("Arial", 8, "bold"),
-                width=NODE_WIDTH - 4,
-                justify="center",
-                tags=(tag,)
-            )
-
-
-
-
-
-
+            # Draw each line of text separately.
+            # The first line (name) is bold; others are normal.
+            for i, line in enumerate(lines):
+                if i == 0:
+                    font = ("Arial", 9, "bold")
+                else:
+                    font = ("Arial", 9)
+                self.canvas.create_text(
+                    x, current_y + i * TEXT_LINE_HEIGHT,
+                    text=line,
+                    fill="white",
+                    font=font,
+                    tags=(tag,)
+                )
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_all_links
