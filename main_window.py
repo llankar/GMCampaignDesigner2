@@ -66,7 +66,7 @@ class MainWindow(ctk.CTk):
         self.title("GMCampaignDesigner")
         self.geometry("1920x980")
         self.minsize(1920, 980)
-       
+
         self.attributes("-fullscreen", True)
 
         position_window_at_top(self)
@@ -164,9 +164,9 @@ class MainWindow(ctk.CTk):
         # Database Tools section
         db_frame = ctk.CTkFrame(sidebar_inner, fg_color="transparent", border_width=2, border_color="#2E4A5F", corner_radius=8)
         db_frame.pack(fill="x", pady=(5, 5), padx=0)
-        ctk.CTkLabel(db_frame, text="Database Tools", font=("Helvetica", 16, "bold"), fg_color="transparent").pack(pady=(2, 2))
+        ctk.CTkLabel(db_frame, text="Tools", font=("Helvetica", 16, "bold"), fg_color="transparent").pack(pady=(2, 2))
         ctk.CTkButton(db_frame, text="Change Data\nStorage", command=self.change_database_storage, **button_config).pack(pady=2)
-        # Reduced extra bottom padding to 1
+        ctk.CTkButton(db_frame, text="Set SwarmUI Path", command=self.select_swarmui_path, **button_config).pack(pady=2)
         ctk.CTkLabel(db_frame, text="", fg_color="transparent").pack(pady=(0, 1))
 
         # Managing section
@@ -180,7 +180,6 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(inner_frame, text="Manage Factions", command=lambda: self.open_entity("factions"), **button_config).pack(pady=2)
         ctk.CTkButton(inner_frame, text="Manage Places", command=lambda: self.open_entity("places"), **button_config).pack(pady=2)
         ctk.CTkButton(inner_frame, text="Manage Objects", command=lambda: self.open_entity("objects"), **button_config).pack(pady=2)
-        # Reduced extra bottom padding to 1
         ctk.CTkLabel(inner_frame, text="", fg_color="transparent").pack(pady=(0, 1))
 
         # Tools section
@@ -191,7 +190,6 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(tools_frame, text="Open GM Screen", command=self.open_gm_screen, **button_config).pack(pady=2)
         ctk.CTkButton(tools_frame, text="Open NPC\nGraph Editor", command=self.open_npc_graph_editor, **button_config).pack(pady=2)
         ctk.CTkButton(tools_frame, text="Open Scenario\nGraph Editor", command=self.open_scenario_graph_editor, **button_config).pack(pady=2)
-        # Reduced extra bottom padding to 1
         ctk.CTkLabel(tools_frame, text="", fg_color="transparent").pack(pady=(0, 1))
 
         # Generating section
@@ -201,7 +199,6 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(gen_frame, text="Generate NPC\nPortraits", command=self.generate_missing_npc_portraits, **button_config).pack(pady=2)
         ctk.CTkButton(gen_frame, text="Import Scenario", command=self.open_scenario_importer, **button_config).pack(pady=2)
         ctk.CTkButton(gen_frame, text="Export Scenarios\nfor Foundry", command=self.export_foundry, **button_config).pack(pady=2)
-        # Reduced extra bottom padding to 1
         ctk.CTkLabel(gen_frame, text="", fg_color="transparent").pack(pady=(0, 1))
 
         # Exit button at bottom
@@ -394,6 +391,36 @@ class MainWindow(ctk.CTk):
         self.conn.commit()
         self.conn.close()
 
+    def select_swarmui_path(self):
+        folder = filedialog.askdirectory(title="Select SwarmUI Path")
+        if folder:
+            ConfigHelper.set("Paths", "swarmui_path", folder)
+            messagebox.showinfo("SwarmUI Path Set", f"SwarmUI path set to:\n{folder}")
+
+    def launch_swarmui(self):
+        global SWARMUI_PROCESS
+        # Retrieve the SwarmUI path from config.ini
+        swarmui_path = ConfigHelper.get("Paths", "swarmui_path", fallback=r"E:\SwarmUI\SwarmUI")
+        SWARMUI_CMD = os.path.join(swarmui_path, "launch-windows.bat")
+        env = os.environ.copy()
+        env.pop('VIRTUAL_ENV', None)
+        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
+            try:
+                SWARMUI_PROCESS = subprocess.Popen(
+                    SWARMUI_CMD,
+                    shell=True,
+                    cwd=swarmui_path,
+                    env=env
+                )
+                time.sleep(120.0)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
+
+    def cleanup_swarmui(self):
+        global SWARMUI_PROCESS
+        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
+            SWARMUI_PROCESS.terminate()
+
     def generate_portrait_for_npc(self, npc):
         self.launch_swarmui()
         SWARM_API_URL = "http://127.0.0.1:7801"
@@ -416,8 +443,8 @@ class MainWindow(ctk.CTk):
                 "images": 1,
                 "prompt": prompt,
                 "negativeprompt": ("blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, "
-                                   "monstrous, too many fingers, too many legs, too many arms, bad hands, "
-                                   "unrealistic weapons, bad grip on equipment, nude"),
+                                "monstrous, too many fingers, too many legs, too many arms, bad hands, "
+                                "unrealistic weapons, bad grip on equipment, nude"),
                 "model": self.selected_model.get(),
                 "width": 1024,
                 "height": 1024,
@@ -469,30 +496,35 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(top, text="Continue", command=confirm_model_and_continue).pack(pady=10)
 
     def generate_portraits_continue(self):
-        npc_file = "data/npcs.json"
-        if not os.path.exists(npc_file):
-            print("NPC file does not exist.")
-            return
-        try:
-            with open(npc_file, "r", encoding="utf-8") as f:
-                npcs = json.load(f)
-        except Exception as e:
-            print(f"Failed to load NPC file: {e}")
-            return
+        # Open a new database connection.
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Retrieve all NPC records.
+        cursor.execute("SELECT * FROM npcs")
+        npc_rows = cursor.fetchall()
         modified = False
-        for npc in npcs:
-            if not npc.get("Portrait", "").strip():
-                self.generate_portrait_for_npc(npc)
-                modified = True
+
+        for npc in npc_rows:
+            portrait = npc["Portrait"] if npc["Portrait"] is not None else ""
+            if not portrait.strip():
+                # Convert the row to a dictionary so that generate_portrait_for_npc works as expected.
+                npc_dict = dict(npc)
+                self.generate_portrait_for_npc(npc_dict)
+                if npc_dict.get("Portrait"):
+                    # Update the portrait field in the database.
+                    cursor.execute("UPDATE npcs SET Portrait = ? WHERE Name = ?", (npc_dict["Portrait"], npc["Name"]))
+                    modified = True
+
         if modified:
-            try:
-                with open(npc_file, "w", encoding="utf-8") as f:
-                    json.dump(npcs, f, indent=4, ensure_ascii=False)
-                print("Updated NPC file with generated portraits.")
-            except Exception as e:
-                print(f"Failed to update NPC file: {e}")
+            conn.commit()
+            print("Updated NPC database with generated portraits.")
         else:
             print("No NPCs were missing portraits.")
+
+        conn.close()
 
     def copy_and_resize_portrait(self, npc, src_path):
         PORTRAIT_FOLDER = "assets/portraits"
@@ -570,7 +602,7 @@ class MainWindow(ctk.CTk):
             doc.add_heading("NPCs", level=3)
             for npc_name in scenario.get("NPCs", []):
                 npc = npc_items.get(npc_name, {"Name": npc_name, "Role": "Unknown",
-                                               "Description": {"text": "Unknown NPC", "formatting": {}}})
+                                            "Description": {"text": "Unknown NPC", "formatting": {}}})
                 p = doc.add_paragraph(f"- {npc['Name']} ({npc['Role']}, {npc.get('Faction', 'Unknown')}): ")
                 description = npc['Description']
                 if isinstance(description, dict):
@@ -580,28 +612,6 @@ class MainWindow(ctk.CTk):
                     p.add_run(str(description))
         doc.save(file_path)
         messagebox.showinfo("Export Successful", f"Scenario exported successfully to:\n{file_path}")
-
-    def launch_swarmui(self):
-        global SWARMUI_PROCESS
-        SWARMUI_CMD = "launch-windows.bat"
-        env = os.environ.copy()
-        env.pop('VIRTUAL_ENV', None)
-        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
-            try:
-                SWARMUI_PROCESS = subprocess.Popen(
-                    SWARMUI_CMD,
-                    shell=True,
-                    cwd=r"E:\SwarmUI\SwarmUI",
-                    env=env
-                )
-                time.sleep(120.0)
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
-
-    def cleanup_swarmui(self):
-        global SWARMUI_PROCESS
-        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
-            SWARMUI_PROCESS.terminate()
 
 
 if __name__ == "__main__":
