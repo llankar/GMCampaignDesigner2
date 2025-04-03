@@ -16,6 +16,7 @@ from PIL import Image, ImageTk
 import os, logging, ctypes
 from ctypes import wintypes
 
+
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
