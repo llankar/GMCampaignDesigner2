@@ -282,30 +282,28 @@ class GenericEditorWindow(ctk.CTkToplevel):
         ctk.CTkButton(button_frame, text="Create Portrait with description", command=self.create_portrait_with_swarmui).pack(side="left", padx=5)
 
         self.field_widgets[field["name"]] = self.portrait_path
-
     
     def launch_swarmui(self):
         global SWARMUI_PROCESS
-        SWARMUI_CMD = "launch-windows.bat"
-        # Create a copy of the current environment and modify it as needed
+        # Retrieve the SwarmUI path from config.ini
+        swarmui_path = ConfigHelper.get("Paths", "swarmui_path", fallback=r"E:\SwarmUI\SwarmUI")
+        # Build the command by joining the path with the batch file name
+        SWARMUI_CMD = os.path.join(swarmui_path, "launch-windows.bat")
         env = os.environ.copy()
-        # Optionally remove the virtual environment variables if not needed:
         env.pop('VIRTUAL_ENV', None)
-        # Adjust PATH if necessary to point to the system Python
-        #env["PATH"] = "C:\\Path\\to\\system\\python;" + env["PATH"]
-        
         if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
             try:
                 SWARMUI_PROCESS = subprocess.Popen(
                     SWARMUI_CMD,
                     shell=True,
-                    cwd=r"E:\SwarmUI\SwarmUI",
+                    cwd=swarmui_path,
                     env=env
                 )
-                # Optionally, wait a little bit here for the process to initialize.
+                # Wait a little for the process to initialize.
                 time.sleep(120.0)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
+
     def cleanup_swarmui(self):
         """
         Terminate the SwarmUI process if it is running.
@@ -313,7 +311,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         global SWARMUI_PROCESS
         if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
             SWARMUI_PROCESS.terminate()
-    
+
     def create_portrait_with_swarmui(self):
       
         self.launch_swarmui()
