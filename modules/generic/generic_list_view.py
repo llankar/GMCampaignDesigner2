@@ -59,10 +59,12 @@ class GenericListView(ctk.CTkFrame):
                         background="#2B2B2B",      # dark gray for cells
                         fieldbackground="#2B2B2B", # dark gray for the empty area
                         foreground="white",       # white text
-                        rowheight=25)
+                        rowheight=25,
+                        font=("Sego UI", 10, "bold"))
         style.configure("Custom.Treeview.Heading",
                         background="#2B2B2B",
-                        foreground="white")
+                        foreground="white",
+                        font=("Sego UI", 10, "bold"))
         style.map("Custom.Treeview", background=[("selected", "#2B2B2B")])
 
         # Create the Treeview with extra columns defined in self.columns.
