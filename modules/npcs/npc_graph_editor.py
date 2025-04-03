@@ -417,7 +417,7 @@ class NPCGraphEditor(ctk.CTkFrame):
             "npc_name": npc_name,
             "x": x,
             "y": y,
-            "color": "lightblue"
+            "color": "#1D3572"
         })
         self.node_positions[tag] = (x, y)
         self.pending_npc = None
@@ -487,7 +487,7 @@ class NPCGraphEditor(ctk.CTkFrame):
                     "npc_name": npc_name,
                     "x": x,
                     "y": y,
-                    "color": "lightblue"
+                    "color": "#1D3572"
                 })
                 self.node_positions[tag] = (x, y)
             self.draw_graph()
@@ -678,26 +678,29 @@ class NPCGraphEditor(ctk.CTkFrame):
     # and calculates/stores their bounding boxes.
     # ─────────────────────────────────────────────────────────────────────────
     def draw_nodes(self):
-        NODE_WIDTH = 150  # increased to accommodate extra text
+        NODE_WIDTH = 150
         TEXT_LINE_HEIGHT = 25
         TEXT_PADDING = 5
+
+        # Path to your node PNG file
+        node_holder_path = os.path.join("assets", "npc_node.png")
+
         for node in self.graph["nodes"]:
             npc_name = node["npc_name"]
             tag = f"npc_{npc_name.replace(' ', '_')}"
             x, y = self.node_positions.get(tag, (node["x"], node["y"]))
-            color = node.get("color", "lightblue")
-            
-            # Get NPC data for extra fields
+
+            # NPC data
             npc_data = self.npcs.get(npc_name, {})
             role = npc_data.get("Role", "")
             faction = npc_data.get("Factions", "")
-            
-            # Build the text that includes name, role, and faction.
-            wrapped_text = f"{npc_name}\nRole: {role}\nFaction: {faction}"
+
+            # Build text (you can adjust this as needed)
+            wrapped_text = f"{npc_name}\n{role}\n{faction}"
             lines = wrapped_text.splitlines()
             number_of_lines = len(lines)
-            
-            # Handle portrait if available.
+
+            # Handle portrait if available
             portrait_path = npc_data.get("Portrait", "")
             has_portrait = portrait_path and os.path.exists(portrait_path)
             portrait_height = 0
@@ -713,36 +716,73 @@ class NPCGraphEditor(ctk.CTkFrame):
                 img = img.resize((portrait_width, portrait_height), Image.Resampling.LANCZOS)
                 photo = ImageTk.PhotoImage(img)
                 self.node_images[npc_name] = photo
+
+            # Calculate node height based on portrait and text
+            node_height = portrait_height + (number_of_lines * TEXT_LINE_HEIGHT) \
+                        + (TEXT_PADDING if has_portrait else 0) + 10
+
+            # Use the node's color for the background
+            node_color ="#1D3572"
+            # Draw a colored rectangle as the background
+            rect_id = self.canvas.create_rectangle(
+                x - NODE_WIDTH // 2, y - node_height // 2,
+                x + NODE_WIDTH // 2, y + node_height // 2,
+                fill=node_color,
+                outline="",
+                width=2,
+                tags=(tag,)
+            )
+            self.node_rectangles[tag] = rect_id
+
+            # Draw the custom PNG overlay on top of the colored background,
+            # if it exists. This PNG should have transparency where you want the
+            # background color to show through.
+            if os.path.exists(node_holder_path):
+                holder_img = Image.open(node_holder_path)
+                holder_img = holder_img.resize((NODE_WIDTH, node_height), Image.Resampling.LANCZOS)
+                holder_photo = ImageTk.PhotoImage(holder_img)
+                # Store the image reference to avoid garbage collection.
+                if not hasattr(self, "node_holder_images"):
+                    self.node_holder_images = {}
+                self.node_holder_images[npc_name] = holder_photo
+                self.canvas.create_image(x, y, image=holder_photo, tags=(tag,))
             
-            # Calculate node height. If there is a portrait, add padding.
-            node_height = portrait_height + (number_of_lines * TEXT_LINE_HEIGHT) + (TEXT_PADDING if has_portrait else 0) + 10
-            
-            # Compute the rectangle boundaries.
+            # Store bounding box for link calculations
             left = x - (NODE_WIDTH // 2)
             top = y - (node_height // 2)
             right = x + (NODE_WIDTH // 2)
             bottom = y + (node_height // 2)
-            
-            rectangle_id = self.canvas.create_rectangle(left, top, right, bottom,
-                                                        fill=color, tags=(tag,))
-            self.node_rectangles[tag] = rectangle_id
             self.node_bboxes[tag] = (left, top, right, bottom)
-            
-            # If there's a portrait, draw it and adjust text_y accordingly.
+
+            # Draw portrait if available; adjust vertical positioning as desired
             if has_portrait:
-                self.canvas.create_image(x, top + (portrait_height // 2),
-                                        image=self.node_images[npc_name], tags=(tag,))
-                text_y = top + portrait_height + TEXT_PADDING + (TEXT_LINE_HEIGHT // 2) + 8
+                # Position portrait 10 pixels from top edge
+                portrait_y = top + 10 + (portrait_height // 2)
+                self.canvas.create_image(x, portrait_y,
+                                        image=self.node_images[npc_name],
+                                        tags=(tag,))
+                # Place text below the portrait with extra vertical gap (e.g. 30 pixels)
+                text_y = portrait_y + (portrait_height // 2) + 30
             else:
-                text_y = y - 4
-            
-            self.canvas.create_text(x, text_y + 4,
-                                    text=wrapped_text,
-                                    fill="black",
-                                    font=("Arial", 8, "bold"),
-                                    width=NODE_WIDTH - 4,
-                                    justify="center",
-                                    tags=(tag,))
+                # If no portrait, center the text vertically
+                text_y = y
+
+            # Draw the node text in white for better contrast
+            self.canvas.create_text(
+                x, text_y,
+                text=wrapped_text,
+                fill="white",
+                font=("Arial", 8, "bold"),
+                width=NODE_WIDTH - 4,
+                justify="center",
+                tags=(tag,)
+            )
+
+
+
+
+
+
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_all_links
@@ -763,7 +803,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         x1, y1 = self.node_positions.get(tag1, (0, 0))
         x2, y2 = self.node_positions.get(tag2, (0, 0))
 
-        line_id = self.canvas.create_line(x1, y1, x2, y2, fill="black", tags=("link",))
+        line_id = self.canvas.create_line(x1, y1, x2, y2, fill="#5BB8FF", tags=("link",))
         arrow_mode = link.get("arrow_mode", "end")
 
         arrow_ids = []
@@ -775,7 +815,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
         text_id = self.canvas.create_text(mid_x, mid_y,
                                         text=link["text"],
-                                        fill="red",
+                                        fill="white",
                                         font=("Arial", 10, "bold"),
                                         tags=("link_text",))
 
@@ -813,8 +853,8 @@ class NPCGraphEditor(ctk.CTkFrame):
             arrow_apex_y + arrow_length * math.sin(angle + math.pi / 6),
             arrow_apex_x + arrow_length * math.cos(angle - math.pi / 6),
             arrow_apex_y + arrow_length * math.sin(angle - math.pi / 6),
-            fill="black",
-            outline="black",
+            fill="#5BB8FF",
+            outline="white",
             tags=("link", "arrowhead")
     )
 
@@ -855,7 +895,7 @@ class NPCGraphEditor(ctk.CTkFrame):
                 for n in self.graph["nodes"]
             }
             for node in self.graph["nodes"]:
-                node["color"] = node.get("color", "lightblue")
+                node["color"] = "#1D3572"
             for link in self.graph["links"]:
                 link["arrow_mode"] = link.get("arrow_mode", "both")
             
