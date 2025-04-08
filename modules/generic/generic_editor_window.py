@@ -12,6 +12,8 @@ from PIL import Image, ImageTk
 from tkinter import filedialog,  messagebox
 from modules.helpers.swarmui_helper import get_available_models
 from modules.helpers.config_helper import ConfigHelper
+import csv
+import random
 
 FACTIONS_FILE = "data/factions.json"
 NPCS_FILE = "data/npcs.json"
@@ -106,21 +108,66 @@ class GenericEditorWindow(ctk.CTkToplevel):
         # Optionally, adjust window position.
         position_window_at_top(self)
 
+   
     def create_longtext_field(self, field):
         value = self.item.get(field["name"], "")
         editor = RichTextEditor(self.scroll_frame)
-        # Configure the text widget to have a dark background and white text.
-        # (Assuming editor.text_widget is a CTkTextbox)
         editor.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
-        
+
         if isinstance(value, dict):
             editor.load_text_data(value)
         else:
             if not isinstance(value, str):
                 value = str(value)
             editor.text_widget.insert("1.0", value)
+
         editor.pack(fill="both", expand=True, pady=5)
         self.field_widgets[field["name"]] = editor
+
+        # For scenario Summary fields, add a button to generate a description from CSV
+        if field["name"] == "Summary":
+            ctk.CTkButton(
+                self.scroll_frame,
+                text="Random Summary",
+                command=self.generate_scenario_description
+            ).pack(pady=5)
+
+    def generate_scenario_description(self):
+        """
+        Reads the CSV file 'RPG_StoryMaker.csv', selects one random element from each of its 6 rows
+        (using a random column index between 1 and 13 as in Main.java), joins them with ';' as separator,
+        and then inserts that single-line result into the 'Summary' text field.
+        """
+        try:
+            with open("assets/RPG_StoryMaker.csv", "r", encoding="utf-8") as csvfile:
+                reader = csv.reader(csvfile, delimiter=";")
+                rows = list(reader)
+
+            # Ensure at least 6 rows exist, as in Main.java
+            if len(rows) < 6:
+                raise ValueError("CSV file must have at least 6 columns.")
+
+            output_parts = []
+            for i in range(6):
+                # Ensure each row has at least 14 columns
+                if len(rows) < 14:
+                    raise ValueError(f"Row {i} in CSV does not have at least 14 lines.")
+                # Random rows from 0 to 13 (inclusive)
+                rand_index = random.randint(1, 13)
+                output_parts.append(rows[rand_index][i])
+
+            output_line = " ".join(output_parts)
+
+            # Insert the one-line result into the 'Summary' field
+            summary_editor = self.field_widgets.get("Summary")
+            if summary_editor:
+                summary_editor.text_widget.delete("1.0", "end")
+                summary_editor.text_widget.insert("1.0", output_line)
+            else:
+                raise ValueError("Summary field editor not found.")
+
+        except Exception as e:
+            messagebox.showerror("Error generating description", str(e))
 
 
     def on_combo_mousewheel(self, event, combobox):
