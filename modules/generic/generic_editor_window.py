@@ -134,31 +134,45 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
     def generate_scenario_description(self):
         """
-        Reads the CSV file 'RPG_StoryMaker.csv', selects one random element from each of its 6 rows
-        (using a random column index between 1 and 13 as in Main.java), joins them with ';' as separator,
-        and then inserts that single-line result into the 'Summary' text field.
+        Reads four text files from the assets folder:
+        - Inciting Incidents.txt
+        - Antagonists.txt
+        - Objectives.txt
+        - Settings.txt
+        Each file contains ~100 elements (one per line). This function randomly selects one line
+        from each file and constructs a single-line description in the order:
+        Inciting Incident, Antagonists, Objectives, Settings.
+        The output is then inserted into the 'Summary' (scenario description) text widget.
         """
         try:
-            with open("assets/RPG_StoryMaker.csv", "r", encoding="utf-8") as csvfile:
-                reader = csv.reader(csvfile, delimiter=";")
-                rows = list(reader)
+            # Define the file paths for each category.
+            files = {
+                "inciting": "assets/Inciting Incidents.txt",
+                "antagonists": "assets/Antagonists.txt",
+                "objectives": "assets/Objectives.txt",
+                "settings": "assets/Settings.txt"
+            }
 
-            # Ensure at least 6 rows exist, as in Main.java
-            if len(rows) < 6:
-                raise ValueError("CSV file must have at least 6 columns.")
+            # Read all non-empty lines from each file and roll for a random element.
+            selected_lines = {}
+            for key, filepath in files.items():
+                with open(filepath, "r", encoding="utf-8") as f:
+                    # Read non-empty stripped lines.
+                    lines = [line.strip() for line in f if line.strip()]
+                if not lines:
+                    raise ValueError(f"No valid lines found in {filepath}.")
+                selected_lines[key] = random.choice(lines)
 
-            output_parts = []
-            for i in range(6):
-                # Ensure each row has at least 14 columns
-                if len(rows) < 14:
-                    raise ValueError(f"Row {i} in CSV does not have at least 14 lines.")
-                # Random rows from 0 to 13 (inclusive)
-                rand_index = random.randint(1, 13)
-                output_parts.append(rows[rand_index][i])
+            # Compose the final description line from the selected lines.
+            # The order is: Inciting Incident, Antagonists, Objectives, Settings.
+            output_line = " ".join([
+                selected_lines["inciting"],
+                selected_lines["antagonists"],
+                selected_lines["objectives"],
+                selected_lines["settings"]
+            ])
 
-            output_line = " ".join(output_parts)
-
-            # Insert the one-line result into the 'Summary' field
+            # Insert the one-line result into the 'Summary' field's text widget.
             summary_editor = self.field_widgets.get("Summary")
             if summary_editor:
                 summary_editor.text_widget.delete("1.0", "end")
