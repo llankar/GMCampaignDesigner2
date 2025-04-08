@@ -397,8 +397,10 @@ class MainWindow(ctk.CTk):
                 Portrait TEXT
             )
         ''')
+        self.update_table_schema( self.conn, self.cursor )
         self.conn.commit()
         self.conn.close()
+        
 
     def select_swarmui_path(self):
         folder = filedialog.askdirectory(title="Select SwarmUI Path")
@@ -709,6 +711,67 @@ class MainWindow(ctk.CTk):
             print("No NPC records were updated. Either all have portraits or no matches were found.")
 
         conn.close()
+
+    def update_table_schema(self, conn, cursor):
+        def alter_table_if_missing(table, required_columns):
+            # Get list of existing columns for the table.
+            cursor.execute(f"PRAGMA table_info({table})")
+            existing_columns = {row["name"] for row in cursor.fetchall()}
+            for col, col_def in required_columns.items():
+                if col not in existing_columns:
+                    # Note: SQLite's ALTER TABLE command doesn't allow modifying an existing PK constraint.
+                    alter_query = f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"
+                    cursor.execute(alter_query)
+                    print(f"Added column '{col}' to table '{table}'.")
+
+        # Define required columns for each table.
+        npcs_columns = {
+            "Name": "TEXT",  # already part of PK if table was created with IF NOT EXISTS.
+            "Role": "TEXT",
+            "Description": "TEXT",
+            "Secret": "TEXT",
+            "Quote": "TEXT",
+            "RoleplayingCues": "TEXT",
+            "Personality": "TEXT",
+            "Motivation": "TEXT",
+            "Background": "TEXT",
+            "Traits": "TEXT",
+            "Genre": "TEXT",
+            "Factions": "TEXT",
+            "Objects": "TEXT",
+            "Portrait": "TEXT"
+        }
+        scenarios_columns = {
+            "Title": "TEXT",
+            "Summary": "TEXT",
+            "Secrets": "TEXT",
+            "Places": "TEXT",
+            "NPCs": "TEXT",
+            "Objects": "TEXT"
+        }
+        factions_columns = {
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "Secrets": "TEXT"
+        }
+        places_columns = {
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "NPCs": "TEXT"
+        }
+        objects_columns = {
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "Secrets": "TEXT",
+            "Portrait": "TEXT"
+        }
+
+        alter_table_if_missing("npcs", npcs_columns)
+        alter_table_if_missing("scenarios", scenarios_columns)
+        alter_table_if_missing("factions", factions_columns)
+        alter_table_if_missing("places", places_columns)
+        alter_table_if_missing("objects", objects_columns)
+
 
 if __name__ == "__main__":
     app = MainWindow()
