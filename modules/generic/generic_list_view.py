@@ -39,7 +39,7 @@ class GenericListView(ctk.CTkFrame):
 
         # Setup search bar
         search_frame = ctk.CTkFrame(self)
-        search_frame.pack(fill="x", padx=5, pady=5)
+        search_frame.pack(fill="x", padx=(5,45), pady=5)
         ctk.CTkLabel(search_frame, text="Search:").pack(side="left", padx=5)
         self.search_var = ctk.StringVar()
         search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var)
@@ -196,3 +196,16 @@ class GenericListView(ctk.CTkFrame):
         else:
             self.filtered_items = self.items.copy()
         self.refresh_list()
+    
+    def add_items(self, items):
+        added_count = 0
+        for item in items:
+            # Check for duplicates by sanitized unique field
+            new_id = sanitize_id(str(item.get(self.unique_field, "")))
+            if not any(sanitize_id(str(i.get(self.unique_field, ""))) == new_id for i in self.items):
+                self.items.append(item)
+                added_count += 1
+        if added_count:
+            self.model_wrapper.save_items(self.items)
+            self.filter_items(self.search_var.get())
+        

@@ -18,6 +18,13 @@ def initialize_db():
             Role TEXT,
             Description TEXT,
             Secret TEXT,
+            Quote TEXT,
+            RoleplayingCues TEXT,
+            Personality TEXT,
+            Motivation TEXT,
+            Background TEXT,
+            Traits TEXT,
+            Genre TEXT,
             Factions TEXT,
             Objects TEXT,
             Portrait TEXT
