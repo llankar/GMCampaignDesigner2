@@ -43,8 +43,7 @@ def load_items_from_json(view, entity_name):
         with open(file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
             items = data.get(entity_name, [])
-            for item in items:
-                view.add_items(item)
+            view.add_items(items)
             messagebox.showinfo("Success", f"{len(items)} {entity_name} loaded successfully!")
     except Exception as e:
         messagebox.showerror("Error", f"Failed to load {entity_name}: {e}")
@@ -197,15 +196,18 @@ class MainWindow(ctk.CTk):
         gen_frame.pack(fill="x", pady=(0, 5), padx=0)
         ctk.CTkLabel(gen_frame, text="Generating", font=("Helvetica", 16, "bold"), fg_color="transparent").pack(pady=(2, 2))
         ctk.CTkButton(gen_frame, text="Generate NPC\nPortraits", command=self.generate_missing_npc_portraits, **button_config).pack(pady=2)
+        ctk.CTkButton(gen_frame, text="Associate NPC\nPortraits", command=self.associate_npc_portraits, **button_config).pack(pady=2)
+        
         ctk.CTkButton(gen_frame, text="Import Scenario", command=self.open_scenario_importer, **button_config).pack(pady=2)
         ctk.CTkButton(gen_frame, text="Export Scenarios\nfor Foundry", command=self.export_foundry, **button_config).pack(pady=2)
         ctk.CTkLabel(gen_frame, text="", fg_color="transparent").pack(pady=(0, 1))
 
         # Exit button at bottom
-        exit_button_config = button_config.copy()
-        exit_button_config.update({"fg_color": "red", "hover_color": "#AA0000"})
-        ctk.CTkButton(sidebar_inner, text="Exit", command=self.destroy, **exit_button_config).pack(pady=5, side="bottom")
-
+        # Add a red cross exit button to the upper-right corner of the main window.
+        exit_button = ctk.CTkButton(self, text="✕", command=self.destroy,
+                                    fg_color="red", hover_color="#AA0000",
+                                    width=20, height=20, corner_radius=15)
+        exit_button.place(relx=0.9999, rely=0.01, anchor="ne")
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
@@ -351,6 +353,13 @@ class MainWindow(ctk.CTk):
                 Role TEXT,
                 Description TEXT,
                 Secret TEXT,
+                Quote TEXT,
+                RoleplayingCues TEXT,
+                Personality TEXT,
+                Motivation TEXT,
+                Background TEXT,
+                Traits TEXT,
+                Genre TEXT,
                 Factions TEXT,
                 Objects TEXT,
                 Portrait TEXT
@@ -613,6 +622,93 @@ class MainWindow(ctk.CTk):
         doc.save(file_path)
         messagebox.showinfo("Export Successful", f"Scenario exported successfully to:\n{file_path}")
 
+    def normalize_name(self, name):
+        """
+        Normalize a name by converting to lowercase and replacing underscores with spaces.
+        """
+        return name.lower().replace('_', ' ').strip()
+
+    def build_portrait_mapping(self):
+        """
+        Reads the assets/portraits/dir.txt file and builds a dictionary mapping
+        normalized NPC names to their corresponding portrait filenames.
+        """
+        mapping = {}
+        dir_txt_path = os.path.join("assets", "portraits", "dir.txt")
+        if not os.path.exists(dir_txt_path):
+            print(f"dir.txt not found at {dir_txt_path}")
+            return mapping
+
+        with open(dir_txt_path, "r", encoding="cp1252") as f:
+            for line in f:
+                line = line.strip()
+                # Process only lines that end with .png
+                if not line.lower().endswith(".png"):
+                    continue
+                # Assume the file name is the last token (ignoring date/size info)
+                tokens = line.split()
+                file_name = tokens[-1]
+                if file_name.lower() == "dir.txt":
+                    continue
+                # Remove the file extension and split by underscores
+                base_name = os.path.splitext(file_name)[0]
+                parts = base_name.split("_")
+                filtered_parts = []
+                for part in parts:
+                    # Skip "portrait" and parts that are purely digits (likely timestamps)
+                    if part.lower() == "portrait" or part.isdigit():
+                        continue
+                    filtered_parts.append(part)
+                if filtered_parts:
+                    # Join the remaining parts to form a candidate NPC name
+                    candidate = " ".join(filtered_parts)
+                    normalized_candidate = self.normalize_name(candidate)
+                    mapping[normalized_candidate] = file_name
+        return mapping
+
+    def associate_npc_portraits(self):
+        """
+        Associates each NPC in the database with the matching portrait file
+        found in the assets/portraits directory (as defined by dir.txt).
+
+        The function reads each NPC from the database and, if its Portrait field is empty,
+        normalizes its Name and checks for a match in the portrait mapping.
+        On finding a match, the Portrait field is updated with the relative path.
+        """
+        portrait_mapping = self.build_portrait_mapping()
+        if not portrait_mapping:
+            print("No portrait mapping was built.")
+            return
+
+        # Open the database using the configuration settings
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT Name, Portrait FROM npcs")
+        npc_rows = cursor.fetchall()
+        modified = False
+
+        for npc in npc_rows:
+            npc_name = npc["Name"].strip()
+            normalized_npc = self.normalize_name(npc_name)
+            if normalized_npc in portrait_mapping:
+                portrait_file = portrait_mapping[normalized_npc]
+                # Only update if the Portrait field is empty
+                if not npc["Portrait"] or npc["Portrait"].strip() == "":
+                    new_portrait_path = os.path.join("assets", "portraits", portrait_file)
+                    cursor.execute("UPDATE npcs SET Portrait = ? WHERE Name = ?", (new_portrait_path, npc_name))
+                    print(f"Associated portrait '{portrait_file}' with NPC '{npc_name}'")
+                    modified = True
+
+        if modified:
+            conn.commit()
+            print("NPC database updated with associated portraits.")
+        else:
+            print("No NPC records were updated. Either all have portraits or no matches were found.")
+
+        conn.close()
 
 if __name__ == "__main__":
     app = MainWindow()
