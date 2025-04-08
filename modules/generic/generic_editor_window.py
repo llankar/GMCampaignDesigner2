@@ -46,6 +46,26 @@ def load_objects_list():
             return [object["Name"] for object in json.load(f)]
     return []
 
+"""
+A customizable editor window for creating and editing generic items with dynamic field generation.
+
+This class provides a flexible Tkinter-based editor that can dynamically generate input fields
+based on a provided template. It supports various field types including text entries, long text
+fields, dynamic combobox lists, and portrait selection/generation.
+
+Key features:
+- Dynamic field generation from a template
+- Support for rich text editing
+- Ability to generate random scenario descriptions and secrets
+- Portrait selection and AI-assisted portrait generation
+- Customizable action bar with save, cancel, and scenario generation options
+
+Args:
+    master (tk.Tk): The parent window
+    item (dict): The item being edited
+    template (dict): A template defining the structure of the item
+    creation_mode (bool, optional): Whether the window is in item creation mode. Defaults to False.
+"""
 class GenericEditorWindow(ctk.CTkToplevel):
     def __init__(self, master, item, template, creation_mode=False):
         super().__init__(master)
@@ -132,6 +152,111 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 command=self.generate_scenario_description
             ).pack(pady=5)
 
+        if field["name"] == "Secrets":
+            ctk.CTkButton(
+                self.scroll_frame,
+                text="Generate Secret",
+                command=self.generate_secret_text
+            ).pack(pady=5)
+    
+    def generate_secret_text(self):
+        """
+        Reads three text files from the assets folder:
+        - Secret truths.txt
+        - Secret origins.txt
+        - Secret consequences.txt
+        Each file is expected to contain approximately 100 elements (one per line).
+        The function randomly selects one line from each file in the order:
+        Secret truths, then Secret origins, then Secret consequences.
+        The final string is then inserted into the 'Secrets' text widget.
+        """
+        try:
+            # Determine the absolute path to your assets folder (assumed to be in the same directory as this module).
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            assets_folder = os.path.join(current_dir, "assets")
+
+            # Define the full paths of the required files.
+            files = {
+                "truths" : "assets/Secret truths.txt",
+                "origins" : "assets/Secret origins.txt",
+                "consequences" : "assets/Secret consequences.txt"
+            }
+
+            selected_lines = {}
+            # Process each file.
+            for key, filepath in files.items():
+                if not os.path.exists(filepath):
+                    raise FileNotFoundError(f"File not found: {filepath}")
+                with open(filepath, "r", encoding="utf-8") as f:
+                    # Read all non-empty lines.
+                    lines = [line.strip() for line in f if line.strip()]
+                # Debug: Uncomment the next line if you want to print how many lines were found.
+                # print(f"File {filepath} has {len(lines)} valid lines.")
+                if not lines:
+                    raise ValueError(f"No valid lines found in {filepath}.")
+                selected_lines[key] = random.choice(lines)
+
+            # Compose the final secret in the order: truths, origins, consequences.
+            output_line = " ".join([
+                selected_lines["truths"],
+                selected_lines["origins"],
+                selected_lines["consequences"]
+            ])
+
+            # Insert the generated secret into the Secrets field's text widget.
+            secrets_editor = self.field_widgets.get("Secrets")
+            if secrets_editor:
+                secrets_editor.text_widget.delete("1.0", "end")
+                secrets_editor.text_widget.insert("1.0", output_line)
+            else:
+                raise ValueError("Secrets field editor not found.")
+
+        except Exception as e:
+            messagebox.showerror("Error generating secret", str(e))
+
+    def generate_scenario(self):
+        try:
+            self.generate_scenario_description()
+            self.generate_secret_text()
+
+            npcs_list = load_npcs_list()
+            places_list = load_places_list()
+
+            selected_npcs = random.sample(npcs_list, 3) if len(npcs_list) >= 3 else npcs_list
+            selected_places = random.sample(places_list, 3) if len(places_list) >= 3 else places_list
+
+            self.item["NPCs"] = selected_npcs
+            self.item["Places"] = selected_places
+
+            # --- NPCs ---
+            npc_widgets = self.field_widgets.get("NPCs", [])
+            add_npc_combobox = self.field_widgets.get("NPCs_add_combobox")
+            while len(npc_widgets) < 3:
+                add_npc_combobox()
+                npc_widgets = self.field_widgets["NPCs"]  # Update after adding new combobox
+
+            for i, widget in enumerate(npc_widgets[:3]):
+                widget.configure(state="normal")
+                widget.delete(0, "end")
+                widget.insert(0, selected_npcs[i])
+                widget.configure(state="readonly")
+
+            # --- Places ---
+            place_widgets = self.field_widgets.get("Places", [])
+            add_place_combobox = self.field_widgets.get("Places_add_combobox")
+            while len(place_widgets) < 3:
+                add_place_combobox()
+                place_widgets = self.field_widgets["Places"]  # Update after adding new combobox
+
+            for i, widget in enumerate(place_widgets[:3]):
+                widget.configure(state="normal")
+                widget.delete(0, "end")
+                widget.insert(0, selected_places[i])
+                widget.configure(state="readonly")
+
+        except Exception as e:
+            messagebox.showerror("Error generating scenario", str(e))
+
     def generate_scenario_description(self):
         """
         Reads four text files from the assets folder:
@@ -215,68 +340,67 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         if field["name"] == "NPCs":
             options_list = load_npcs_list()
+            label_text = "Add NPC"
         elif field["name"] == "Places":
             options_list = load_places_list()
+            label_text = "Add Place"
         elif field["name"] == "Factions":
             options_list = load_factions_list()
+            label_text = "Add Faction"
         elif field["name"] == "Objects":
             options_list = load_objects_list()
+            label_text = "Add Object"
         else:
             options_list = []
+            label_text = f"Add {field['name']}"
 
         initial_values = self.item.get(field["name"]) or []
 
         def remove_this(row, entry_widget):
-            """Removes the given row and its entry from the combobox_list."""
             row.destroy()
-            if entry_widget in combobox_list:
-                combobox_list.remove(entry_widget)
-
-        def add_combobox(initial_value=None):
-            row = ctk.CTkFrame(container)
-            row.pack(fill="x", pady=2)
-            
-            var = ctk.StringVar()
-            # Create a read-only entry to display the selected value:
-            entry = ctk.CTkEntry(row, textvariable=var, state="readonly")
-            entry.pack(side="left", expand=True, fill="x")
-            
-            # Set initial value:
-            if initial_value and initial_value in options_list:
-                var.set(initial_value)
-            else:
-                var.set(options_list[0] if options_list else "")
-
-            # Button to open dropdown:
-            btn = ctk.CTkButton(row, text="▼", width=30, command=lambda: open_dropdown(entry, var))
-            btn.pack(side="left", padx=5)
-            # - button to remove this entry.
-            remove_btn = ctk.CTkButton(row, text="-", width=30, command=lambda: remove_this(row, entry))
-            remove_btn.pack(side="left", padx=5)
-            combobox_list.append(entry)
-
-        def remove_this(row, widget):
-            row.destroy()
-            combobox_list.remove(widget)
+            combobox_list.remove(entry_widget)
 
         def open_dropdown(widget, var):
-            # Use the top-level window as parent so the dropdown isn’t clipped.
             top = widget.winfo_toplevel()
             x = widget.winfo_rootx()
             y = widget.winfo_rooty() + widget.winfo_height()
             dropdown = self.CustomDropdown(top, options=options_list, command=lambda val: var.set(val))
             dropdown.geometry(f"+{x}+{y}")
-            dropdown.lift()  # Bring the dropdown to the front
-            dropdown.attributes("-topmost", True)  # Force it to stay on top
+            dropdown.lift()
+            dropdown.attributes("-topmost", True)
             dropdown.focus_set()
+
+        def add_combobox(initial_value=None):
+            row = ctk.CTkFrame(container)
+            row.pack(fill="x", pady=2)
+
+            var = ctk.StringVar()
+            entry = ctk.CTkEntry(row, textvariable=var, state="readonly")
+            entry.pack(side="left", expand=True, fill="x")
+
+            if initial_value and initial_value in options_list:
+                var.set(initial_value)
+            elif options_list:
+                var.set(options_list[0])
+
+            btn = ctk.CTkButton(row, text="▼", width=30, command=lambda: open_dropdown(entry, var))
+            btn.pack(side="left", padx=5)
+
+            remove_btn = ctk.CTkButton(row, text="-", width=30, command=lambda: remove_this(row, entry))
+            remove_btn.pack(side="left", padx=5)
+
+            combobox_list.append(entry)
 
         for value in initial_values:
             add_combobox(value)
 
-        add_button = ctk.CTkButton(self.scroll_frame, text=f"Add {field['name'][6:]}", command=add_combobox)
+        add_button = ctk.CTkButton(container, text=label_text, command=add_combobox)
         add_button.pack(anchor="w", pady=2)
 
+        # Save widgets clearly
         self.field_widgets[field["name"]] = combobox_list
+        self.field_widgets[f"{field['name']}_container"] = container
+        self.field_widgets[f"{field['name']}_add_combobox"] = add_combobox
 
 
 
@@ -292,6 +416,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         ctk.CTkButton(action_bar, text="Cancel", command=self.destroy).pack(side="right", padx=5)
         ctk.CTkButton(action_bar, text="Save", command=self.save).pack(side="right", padx=5)
+        ctk.CTkButton(action_bar, text="Generate Scenario", command=self.generate_scenario).pack(side="left", padx=5)
 
     # === Sauvegarde ===
 
