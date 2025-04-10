@@ -67,11 +67,12 @@ Args:
     creation_mode (bool, optional): Whether the window is in item creation mode. Defaults to False.
 """
 class GenericEditorWindow(ctk.CTkToplevel):
-    def __init__(self, master, item, template, creation_mode=False):
+    def __init__(self, master, item, template, model_wrapper, creation_mode=False):
         super().__init__(master)
         self.item = item
         self.template = template
         self.saved = False
+        self.model_wrapper = model_wrapper
         self.field_widgets = {}
 
         self.transient(master)
@@ -213,6 +214,66 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         except Exception as e:
             messagebox.showerror("Error generating secret", str(e))
+
+    def generate_npc(self):
+        """
+        Reads four text files from the assets folder:
+        - npc_appearance.txt
+        - npc_background.txt
+        - npc_personality.txt
+        - npc_quirks.txt
+
+        Each file is expected to contain many lines (each line representing one possible element).
+        The function randomly selects one line from each file and updates the corresponding NPC field
+        (e.g., Appearance, Background, Personality, Quirks) in both the underlying item (self.item)
+        and in the UI (using the appropriate text widget or entry).
+        """
+        try:
+           
+            # Determine the absolute path to the assets folder.
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            assets_folder = os.path.join(current_dir, "assets")
+
+            # Map each NPC field to its corresponding asset file.
+            files = {
+                "Description": "assets/npc_appearance.txt",
+                "Background":  "assets/npc_background.txt",
+                "Personality":  "assets/npc_personality.txt",
+                "RoleplayingCues":  "assets/npc_quirks.txt"
+            }
+
+            generated_fields = {}
+
+            # Process each file.
+            for field, filepath in files.items():
+                if not os.path.exists(filepath):
+                    raise FileNotFoundError(f"File not found: {filepath}")
+                with open(filepath, "r", encoding="utf-8") as f:
+                    # Read all non-empty and stripped lines.
+                    lines = [line.strip() for line in f if line.strip()]
+                if not lines:
+                    raise ValueError(f"No valid lines found in {filepath}.")
+                generated_fields[field] = random.choice(lines)
+
+            # Update the underlying data model and the UI widgets.
+            for field, value in generated_fields.items():
+                # Set or update the field in the data model.
+                self.item[field] = value
+
+                # Update the UI: assume that the widget for this field is stored under self.field_widgets.
+                # It might be a RichTextEditor (with a text_widget) or an Entry widget.
+                field_widget = self.field_widgets.get(field)
+                if field_widget:
+                    # If the widget has a text_widget attribute (e.g. RichTextEditor), update that.
+                    if hasattr(field_widget, "text_widget"):
+                        field_widget.text_widget.delete("1.0", "end")
+                        field_widget.text_widget.insert("1.0", value)
+                    else:
+                        # Otherwise assume it's an Entry widget.
+                        field_widget.delete(0, "end")
+                        field_widget.insert(0, value)
+        except Exception as e:
+            messagebox.showerror("Error generating NPC", str(e))
 
     def generate_scenario(self):
         try:
@@ -406,7 +467,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
     def create_text_entry(self, field):
         entry = ctk.CTkEntry(self.scroll_frame)
-        entry.insert(0, self.item.get(field["name"], ""))
+        value = self.item.get(field["name"], "")
+        if value:
+            entry.insert(0, self.item.get(field["name"], ""))
         entry.pack(fill="x", pady=5)
         self.field_widgets[field["name"]] = entry
 
@@ -416,10 +479,13 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         ctk.CTkButton(action_bar, text="Cancel", command=self.destroy).pack(side="right", padx=5)
         ctk.CTkButton(action_bar, text="Save", command=self.save).pack(side="right", padx=5)
-        ctk.CTkButton(action_bar, text="Generate Scenario", command=self.generate_scenario).pack(side="left", padx=5)
+        if self.model_wrapper.entity_type== 'scenarios':
+            ctk.CTkButton(action_bar, text='Generate Scenario', command=self.generate_scenario).pack(side='left', padx=5)
 
+        if self.model_wrapper.entity_type== 'npcs':
+            ctk.CTkButton(action_bar, text='Generate NPC', command=self.generate_npc).pack(side='left', padx=5)
+    
     # === Sauvegarde ===
-
     def save(self):
         for field in self.template["fields"]:
             widget = self.field_widgets[field["name"]]
