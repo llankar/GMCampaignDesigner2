@@ -154,7 +154,7 @@ class GenericListView(ctk.CTkFrame):
         found_item = next((item for item in self.filtered_items 
                            if sanitize_id(str(item.get(self.unique_field, ""))) == item_id), None)
         if found_item:
-            editor = GenericEditorWindow(self.master, found_item, self.template, creation_mode=False)
+            editor = GenericEditorWindow(self.master, found_item, self.template, self.model_wrapper, creation_mode=False)
             self.master.wait_window(editor)
             if editor.saved:
                 self.model_wrapper.save_items(self.items)
