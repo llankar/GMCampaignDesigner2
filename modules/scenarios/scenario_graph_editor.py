@@ -528,7 +528,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         if node_tag.startswith("scenario_"):
             scenario_template = load_template("scenarios")
             if self.scenario:
-                GenericEditorWindow(None, self.scenario, scenario_template)
+                GenericEditorWindow(None, self.scenario, scenario_template, self.scenario_wrapper, True)
         else:
             if node_tag.startswith("npc_"):
                 entity_type = "NPCs"

@@ -53,6 +53,7 @@ class NPCGraphEditor(ctk.CTkFrame):
     # ─────────────────────────────────────────────────────────────────────────
     def __init__(self, master, npc_wrapper: GenericModelWrapper, faction_wrapper: GenericModelWrapper, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
+        self.selected_shape = None
         self.link_canvas_ids = {}
         self.npc_wrapper = npc_wrapper
         self.faction_wrapper = faction_wrapper

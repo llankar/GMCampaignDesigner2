@@ -26,6 +26,6 @@ def open_npc_editor_window(npc_name):
 
     # 4. Create the editor window
     #    GenericEditorWindow is itself a Toplevel, so we can pass None or any master.
-    editor_window = GenericEditorWindow(None, npc_item, npc_template)
+    editor_window = GenericEditorWindow(None, npc_item, npc_template, npc_wrapper)
     # Optionally, wait for the window to close:
     # editor_window.wait_window()

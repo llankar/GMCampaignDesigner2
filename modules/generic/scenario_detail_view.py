@@ -158,6 +158,8 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         detached_window = ctk.CTkToplevel(self)
         detached_window.title(name)
+        detached_window.lift()
+        detached_window.attributes("-topmost", True)
         detached_window.protocol("WM_DELETE_WINDOW", lambda: None)
         print(f"[DETACH] Detached window created: {detached_window}")
 
@@ -431,14 +433,29 @@ class ScenarioDetailView(ctk.CTkFrame):
                 if linked_type:
                     self.insert_links(frame, field_name, entity.get(field_name) or [], linked_type)
         return frame
-
+    
     def insert_text(self, parent, header, content):
-        ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
+        label = ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold"))
+        label.pack(anchor="w", padx=10)
         box = ctk.CTkTextbox(parent, wrap="word", height=80)
+        # Ensure content is a plain string.
+        if isinstance(content, dict):
+            content = content.get("text", "")
+        elif isinstance(content, list):
+            content = " ".join(map(str, content))
+        else:
+            content = str(content)
+        # For debugging, you can verify:
+        # print("DEBUG: content =", repr(content))
+
+        # Override the insert method to bypass the CTkTextbox wrapper.
+        box.insert = box._textbox.insert
+        # Now use box.insert normally.
         box.insert("1.0", content)
+
         box.configure(state="disabled")
         box.pack(fill="x", padx=10, pady=5)
-
+        
     def insert_longtext(self, parent, header, content):
         ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
         formatted_text = format_longtext(content, max_length=2000)

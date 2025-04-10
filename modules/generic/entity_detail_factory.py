@@ -17,9 +17,24 @@ wrappers = {
         }
 
 def insert_text(parent, header, content):
-    ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
-    box = CTkTextbox(parent, wrap="word", height=80)
+    label = ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold"))
+    label.pack(anchor="w", padx=10)
+    box = ctk.CTkTextbox(parent, wrap="word", height=80)
+    # Ensure content is a plain string.
+    if isinstance(content, dict):
+        content = content.get("text", "")
+    elif isinstance(content, list):
+        content = " ".join(map(str, content))
+    else:
+        content = str(content)
+    # For debugging, you can verify:
+    # print("DEBUG: content =", repr(content))
+
+    # Override the insert method to bypass the CTkTextbox wrapper.
+    box.insert = box._textbox.insert
+    # Now use box.insert normally.
     box.insert("1.0", content)
+
     box.configure(state="disabled")
     box.pack(fill="x", padx=10, pady=5)
 
@@ -70,26 +85,35 @@ def open_entity_tab(entity_type , name, master):
     
    
 def create_entity_detail_frame(entity_type, entity, master, open_entity_callback=None):
-    # Load the template based on entity_type (e.g., "npcs" for "NPCs")
-    template = load_template(entity_type.lower())
-    frame = ctk.CTkFrame(master)
-    frame.portrait_images = {}  # local cache to keep image references
+    # Create a scrollable container instead of a plain frame.
+    scrollable_container = ctk.CTkScrollableFrame(master)
+    scrollable_container.pack(fill="both", expand=True)
 
+    # Create the actual content frame inside the scrollable container.
+    content_frame = ctk.CTkFrame(scrollable_container)
+    content_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    # This local cache is used for portrait images (if any).
+    content_frame.portrait_images = {}
+
+    # If entity_type is "NPCs" and the entity has a valid Portrait, load and show it.
     if entity_type == "NPCs" and "Portrait" in entity and os.path.exists(entity["Portrait"]):
         try:
             img = Image.open(entity["Portrait"])
             img = img.resize(PORTRAIT_SIZE, Image.Resampling.LANCZOS)
             ctk_image = CTkImage(light_image=img, size=PORTRAIT_SIZE)
-            portrait_label = CTkLabel(frame, image=ctk_image, text="")
+            portrait_label = CTkLabel(content_frame, image=ctk_image, text="")
             portrait_label.image = ctk_image  # persist reference
             portrait_label.entity_name = entity.get("Name", "")
             portrait_label.is_portrait = True
-            frame.portrait_images[entity.get("Name", "")] = ctk_image
+            content_frame.portrait_images[entity.get("Name", "")] = ctk_image
             portrait_label.pack(pady=10)
-            frame.portrait_label = portrait_label
+            content_frame.portrait_label = portrait_label
         except Exception as e:
             print(f"[DEBUG] Error loading portrait for {entity.get('Name','')}: {e}")
 
+    # Create fields from the template.
+    template = load_template(entity_type.lower())
     for field in template["fields"]:
         field_name = field["name"]
         field_type = field["type"]
@@ -97,14 +121,15 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
         if entity_type == "NPCs" and field_name == "Portrait":
             continue
         if field_type == "longtext":
-            insert_longtext(frame, field_name, entity.get(field_name, ""))
+            insert_longtext(content_frame, field_name, entity.get(field_name, ""))
         elif field_type == "text":
-            insert_text(frame, field_name, entity.get(field_name, ""))
+            insert_text(content_frame, field_name, entity.get(field_name, ""))
         elif field_type == "list":
             linked_type = field.get("linked_type", None)
             if linked_type:
-                insert_links(frame, field_name, entity.get(field_name) or [], linked_type, open_entity_callback)
-    return frame
+                insert_links(content_frame, field_name, entity.get(field_name) or [], linked_type, open_entity_callback)
+    # Return the scrollable container so that whoever creates the window or tab gets a frame with scrollbars.
+    return scrollable_container
 
 def open_entity_window(entity_type, name):
         # Look up the entity using the wrappers dictionary.

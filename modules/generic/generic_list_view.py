@@ -183,7 +183,7 @@ class GenericListView(ctk.CTkFrame):
             self.filter_items(self.search_var.get())
 
     def open_editor(self, item, creation_mode=False):
-        editor = GenericEditorWindow(self.master, item, self.template, creation_mode)
+        editor = GenericEditorWindow(self.master, item, self.template,self.model_wrapper, creation_mode)
         self.master.wait_window(editor)
         return editor.saved
 
