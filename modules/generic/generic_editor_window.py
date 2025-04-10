@@ -216,64 +216,71 @@ class GenericEditorWindow(ctk.CTkToplevel):
             messagebox.showerror("Error generating secret", str(e))
 
     def generate_npc(self):
-        """
-        Reads four text files from the assets folder:
-        - npc_appearance.txt
-        - npc_background.txt
-        - npc_personality.txt
-        - npc_quirks.txt
+            """
+            Generates random NPC data by:
+            - Filling the Appearance, Background, Personality, and Quirks fields using the corresponding asset files:
+                npc_appearance.txt, npc_background.txt, npc_personality.txt, npc_quirks.txt
+            - Filling the NPC's Secret field by reading from:
+                npc_secret_implication.txt, npc_secret_motive.txt, npc_secret_origin.txt, npc_secret_detail.txt
+            Updates both the underlying data model (self.item) and the UI widgets.
+            """
+            try:
+                # Determine the absolute path of the assets folder.
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                assets_folder = os.path.join(current_dir, "assets")
 
-        Each file is expected to contain many lines (each line representing one possible element).
-        The function randomly selects one line from each file and updates the corresponding NPC field
-        (e.g., Appearance, Background, Personality, Quirks) in both the underlying item (self.item)
-        and in the UI (using the appropriate text widget or entry).
-        """
-        try:
-           
-            # Determine the absolute path to the assets folder.
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            assets_folder = os.path.join(current_dir, "assets")
+                # Define a helper function to pick a random line from a given file.
+                def pick_random_line(filepath):
+                    if not os.path.exists(filepath):
+                        raise FileNotFoundError(f"File not found: {filepath}")
+                    with open(filepath, "r", encoding="utf-8") as f:
+                        lines = [line.strip() for line in f if line.strip()]
+                    if not lines:
+                        raise ValueError(f"No valid lines found in {filepath}.")
+                    return random.choice(lines)
 
-            # Map each NPC field to its corresponding asset file.
-            files = {
-                "Description": "assets/npc_appearance.txt",
-                "Background":  "assets/npc_background.txt",
-                "Personality":  "assets/npc_personality.txt",
-                "RoleplayingCues":  "assets/npc_quirks.txt"
-            }
+                # Generate basic NPC fields.
+                npc_fields = {
+                    "Description": "assets/npc_appearance.txt",
+                    "Background": "assets/npc_background.txt",
+                    "Personality": "assets/npc_personality.txt",
+                    "RoleplayingCues": "assets/npc_quirks.txt"
+                }
+                for field, path in npc_fields.items():
+                    value = pick_random_line(path)
+                    self.item[field] = value
+                    widget = self.field_widgets.get(field)
+                    if widget:
+                        if hasattr(widget, "text_widget"):
+                            widget.text_widget.delete("1.0", "end")
+                            widget.text_widget.insert("1.0", value)
+                        else:
+                            widget.delete(0, "end")
+                            widget.insert(0, value)
 
-            generated_fields = {}
-
-            # Process each file.
-            for field, filepath in files.items():
-                if not os.path.exists(filepath):
-                    raise FileNotFoundError(f"File not found: {filepath}")
-                with open(filepath, "r", encoding="utf-8") as f:
-                    # Read all non-empty and stripped lines.
-                    lines = [line.strip() for line in f if line.strip()]
-                if not lines:
-                    raise ValueError(f"No valid lines found in {filepath}.")
-                generated_fields[field] = random.choice(lines)
-
-            # Update the underlying data model and the UI widgets.
-            for field, value in generated_fields.items():
-                # Set or update the field in the data model.
-                self.item[field] = value
-
-                # Update the UI: assume that the widget for this field is stored under self.field_widgets.
-                # It might be a RichTextEditor (with a text_widget) or an Entry widget.
-                field_widget = self.field_widgets.get(field)
-                if field_widget:
-                    # If the widget has a text_widget attribute (e.g. RichTextEditor), update that.
-                    if hasattr(field_widget, "text_widget"):
-                        field_widget.text_widget.delete("1.0", "end")
-                        field_widget.text_widget.insert("1.0", value)
+                # Generate the NPC secret.
+                secret_files = {
+                    "Implication": "assets/npc_secret_implication.txt",
+                    "Motive": "assets/npc_secret_motive.txt",
+                    "Origin": "assets/npc_secret_origin.txt",
+                    "Detail": "assets/npc_secret_detail.txt"
+                }
+                secret_parts = []
+                for key, path in secret_files.items():
+                    secret_parts.append(pick_random_line(path))
+                secret_text = " ".join(secret_parts)
+                self.item["Secret"] = secret_text
+                secret_widget = self.field_widgets.get("Secret")
+                if secret_widget:
+                    if hasattr(secret_widget, "text_widget"):
+                        secret_widget.text_widget.delete("1.0", "end")
+                        secret_widget.text_widget.insert("1.0", secret_text)
                     else:
-                        # Otherwise assume it's an Entry widget.
-                        field_widget.delete(0, "end")
-                        field_widget.insert(0, value)
-        except Exception as e:
-            messagebox.showerror("Error generating NPC", str(e))
+                        secret_widget.delete(0, "end")
+                        secret_widget.insert(0, secret_text)
+
+            except Exception as e:
+                messagebox.showerror("Error generating NPC", str(e))
 
     def generate_scenario(self):
         try:
