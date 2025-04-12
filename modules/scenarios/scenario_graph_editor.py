@@ -3,7 +3,11 @@ import math
 import customtkinter as ctk
 import tkinter.font as tkFont
 import re
-
+import os
+import ctypes
+from ctypes import wintypes
+import logging
+import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
 
@@ -13,15 +17,11 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.npcs import npc_opener
 from customtkinter import CTkImage
-import logging
-from screeninfo import get_monitors
-import tkinter as tk  # standard tkinter
-import os, ctypes
-from ctypes import wintypes
 from modules.generic.entity_detail_factory import create_entity_detail_frame, open_entity_window
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.text_helpers import format_longtext
 
+# Global constants
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
 ctk.set_appearance_mode("Dark")
@@ -42,7 +42,6 @@ def get_monitors():
     ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
     return monitors
 
-# A helper function to remove basic RTF formatting flags.
 def clean_longtext(data, max_length=2000):
     # First, get the plain text using your existing helper.
     text = format_longtext(data, max_length)
@@ -56,17 +55,20 @@ class ScenarioGraphEditor(ctk.CTkFrame):
     def __init__(self, master,
                 scenario_wrapper: GenericModelWrapper,
                 npc_wrapper: GenericModelWrapper,
+                creature_wrapper: GenericModelWrapper,
                 place_wrapper: GenericModelWrapper,
                 *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.scenario_wrapper = scenario_wrapper
         self.npc_wrapper = npc_wrapper
+        self.creature_wrapper = creature_wrapper
         self.place_wrapper = place_wrapper
         self.node_bboxes = {}
         self.node_images = {}  # Prevent garbage collection of PhotoImage objects
 
-        # Preload NPC and Place data for quick lookup.
+        # Preload NPC, Creature and Place data for quick lookup.
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
+        self.creatures = {creature["Name"]: creature for creature in self.creature_wrapper.load_items()}
         self.places = {pl["Name"]: pl for pl in self.place_wrapper.load_items()}
 
         self.scenario = None
@@ -124,20 +126,27 @@ class ScenarioGraphEditor(ctk.CTkFrame):
 
     def display_portrait_window(self):
         logging.debug("Entering display_portrait_window")
-        if not self.selected_node or not self.selected_node.startswith("npc_"):
-            messagebox.showerror("Error", "No NPC selected.")
+        if not self.selected_node or not (self.selected_node.startswith("npc_") or self.selected_node.startswith("creature_")):
+            messagebox.showerror("Error", "No NPC or Creature selected.")
             return
 
-        npc_name = self.selected_node.replace("npc_", "").replace("_", " ")
-        logging.debug(f"Extracted NPC name: {npc_name}")
-        npc_data = self.npcs.get(npc_name)
-        if not npc_data:
-            messagebox.showerror("Error", f"NPC '{npc_name}' not found.")
+        # Extract name after prefix. Note that creatures use "creature_" prefix.
+        if self.selected_node.startswith("npc_"):
+            name_key = self.selected_node.replace("npc_", "").replace("_", " ")
+            data_source = self.npcs
+        else:
+            name_key = self.selected_node.replace("creature_", "").replace("_", " ")
+            data_source = self.creatures
+
+        logging.debug(f"Extracted name: {name_key}")
+        entity_data = data_source.get(name_key)
+        if not entity_data:
+            messagebox.showerror("Error", f"Entity '{name_key}' not found.")
             return
 
-        portrait_path = npc_data.get("Portrait", "")
+        portrait_path = entity_data.get("Portrait", "")
         if not portrait_path or not os.path.exists(portrait_path):
-            messagebox.showerror("Error", "No valid portrait found for this NPC.")
+            messagebox.showerror("Error", "No valid portrait found for this entity.")
             return
 
         try:
@@ -157,16 +166,16 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             img = img.resize(new_size, resample_method)
 
         win = ctk.CTkToplevel(self)
-        win.title(npc_name)
+        win.title(name_key)
         win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
         win.update_idletasks()
 
         portrait_img = ImageTk.PhotoImage(img, master=win)
-        self.node_images[f"window_{npc_name}"] = portrait_img
+        self.node_images[f"window_{name_key}"] = portrait_img
 
         content_frame = tk.Frame(win, bg="white")
         content_frame.pack(fill="both", expand=True)
-        name_label = tk.Label(content_frame, text=npc_name,
+        name_label = tk.Label(content_frame, text=name_key,
                             font=("Arial", 40, "bold"),
                             fg="white", bg="white")
         name_label.pack(pady=20)
@@ -181,7 +190,6 @@ class ScenarioGraphEditor(ctk.CTkFrame):
     def load_scenario(self, scenario):
         # Use full text; no truncation—wrapping will be handled by canvas.
         summary = scenario.get("Summary", "")
-        # Clean RTF flags using clean_longtext if needed.
         summary = clean_longtext(summary, max_length=5000)
         self.scenario = scenario
         self.graph = {"nodes": [], "links": []}
@@ -272,6 +280,43 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     "text": ""
                 })
 
+        # Creature nodes (new block)
+        creatures_list = scenario.get("Creatures", [])
+        creatures_count = len(creatures_list)
+        if creatures_count > 0:
+            # Define an arc for creatures (e.g. between 150° and 210°)
+            arc_start_creatures = 150
+            arc_end_creatures = 210
+            offset_creatures = 350
+
+            for k, creature_name in enumerate(creatures_list):
+                if creature_name not in self.creatures:
+                    continue
+                angle_deg = (arc_start_creatures if creatures_count == 1
+                            else arc_start_creatures + k * (arc_end_creatures - arc_start_creatures) / (creatures_count - 1))
+                angle_rad = math.radians(angle_deg)
+                x = center_x + offset_creatures * math.cos(angle_rad)
+                y = center_y + offset_creatures * math.sin(angle_rad)
+                creature_data = self.creatures[creature_name]
+                desc = creature_data.get("Description", "")
+                desc = clean_longtext(desc, max_length=5000)
+                creature_data["Description"] = desc
+                creature_tag = f"creature_{creature_name.replace(' ', '_')}"
+                self.graph["nodes"].append({
+                    "type": "creature",
+                    "name": creature_name,
+                    "x": x,
+                    "y": y,
+                    "color": "darkblue",
+                    "data": creature_data
+                })
+                self.node_positions[creature_tag] = (x, y)
+                self.graph["links"].append({
+                    "from": scenario_tag,
+                    "to": creature_tag,
+                    "text": ""
+                })
+
         self.draw_graph()
 
     def draw_graph(self):
@@ -314,7 +359,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         default_colors = {
             "scenario": "darkolivegreen",
             "npc": "darkslateblue",
-            "place": "sienna"
+            "place": "sienna",
+            "creature": "darkorange"
         }
 
         if not hasattr(self, "node_bboxes"):
@@ -359,10 +405,10 @@ class ScenarioGraphEditor(ctk.CTkFrame):
 
             portrait = None
             p_w = p_h = 0
-            if node_type == "npc":
+            if node_type in ["npc", "creature"]:
                 portrait, (p_w, p_h) = self.load_portrait(node["data"].get("Portrait", ""), node_tag)
 
-            if node_type == "npc" and portrait and p_w > 0:
+            if node_type in ["npc", "creature"] and portrait and p_w > 0:
                 desired_width = p_w + GAP + NPC_TEXT_WRAP + 2 * PAD
                 desired_height = max(p_h, total_text_height) + 2 * PAD
             else:
@@ -395,7 +441,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 self.node_holder_images[node_tag] = overlay_photo
                 self.canvas.create_image(x, y, image=overlay_photo, tags=("node", node_tag))
 
-            if node_type == "npc" and portrait and p_w > 0:
+            if node_type in ["npc", "creature"] and portrait and p_w > 0:
                 portrait_x = left + PAD + (p_w / 2)
                 portrait_y = y
                 self.canvas.create_image(
@@ -479,6 +525,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             return
         node_tag = next((t for t in tags if t.startswith("scenario_")
                         or t.startswith("npc_")
+                        or t.startswith("creature_")
                         or t.startswith("place_")), None)
         if node_tag:
             self.selected_node = node_tag
@@ -520,7 +567,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             return
         node_tag = None
         for t in tags:
-            if t.startswith("scenario_") or t.startswith("npc_") or t.startswith("place_"):
+            if t.startswith("scenario_") or t.startswith("npc_") or t.startswith("creature_") or t.startswith("place_") or t.startswith("faction_"):
                 node_tag = t
                 break
         if not node_tag:
@@ -529,32 +576,36 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             scenario_template = load_template("scenarios")
             if self.scenario:
                 GenericEditorWindow(None, self.scenario, scenario_template, self.scenario_wrapper, True)
+        elif node_tag.startswith("npc_"):
+            entity_type = "NPCs"
+            entity_name = node_tag.replace("npc_", "").replace("_", " ")
+            entity = self.npcs.get(entity_name)
+            template_path = "npcs/npcs_template.json"
+        elif node_tag.startswith("creature_"):
+            entity_type = "Creatures"
+            entity_name = node_tag.replace("creature_", "").replace("_", " ")
+            entity = self.creatures.get(entity_name)
+            template_path = "creatures/creatures_template.json"
+        elif node_tag.startswith("place_"):
+            entity_type = "Places"
+            entity_name = node_tag.replace("place_", "").replace("_", " ")
+            entity = self.places.get(entity_name)
+            template_path = "places/places_template.json"
+        elif node_tag.startswith("faction_"):
+            entity_type = "Factions"
+            entity_name = node_tag.replace("faction_", "").replace("_", " ")
+            entity = self.factions.get(entity_name)
+            template_path = "factions/factions_template.json"
         else:
-            if node_tag.startswith("npc_"):
-                entity_type = "NPCs"
-                entity_name = node_tag.replace("npc_", "").replace("_", " ")
-                entity = self.npcs.get(entity_name)
-                template_path = "npcs/npcs_template.json"
-            elif node_tag.startswith("place_"):
-                entity_type = "Places"
-                entity_name = node_tag.replace("place_", "").replace("_", " ")
-                entity = self.places.get(entity_name)
-                template_path = "places/places_template.json"
-            elif node_tag.startswith("faction_"):
-                entity_type = "Factions"
-                entity_name = node_tag.replace("faction_", "").replace("_", " ")
-                entity = self.factions.get(entity_name)
-                template_path = "factions/factions_template.json"
-            else:
-                return
-            if not entity:
-                messagebox.showerror("Error", f"{entity_type[:-1]} '{entity_name}' not found.")
-                return
-            import tkinter as tk
-            win = tk.Toplevel(self)
-            win.title(entity_name)
-            detail_frame = create_entity_detail_frame(entity_type, entity, master=win, open_entity_callback=open_entity_window)
-            detail_frame.pack(fill="both", expand=True)
+            return
+
+        if not entity:
+            messagebox.showerror("Error", f"{entity_type[:-1]} '{entity_name}' not found.")
+            return
+        win = tk.Toplevel(self)
+        win.title(entity_name)
+        detail_frame = create_entity_detail_frame(entity_type, entity, master=win, open_entity_callback=open_entity_window)
+        detail_frame.pack(fill="both", expand=True)
 
     def on_right_click(self, event):
         x = self.canvas.canvasx(event.x)
@@ -568,6 +619,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             return
         node_tag = next((t for t in tags if t.startswith("scenario_")
                         or t.startswith("npc_")
+                        or t.startswith("creature_")
                         or t.startswith("place_")), None)
         if node_tag:
             self.selected_node = node_tag
@@ -590,7 +642,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         node_menu.add_command(label="Delete Node", command=self.delete_node)
         node_menu.add_separator()
         node_menu.add_command(label="Change Color", command=lambda: self.show_color_menu(x, y))
-        if self.selected_node and self.selected_node.startswith("npc_"):
+        if self.selected_node and (self.selected_node.startswith("npc_") or self.selected_node.startswith("creature_")):
             node_menu.add_command(label="Display Portrait", command=self.display_portrait_window)
         node_menu.post(int(x), int(y))
 
@@ -615,6 +667,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 tag = f"scenario_{node['name'].replace(' ', '_')}"
             elif node["type"] == "npc":
                 tag = f"npc_{node['name'].replace(' ', '_')}"
+            elif node["type"] == "creature":
+                tag = f"creature_{node['name'].replace(' ', '_')}"
             else:
                 tag = f"place_{node['name'].replace(' ', '_')}"
             if tag == self.selected_node:
@@ -637,11 +691,12 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         file_path = filedialog.asksaveasfilename(defaultextension=".json")
         if file_path:
             for node in self.graph["nodes"]:
-                node_tag = ""
                 if node["type"] == "scenario":
                     node_tag = f"scenario_{node['name'].replace(' ', '_')}"
                 elif node["type"] == "npc":
                     node_tag = f"npc_{node['name'].replace(' ', '_')}"
+                elif node["type"] == "creature":
+                    node_tag = f"creature_{node['name'].replace(' ', '_')}"
                 else:
                     node_tag = f"place_{node['name'].replace(' ', '_')}"
                 x, y = self.node_positions.get(node_tag, (node["x"], node["y"]))
@@ -656,11 +711,12 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 self.graph = json.load(f)
             self.node_positions.clear()
             for node in self.graph["nodes"]:
-                node_tag = ""
                 if node["type"] == "scenario":
                     node_tag = f"scenario_{node['name'].replace(' ', '_')}"
                 elif node["type"] == "npc":
                     node_tag = f"npc_{node['name'].replace(' ', '_')}"
+                elif node["type"] == "creature":
+                    node_tag = f"creature_{node['name'].replace(' ', '_')}"
                 else:
                     node_tag = f"place_{node['name'].replace(' ', '_')}"
                 self.node_positions[node_tag] = (node["x"], node["y"])

@@ -341,8 +341,9 @@ class MainWindow(ctk.CTk):
         container.pack(fill="both", expand=True)
         scenario_wrapper = GenericModelWrapper("scenarios")
         npc_wrapper = GenericModelWrapper("npcs")
+        creature_wrapper = GenericModelWrapper("creatures")
         place_wrapper = GenericModelWrapper("places")
-        editor = ScenarioGraphEditor(container, scenario_wrapper, npc_wrapper, place_wrapper)
+        editor = ScenarioGraphEditor(container, scenario_wrapper, npc_wrapper, creature_wrapper, place_wrapper)
         editor.pack(fill="both", expand=True)
 
     def export_foundry(self):
@@ -446,6 +447,7 @@ class MainWindow(ctk.CTk):
                 Secrets TEXT,
                 Places TEXT,
                 NPCs TEXT,
+                Creatures TEXT,
                 Objects TEXT
             )
         ''')
@@ -800,6 +802,7 @@ class MainWindow(ctk.CTk):
             "Secrets": "TEXT",
             "Places": "TEXT",
             "NPCs": "TEXT",
+            "Creatures": "TEXT",
             "Objects": "TEXT"
         }
         factions_columns = {

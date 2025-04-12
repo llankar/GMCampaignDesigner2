@@ -12,39 +12,48 @@ from PIL import Image, ImageTk
 from tkinter import filedialog,  messagebox
 from modules.helpers.swarmui_helper import get_available_models
 from modules.helpers.config_helper import ConfigHelper
+from modules.generic.generic_model_wrapper import GenericModelWrapper
+
 import csv
 import random
 
-FACTIONS_FILE = "data/factions.json"
-NPCS_FILE = "data/npcs.json"
-PLACES_FILE = "data/places.json"
-OBJECTS_FILE = "data/objects.json"
 SWARMUI_PROCESS = None
 
+def load_entities_list(entity_type):
+    """
+    Creates a model wrapper for the given entity type, fetches all
+    database records, and returns a list of names.
+
+    Args:
+        entity_type (str): The type of entity to load (e.g., "npcs", "factions").
+
+    Returns:
+        list: A list of names for the given entity, or an empty list on error.
+    """
+    try:
+        wrapper = GenericModelWrapper(entity_type)
+        entities = wrapper.load_items() # Assumes get_all() returns a list of dictionaries.
+        # Each record is expected to have a "Name" key:
+        return [entity.get("Name", "Unnamed") for entity in entities]
+    except Exception as e:
+        # Log error if needed:
+        print(f"Error loading {entity_type}: {e}")
+        return []
 
 def load_factions_list():
-    if os.path.exists(FACTIONS_FILE):
-        with open(FACTIONS_FILE, "r", encoding="utf-8") as f:
-            return [faction["Name"] for faction in json.load(f)]
-    return []
+    return load_entities_list("factions")
 
 def load_npcs_list():
-    if os.path.exists(NPCS_FILE):
-        with open(NPCS_FILE, "r", encoding="utf-8") as f:
-            return [npc["Name"] for npc in json.load(f)]
-    return []
+    return load_entities_list("npcs")
 
 def load_places_list():
-    if os.path.exists(PLACES_FILE):
-        with open(PLACES_FILE, "r", encoding="utf-8") as f:
-            return [place["Name"] for place in json.load(f)]
-    return []
+    return load_entities_list("places")
 
 def load_objects_list():
-    if os.path.exists(OBJECTS_FILE):
-        with open(OBJECTS_FILE, "r", encoding="utf-8") as f:
-            return [object["Name"] for object in json.load(f)]
-    return []
+    return load_entities_list("objects")
+
+def load_creatures_list():
+    return load_entities_list("creatures")
 
 """
 A customizable editor window for creating and editing generic items with dynamic field generation.
@@ -106,7 +115,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             ctk.CTkLabel(self.scroll_frame, text=field["name"]).pack(pady=(5, 0), anchor="w")
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
-            elif field["name"] in ["NPCs", "Places", "Factions", "Objects"]:
+            elif field["name"] in ["NPCs", "Places", "Factions", "Objects", "Creatures"]:
                 self.create_dynamic_combobox_list(field)
             else:
                 self.create_text_entry(field)
@@ -418,6 +427,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
         elif field["name"] == "Objects":
             options_list = load_objects_list()
             label_text = "Add Object"
+        elif field["name"] == "Creatures":
+            options_list = load_creatures_list()
+            label_text = "Add Creature"
         else:
             options_list = []
             label_text = f"Add {field['name']}"
@@ -503,7 +515,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
                     self.item[field["name"]] = ""
                 else:
                     self.item[field["name"]] = data
-            elif field["name"] in ["Places", "NPCs", "Factions", "Objects"]:
+            elif field["name"] in ["Places", "NPCs", "Factions", "Objects", "Creatures"]:
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
             elif field["name"] == "Portrait":
                 self.item[field["name"]] = self.portrait_path
