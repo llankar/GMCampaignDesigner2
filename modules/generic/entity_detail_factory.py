@@ -13,7 +13,9 @@ wrappers = {
             "Scenarios": GenericModelWrapper("scenarios"),
             "Places": GenericModelWrapper("places"),
             "NPCs": GenericModelWrapper("npcs"),
-            "Factions": GenericModelWrapper("factions")
+            "Factions": GenericModelWrapper("factions"),
+            "Objects": GenericModelWrapper("objects"),
+            "Creatures": GenericModelWrapper("creatures")
         }
 
 def insert_text(parent, header, content):
@@ -97,7 +99,7 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
     content_frame.portrait_images = {}
 
     # If entity_type is "NPCs" and the entity has a valid Portrait, load and show it.
-    if entity_type == "NPCs" and "Portrait" in entity and os.path.exists(entity["Portrait"]):
+    if (entity_type == "NPCs" or entity_type == "Creatures") and "Portrait" in entity and os.path.exists(entity["Portrait"]):
         try:
             img = Image.open(entity["Portrait"])
             img = img.resize(PORTRAIT_SIZE, Image.Resampling.LANCZOS)
@@ -118,7 +120,7 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
         field_name = field["name"]
         field_type = field["type"]
         # Skip the Portrait field if already handled.
-        if entity_type == "NPCs" and field_name == "Portrait":
+        if (entity_type == "NPCs" or entity_type == "Creatures") and field_name == "Portrait":
             continue
         if field_type == "longtext":
             insert_longtext(content_frame, field_name, entity.get(field_name, ""))
