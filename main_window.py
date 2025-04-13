@@ -6,27 +6,31 @@ import time
 import requests
 import shutil
 import tkinter as tk
-from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE
-from tkinter import PhotoImage
+from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, PhotoImage
+import logging
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
 from docx import Document
-import logging
+
+# Import modular helpers – ensure these files exist.
+from modules.helpers.window_helper import position_window_at_top
+from modules.helpers.template_loader import load_template
+from modules.helpers.config_helper import ConfigHelper
+from modules.helpers.swarmui_helper import get_available_models
+from modules.helpers.db_helper import init_db
+from modules.ui.tooltip import ToolTip
+from modules.ui.icon_button import create_icon_button
 
 from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
-from modules.helpers.window_helper import position_window_at_top
 from modules.scenarios.scenario_detail_view import ScenarioDetailView
-from modules.npcs.npc_graph_editor import NPCGraphEditor  # Import the graph editor
+from modules.npcs.npc_graph_editor import NPCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
-from modules.helpers.template_loader import load_template
 from modules.generic.generic_editor_window import GenericEditorWindow
-from modules.helpers import text_helpers
 from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
-from modules.helpers.config_helper import ConfigHelper
-from modules.helpers.swarmui_helper import get_available_models
+from modules.helpers import text_helpers
 
 # Set up CustomTkinter appearance
 ctk.set_appearance_mode("Dark")
@@ -35,92 +39,9 @@ ctk.set_default_color_theme("blue")
 # Global process variable for SwarmUI
 SWARMUI_PROCESS = None
 
-class ToolTip:
-    """
-    A tooltip that displays after a delay if the pointer remains over the widget.
-    Debug logs and pointer descendant checking have been added.
-    """
-    def __init__(self, widget, text, delay=500):
-        self.widget = widget
-        self.text = text
-        self.delay = delay  # delay in milliseconds
-        self.tipwindow = None
-        self.after_id = None
-        widget.bind("<Enter>", self.schedule, add="+")
-        widget.bind("<Leave>", self.cancel, add="+")
-        widget.bind("<ButtonPress>", self.cancel, add="+")
+#logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
-    def is_descendant(self, widget):
-        """
-        Check if the given widget is self.widget or a descendant of self.widget.
-        """
-        current = widget
-        while current:
-            if current == self.widget:
-                return True
-            current = current.master
-        return False
 
-    def schedule(self, event=None):
-        self.after_id = self.widget.after(self.delay, self.showtip)
-
-    def cancel(self, event=None):
-        if event:
-            # Get the widget currently under the pointer using global coordinates.
-            x, y = event.x_root, event.y_root
-            widget_under = self.widget.winfo_containing(x, y)
-            if widget_under and self.is_descendant(widget_under):
-                return
-        if self.after_id:
-            self.widget.after_cancel(self.after_id)
-            self.after_id = None
-        self.hidetip()
-
-    def showtip(self):
-        if self.tipwindow or not self.text:
-            print("Aborting showtip: tipwindow already exists or text is empty")
-            return
-        x = self.widget.winfo_rootx() + 30
-        y = self.widget.winfo_rooty() + 20
-        self.tipwindow = tw = Toplevel(self.widget)
-        tw.wm_overrideredirect(True)
-        tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(tw, text=self.text, justify="left",
-                        background="#ffffe0", relief="solid", borderwidth=1,
-                        font=("tahoma", "8", "normal"))
-        label.pack(ipadx=1)
-    
-    def hidetip(self):
-        tw = self.tipwindow
-        self.tipwindow = None
-        if tw:
-            tw.destroy()
-   
-# ---------------------------
-# Helper to create an icon button with tooltip (using grid later)
-# ---------------------------
-def create_icon_button(parent, icon, tooltip_text, command):
-    container = tk.Frame(parent, bg="#2B2B2B")  # Set background to match your dark theme
-    btn = ctk.CTkButton(
-        container,
-        text="",
-        image=icon,
-        command=command,
-        width=80,
-        height=80,
-        corner_radius=12,
-        fg_color="#0077CC",
-        hover_color="#005fa3",
-        border_width=1,
-        border_color="#005fa3"
-    )
-    btn.pack()
-    ToolTip(container, tooltip_text)
-    return container
-
-# ---------------------------
-# Main Window Class with Multi-Column Icon Layout
-# ---------------------------
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -131,75 +52,103 @@ class MainWindow(ctk.CTk):
         self.attributes("-fullscreen", True)
 
         position_window_at_top(self)
+        self.set_window_icon()
+        self.init_db()
+        self.create_layout()
+        self.load_icons()
+        self.create_sidebar()
+        self.create_content_area()
+        self.create_exit_button()
+        self.load_model_config()
+        self.init_wrappers()
 
-        # Set window icon
+    # ---------------------------
+    # Setup and Layout Methods
+    # ---------------------------
+    def set_window_icon(self):
         icon_path = os.path.join("assets", "GMCampaignDesigner.ico")
         if os.path.exists(icon_path):
             self.iconbitmap(icon_path)
         icon_image = PhotoImage(file=os.path.join("assets", "GMCampaignDesigner logo.png"))
         self.tk.call('wm', 'iconphoto', self._w, icon_image)
 
-        # Initialize database connection and other settings
-        self.init_db()
-
-        # Main layout frame
-        main_frame = ctk.CTkFrame(self)
-        main_frame.pack(fill="both", expand=True)
-
-        # Sidebar frame on the left
-        sidebar_frame = ctk.CTkFrame(main_frame, width=220)
-        sidebar_frame.pack(side="left", fill="y", padx=5, pady=5)
-        sidebar_frame.pack_propagate(False)
-
-        # Inner frame for sidebar content
-        sidebar_inner = ctk.CTkFrame(sidebar_frame, fg_color="transparent")
-        sidebar_inner.pack(fill="both", expand=True, padx=5, pady=5)
-
-        # Logo (60x60)
-        logo_path = os.path.join("assets", "GMCampaignDesigner logo.png")
-        if os.path.exists(logo_path):
-            logo_image = Image.open(logo_path).resize((60, 60))
-            logo = ctk.CTkImage(light_image=logo_image, dark_image=logo_image, size=(100, 100))
-            self.logo_image = logo
-            logo_label = ctk.CTkLabel(sidebar_inner, image=logo, text="")
-            logo_label.pack(pady=(0, 3), anchor="center")
-
-        # Header label
-        header_label = ctk.CTkLabel(sidebar_inner, text="Campaign Tools", font=("Helvetica", 16, "bold"))
-        header_label.pack(pady=(0, 5), anchor="center")
-
-        # Database display container (blue border)
-        db_container = ctk.CTkFrame(
-            sidebar_inner,
-            fg_color="transparent",
-            border_color="#005fa3",
-            border_width=2,
-            corner_radius=8
-        )
-        db_container.pack(pady=(0, 5), anchor="center", fill="x", padx=5)
-
-        db_title_label = ctk.CTkLabel(
-            db_container,
-            text="Database:",
-            font=("Segoe UI", 16, "bold"),
-            fg_color="transparent",
-            text_color="white"
-        )
-        db_title_label.pack(pady=(3, 0), anchor="center")
-
+    def init_db(self):
         db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
-        db_name = os.path.splitext(os.path.basename(db_path))[0]
+        init_db(db_path, self.update_table_schema)
 
-        self.db_name_label = ctk.CTkLabel(
-            db_container,
-            text=db_name,
-            font=("Segoe UI", 14, "italic"),
-            fg_color="transparent",
-            text_color="white"
-        )
-        self.db_name_label.pack(pady=(0, 3), anchor="center")
+    def update_table_schema(self, conn, cursor):
+        def alter_table_if_missing(table, required_columns):
+            cursor.execute(f"PRAGMA table_info({table})")
+            existing_columns = {row["name"] for row in cursor.fetchall()}
+            for col, col_def in required_columns.items():
+                if col not in existing_columns:
+                    alter_query = f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"
+                    cursor.execute(alter_query)
+                    logging.debug("Added column '%s' to table '%s'.", col, table)
+        npcs_columns = {
+            "Name": "TEXT",
+            "Role": "TEXT",
+            "Description": "TEXT",
+            "Secret": "TEXT",
+            "Quote": "TEXT",
+            "RoleplayingCues": "TEXT",
+            "Personality": "TEXT",
+            "Motivation": "TEXT",
+            "Background": "TEXT",
+            "Traits": "TEXT",
+            "Genre": "TEXT",
+            "Factions": "TEXT",
+            "Objects": "TEXT",
+            "Portrait": "TEXT"
+        }
+        scenarios_columns = {
+            "Title": "TEXT",
+            "Summary": "TEXT",
+            "Secrets": "TEXT",
+            "Places": "TEXT",
+            "NPCs": "TEXT",
+            "Creatures": "TEXT",
+            "Objects": "TEXT"
+        }
+        factions_columns = {
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "Secrets": "TEXT"
+        }
+        places_columns = {
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "NPCs": "TEXT"
+        }
+        objects_columns = {
+            "Name": "TEXT",
+            "Description": "TEXT",
+            "Secrets": "TEXT",
+            "Portrait": "TEXT"
+        }
+        creatures_columns = {
+            "Name": "TEXT",
+            "Type": "TEXT",
+            "Description": "TEXT",
+            "Weakness": "TEXT",
+            "Powers": "TEXT",
+            "Stats": "TEXT",
+            "Background": "TEXT",
+            "Genre": "TEXT",
+            "Portrait": "TEXT"
+        }
+        alter_table_if_missing("npcs", npcs_columns)
+        alter_table_if_missing("scenarios", scenarios_columns)
+        alter_table_if_missing("factions", factions_columns)
+        alter_table_if_missing("places", places_columns)
+        alter_table_if_missing("objects", objects_columns)
+        alter_table_if_missing("creatures", creatures_columns)
 
-        # Load and store icon images as CTkImage objects with a larger size (64x64)
+    def create_layout(self):
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.pack(fill="both", expand=True)
+
+    def load_icons(self):
         self.icons = {
             "change_db": self.load_icon("database_icon.png", size=(64, 64)),
             "swarm_path": self.load_icon("folder_icon.png", size=(64, 64)),
@@ -219,16 +168,56 @@ class MainWindow(ctk.CTk):
             "export_foundry": self.load_icon("export_foundry_icon.png", size=(64, 64))
         }
 
-        # Create one container frame for the grid of icon buttons
-        icons_frame = ctk.CTkFrame(sidebar_inner, fg_color="transparent")
-        icons_frame.pack(fill="both", expand=True, padx=5, pady=5)
+    def load_icon(self, file_name, size=(64, 64)):
+        path = os.path.join("assets", file_name)
+        try:
+            pil_image = Image.open(path)
+        except Exception as e:
+            logging.error("Error loading %s: %s", path, e)
+            return None
+        return ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=size)
 
-        # Configure grid columns to center content
+    def create_sidebar(self):
+        self.sidebar_frame = ctk.CTkFrame(self.main_frame, width=220)
+        self.sidebar_frame.pack(side="left", fill="y", padx=5, pady=5)
+        self.sidebar_frame.pack_propagate(False)
+        self.sidebar_inner = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
+        self.sidebar_inner.pack(fill="both", expand=True, padx=5, pady=5)
+
+        # Logo
+        logo_path = os.path.join("assets", "GMCampaignDesigner logo.png")
+        if os.path.exists(logo_path):
+            logo_image = Image.open(logo_path).resize((60, 60))
+            logo = ctk.CTkImage(light_image=logo_image, dark_image=logo_image, size=(100, 100))
+            self.logo_image = logo
+            logo_label = ctk.CTkLabel(self.sidebar_inner, image=logo, text="")
+            logo_label.pack(pady=(0, 3), anchor="center")
+
+        # Header label
+        header_label = ctk.CTkLabel(self.sidebar_inner, text="Campaign Tools", font=("Helvetica", 16, "bold"))
+        header_label.pack(pady=(0, 5), anchor="center")
+
+        # Database display container
+        db_container = ctk.CTkFrame(self.sidebar_inner, fg_color="transparent",
+                                    border_color="#005fa3", border_width=2, corner_radius=8)
+        db_container.pack(pady=(0, 5), anchor="center", fill="x", padx=5)
+        db_title_label = ctk.CTkLabel(db_container, text="Database:", font=("Segoe UI", 16, "bold"),
+                                    fg_color="transparent", text_color="white")
+        db_title_label.pack(pady=(3, 0), anchor="center")
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+        db_name = os.path.splitext(os.path.basename(db_path))[0]
+        self.db_name_label = ctk.CTkLabel(db_container, text=db_name,
+                                        font=("Segoe UI", 14, "italic"), fg_color="transparent", text_color="white")
+        self.db_name_label.pack(pady=(0, 3), anchor="center")
+
+        self.create_icon_grid()
+
+    def create_icon_grid(self):
+        icons_frame = ctk.CTkFrame(self.sidebar_inner, fg_color="transparent")
+        icons_frame.pack(fill="both", expand=True, padx=5, pady=5)
         columns = 2
         for col in range(columns):
             icons_frame.grid_columnconfigure(col, weight=1)
-
-        # An ordered list of icons with their tooltip texts and commands
         icons_list = [
             ("change_db", "Change Data Storage", self.change_database_storage),
             ("swarm_path", "Set SwarmUI Path", self.select_swarmui_path),
@@ -247,52 +236,44 @@ class MainWindow(ctk.CTk):
             ("import_scenario", "Import Scenario", self.open_scenario_importer),
             ("export_foundry", "Export Scenarios for Foundry", self.export_foundry)
         ]
-
-        # Arrange the buttons in the grid (2 columns)
+        self.icon_buttons = []
         for idx, (icon_key, tooltip, cmd) in enumerate(icons_list):
             row = idx // columns
             col = idx % columns
             btn = create_icon_button(icons_frame, self.icons[icon_key], tooltip, cmd)
             btn.grid(row=row, column=col, padx=10, pady=10)
+            self.icon_buttons.append(btn)
 
-        # Main content frame on the right
-        self.content_frame = ctk.CTkFrame(main_frame)
+    def create_content_area(self):
+        self.content_frame = ctk.CTkFrame(self.main_frame)
         self.content_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
-        # Red cross exit button in the upper-right corner
+    def create_exit_button(self):
         exit_button = ctk.CTkButton(self, text="✕", command=self.destroy,
                                     fg_color="red", hover_color="#AA0000",
                                     width=20, height=20, corner_radius=15)
         exit_button.place(relx=0.9999, rely=0.01, anchor="ne")
 
-        # Model loading configuration
+    def load_model_config(self):
         self.models_path = ConfigHelper.get("Paths", "models_path", fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
         self.model_options = get_available_models()
-       
-        # Initialize wrappers for the database tables
+
+    def init_wrappers(self):
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")
 
-    # Helper function to load icons as CTkImage objects with a specified size
-    def load_icon(self, file_name, size=(64, 64)):
-        path = os.path.join("assets", file_name)
-        try:
-            pil_image = Image.open(path)
-        except Exception as e:
-            print(f"Error loading {path}: {e}")
-            return None
-        # Create a CTkImage from the PIL image for both light and dark modes
-        return ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=size)
-
-    def clear_content(self):
+    # ============================================================
+    # Methods Called by Icon Buttons (Event Handlers)
+    # ============================================================
+    def clear_main_content(self):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
     def open_entity(self, entity):
-        self.clear_content()
+        self.clear_main_content()
         container = ctk.CTkFrame(self.content_frame)
         container.pack(fill="both", expand=True)
         model_wrapper = GenericModelWrapper(entity)
@@ -307,11 +288,9 @@ class MainWindow(ctk.CTk):
     def load_items_from_json(self, view, entity_name):
         file_path = filedialog.askopenfilename(
             title=f"Load {entity_name.capitalize()} from JSON",
-            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")]
-        )
+            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")])
         if not file_path:
             return
-
         try:
             with open(file_path, "r", encoding="utf-8") as file:
                 data = json.load(file)
@@ -327,7 +306,7 @@ class MainWindow(ctk.CTk):
         if not scenarios:
             messagebox.showwarning("No Scenarios", "No scenarios available.")
             return
-        self.clear_content()
+        self.clear_main_content()
         container = ctk.CTkFrame(self.content_frame, fg_color="#2B2B2B")
         container.pack(fill="both", expand=True)
         select_label = ctk.CTkLabel(container, text="Select a Scenario", font=("Helvetica", 16, "bold"),
@@ -344,7 +323,7 @@ class MainWindow(ctk.CTk):
                 messagebox.showwarning("No Selection", "Please select a scenario.")
                 return
             selected_scenario = scenarios[selection[0]]
-            self.clear_content()
+            self.clear_main_content()
             detail_container = ctk.CTkFrame(self.content_frame)
             detail_container.pack(fill="both", expand=True)
             scenario_detail_view = ScenarioDetailView(detail_container, scenario_item=selected_scenario)
@@ -353,14 +332,14 @@ class MainWindow(ctk.CTk):
         open_button.pack(pady=10)
 
     def open_npc_graph_editor(self):
-        self.clear_content()
+        self.clear_main_content()
         container = ctk.CTkFrame(self.content_frame)
         container.pack(fill="both", expand=True)
         npc_graph_editor = NPCGraphEditor(container, self.npc_wrapper, self.faction_wrapper)
         npc_graph_editor.pack(fill="both", expand=True)
 
     def open_scenario_graph_editor(self):
-        self.clear_content()
+        self.clear_main_content()
         container = ctk.CTkFrame(self.content_frame)
         container.pack(fill="both", expand=True)
         scenario_wrapper = GenericModelWrapper("scenarios")
@@ -374,7 +353,7 @@ class MainWindow(ctk.CTk):
         preview_and_export_foundry(self)
 
     def open_scenario_importer(self):
-        self.clear_content()
+        self.clear_main_content()
         container = ctk.CTkFrame(self.content_frame)
         container.pack(fill="both", expand=True)
         ScenarioImportWindow(container)
@@ -384,8 +363,7 @@ class MainWindow(ctk.CTk):
         if choice == "yes":
             file_path = filedialog.askopenfilename(
                 title="Select Database",
-                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
-            )
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")])
             if not file_path:
                 return
             new_db_path = file_path
@@ -393,8 +371,7 @@ class MainWindow(ctk.CTk):
             new_db_path = filedialog.asksaveasfilename(
                 title="Create New Database",
                 defaultextension=".db",
-                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
-            )
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")])
             if not new_db_path:
                 return
             conn = sqlite3.connect(new_db_path)
@@ -440,85 +417,6 @@ class MainWindow(ctk.CTk):
         self.object_wrapper = GenericModelWrapper("objects")
         db_name = os.path.splitext(os.path.basename(new_db_path))[0]
         self.db_name_label.configure(text=f"{db_name}")
-
-    def init_db(self):
-        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
-        self.conn = sqlite3.connect(db_path)
-        self.conn.row_factory = sqlite3.Row
-        self.cursor = self.conn.cursor()
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS npcs (
-                Name TEXT PRIMARY KEY,
-                Role TEXT,
-                Description TEXT,
-                Secret TEXT,
-                Quote TEXT,
-                RoleplayingCues TEXT,
-                Personality TEXT,
-                Motivation TEXT,
-                Background TEXT,
-                Traits TEXT,
-                Genre TEXT,
-                Factions TEXT,
-                Objects TEXT,
-                Portrait TEXT
-            )
-        ''')
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS scenarios (
-                Title TEXT PRIMARY KEY,
-                Summary TEXT,
-                Secrets TEXT,
-                Places TEXT,
-                NPCs TEXT,
-                Creatures TEXT,
-                Objects TEXT
-            )
-        ''')
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS factions (
-                Name TEXT PRIMARY KEY,
-                Description TEXT,
-                Secrets TEXT
-            )
-        ''')
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS places (
-                Name TEXT PRIMARY KEY,
-                Description TEXT,
-                NPCs TEXT
-            )
-        ''')
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS objects (
-                Name TEXT PRIMARY KEY,
-                Description TEXT,
-                Secrets TEXT,
-                Portrait TEXT
-            )
-        ''')
-        self.cursor.execute("""
-        CREATE TABLE IF NOT EXISTS creatures (
-            Name TEXT PRIMARY KEY,
-            Type TEXT,
-            Description TEXT,
-            Weakness TEXT,
-            Powers TEXT,
-            Stats TEXT,
-            Background TEXT,
-            Genre TEXT,
-            Portrait TEXT
-            )
-        """)
-        self.update_table_schema(self.conn, self.cursor)
-        self.conn.commit()
-        self.conn.close()
-
-    def select_swarmui_path(self):
-        folder = filedialog.askdirectory(title="Select SwarmUI Path")
-        if folder:
-            ConfigHelper.set("Paths", "swarmui_path", folder)
-            messagebox.showinfo("SwarmUI Path Set", f"SwarmUI path set to:\n{folder}")
 
     def launch_swarmui(self):
         global SWARMUI_PROCESS
@@ -598,6 +496,20 @@ class MainWindow(ctk.CTk):
         except Exception as e:
             print(f"Error generating portrait for NPC '{npc.get('Name', 'Unknown')}': {e}")
 
+    def copy_and_resize_portrait(self, npc, src_path):
+        PORTRAIT_FOLDER = "assets/portraits"
+        MAX_PORTRAIT_SIZE = (1024, 1024)
+        os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
+        npc_name = npc.get("Name", "Unnamed").replace(" ", "_")
+        ext = os.path.splitext(src_path)[-1].lower()
+        dest_filename = f"{npc_name}_{id(self)}{ext}"
+        dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
+        with Image.open(src_path) as img:
+            img = img.convert("RGB")
+            img.thumbnail(MAX_PORTRAIT_SIZE)
+            img.save(dest_path)
+        return dest_path
+
     def generate_missing_npc_portraits(self):
         def confirm_model_and_continue():
             ConfigHelper.set("LastUsed", "model", self.selected_model.get())
@@ -640,20 +552,6 @@ class MainWindow(ctk.CTk):
             print("No NPCs were missing portraits.")
         conn.close()
 
-    def copy_and_resize_portrait(self, npc, src_path):
-        PORTRAIT_FOLDER = "assets/portraits"
-        MAX_PORTRAIT_SIZE = (1024, 1024)
-        os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
-        npc_name = npc.get("Name", "Unnamed").replace(" ", "_")
-        ext = os.path.splitext(src_path)[-1].lower()
-        dest_filename = f"{npc_name}_{id(self)}{ext}"
-        dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
-        with Image.open(src_path) as img:
-            img = img.convert("RGB")
-            img.thumbnail(MAX_PORTRAIT_SIZE)
-            img.save(dest_path)
-        return dest_path
-
     def preview_and_export_scenarios(self):
         scenario_wrapper = GenericModelWrapper("scenarios")
         scenario_items = scenario_wrapper.load_items()
@@ -663,7 +561,7 @@ class MainWindow(ctk.CTk):
         selection_window = Toplevel()
         selection_window.title("Select Scenarios to Export")
         selection_window.geometry("400x300")
-        listbox = Listbox(selection_window, selectmode=MULTIPLE, height=15)
+        listbox = Listbox(selection_window, selectmode="multiple", height=15)
         listbox.pack(fill="both", expand=True, padx=10, pady=10)
         scenario_titles = [scenario.get("Title", "Unnamed Scenario") for scenario in scenario_items]
         for title in scenario_titles:
@@ -715,7 +613,7 @@ class MainWindow(ctk.CTk):
             else:
                 doc.add_paragraph(str(secrets))
 
-            # Updated Places Section
+            # Places Section
             doc.add_heading("Places", level=3)
             for place_name in scenario.get("Places", []):
                 place = place_items.get(place_name, {"Name": place_name, "Description": "Unknown Place"})
@@ -725,7 +623,7 @@ class MainWindow(ctk.CTk):
                     description_text = place["Description"]
                 doc.add_paragraph(f"- {place['Name']}: {description_text}")
 
-            # NPCs Section remains largely the same...
+            # NPCs Section
             doc.add_heading("NPCs", level=3)
             for npc_name in scenario.get("NPCs", []):
                 npc = npc_items.get(npc_name, {"Name": npc_name, "Role": "Unknown",
@@ -738,7 +636,7 @@ class MainWindow(ctk.CTk):
                 else:
                     p.add_run(str(description))
 
-            # Updated Creatures Section
+            # Creatures Section
             doc.add_heading("Creatures", level=3)
             for creature_name in scenario.get("Creatures", []):
                 creature = creature_items.get(creature_name, {
@@ -752,21 +650,18 @@ class MainWindow(ctk.CTk):
                     stats_text = stats.get("text", "No Stats")
                 else:
                     stats_text = stats
-
                 powers = creature.get("Powers", "Unknown")
                 if isinstance(powers, dict):
                     powers_text = powers.get("text", "No Powers")
                 else:
                     powers_text = powers
-
                 p = doc.add_paragraph(f"- {creature['Name']} ({stats_text}, {powers_text}): ")
-                description = creature['Description']
+                description = creature["Description"]
                 if isinstance(description, dict):
                     run = p.add_run(description.get("text", ""))
                     self.apply_formatting(run, description.get("formatting", {}))
                 else:
                     p.add_run(str(description))
-
         doc.save(file_path)
         messagebox.showinfo("Export Successful", f"Scenario exported successfully to:\n{file_path}")
 
@@ -905,7 +800,12 @@ class MainWindow(ctk.CTk):
         alter_table_if_missing("places", places_columns)
         alter_table_if_missing("objects", objects_columns)
         alter_table_if_missing("creatures", creatures_columns)
-
+    
+    def select_swarmui_path(self):
+        folder = filedialog.askdirectory(title="Select SwarmUI Path")
+        if folder:
+            ConfigHelper.set("Paths", "swarmui_path", folder)
+            messagebox.showinfo("SwarmUI Path Set", f"SwarmUI path set to:\n{folder}")
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
