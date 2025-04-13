@@ -251,6 +251,7 @@ class MainWindow(ctk.CTk):
         self.npc_wrapper = GenericModelWrapper("npcs")
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
+        self.creature_wrapper = GenericModelWrapper("creatures")
 
     # Helper function to load icons as CTkImage objects with a specified size
     def load_icon(self, file_name, size=(64, 64)):
@@ -655,8 +656,10 @@ class MainWindow(ctk.CTk):
         ctk.CTkButton(selection_window, text="Export Selected", command=export_selected).pack(pady=5)
 
     def preview_and_save(self, selected_scenarios):
+        creature_items = {creature["Name"]: creature for creature in self.creature_wrapper.load_items()}
         place_items = {place["Name"]: place for place in self.place_wrapper.load_items()}
         npc_items = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
+
         file_path = filedialog.asksaveasfilename(
             defaultextension=".docx",
             filetypes=[("Word Files", "*.docx"), ("All Files", "*.*")],
@@ -664,12 +667,14 @@ class MainWindow(ctk.CTk):
         )
         if not file_path:
             return
+
         doc = Document()
         doc.add_heading("Campaign Scenarios", level=1)
         for scenario in selected_scenarios:
             title = scenario.get("Title", "Unnamed Scenario")
             summary = scenario.get("Summary", "No description provided.")
             secrets = scenario.get("Secrets", "No secrets provided.")
+
             doc.add_heading(title, level=2)
             doc.add_heading("Summary", level=3)
             if isinstance(summary, dict):
@@ -678,6 +683,7 @@ class MainWindow(ctk.CTk):
                 self.apply_formatting(run, summary.get("formatting", {}))
             else:
                 doc.add_paragraph(str(summary))
+
             doc.add_heading("Secrets", level=3)
             if isinstance(secrets, dict):
                 p = doc.add_paragraph()
@@ -685,10 +691,18 @@ class MainWindow(ctk.CTk):
                 self.apply_formatting(run, secrets.get("formatting", {}))
             else:
                 doc.add_paragraph(str(secrets))
+
+            # Updated Places Section
             doc.add_heading("Places", level=3)
             for place_name in scenario.get("Places", []):
                 place = place_items.get(place_name, {"Name": place_name, "Description": "Unknown Place"})
-                doc.add_paragraph(f"- {place['Name']}: {place['Description']}")
+                if isinstance(place["Description"], dict):
+                    description_text = place["Description"].get("text", "Unknown Place")
+                else:
+                    description_text = place["Description"]
+                doc.add_paragraph(f"- {place['Name']}: {description_text}")
+
+            # NPCs Section remains largely the same...
             doc.add_heading("NPCs", level=3)
             for npc_name in scenario.get("NPCs", []):
                 npc = npc_items.get(npc_name, {"Name": npc_name, "Role": "Unknown",
@@ -700,6 +714,36 @@ class MainWindow(ctk.CTk):
                     self.apply_formatting(run, description.get("formatting", {}))
                 else:
                     p.add_run(str(description))
+
+            # Updated Creatures Section
+            doc.add_heading("Creatures", level=3)
+            for creature_name in scenario.get("Creatures", []):
+                creature = creature_items.get(creature_name, {
+                    "Name": creature_name,
+                    "Stats": {"text": "No Stats", "formatting": {}},
+                    "Powers": {"text": "No Powers", "formatting": {}},
+                    "Description": {"text": "Unknown Creature", "formatting": {}}
+                })
+                stats = creature["Stats"]
+                if isinstance(stats, dict):
+                    stats_text = stats.get("text", "No Stats")
+                else:
+                    stats_text = stats
+
+                powers = creature.get("Powers", "Unknown")
+                if isinstance(powers, dict):
+                    powers_text = powers.get("text", "No Powers")
+                else:
+                    powers_text = powers
+
+                p = doc.add_paragraph(f"- {creature['Name']} ({stats_text}, {powers_text}): ")
+                description = creature['Description']
+                if isinstance(description, dict):
+                    run = p.add_run(description.get("text", ""))
+                    self.apply_formatting(run, description.get("formatting", {}))
+                else:
+                    p.add_run(str(description))
+
         doc.save(file_path)
         messagebox.showinfo("Export Successful", f"Scenario exported successfully to:\n{file_path}")
 
