@@ -34,14 +34,16 @@ class ScenarioDetailView(ctk.CTkFrame):
             "Scenarios": GenericModelWrapper("scenarios"),
             "Places": GenericModelWrapper("places"),
             "NPCs": GenericModelWrapper("npcs"),
-            "Factions": GenericModelWrapper("factions")
+            "Factions": GenericModelWrapper("factions"),
+            "Creatures": GenericModelWrapper("Creatures")
         }
 
         self.templates = {
             "Scenarios": self.load_template("scenarios/scenarios_template.json"),
             "Places": self.load_template("places/places_template.json"),
             "NPCs": self.load_template("npcs/npcs_template.json"),
-            "Factions": self.load_template("factions/factions_template.json")
+            "Factions": self.load_template("factions/factions_template.json"),
+            "Creatures": self.load_template("creatures/creatures_template.json")
         }
 
         self.tabs = {}
@@ -326,7 +328,7 @@ class ScenarioDetailView(ctk.CTkFrame):
 
     def add_new_tab(self):
         # Added "Scenario Graph Editor" to the list of options.
-        options = ["Factions", "Places", "NPCs", "Scenarios", "Note Tab", "NPC Graph", "Scenario Graph Editor"]
+        options = ["Factions", "Places", "NPCs", "Creatures","Scenarios", "Note Tab", "NPC Graph", "Scenario Graph Editor"]
         popup = ctk.CTkToplevel(self)
         popup.title("Create New Tab")
         popup.geometry("300x250")
@@ -370,6 +372,19 @@ class ScenarioDetailView(ctk.CTkFrame):
 
 
     def open_entity_tab(self, entity_type, name):
+        """
+        Open a new tab for a specific entity with its details.
+        
+        Args:
+            entity_type (str): The type of entity (e.g., 'Scenarios', 'NPCs', 'Creatures').
+            name (str): The name or title of the specific entity to display.
+        
+        Raises:
+            messagebox.showerror: If the specified entity cannot be found in the wrapper.
+        
+        Creates a new tab with the entity's details using a shared factory function,
+        and provides a mechanism to recursively open related entities.
+        """
         wrapper = self.wrappers[entity_type]
         items = wrapper.load_items()
         key = "Title" if entity_type == "Scenarios" else "Name"
@@ -396,6 +411,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             frame,
             self.wrappers["Scenarios"],
             self.wrappers["NPCs"],
+            self.wrappers["Creatures"],
             self.wrappers["Places"]
         )
         scenario_graph_editor.pack(fill="both", expand=True)
@@ -407,7 +423,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             master = self.content_area
         frame = ctk.CTkFrame(master)
         template = self.templates[entity_type]
-        if entity_type == "NPCs" and "Portrait" in entity and os.path.exists(entity["Portrait"]):
+        if (entity_type == "NPCs" or entity_type == "Creatures" ) and "Portrait" in entity and os.path.exists(entity["Portrait"]):
             img = Image.open(entity["Portrait"])
             img = img.resize((200, 200), Image.Resampling.LANCZOS)
             ctk_image = ctk.CTkImage(light_image=img, size=(200, 200))
@@ -422,7 +438,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         for field in template["fields"]:
             field_name = field["name"]
             field_type = field["type"]
-            if entity_type == "NPCs" and field_name == "Portrait":
+            if (entity_type == "NPCs" or entity_type == "Creatures") and field_name == "Portrait":
                 continue
             if field_type == "longtext":
                 self.insert_longtext(frame, field_name, entity.get(field_name, ""))
