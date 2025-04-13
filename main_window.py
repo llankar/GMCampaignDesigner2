@@ -13,7 +13,7 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 from docx import Document
 
-# Import modular helpers – ensure these files exist.
+# Modular helper imports
 from modules.helpers.window_helper import position_window_at_top
 from modules.helpers.template_loader import load_template
 from modules.helpers.config_helper import ConfigHelper
@@ -39,7 +39,7 @@ ctk.set_default_color_theme("blue")
 # Global process variable for SwarmUI
 SWARMUI_PROCESS = None
 
-#logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
 
 class MainWindow(ctk.CTk):
@@ -231,7 +231,7 @@ class MainWindow(ctk.CTk):
             ("gm_screen", "Open GM Screen", self.open_gm_screen),
             ("npc_graph", "Open NPC Graph Editor", self.open_npc_graph_editor),
             ("scenario_graph", "Open Scenario Graph Editor", self.open_scenario_graph_editor),
-            ("generate_portraits", "Generate NPC Portraits", self.generate_missing_npc_portraits),
+            ("generate_portraits", "Generate Portraits", self.generate_missing_portraits),
             ("associate_portraits", "Associate NPC Portraits", self.associate_npc_portraits),
             ("import_scenario", "Import Scenario", self.open_scenario_importer),
             ("export_foundry", "Export Scenarios for Foundry", self.export_foundry)
@@ -255,7 +255,8 @@ class MainWindow(ctk.CTk):
         exit_button.place(relx=0.9999, rely=0.01, anchor="ne")
 
     def load_model_config(self):
-        self.models_path = ConfigHelper.get("Paths", "models_path", fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
+        self.models_path = ConfigHelper.get("Paths", "models_path",
+                                            fallback=r"E:\SwarmUI\SwarmUI\Models\Stable-diffusion")
         self.model_options = get_available_models()
 
     def init_wrappers(self):
@@ -265,9 +266,9 @@ class MainWindow(ctk.CTk):
         self.object_wrapper = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")
 
-    # ============================================================
+    # =============================================================
     # Methods Called by Icon Buttons (Event Handlers)
-    # ============================================================
+    # =============================================================
     def clear_main_content(self):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
@@ -280,15 +281,18 @@ class MainWindow(ctk.CTk):
         template = load_template(entity)
         view = GenericListView(container, model_wrapper, template)
         view.pack(fill="both", expand=True)
-        load_button = ctk.CTkButton(container,
-                                    text=f"Load {entity.capitalize()}",
-                                    command=lambda: self.load_items_from_json(view, entity))
+        load_button = ctk.CTkButton(
+            container,
+            text=f"Load {entity.capitalize()}",
+            command=lambda: self.load_items_from_json(view, entity)
+        )
         load_button.pack(pady=5)
 
     def load_items_from_json(self, view, entity_name):
         file_path = filedialog.askopenfilename(
             title=f"Load {entity_name.capitalize()} from JSON",
-            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")])
+            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")]
+        )
         if not file_path:
             return
         try:
@@ -309,11 +313,23 @@ class MainWindow(ctk.CTk):
         self.clear_main_content()
         container = ctk.CTkFrame(self.content_frame, fg_color="#2B2B2B")
         container.pack(fill="both", expand=True)
-        select_label = ctk.CTkLabel(container, text="Select a Scenario", font=("Helvetica", 16, "bold"),
-                                    fg_color="#2B2B2B", text_color="white")
+        select_label = ctk.CTkLabel(
+            container,
+            text="Select a Scenario",
+            font=("Helvetica", 16, "bold"),
+            fg_color="#2B2B2B",
+            text_color="white"
+        )
         select_label.pack(pady=10)
-        listbox = Listbox(container, selectmode="single", height=15, bg="#2B2B2B", fg="white",
-                        highlightthickness=0, bd=0)
+        listbox = Listbox(
+            container,
+            selectmode="single",
+            height=15,
+            bg="#2B2B2B",
+            fg="white",
+            highlightthickness=0,
+            bd=0
+        )
         listbox.pack(fill="both", expand=True, padx=10, pady=10)
         for scenario in scenarios:
             listbox.insert("end", scenario["Title"])
@@ -363,7 +379,8 @@ class MainWindow(ctk.CTk):
         if choice == "yes":
             file_path = filedialog.askopenfilename(
                 title="Select Database",
-                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")])
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
+            )
             if not file_path:
                 return
             new_db_path = file_path
@@ -371,7 +388,8 @@ class MainWindow(ctk.CTk):
             new_db_path = filedialog.asksaveasfilename(
                 title="Create New Database",
                 defaultextension=".db",
-                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")])
+                filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
+            )
             if not new_db_path:
                 return
             conn = sqlite3.connect(new_db_path)
@@ -418,6 +436,12 @@ class MainWindow(ctk.CTk):
         db_name = os.path.splitext(os.path.basename(new_db_path))[0]
         self.db_name_label.configure(text=f"{db_name}")
 
+    def select_swarmui_path(self):
+        folder = filedialog.askdirectory(title="Select SwarmUI Path")
+        if folder:
+            ConfigHelper.set("Paths", "swarmui_path", folder)
+            messagebox.showinfo("SwarmUI Path Set", f"SwarmUI path set to:\n{folder}")
+
     def launch_swarmui(self):
         global SWARMUI_PROCESS
         swarmui_path = ConfigHelper.get("Paths", "swarmui_path", fallback=r"E:\SwarmUI\SwarmUI")
@@ -440,6 +464,114 @@ class MainWindow(ctk.CTk):
         global SWARMUI_PROCESS
         if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
             SWARMUI_PROCESS.terminate()
+
+    # ------------------------------------------------------
+    # Unified Generate Portraits for NPCs and Creatures
+    # ------------------------------------------------------
+    def generate_missing_portraits(self):
+        top = ctk.CTkToplevel(self)
+        top.title("Generate Portraits")
+        top.geometry("300x150")
+        top.transient(self)
+        top.grab_set()
+        # Use ctk.StringVar (not CTkStringVar)
+        selection = ctk.StringVar(value="NPC")
+        ctk.CTkLabel(top, text="Generate portraits for:").pack(pady=10)
+        ctk.CTkRadioButton(top, text="NPCs", variable=selection, value="NPC").pack(pady=5)
+        ctk.CTkRadioButton(top, text="Creatures", variable=selection, value="Creature").pack(pady=5)
+        def on_confirm():
+            choice = selection.get()
+            top.destroy()
+            if choice == "NPC":
+                self.generate_missing_npc_portraits()
+            else:
+                self.generate_missing_creature_portraits()
+        ctk.CTkButton(top, text="Continue", command=on_confirm).pack(pady=10)
+
+    def generate_missing_npc_portraits(self):
+        def confirm_model_and_continue():
+            ConfigHelper.set("LastUsed", "model", self.selected_model.get())
+            top.destroy()
+            self.generate_portraits_continue_npcs()
+        top = ctk.CTkToplevel(self)
+        top.title("Select AI Model for NPCs")
+        top.geometry("400x200")
+        top.transient(self)
+        top.grab_set()
+        ctk.CTkLabel(top, text="Select AI Model to use for NPC portrait generation:").pack(pady=20)
+        last_model = ConfigHelper.get("LastUsed", "model", fallback=None)
+        # Use ctk.StringVar
+        if last_model in self.model_options:
+            self.selected_model = ctk.StringVar(value=last_model)
+        else:
+            self.selected_model = ctk.StringVar(value=self.model_options[0])
+        ctk.CTkOptionMenu(top, values=self.model_options, variable=self.selected_model).pack(pady=10)
+        ctk.CTkButton(top, text="Continue", command=confirm_model_and_continue).pack(pady=10)
+
+    def generate_portraits_continue_npcs(self):
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM npcs")
+        npc_rows = cursor.fetchall()
+        modified = False
+        for npc in npc_rows:
+            portrait = npc["Portrait"] if npc["Portrait"] is not None else ""
+            if not portrait.strip():
+                npc_dict = dict(npc)
+                self.generate_portrait_for_npc(npc_dict)
+                if npc_dict.get("Portrait"):
+                    cursor.execute("UPDATE npcs SET Portrait = ? WHERE Name = ?", (npc_dict["Portrait"], npc["Name"]))
+                    modified = True
+        if modified:
+            conn.commit()
+            print("Updated NPC database with generated portraits.")
+        else:
+            print("No NPCs were missing portraits.")
+        conn.close()
+
+    def generate_missing_creature_portraits(self):
+        def confirm_model_and_continue():
+            ConfigHelper.set("LastUsed", "model", self.selected_model.get())
+            top.destroy()
+            self.generate_portraits_continue_creatures()
+        top = ctk.CTkToplevel(self)
+        top.title("Select AI Model for Creatures")
+        top.geometry("400x200")
+        top.transient(self)
+        top.grab_set()
+        ctk.CTkLabel(top, text="Select AI Model to use for creature portrait generation:").pack(pady=20)
+        last_model = ConfigHelper.get("LastUsed", "model", fallback=None)
+        if last_model in self.model_options:
+            self.selected_model = ctk.StringVar(value=last_model)
+        else:
+            self.selected_model = ctk.StringVar(value=self.model_options[0])
+        ctk.CTkOptionMenu(top, values=self.model_options, variable=self.selected_model).pack(pady=10)
+        ctk.CTkButton(top, text="Continue", command=confirm_model_and_continue).pack(pady=10)
+
+    def generate_portraits_continue_creatures(self):
+        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM creatures")
+        creature_rows = cursor.fetchall()
+        modified = False
+        for creature in creature_rows:
+            portrait = creature["Portrait"] if creature["Portrait"] is not None else ""
+            if not portrait.strip():
+                creature_dict = dict(creature)
+                self.generate_portrait_for_creature(creature_dict)
+                if creature_dict.get("Portrait"):
+                    cursor.execute("UPDATE creatures SET Portrait = ? WHERE Name = ?", (creature_dict["Portrait"], creature_dict["Name"]))
+                    modified = True
+        if modified:
+            conn.commit()
+            print("Updated creature database with generated portraits.")
+        else:
+            print("No creatures were missing portraits.")
+        conn.close()
 
     def generate_portrait_for_npc(self, npc):
         self.launch_swarmui()
@@ -496,61 +628,73 @@ class MainWindow(ctk.CTk):
         except Exception as e:
             print(f"Error generating portrait for NPC '{npc.get('Name', 'Unknown')}': {e}")
 
-    def copy_and_resize_portrait(self, npc, src_path):
+    def generate_portrait_for_creature(self, creature):
+        self.launch_swarmui()
+        SWARM_API_URL = "http://127.0.0.1:7801"
+        try:
+            session_url = f"{SWARM_API_URL}/API/GetNewSession"
+            session_response = requests.post(session_url, json={}, headers={"Content-Type": "application/json"})
+            session_data = session_response.json()
+            session_id = session_data.get("session_id")
+            if not session_id:
+                print(f"Failed to obtain session ID for Creature {creature.get('Name', 'Unknown')}")
+                return
+            creature_name = creature.get("Name", "Unknown")
+            creature_desc = creature.get("Description", "Unknown")
+            stats = creature.get("Stats", "")
+            creature_desc_formatted = text_helpers.format_longtext(creature_desc)
+            prompt = f"{creature_name} {creature_desc_formatted} {stats}"
+            prompt_data = {
+                "session_id": session_id,
+                "images": 1,
+                "prompt": prompt,
+                "negativeprompt": ("blurry, low quality, comics style, mangastyle, paint style, watermark, ugly, "
+                                "monstrous, too many fingers, too many legs, too many arms, bad hands, "
+                                "unrealistic weapons, bad grip on equipment, nude"),
+                "model": self.selected_model.get(),
+                "width": 1024,
+                "height": 1024,
+                "cfgscale": 9,
+                "steps": 20,
+                "seed": -1
+            }
+            generate_url = f"{SWARM_API_URL}/API/GenerateText2Image"
+            image_response = requests.post(generate_url, json=prompt_data, headers={"Content-Type": "application/json"})
+            image_data = image_response.json()
+            images = image_data.get("images")
+            if not images or len(images) == 0:
+                print(f"Image generation failed for Creature '{creature_name}'")
+                return
+            image_url = f"{SWARM_API_URL}/{images[0]}"
+            downloaded_image = requests.get(image_url)
+            if downloaded_image.status_code != 200:
+                print(f"Failed to download generated image for Creature '{creature_name}'")
+                return
+            output_filename = f"{creature_name.replace(' ', '_')}_portrait.png"
+            with open(output_filename, "wb") as f:
+                f.write(downloaded_image.content)
+            GENERATED_FOLDER = "assets/generated"
+            os.makedirs(GENERATED_FOLDER, exist_ok=True)
+            shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
+            creature["Portrait"] = self.copy_and_resize_portrait(creature, output_filename)
+            os.remove(output_filename)
+            print(f"Generated portrait for Creature '{creature_name}'")
+        except Exception as e:
+            print(f"Error generating portrait for Creature '{creature.get('Name', 'Unknown')}': {e}")
+
+    def copy_and_resize_portrait(self, entity, src_path):
         PORTRAIT_FOLDER = "assets/portraits"
         MAX_PORTRAIT_SIZE = (1024, 1024)
         os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
-        npc_name = npc.get("Name", "Unnamed").replace(" ", "_")
+        name = entity.get("Name", "Unnamed").replace(" ", "_")
         ext = os.path.splitext(src_path)[-1].lower()
-        dest_filename = f"{npc_name}_{id(self)}{ext}"
+        dest_filename = f"{name}_{id(self)}{ext}"
         dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
         with Image.open(src_path) as img:
             img = img.convert("RGB")
             img.thumbnail(MAX_PORTRAIT_SIZE)
             img.save(dest_path)
         return dest_path
-
-    def generate_missing_npc_portraits(self):
-        def confirm_model_and_continue():
-            ConfigHelper.set("LastUsed", "model", self.selected_model.get())
-            top.destroy()
-            self.generate_portraits_continue()
-        top = ctk.CTkToplevel(self)
-        top.title("Select AI Model")
-        top.geometry("400x200")
-        top.transient(self)
-        top.grab_set()
-        ctk.CTkLabel(top, text="Select AI Model to use for portrait generation:").pack(pady=20)
-        last_model = ConfigHelper.get("LastUsed", "model", fallback=None)
-        if last_model in self.model_options:
-            self.selected_model = ctk.StringVar(value=last_model)
-        else:
-            self.selected_model = ctk.StringVar(value=self.model_options[0])
-        ctk.CTkOptionMenu(top, values=self.model_options, variable=self.selected_model).pack(pady=10)
-        ctk.CTkButton(top, text="Continue", command=confirm_model_and_continue).pack(pady=10)
-
-    def generate_portraits_continue(self):
-        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM npcs")
-        npc_rows = cursor.fetchall()
-        modified = False
-        for npc in npc_rows:
-            portrait = npc["Portrait"] if npc["Portrait"] is not None else ""
-            if not portrait.strip():
-                npc_dict = dict(npc)
-                self.generate_portrait_for_npc(npc_dict)
-                if npc_dict.get("Portrait"):
-                    cursor.execute("UPDATE npcs SET Portrait = ? WHERE Name = ?", (npc_dict["Portrait"], npc["Name"]))
-                    modified = True
-        if modified:
-            conn.commit()
-            print("Updated NPC database with generated portraits.")
-        else:
-            print("No NPCs were missing portraits.")
-        conn.close()
 
     def preview_and_export_scenarios(self):
         scenario_wrapper = GenericModelWrapper("scenarios")
@@ -800,12 +944,31 @@ class MainWindow(ctk.CTk):
         alter_table_if_missing("places", places_columns)
         alter_table_if_missing("objects", objects_columns)
         alter_table_if_missing("creatures", creatures_columns)
-    
-    def select_swarmui_path(self):
-        folder = filedialog.askdirectory(title="Select SwarmUI Path")
-        if folder:
-            ConfigHelper.set("Paths", "swarmui_path", folder)
-            messagebox.showinfo("SwarmUI Path Set", f"SwarmUI path set to:\n{folder}")
+
+    def launch_swarmui(self):
+        global SWARMUI_PROCESS
+        swarmui_path = ConfigHelper.get("Paths", "swarmui_path", fallback=r"E:\SwarmUI\SwarmUI")
+        SWARMUI_CMD = os.path.join(swarmui_path, "launch-windows.bat")
+        env = os.environ.copy()
+        env.pop('VIRTUAL_ENV', None)
+        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
+            try:
+                SWARMUI_PROCESS = subprocess.Popen(
+                    SWARMUI_CMD,
+                    shell=True,
+                    cwd=swarmui_path,
+                    env=env
+                )
+                time.sleep(120.0)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
+
+    def cleanup_swarmui(self):
+        global SWARMUI_PROCESS
+        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
+            SWARMUI_PROCESS.terminate()
+
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
