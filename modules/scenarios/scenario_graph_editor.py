@@ -191,6 +191,9 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         # Use full text; no truncation—wrapping will be handled by canvas.
         summary = scenario.get("Summary", "")
         summary = clean_longtext(summary, max_length=5000)
+        # Extract secret for the scenario node.
+        secret = scenario.get("Secret", "")
+        secret = clean_longtext(secret, max_length=5000)
         self.scenario = scenario
         self.graph = {"nodes": [], "links": []}
         self.node_positions.clear()
@@ -204,7 +207,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             "x": center_x,
             "y": center_y,
             "color": "darkolivegreen",
-            "data": {**scenario, "Summary": summary}
+            "data": {**scenario, "Summary": summary, "Secret": secret}
         })
         self.node_positions[scenario_tag] = (center_x, center_y)
 
@@ -225,9 +228,12 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 x = center_x + offset_npcs * math.cos(angle_rad)
                 y = center_y + offset_npcs * math.sin(angle_rad)
                 npc_data = self.npcs[npc_name]
-                desc = npc_data.get("Description", "")
-                desc = clean_longtext(desc, max_length=5000)
-                npc_data["Description"] = desc
+                secret = npc_data.get("Secret", "")
+                secret = clean_longtext(secret, max_length=5000)
+                npc_data["Secret"] = secret
+                traits = npc_data.get("Traits", "")
+                traits = clean_longtext(traits, max_length=5000)
+                npc_data["Traits"] = traits
                 npc_tag = f"npc_{npc_name.replace(' ', '_')}"
                 self.graph["nodes"].append({
                     "type": "npc",
@@ -264,6 +270,10 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 pd = place_data.get("Description", "")
                 pd = clean_longtext(pd, max_length=5000)
                 place_data["Description"] = pd
+                # Add secret field processing for places
+                secret = place_data.get("Secret", "")
+                secret = clean_longtext(secret, max_length=5000)
+                place_data["Secret"] = secret
                 place_tag = f"place_{place_name.replace(' ', '_')}"
                 self.graph["nodes"].append({
                     "type": "place",
@@ -280,7 +290,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     "text": ""
                 })
 
-        # Creature nodes (new block)
+        # Creature nodes
         creatures_list = scenario.get("Creatures", [])
         creatures_count = len(creatures_list)
         if creatures_count > 0:
@@ -301,6 +311,10 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 desc = creature_data.get("Description", "")
                 desc = clean_longtext(desc, max_length=5000)
                 creature_data["Description"] = desc
+                # Add secret field processing for creatures
+                weakness = creature_data.get("Weakness", "")
+                weakness = clean_longtext(weakness, max_length=5000)
+                creature_data["Weakness"] = weakness
                 creature_tag = f"creature_{creature_name.replace(' ', '_')}"
                 self.graph["nodes"].append({
                     "type": "creature",
@@ -383,16 +397,43 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             color = node.get("color", default_colors.get(node_type, "darkslategray"))
             node_tag = f"{node_type}_{node_name.replace(' ', '_')}"
 
-            # Split text: title is node name (bold), body is Summary (scenario) or Description (others)
+            # Title is always the node name. For body text, include secret info where applicable.
             title_text = node_name
             if node_type == "scenario":
-                body_text = node["data"].get("Summary", "")
+                summary = node["data"].get("Summary", "")
+                secret = node["data"].get("Secret", "")
+                if secret:
+                    body_text = f"{summary}\n Secrets: {secret}"
+                else:
+                    body_text = summary
                 wrap_width = MAX_OVERLAY_WIDTH - 2 * PAD
             elif node_type == "place":
-                body_text = node["data"].get("Description", "")
+                description = node["data"].get("Description", "")
+                secret = node["data"].get("Secret", "")
+                if secret:
+                    body_text = f"{description}\nSecret: {secret}"
+                else:
+                    body_text = description
                 wrap_width = MAX_OVERLAY_WIDTH - 2 * PAD
-            else:
-                body_text = node["data"].get("Description", "")
+            elif node_type == "creature":
+                stats = node["data"].get("Stats", "")
+                if isinstance(stats, dict):
+                    stats_text = stats.get("text", "No Stats")
+                else:
+                    stats_text = str(stats)
+                weakness = node["data"].get("Weakness", "")
+                if weakness:
+                    body_text = f"Stats: {stats_text}\nWeakness: {weakness}"
+                else:
+                    body_text = f"Stats: {stats_text}"
+                wrap_width = NPC_TEXT_WRAP
+            else:  # NPC nodes (and similar)
+                traits = node["data"].get("Traits", "")
+                secret = node["data"].get("Secret", "")
+                if secret:
+                    body_text = f"{traits}\nSecret: {secret}"
+                else:
+                    body_text = traits
                 wrap_width = NPC_TEXT_WRAP
 
             title_font = tkFont.Font(family="Arial", size=10, weight="bold")
@@ -412,8 +453,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 desired_width = p_w + GAP + NPC_TEXT_WRAP + 2 * PAD
                 desired_height = max(p_h, total_text_height) + 2 * PAD
             else:
-                desired_width = max((wrap_width + 2 * PAD), MAX_OVERLAY_WIDTH)
-                desired_height = max(total_text_height + 2 * PAD, MAX_OVERLAY_HEIGHT)
+                desired_width = wrap_width + 2 * PAD
+                desired_height = total_text_height + 2 * PAD
 
             try:
                 overlay_img = Image.open(node_png_path)

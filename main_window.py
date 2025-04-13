@@ -16,7 +16,7 @@ from docx import Document
 from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.window_helper import position_window_at_top
-from modules.generic.scenario_detail_view import ScenarioDetailView
+from modules.scenarios.scenario_detail_view import ScenarioDetailView
 from modules.npcs.npc_graph_editor import NPCGraphEditor  # Import the graph editor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
 from modules.helpers.template_loader import load_template
