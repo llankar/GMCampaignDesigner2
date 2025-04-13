@@ -12,6 +12,7 @@ from tkinter import PhotoImage
 import customtkinter as ctk
 from PIL import Image, ImageTk
 from docx import Document
+import logging
 
 from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
@@ -34,53 +35,74 @@ ctk.set_default_color_theme("blue")
 # Global process variable for SwarmUI
 SWARMUI_PROCESS = None
 
-# ---------------------------
-# Tooltip Helper Class
-# ---------------------------
 class ToolTip:
     """
-    A simple tooltip class for tkinter widgets.
+    A tooltip that displays after a delay if the pointer remains over the widget.
+    Debug logs and pointer descendant checking have been added.
     """
-    def __init__(self, widget, text):
+    def __init__(self, widget, text, delay=500):
         self.widget = widget
         self.text = text
+        self.delay = delay  # delay in milliseconds
         self.tipwindow = None
-        widget.bind("<Enter>", self.enter)
-        widget.bind("<Leave>", self.leave)
+        self.after_id = None
+        widget.bind("<Enter>", self.schedule, add="+")
+        widget.bind("<Leave>", self.cancel, add="+")
+        widget.bind("<ButtonPress>", self.cancel, add="+")
 
-    def enter(self, event=None):
-        self.showtip()
+    def is_descendant(self, widget):
+        """
+        Check if the given widget is self.widget or a descendant of self.widget.
+        """
+        current = widget
+        while current:
+            if current == self.widget:
+                return True
+            current = current.master
+        return False
 
-    def leave(self, event=None):
+    def schedule(self, event=None):
+        self.after_id = self.widget.after(self.delay, self.showtip)
+
+    def cancel(self, event=None):
+        if event:
+            # Get the widget currently under the pointer using global coordinates.
+            x, y = event.x_root, event.y_root
+            widget_under = self.widget.winfo_containing(x, y)
+            if widget_under and self.is_descendant(widget_under):
+                return
+        if self.after_id:
+            self.widget.after_cancel(self.after_id)
+            self.after_id = None
         self.hidetip()
 
     def showtip(self):
         if self.tipwindow or not self.text:
+            print("Aborting showtip: tipwindow already exists or text is empty")
             return
-        # Position the tooltip to the right of the widget
         x = self.widget.winfo_rootx() + 30
         y = self.widget.winfo_rooty() + 20
         self.tipwindow = tw = Toplevel(self.widget)
-        tw.wm_overrideredirect(1)
+        tw.wm_overrideredirect(True)
         tw.wm_geometry("+%d+%d" % (x, y))
         label = tk.Label(tw, text=self.text, justify="left",
                         background="#ffffe0", relief="solid", borderwidth=1,
                         font=("tahoma", "8", "normal"))
         label.pack(ipadx=1)
-
+    
     def hidetip(self):
         tw = self.tipwindow
         self.tipwindow = None
         if tw:
             tw.destroy()
-
+   
 # ---------------------------
 # Helper to create an icon button with tooltip (using grid later)
 # ---------------------------
 def create_icon_button(parent, icon, tooltip_text, command):
-    # Increased the button size to 80x80 pixels
+    container = tk.Frame(parent, bg="#2B2B2B")  # Set background to match your dark theme
     btn = ctk.CTkButton(
-        parent,
+        container,
         text="",
         image=icon,
         command=command,
@@ -92,8 +114,9 @@ def create_icon_button(parent, icon, tooltip_text, command):
         border_width=1,
         border_color="#005fa3"
     )
-    ToolTip(btn, tooltip_text)
-    return btn
+    btn.pack()
+    ToolTip(container, tooltip_text)
+    return container
 
 # ---------------------------
 # Main Window Class with Multi-Column Icon Layout
