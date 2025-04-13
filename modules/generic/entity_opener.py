@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 import os
-
+from modules.scenarios.scenario_detail_view import ScenarioDetailView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.template_loader import load_template
 
@@ -25,7 +25,7 @@ def open_detached_npc(npc_name):
     window.geometry("800x600")
 
     # 3. Create a minimal ScenarioDetailView (or a custom UI) for display
-    from modules.generic.scenario_detail_view import ScenarioDetailView
+  
     dummy_scenario = {"Title": f"Entity: {npc_name}"}
     detail_view = ScenarioDetailView(window, scenario_item=dummy_scenario)
     detail_view.pack(fill="both", expand=True)
