@@ -6,7 +6,7 @@ import re
 import os
 import ctypes
 from ctypes import wintypes
-import logging
+#import logging
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
@@ -26,7 +26,7 @@ PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 def get_monitors():
     monitors = []
@@ -125,7 +125,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         dialog.wait_window()
 
     def display_portrait_window(self):
-        logging.debug("Entering display_portrait_window")
+       #logging.debug("Entering display_portrait_window")
         if not self.selected_node or not (self.selected_node.startswith("npc_") or self.selected_node.startswith("creature_")):
             messagebox.showerror("Error", "No NPC or Creature selected.")
             return
@@ -138,7 +138,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             name_key = self.selected_node.replace("creature_", "").replace("_", " ")
             data_source = self.creatures
 
-        logging.debug(f"Extracted name: {name_key}")
+       #logging.debug(f"Extracted name: {name_key}")
         entity_data = data_source.get(name_key)
         if not entity_data:
             messagebox.showerror("Error", f"Entity '{name_key}' not found.")

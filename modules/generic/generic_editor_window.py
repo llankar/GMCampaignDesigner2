@@ -730,23 +730,55 @@ class GenericEditorWindow(ctk.CTkToplevel):
             img.save(dest_path)
         
         return dest_path
+    
     class CustomDropdown(ctk.CTkToplevel):
         def __init__(self, master, options, command, **kwargs):
             super().__init__(master, **kwargs)
             self.command = command  # Callback when an option is selected.
-            self.options = options
+            self.all_options = options  # Keep the full list for filtering.
+            self.filtered_options = options.copy()  # Start with all options.
             self.overrideredirect(True)  # Remove window decorations
+
+            # Create a StringVar for searching.
+            self.search_var = ctk.StringVar()
+            self.search_var.trace("w", self.on_search_change)
+
+            # Create a search entry at the top of the dropdown.
+            search_entry = ctk.CTkEntry(self, textvariable=self.search_var, placeholder_text="Search...")
+            search_entry.pack(fill="x", padx=5, pady=(5, 0))
+
+            # Create the scrollable frame for the options.
             self.scrollable = ctk.CTkScrollableFrame(self)
-            self.scrollable.pack(fill="both", expand=True)
-            for opt in options:
-                btn = ctk.CTkButton(self.scrollable, text=opt, command=lambda o=opt: self.select(o))
-                btn.pack(fill="x", padx=5, pady=2)
-            # Bind mouse wheel events on the scrollable frame.
+            self.scrollable.pack(fill="both", expand=True, padx=5, pady=5)
+
+            # Initialize a list to hold the option buttons.
+            self.option_buttons = []
+            self.populate_options()
+
+            # Bind mouse wheel events for scrolling.
             self.scrollable.bind("<MouseWheel>", self.on_mousewheel)
             self.scrollable.bind("<Button-4>", self.on_mousewheel)  # Linux up
             self.scrollable.bind("<Button-5>", self.on_mousewheel)  # Linux down
 
+        def populate_options(self):
+            # Remove any existing option buttons.
+            for widget in self.scrollable.winfo_children():
+                widget.destroy()
+            self.option_buttons = []
+            # Create a button for each option in the filtered list.
+            for opt in self.filtered_options:
+                btn = ctk.CTkButton(self.scrollable, text=opt, command=lambda o=opt: self.select(o))
+                btn.pack(fill="x", padx=5, pady=2)
+                self.option_buttons.append(btn)
+
+        def on_search_change(self, *args):
+            query = self.search_var.get().lower()
+            # Filter options based on whether the query is found (case-insensitive).
+            self.filtered_options = [opt for opt in self.all_options if query in opt.lower()]
+            self.populate_options()
+
         def on_mousewheel(self, event):
+            # Scroll the canvas based on mouse wheel events.
             if event.num == 4 or event.delta > 0:
                 self.scrollable._parent_canvas.yview_scroll(-1, "units")
             elif event.num == 5 or event.delta < 0:
@@ -755,4 +787,3 @@ class GenericEditorWindow(ctk.CTkToplevel):
         def select(self, option):
             self.command(option)
             self.destroy()
-

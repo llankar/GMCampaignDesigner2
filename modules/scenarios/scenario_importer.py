@@ -1,14 +1,11 @@
 import re
 import os
 import json
-import logging
 import customtkinter as ctk
 from tkinter import messagebox
 from modules.helpers.text_helpers import format_longtext
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 
-# Configure logging.
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 # Default formatting object.
 default_formatting = {
@@ -30,18 +27,18 @@ def remove_emojis(text):
                                u"\U000024C2-\U0001F251"
                                "]+", flags=re.UNICODE)
     cleaned = emoji_pattern.sub(r'', text)
-    logging.debug("Emojis removed.")
+   #logging.debug("Emojis removed.")
     return cleaned
 
 def import_formatted_scenario(text):
     # Remove emojis.
     cleaned_text = remove_emojis(text)
-    logging.info("Cleaned text (first 200 chars): %s", cleaned_text[:200])
+   #logging.info("Cleaned text (first 200 chars): %s", cleaned_text[:200])
     
     # --- Extract Basic Scenario Info ---
     title_match = re.search(r'^Scenario Title:\s*(.+)$', cleaned_text, re.MULTILINE)
     title = title_match.group(1).strip() if title_match else "Unnamed Scenario"
-    logging.info("Parsed Title: %s", title)
+   #logging.info("Parsed Title: %s", title)
     
     # Extract Introduction.
     intro_match = re.search(
@@ -50,7 +47,7 @@ def import_formatted_scenario(text):
         re.DOTALL
     )
     introduction = intro_match.group(1).strip() if intro_match else ""
-    logging.info("Parsed Introduction (first 100 chars): %s", introduction[:100])
+   #logging.info("Parsed Introduction (first 100 chars): %s", introduction[:100])
     
     # --- Extract Places ---
     locations = []
@@ -64,7 +61,7 @@ def import_formatted_scenario(text):
             locs_text = remainder[:npc_index].strip()
         else:
             locs_text = remainder.strip()
-        logging.info("Extracted Places section (first 200 chars): %s", locs_text[:200])
+       #logging.info("Extracted Places section (first 200 chars): %s", locs_text[:200])
         loc_entries = re.split(r'(?m)^\d+\.\s+', locs_text)
         for entry in loc_entries:
             entry = entry.strip()
@@ -88,16 +85,13 @@ def import_formatted_scenario(text):
                 "Name": loc_name,
                 "Description": description.strip()
             })
-            logging.info("Parsed Place: %s; Desc snippet: %s", loc_name, description[:60])
-    else:
-        logging.info("No Places section found.")
     
     # --- Extract NPCs ---
     npcs = []
     npc_split = re.split(r'(?mi)^\s*(?:[^\w\s]*\s*)?(?:Key NPCs|NPCs)\s*:?.*$', cleaned_text, maxsplit=1)
     if len(npc_split) > 1:
         npc_text = npc_split[1].strip()
-        logging.info("Extracted NPCs section (first 200 chars): %s", npc_text[:200])
+        #logging.info("Extracted NPCs section (first 200 chars): %s", npc_text[:200])
         npc_entries = re.split(r'(?m)^\d+\.\s+', npc_text)
         if npc_entries and not npc_entries[0].strip():
             npc_entries = npc_entries[1:]
@@ -155,10 +149,8 @@ def import_formatted_scenario(text):
                 "Portrait": ""
             }
             npcs.append(npc_obj)
-            logging.info("Parsed NPC: %s; Role: %s; Desc snippet: %s; Secret snippet: %s", 
-                         npc_name, npc_role, combined_desc[:60], secret.strip()[:60])
-    else:
-        logging.info("No NPC section found.")
+           #logging.info("Parsed NPC: %s; Role: %s; Desc snippet: %s; Secret snippet: %s", 
+           #               npc_name, npc_role, combined_desc[:60], secret.strip()[:60])
     
     # --- Build Scenario Entity ---
     scenario_entity = {
@@ -174,7 +166,7 @@ def import_formatted_scenario(text):
         "Places": [loc["Name"] for loc in locations],
         "NPCs": [npc["Name"] for npc in npcs]
     }
-    logging.info("Built scenario entity: %s", scenario_entity)
+   #logging.info("Built scenario entity: %s", scenario_entity)
     
     # --- Save to the Database using Wrappers (append new records) ---
     scenario_wrapper = GenericModelWrapper("scenarios")
@@ -193,7 +185,7 @@ def import_formatted_scenario(text):
     places_wrapper.save_items(combined_places)
     npcs_wrapper.save_items(combined_npcs)
     
-    logging.info("Scenario imported successfully using the database (appended to existing data)!")
+   #logging.info("Scenario imported successfully using the database (appended to existing data)!")
 
 # ─────────────────────────────────────────────────────────────────────────
 # CLASS: ScenarioImportWindow
