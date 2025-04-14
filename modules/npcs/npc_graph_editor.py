@@ -8,12 +8,12 @@ from modules.helpers.template_loader import load_template
 from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 import math
-import logging
+#import logging
 from screeninfo import get_monitors
 from modules.npcs import npc_opener
 import tkinter as tk  # standard tkinter
 from PIL import Image, ImageTk
-import os, logging, ctypes
+import os, ctypes
 from ctypes import wintypes
 
 
@@ -34,7 +34,7 @@ def get_monitors():
                                           wintypes.LPARAM)
     ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
     return monitors
-logging.basicConfig(level=logging.ERROR)
+#logging.basicConfig(level=logging.ERROR)
 
 # Constants for portrait folder and max portrait size
 PORTRAIT_FOLDER = "assets/portraits"
@@ -138,66 +138,64 @@ class NPCGraphEditor(ctk.CTkFrame):
         """Display the NPC's portrait in a normal window (with decorations) that is
         sized and positioned to cover the second monitor (if available).  
         """
-        logging.debug("Entering display_portrait_window")
+        #logging.debug("Entering display_portrait_window")
         
         # Check if a valid NPC is selected.
         if not self.selected_node or not self.selected_node.startswith("npc_"):
             messagebox.showerror("Error", "No NPC selected.")
-            logging.error("No NPC selected.")
+           #logging.error("No NPC selected.")
             return
 
         # Extract NPC name from the node tag.
         npc_name = self.selected_node.replace("npc_", "").replace("_", " ")
-        logging.debug(f"Extracted NPC name: {npc_name}")
+       #logging.debug(f"Extracted NPC name: {npc_name}")
 
         npc_data = self.npcs.get(npc_name)
         if not npc_data:
             messagebox.showerror("Error", f"NPC '{npc_name}' not found.")
-            logging.error(f"NPC '{npc_name}' not found.")
+           #logging.error(f"NPC '{npc_name}' not found.")
             return
 
         portrait_path = npc_data.get("Portrait", "")
-        logging.debug(f"Portrait path: {portrait_path}")
+       #logging.debug(f"Portrait path: {portrait_path}")
         if not portrait_path or not os.path.exists(portrait_path):
             messagebox.showerror("Error", "No valid portrait found for this NPC.")
-            logging.error("No valid portrait found.")
+           #logging.error("No valid portrait found.")
             return
 
         try:
             img = Image.open(portrait_path)
-            logging.debug(f"Image opened successfully, original size: {img.size}")
+           #logging.debug(f"Image opened successfully, original size: {img.size}")
         except Exception as e:
             messagebox.showerror("Error", f"Error loading portrait: {e}")
-            logging.exception("Error loading portrait:")
+           #logging.exception("Error loading portrait:")
             return
 
         # Obtain monitor information using ctypes.
         monitors = get_monitors()
-        logging.debug("Detected monitors: " + str(monitors))
+       #logging.debug("Detected monitors: " + str(monitors))
 
         # Choose the second monitor if available; otherwise, use the primary monitor.
         if len(monitors) > 1:
             target_monitor = monitors[1]
-            logging.debug(f"Using second monitor: {target_monitor}")
+           #logging.debug(f"Using second monitor: {target_monitor}")
         else:
             target_monitor = monitors[0]
-            logging.debug("Only one monitor available; using primary monitor.")
+           #logging.debug("Only one monitor available; using primary monitor.")
 
         screen_x, screen_y, screen_width, screen_height = target_monitor
-        logging.debug(f"Target screen: ({screen_x}, {screen_y}, {screen_width}, {screen_height})")
+       #logging.debug(f"Target screen: ({screen_x}, {screen_y}, {screen_width}, {screen_height})")
 
         # Scale the image if it's larger than the monitor dimensions (without upscaling).
         img_width, img_height = img.size
         scale = min(screen_width / img_width, screen_height / img_height, 1)
         new_size = (int(img_width * scale), int(img_height * scale))
-        logging.debug(f"Scaling factor: {scale}, new image size: {new_size}")
+       #logging.debug(f"Scaling factor: {scale}, new image size: {new_size}")
         if scale < 1:
             resample_method = getattr(Image, "Resampling", Image).LANCZOS
             img = img.resize(new_size, resample_method)
-            logging.debug("Image resized.")
-        else:
-            logging.debug("No resizing needed.")
-
+           #logging.debug("Image resized.")
+        
         portrait_img = ImageTk.PhotoImage(img)
         # Persist the image reference to prevent garbage collection.
         self.node_images[f"window_{npc_name}"] = portrait_img
@@ -208,7 +206,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         # Set the window geometry to match the target monitor's dimensions and position.
         win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
         win.update_idletasks()
-        logging.debug("Window created on target monitor with screen size.")
+       #logging.debug("Window created on target monitor with screen size.")
 
         # Create a frame with a black background to hold the content.
         content_frame = tk.Frame(win, bg="white")
@@ -219,19 +217,19 @@ class NPCGraphEditor(ctk.CTkFrame):
                             font=("Arial", 40, "bold"),
                             fg="white", bg="white")
         name_label.pack(pady=20)
-        logging.debug("NPC name label created.")
+       #logging.debug("NPC name label created.")
 
         # Add a label to display the portrait image.
         image_label = tk.Label(content_frame, image=portrait_img, bg="white")
         image_label.image = portrait_img  # persist reference
         image_label.pack(expand=True)
-        logging.debug("Portrait image label created.")
+       #logging.debug("Portrait image label created.")
         new_x = screen_x + 0 #1920
         win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
-        logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")        
+       #logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")        
         # Bind a click event to close the window.
         win.bind("<Button-1>", lambda e: win.destroy())
-        logging.debug("Window displayed; waiting for click to close.")
+       #logging.debug("Window displayed; waiting for click to close.")
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: _on_mousewheel_y

@@ -7,7 +7,7 @@ import requests
 import shutil
 import tkinter as tk
 from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, PhotoImage
-import logging
+#import logging
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
@@ -39,7 +39,7 @@ ctk.set_default_color_theme("blue")
 # Global process variable for SwarmUI
 SWARMUI_PROCESS = None
 
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+#logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 
 
 class MainWindow(ctk.CTk):
@@ -84,7 +84,7 @@ class MainWindow(ctk.CTk):
                 if col not in existing_columns:
                     alter_query = f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"
                     cursor.execute(alter_query)
-                    logging.debug("Added column '%s' to table '%s'.", col, table)
+                    #logging.debug("Added column '%s' to table '%s'.", col, table)
         npcs_columns = {
             "Name": "TEXT",
             "Role": "TEXT",
@@ -173,7 +173,7 @@ class MainWindow(ctk.CTk):
         try:
             pil_image = Image.open(path)
         except Exception as e:
-            logging.error("Error loading %s: %s", path, e)
+            #logging.error("Error loading %s: %s", path, e)
             return None
         return ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=size)
 
