@@ -138,41 +138,59 @@ WELCOME_TEMPLATE = '''
     <title>{{ db_name }} - Welcome</title>
     <style>
         body {
-            font-family: "Arial", sans-serif;
-            text-align: center;
-            background: url('/assets/images/background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
+            font-family: "Segoe UI", sans-serif;
+            background: url('/assets/images/background.png') no-repeat center center fixed;
+            background-size: center;
             margin: 0;
             padding: 0;
+            color: #ffffff;
+        }
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
         }
         h1 {
-            margin-top: 50px;
-            font-size: 48px;
-            text-shadow: 2px 2px 4px #000;
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 6px #000;
+        }
+        .button-group {
+            margin-top: 30px;
         }
         .btn {
-            margin: 20px;
-            padding: 20px 40px;
-            font-size: 24px;
+            margin: 10px;
+            padding: 18px 36px;
+            font-size: 20px;
+            font-weight: bold;
             color: #fff;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: none;
-            border-radius: 8px;
+            background-color: rgba(30, 30, 30, 0.6);
+            border: 2px solid #ffffff88;
+            border-radius: 12px;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
+            transition: all 0.2s ease-in-out;
         }
         .btn:hover {
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: #ffffffcc;
+            color: #1D3572;
+            border-color: #ffffff;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to {{ db_name }} Campaign</h1>
-    <div>
-        <a class="btn" href="{{ url_for('npc_view') }}">Non Player Characters View</a>
-        <a class="btn" href="{{ url_for('locations_view') }}">Locations View</a>
+    <div class="overlay">
+        <h1>Welcome to <span style="color:#ffe066;">{{ db_name }}</span> Campaign</h1>
+        <div class="button-group">
+            <a class="btn" href="{{ url_for('npc_view') }}">Non Player Characters View</a>
+            <a class="btn" href="{{ url_for('locations_view') }}">Locations View</a>
+        </div>
     </div>
 </body>
 </html>
