@@ -1,0 +1,60 @@
+{
+  "nodes": [
+    {
+      "npc_name": "Nicodemus Archleone",
+      "x": 100,
+      "y": 100,
+      "color": "lightblue"
+    },
+    {
+      "npc_name": "Pastor Caleb North",
+      "x": 220,
+      "y": 100,
+      "color": "lightblue"
+    },
+    {
+      "npc_name": "Marcus 'Mark' Shaw and Ophiriel",
+      "x": 444.0,
+      "y": 330.0,
+      "color": "lightblue"
+    },
+    {
+      "npc_name": "Captain Jonah Steele and Andras",
+      "x": 697.0,
+      "y": 476.0,
+      "color": "lightblue"
+    },
+    {
+      "npc_name": "Lucille Voss and Marchosias",
+      "x": 700,
+      "y": 100,
+      "color": "lightblue"
+    },
+    {
+      "npc_name": "Frederick 'Freddie' Winters and Orobas",
+      "x": 820,
+      "y": 100,
+      "color": "lightblue"
+    },
+    {
+      "npc_name": "Diana Vale and Barbatos",
+      "x": 940,
+      "y": 100,
+      "color": "lightblue"
+    },
+    {
+      "npc_name": "Mikhail Azarov",
+      "x": 1060,
+      "y": 100,
+      "color": "lightblue"
+    }
+  ],
+  "links": [
+    {
+      "npc_name1": "Captain Jonah Steele and Andras",
+      "npc_name2": "Marcus 'Mark' Shaw and Ophiriel",
+      "text": "sdqqsd",
+      "arrow_mode": "both"
+    }
+  ]
+}
