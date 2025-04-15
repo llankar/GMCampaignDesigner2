@@ -117,6 +117,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 self.create_longtext_field(field)
             elif field["name"] in ["NPCs", "Places", "Factions", "Objects", "Creatures"]:
                 self.create_dynamic_combobox_list(field)
+            elif field["type"] == "boolean":
+                self.create_boolean_field(field)
             else:
                 self.create_text_entry(field)
 
@@ -138,7 +140,24 @@ class GenericEditorWindow(ctk.CTkToplevel):
         # Optionally, adjust window position.
         position_window_at_top(self)
 
-   
+    def create_boolean_field(self, field):
+        # Define the two possible dropdown options.
+        options = ["True", "False"]
+        # Retrieve the stored value (default to "False" if not found).
+        stored_value = self.item.get(field["name"], "False")
+        # Convert stored_value to a string "True" or "False":
+        if isinstance(stored_value, bool):
+            initial_value = "True" if stored_value else "False"
+        else:
+            initial_value = "True" if (str(stored_value).lower() == "true" or stored_value ==1) else "False"
+        # Create a StringVar with the initial value.
+        var = ctk.StringVar(value=initial_value)
+        # Create the OptionMenu (dropdown) using customtkinter.
+        option_menu = ctk.CTkOptionMenu(self.scroll_frame, variable=var, values=options)
+        option_menu.pack(fill="x", pady=5)
+        # Save the widget and its StringVar for later retrieval.
+        self.field_widgets[field["name"]] = (option_menu, var)
+
     def create_longtext_field(self, field):
         value = self.item.get(field["name"], "")
         editor = RichTextEditor(self.scroll_frame)
@@ -510,7 +529,6 @@ class GenericEditorWindow(ctk.CTkToplevel):
             widget = self.field_widgets[field["name"]]
             if field["type"] == "longtext":
                 data = widget.get_text_data()
-                # If data is a dict and the text is empty, store empty string
                 if isinstance(data, dict) and not data.get("text", "").strip():
                     self.item[field["name"]] = ""
                 else:
@@ -519,6 +537,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
             elif field["name"] == "Portrait":
                 self.item[field["name"]] = self.portrait_path
+            elif field["type"] == "boolean":
+                # widget is stored as (option_menu, StringVar); convert to Boolean.
+                self.item[field["name"]] = True if widget[1].get() == "True" else False
             else:
                 self.item[field["name"]] = widget.get()
         self.saved = True
