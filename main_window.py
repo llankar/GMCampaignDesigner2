@@ -166,8 +166,7 @@ class MainWindow(ctk.CTk):
             "generate_portraits": self.load_icon("generate_icon.png", size=(64, 64)),
             "associate_portraits": self.load_icon("associate_icon.png", size=(64, 64)),
             "import_scenario": self.load_icon("import_icon.png", size=(64, 64)),
-            "export_foundry": self.load_icon("export_foundry_icon.png", size=(64, 64)),
-            "share_npc_graph": self.load_icon("share_npc_graph_icon.png", size=(64, 64))
+            "export_foundry": self.load_icon("export_foundry_icon.png", size=(64, 64))
         }
 
     def load_icon(self, file_name, size=(64, 64)):
@@ -236,8 +235,7 @@ class MainWindow(ctk.CTk):
             ("generate_portraits", "Generate Portraits", self.generate_missing_portraits),
             ("associate_portraits", "Associate NPC Portraits", self.associate_npc_portraits),
             ("import_scenario", "Import Scenario", self.open_scenario_importer),
-            ("export_foundry", "Export Scenarios for Foundry", self.export_foundry),
-            ("share_npc_graph", "Share NPC Graph", launch_web_viewer)
+            ("export_foundry", "Export Scenarios for Foundry", self.export_foundry)
         ]
         self.icon_buttons = []
         for idx, (icon_key, tooltip, cmd) in enumerate(icons_list):

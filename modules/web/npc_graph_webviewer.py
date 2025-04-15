@@ -33,13 +33,10 @@ if platform.system() != "Windows" and is_windows_style_path:
 
     synology_base = "/volume1/homes/llankar/Drive"
     DB_PATH = os.path.join(synology_base, subpath)
-    logging.debug("Resolved DB_PATH linux: %s", DB_PATH)
 else:
     DB_PATH = raw_db_path if os.path.exists(raw_db_path) else os.path.abspath(os.path.normpath(raw_db_path))
 
 DB_NAME = os.path.basename(DB_PATH).replace(".db", "")
-logging.debug("Resolved DB_PATH: %s", DB_PATH)
-logging.debug("DB_NAME: %s", DB_NAME)
 
 # Compute directories relative to this file.
 CURRENT_DIR = os.path.dirname(__file__)
