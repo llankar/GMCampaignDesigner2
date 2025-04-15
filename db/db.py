@@ -57,7 +57,10 @@ def initialize_db():
         CREATE TABLE IF NOT EXISTS places (
             Name TEXT PRIMARY KEY,
             Description TEXT,
-            NPCs TEXT
+            NPCs TEXT,
+            PlayerDisplay BOOLEAN DEFAULT 0,
+            Secrets TEXT,
+            Portrait TEXT
         )
     ''')
     

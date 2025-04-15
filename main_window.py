@@ -922,7 +922,10 @@ class MainWindow(ctk.CTk):
         places_columns = {
             "Name": "TEXT",
             "Description": "TEXT",
-            "NPCs": "TEXT"
+            "NPCs": "TEXT",
+            "Secrets": "TEXT",
+            "PlayerDisplay": "BOOLEAN",
+            "Portrait": "TEXT"
         }
         objects_columns = {
             "Name": "TEXT",
