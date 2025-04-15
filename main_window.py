@@ -31,6 +31,7 @@ from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
 from modules.helpers import text_helpers
+from modules.web.npc_graph_webviewer import launch_web_viewer
 
 # Set up CustomTkinter appearance
 ctk.set_appearance_mode("Dark")
@@ -165,7 +166,8 @@ class MainWindow(ctk.CTk):
             "generate_portraits": self.load_icon("generate_icon.png", size=(64, 64)),
             "associate_portraits": self.load_icon("associate_icon.png", size=(64, 64)),
             "import_scenario": self.load_icon("import_icon.png", size=(64, 64)),
-            "export_foundry": self.load_icon("export_foundry_icon.png", size=(64, 64))
+            "export_foundry": self.load_icon("export_foundry_icon.png", size=(64, 64)),
+            "share_npc_graph": self.load_icon("share_npc_graph_icon.png", size=(64, 64))
         }
 
     def load_icon(self, file_name, size=(64, 64)):
@@ -234,7 +236,8 @@ class MainWindow(ctk.CTk):
             ("generate_portraits", "Generate Portraits", self.generate_missing_portraits),
             ("associate_portraits", "Associate NPC Portraits", self.associate_npc_portraits),
             ("import_scenario", "Import Scenario", self.open_scenario_importer),
-            ("export_foundry", "Export Scenarios for Foundry", self.export_foundry)
+            ("export_foundry", "Export Scenarios for Foundry", self.export_foundry),
+            ("share_npc_graph", "Share NPC Graph", launch_web_viewer)
         ]
         self.icon_buttons = []
         for idx, (icon_key, tooltip, cmd) in enumerate(icons_list):
