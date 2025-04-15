@@ -1,11 +1,39 @@
 # db.py
 import sqlite3
+import os
+import re
+import platform
 from modules.helpers.config_helper import ConfigHelper
+import logging
 
 def get_connection():
     # Read the database path from the config; default to "campaign.db"
-    db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
-    return sqlite3.connect(db_path)
+    # Obtain the database name from the config (strip off '.db')
+    raw_db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db").strip()
+
+    # Detect Windows-style absolute paths like D:/...
+    is_windows_style_path = re.match(r"^[a-zA-Z]:[\\/]", raw_db_path)
+
+    if platform.system() != "Windows" and is_windows_style_path:
+        drive_letter = raw_db_path[0].upper()
+        subpath = raw_db_path[2:].lstrip("/\\").replace("\\", "/")  # Normalize to forward slashes
+
+        # ✅ Remove "SynologyDrive/" prefix from the subpath if present
+        if subpath.lower().startswith("synologydrive/"):
+            subpath = subpath[len("synologydrive/"):]
+
+        synology_base = "/volume1/homes/llankar/Drive"
+        DB_PATH = os.path.join(synology_base, subpath)
+        logging.debug("Resolved DB_PATH linux: %s", DB_PATH)
+    else:
+        DB_PATH = raw_db_path if os.path.exists(raw_db_path) else os.path.abspath(os.path.normpath(raw_db_path))
+
+    DB_NAME = os.path.basename(DB_PATH).replace(".db", "")
+    
+    logging.debug("Resolved DB_PATH: %s", DB_PATH)
+    logging.debug("DB_NAME: %s", DB_NAME)
+
+    return sqlite3.connect(DB_PATH)
 
 def initialize_db():
     conn = get_connection()
