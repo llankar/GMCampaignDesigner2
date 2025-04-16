@@ -1,0 +1,65 @@
+{
+  "npcs":[
+    {
+        "Name": "Asa 'The Oathbound' Murad",
+        "Role": "Guardian of the Bone Cellar",
+        "Description": "A towering figure at seven feet, Asa has burned-clay skin and ancient glass-like eyes. His appearance evokes an archaic titan, clad in lamellar armor over a dark monk\u2019s robe. A massive axe, bound in soul-silk, rests on his back. Silent unless called by the Accords, Asa carries an aura of ritual power.",
+        "Secret": "He was once an executioner for a dead god; his vow binds him until the club\u2019s neutrality ends.",
+        "Quote": "\"Speak your oath, and it shall be heard by the stones.\"",
+        "RoleplayingCues": "Speaks only when necessary; every word heavy with ritual. Stillness like a statue.",
+        "Personality": "Stoic, patient, unwavering, terrifying in his calm.",
+        "Motivation": "To uphold the sanctity of Hell\u2019s Gate through the Bone Cellar.",
+        "Background": "Asa\u2019s life began as a divine enforcer, but after the death of his master deity, he wandered until Raziel offered him purpose.",
+        "Traits": "Supernatural resilience, massive strength, Oath magic.",
+        "Genre": "Urban Fantasy",
+        "Factions": [
+            ""
+        ],
+        "Objects": [
+            ""
+        ],
+        "Portrait": ""
+    },
+    {
+        "Name": "DJ NeonNova",
+        "Role": "Fey Disc-Jockey of The Velvet Hollow",
+        "Description": "A genderfluid fey with chrome-glowing skin and a blue-fire mohawk. Their aura pulses with music, dressed in illusion threads and always hovering slightly above ground. Their eyes\u2014one a starfield, the other a mirror\u2014see into the soul of sound.",
+        "Secret": "Their music can influence fey politics and has caused accidental enchantments.",
+        "Quote": "\"Feel the beat, become the beat, or be moved by it.\"",
+        "RoleplayingCues": "Constantly emits faint ambient sound. Speaks in poetic rhythms.",
+        "Personality": "Flamboyant, deeply empathic, mysterious, dramatic.",
+        "Motivation": "To maintain emotional equilibrium through sound.",
+        "Background": "Summoned through a botched digital ritual, Nova now works as Hell\u2019s Gate\u2019s official emotional modulator.",
+        "Traits": "Emotion magic, Fey charm, Illusory manipulation.",
+        "Genre": "Urban Fantasy",
+        "Factions": [
+            "Winter Court"
+        ],
+        "Objects": [
+            ""
+        ],
+        "Portrait": ""
+    },
+    
+    {
+        "Name": "Vela Stone",
+        "Role": "Emissary of the Grey Council",
+        "Description": "Statuesque and serene, Vela has marble-grey, faintly glowing skin. She\u2019s dressed in silk suits of storm and shadow, wielding only a jet-black obsidian pen. Her gaze is calculating, her voice dispassionately calm.",
+        "Secret": "Her pen writes in fate\u2014changing or recording truths from beyond.",
+        "Quote": "\"I record. I do not interfere\u2014unless fate wills it.\"",
+        "RoleplayingCues": "Quietly takes notes in a rune-bound ledger. Watches intently, unnerving silence.",
+        "Personality": "Aloof, intensely perceptive, subtly manipulative.",
+        "Motivation": "To observe all breaches of neutrality and report to the Grey Council.",
+        "Background": "Vela was born of twilight energies and serves as the neutral judge between Faerie interests.",
+        "Traits": "Prophetic intuition, inviolable neutrality, Fate Magic.",
+        "Genre": "Urban Fantasy",
+        "Factions": [
+            "Wyld Feys"
+        ],
+        "Objects": [
+            ""
+        ],
+        "Portrait": ""
+    }
+	]
+}

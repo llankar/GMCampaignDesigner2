@@ -113,6 +113,30 @@ def get_places_list():
         return []
 
 
+def get_informations_list():
+    """
+    Load Informations with PlayerDisplay == True.
+    Process the longtext 'Information' field.
+    """
+    try:
+        info_wrapper = GenericModelWrapper("informations")
+        infos = info_wrapper.load_items()
+        filtered = []
+        for info in infos:
+            pd = info.get("PlayerDisplay")
+            if pd in (True, "True", "true", 1, "1"):
+                text = info.get("Information")
+                info["DisplayInformation"] = format_longtext(text) if text else ""
+                text = info.get("Level")
+                info["DisplayLevel"] = format_longtext(text) if text else ""
+                filtered.append(info)
+        logging.debug("Filtered %d information(s) for player display.", len(filtered))
+        return filtered
+    except Exception as e:
+        logging.error("Error loading informations: %s", e)
+        return []
+
+
 # -------------------- HTML Templates --------------------
 
 WELCOME_TEMPLATE = '''
@@ -173,8 +197,9 @@ WELCOME_TEMPLATE = '''
     <div class="overlay">
         <h1>Welcome to <span style="color:#ffe066;">{{ db_name }}</span> Campaign</h1>
         <div class="button-group">
-            <a class="btn" href="{{ url_for('npc_view') }}">Non Player Characters View</a>
-            <a class="btn" href="{{ url_for('locations_view') }}">Locations View</a>
+            <a class="btn" href="{{ url_for('npc_view') }}">Non-Player Characters</a>
+            <a class="btn" href="{{ url_for('locations_view') }}">Locations</a>
+            <a class="btn" href="{{ url_for('news_view') }}">News and Rumors</a>
         </div>
     </div>
 </body>
@@ -245,9 +270,9 @@ NPC_VIEWER_TEMPLATE = '''
         fetch('/api/npc-graph?graph={{ selected_graph }}')
             .then(response => response.json())
             .then(data => {
-                const nodes = data.nodes.map((node, index) => ({
+                const nodes = data.nodes.map((node, idx) => ({
                     data: {
-                        id: 'node' + index,
+                        id: 'node' + idx,
                         label: node.npc_name,
                         color: node.color,
                         portrait: node.portrait,
@@ -257,8 +282,8 @@ NPC_VIEWER_TEMPLATE = '''
                 }));
                 const edges = data.links.map(link => ({
                     data: {
-                        source: getNodeIdByName(nodes, link.npc_name1),
-                        target: getNodeIdByName(nodes, link.npc_name2),
+                        source: nodes.find(n => n.data.label === link.npc_name1).data.id,
+                        target: nodes.find(n => n.data.label === link.npc_name2).data.id,
                         label: link.text
                     }
                 }));
@@ -279,7 +304,6 @@ NPC_VIEWER_TEMPLATE = '''
                                 'text-halign': 'center',
                                 'text-margin-y': 5,
                                 'font-size': '10px',
-                                'color': '#444',
                                 'width': 80,
                                 'height': 80,
                                 'shape': 'ellipse'
@@ -304,22 +328,18 @@ NPC_VIEWER_TEMPLATE = '''
                     layout: { name: 'preset' }
                 });
 
-                // Show popup on node click
-                cy.on('tap', 'node', function(evt){
+                cy.on('tap', 'node', evt => {
                     const node = evt.target;
                     const label = node.data('label');
                     const bkg = node.data('background') || "(No background)";
                     const popup = document.getElementById('npcPopup');
-                    document.getElementById('popupContent').innerHTML =
-                        `<strong>${label}</strong><br><br>${bkg}`;
+                    document.getElementById('popupContent').innerHTML = `<strong>${label}</strong><br><br>${bkg}`;
                     const pos = evt.renderedPosition || node.renderedPosition();
                     popup.style.left = (pos.x + 20) + 'px';
                     popup.style.top = (pos.y + 80) + 'px';
                     popup.style.display = 'block';
                 });
-
-                // Hide popup on background click
-                cy.on('tap', function(evt){
+                cy.on('tap', evt => {
                     if (evt.target === cy) {
                         document.getElementById('npcPopup').style.display = 'none';
                     }
@@ -327,8 +347,8 @@ NPC_VIEWER_TEMPLATE = '''
             })
             .catch(error => console.error("Error fetching graph data:", error));
 
-        function getNodeIdByName(nodes, npcName) {
-            const found = nodes.find(n => n.data.label === npcName);
+        function getNodeIdByName(nodes, name) {
+            const found = nodes.find(n => n.data.label === name);
             return found ? found.data.id : null;
         }
     </script>
@@ -367,8 +387,6 @@ LOCATIONS_TEMPLATE = '''
         }
         .portrait {
             width: 150px;
-            height: auto;
-            max-height: 200px;
             object-fit: contain;
             margin-bottom: 10px;
             border-radius: 8px;
@@ -381,16 +399,16 @@ LOCATIONS_TEMPLATE = '''
     </style>
     <script>
         function toggleDetails(id) {
-            const details = document.getElementById(id);
-            details.style.display = (details.style.display === "block") ? "none" : "block";
+            const d = document.getElementById(id);
+            d.style.display = (d.style.display === 'block') ? 'none' : 'block';
         }
         function showImageModal(src) {
-            const modal = document.getElementById("imageModal");
-            document.getElementById("modalImage").src = src;
-            modal.style.display = "block";
+            const m = document.getElementById('imageModal');
+            document.getElementById('modalImage').src = src;
+            m.style.display = 'block';
         }
         function hideImageModal() {
-            document.getElementById("imageModal").style.display = "none";
+            document.getElementById('imageModal').style.display = 'none';
         }
     </script>
 </head>
@@ -398,24 +416,115 @@ LOCATIONS_TEMPLATE = '''
     <h1>Locations - {{ db_name }}</h1>
     {% for place in places %}
         <div class="place-card">
-            <div class="place-header" onclick="toggleDetails('details{{ loop.index }}')">
-                {{ place["Name"] }}
-            </div>
-            <div class="place-details" id="details{{ loop.index }}">
+            <div class="place-header" onclick="toggleDetails('d{{ loop.index }}')">{{ place["Name"] }}</div>
+            <div class="place-details" id="d{{ loop.index }}">
                 {% if place.PortraitURL %}
-                    <img class="portrait" src="{{ place.PortraitURL }}" alt="Portrait for {{ place.Name }}"
-                        onclick="showImageModal('{{ place.PortraitURL }}')">
+                    <img class="portrait" src="{{ place.PortraitURL }}" alt="" onclick="showImageModal('{{ place.PortraitURL }}')">
                 {% endif %}
                 <div class="description">{{ place.DisplayDescription|safe }}</div>
             </div>
         </div>
     {% endfor %}
     <p><a href="{{ url_for('welcome') }}">Back to Welcome</a></p>
+    <div id="imageModal" onclick="hideImageModal()" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;text-align:center;padding-top:30px;">
+        <img id="modalImage" src="" style="max-width:90%;max-height:90%;border-radius:8px;">
+    </div>
+</body>
+</html>
+'''
 
-    <!-- Fullscreen image modal -->
-    <div id="imageModal" onclick="hideImageModal()" style="display:none; position:fixed; top:0; left:0;
-        width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999; text-align:center; padding-top:30px;">
-        <img id="modalImage" src="" style="max-width:90%; max-height:90%; border-radius:8px;">
+NEWS_TEMPLATE = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Chicago Tribune- {{ db_name }}</title>
+    <!-- Load a classic serif heading font -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: url('/assets/images/newspaper_bg.png') repeat;
+            background-size: cover;
+            color: #222;
+            margin: 0;
+            padding: 20px;
+            font-family: Georgia, serif;
+        }
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            column-count: 3;
+            column-gap: 40px;
+            column-fill: balance;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 0.5em;
+            border-bottom: 2px solid #444;
+            padding-bottom: 0.2em;
+        }
+        .article {
+            break-inside: avoid;
+            margin-bottom: 2em;
+            padding-bottom: 1em;
+            border-bottom: 1px solid #ccc;
+        }
+        .article h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5em;
+            margin: 0.2em 0 0.5em;
+        }
+        .level {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 0.5em;
+        }
+        .content {
+            text-align: justify;
+            line-height: 1.6;
+        }
+        /* Drop‑cap first letter */
+        .content p:first-of-type:first-letter {
+            float: left;
+            font-size: 3em;
+            line-height: 1;
+            margin-right: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .npcs {
+            font-size: 0.9em;
+            color: #444;
+            margin-top: 0.5em;
+        }
+        .back {
+            display: block;
+            text-align: center;
+            margin: 3em 0;
+            text-decoration: none;
+            color: #222;
+            font-weight: bold;
+        }
+        .back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chicago City Wire</h1>
+        {% for info in informations %}
+        <div class="article">
+            <h2>{{ info.Title }}</h2>
+            {% if info.DisplayLevel %}
+            <div class="DisplayLevel">{{ info.DisplayLevel }}</div>
+            {% endif %}
+            <div class="content">{{ info.DisplayInformation|safe }}</div>
+        </div>
+        {% endfor %}
+        <a href="{{ url_for('welcome') }}" class="back">← Back to Welcome</a>
     </div>
 </body>
 </html>
@@ -436,102 +545,87 @@ def welcome():
 def npc_view():
     selected_graph = request.args.get("graph")
     if selected_graph:
-        page_title_local = os.path.splitext(selected_graph)[0]
+        title = os.path.splitext(selected_graph)[0]
         logging.debug("NPC Viewer: Selected graph '%s'", selected_graph)
         return render_template_string(NPC_VIEWER_TEMPLATE,
-                                    page_title=page_title_local,
+                                    page_title=title,
                                     selected_graph=selected_graph)
     else:
-        graph_files = get_graph_list()
-        logging.debug("NPC Viewer: Listing graph files: %s", graph_files)
-        return render_template_string(NPC_LIST_TEMPLATE, graph_files=graph_files)
+        files = get_graph_list()
+        logging.debug("NPC Viewer: Listing graph files: %s", files)
+        return render_template_string(NPC_LIST_TEMPLATE, graph_files=files)
 
 @app.route('/locations')
 def locations_view():
     places = get_places_list()
-    logging.debug("Rendering Locations view with %d place(s).", len(places))
-    return render_template_string(LOCATIONS_TEMPLATE, places=places, db_name=DB_NAME)
+    logging.debug("Locations view: %d places", len(places))
+    return render_template_string(LOCATIONS_TEMPLATE,
+                                places=places,
+                                db_name=DB_NAME)
+
+@app.route('/news')
+def news_view():
+    informations = get_informations_list()
+    logging.debug("News view: %d informations", len(informations))
+    return render_template_string(NEWS_TEMPLATE,
+                                informations=informations,
+                                db_name=DB_NAME)
 
 @app.route('/api/npc-graph')
 def npc_graph():
     graph_file = request.args.get("graph")
-    logging.debug("API request for graph file: %s", graph_file)
+    logging.debug("API request for graph: %s", graph_file)
     if not graph_file:
-        logging.error("No graph specified in query parameters.")
         return jsonify({"error": "No graph specified"}), 400
-    graph_path = os.path.join(GRAPH_DIR, graph_file)
-    logging.debug("Computed graph_path: %s", graph_path)
-    if not os.path.exists(graph_path):
-        logging.error("Graph file not found: %s", graph_path)
+    path = os.path.join(GRAPH_DIR, graph_file)
+    if not os.path.exists(path):
         return jsonify({"error": "Graph file not found"}), 404
     try:
-        with open(graph_path, 'r', encoding='utf-8') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            logging.debug("Graph file '%s' loaded successfully.", graph_file)
     except Exception as e:
-        logging.exception("Failed to load JSON file '%s': %s", graph_file, e)
-        return jsonify({"error": "Failed to load JSON file", "details": str(e)}), 500
+        return jsonify({"error": "Failed to load JSON", "details": str(e)}), 500
 
-    portrait_mapping = get_portrait_mapping()
-    logging.debug("Portrait mapping obtained: %s", portrait_mapping)
+    portrait_map = get_portrait_mapping()
     try:
-        npc_wrapper = GenericModelWrapper("npcs")
-        npcs = npc_wrapper.load_items()
-        logging.debug("Loaded %d NPC items for background.", len(npcs))
-    except Exception as e:
-        logging.error("Error loading NPC items for background: %s", e)
+        npcs = GenericModelWrapper("npcs").load_items()
+    except Exception:
         npcs = []
 
     for node in data.get("nodes", []):
-        npc_name = node.get("npc_name", "")
-        original_path = portrait_mapping.get(npc_name, "").strip()
-        logging.debug("Processing node for NPC '%s': original portrait path '%s'.", npc_name, original_path)
-
-        if original_path:
-            prefix1 = "/assets/portraits/"
-            prefix2 = "assets/portraits\\"
-            if original_path.startswith(prefix1):
-                filename = original_path[len(prefix1):]
-            elif original_path.startswith(prefix2):
-                filename = original_path[len(prefix2):]
-            else:
-                filename = original_path
-            node["portrait"] = f"/portraits/{filename}"
-            logging.debug("Set portrait URL for NPC '%s' to '%s'.", npc_name, node["portrait"])
+        name = node.get("npc_name", "")
+        orig = portrait_map.get(name, "").strip()
+        if orig:
+            fn = orig.replace("\\", "/").split("/")[-1]
+            node["portrait"] = f"/portraits/{fn}"
         else:
             node["portrait"] = FALLBACK_PORTRAIT
-            logging.debug("No portrait found for NPC '%s'. Using fallback '%s'.", npc_name, FALLBACK_PORTRAIT)
 
-        matching_npc = next((n for n in npcs if n.get("Name", "").strip() == npc_name), None)
-        if matching_npc and isinstance(matching_npc.get("Background"), dict):
-            node["background"] =format_longtext(matching_npc.get("Background"))
+        match = next((n for n in npcs if n.get("Name", "").strip() == name), None)
+        if match and isinstance(match.get("Background"), str):
+            node["background"] = match["Background"].strip()
         else:
-            node["background"] = "(No background found)" 
-        logging.debug("Background for NPC '%s': %s", npc_name, node["background"])
+            node["background"] = "(No background found)"
 
     return jsonify(data)
 
 @app.route("/portraits/<path:filename>")
 def get_portrait(filename):
-    logging.debug("Serving portrait file: %s", filename)
     return send_from_directory(PORTRAITS_DIR, filename)
 
 @app.route("/assets/<path:filename>")
 def get_asset(filename):
-    asset_dir = os.path.join(BASE_DIR, "assets")
-    logging.debug("Serving asset file: %s", filename)
-    return send_from_directory(asset_dir, filename)
+    return send_from_directory(os.path.join(BASE_DIR, "assets"), filename)
 
 def launch_web_viewer():
     from threading import Thread
     import webbrowser
-
     def run_app():
-        logging.debug("Starting Flask app on host 0.0.0.0, port 31000.")
+        logging.debug("Starting Flask app on port 31000")
         app.run(host='0.0.0.0', port=31000, debug=False)
-    server_thread = Thread(target=run_app)
-    server_thread.start()
-    logging.debug("Opening web browser to http://127.0.0.1:31000/")
+    t = Thread(target=run_app)
+    t.start()
+    webbrowser.open("http://127.0.0.1:31000/")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=31000, debug=True)
