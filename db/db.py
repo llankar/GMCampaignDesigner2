@@ -103,6 +103,7 @@ def initialize_db():
             Title TEXT PRIMARY KEY,
             Information TEXT,
             Level TEXT,
+            PlayerDisplay BOOLEAN DEFAULT 0,
             NPCs TEXT
         )
     ''')

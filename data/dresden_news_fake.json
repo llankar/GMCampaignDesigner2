@@ -1,0 +1,205 @@
+{
+	"informations": [
+    {
+        "Title": "Strange Lights Over Lake Michigan",
+        "Information": "This is a developing story. Witnesses report strange lights over lake michigan around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Rumor",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Harry Dresden",
+            "Michael Carpenter",
+            "Toot-Toot"
+        ]
+    },
+    {
+        "Title": "Mysterious Blackouts Linked to Arcane Activity",
+        "Information": "This is a developing story. Witnesses report mysterious blackouts linked to arcane activity around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Confidential",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Michael Carpenter",
+            "Thomas Raith",
+            "Lara Raith"
+        ]
+    },
+    {
+        "Title": "White Court Vampire Seen at Chicago Gala",
+        "Information": "This is a developing story. Witnesses report white court vampire seen at chicago gala around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Paranet",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Mouse",
+            "Toot-Toot"
+        ]
+    },
+    {
+        "Title": "Unexplained Explosion in Wicker Park",
+        "Information": "This is a developing story. Witnesses report unexplained explosion in wicker park around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Paranet",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Karrin Murphy",
+            "Mouse",
+            "Molly Carpenter"
+        ]
+    },
+    {
+        "Title": "Local Werewolf Pack Denies Involvement in Brawl",
+        "Information": "This is a developing story. Witnesses report local werewolf pack denies involvement in brawl around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Public",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Michael Carpenter"
+        ]
+    },
+    {
+        "Title": "Council of Warden Activity Increases in Midwest",
+        "Information": "This is a developing story. Witnesses report council of warden activity increases in midwest around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Rumor",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Lara Raith",
+            "Toot-Toot",
+            "Marcone"
+        ]
+    },
+    {
+        "Title": "Faerie Ring Appears in Lincoln Park",
+        "Information": "This is a developing story. Witnesses report faerie ring appears in lincoln park around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Supernatural Underground",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Ebenezar McCoy"
+        ]
+    },
+    {
+        "Title": "Mortimer Lindquist Talks Ghost Migration",
+        "Information": "This is a developing story. Witnesses report mortimer lindquist talks ghost migration around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Paranet",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Harry Dresden",
+            "Toot-Toot"
+        ]
+    },
+    {
+        "Title": "Paranet Members Go Missing in Hyde Park",
+        "Information": "This is a developing story. Witnesses report paranet members go missing in hyde park around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Confidential",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Lara Raith",
+            "Michael Carpenter"
+        ]
+    },
+    {
+        "Title": "Denarian Artifact Found in Abandoned Warehouse",
+        "Information": "This is a developing story. Witnesses report denarian artifact found in abandoned warehouse around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Rumor",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Ebenezar McCoy"
+        ]
+    },
+    {
+        "Title": "Chicago PD Investigates 'Magical Graffiti'",
+        "Information": "This is a developing story. Witnesses report chicago pd investigates 'magical graffiti' around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Supernatural Underground",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Thomas Raith"
+        ]
+    },
+    {
+        "Title": "Storm Front Disrupts Ritual Sites",
+        "Information": "This is a developing story. Witnesses report storm front disrupts ritual sites around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Rumor",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Toot-Toot",
+            "Harry Dresden",
+            "Michael Carpenter"
+        ]
+    },
+    {
+        "Title": "Murphy Spotted at Supernatural Crime Scene",
+        "Information": "This is a developing story. Witnesses report murphy spotted at supernatural crime scene around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Public",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Marcone",
+            "Michael Carpenter"
+        ]
+    },
+    {
+        "Title": "Nessie Sighting in Lake Michigan Again?",
+        "Information": "This is a developing story. Witnesses report nessie sighting in lake michigan again? around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Confidential",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Michael Carpenter",
+            "Ebenezar McCoy",
+            "Mouse"
+        ]
+    },
+    {
+        "Title": "Summer Court Dances Under Full Moon",
+        "Information": "This is a developing story. Witnesses report summer court dances under full moon around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Public",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Mouse",
+            "Marcone"
+        ]
+    },
+    {
+        "Title": "Unseelie Accords Meeting Rumored Downtown",
+        "Information": "This is a developing story. Witnesses report unseelie accords meeting rumored downtown around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Paranet",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Lara Raith",
+            "Thomas Raith",
+            "Michael Carpenter"
+        ]
+    },
+    {
+        "Title": "Strange Rune Burns Into Church Door",
+        "Information": "This is a developing story. Witnesses report strange rune burns into church door around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Public",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Molly Carpenter"
+        ]
+    },
+    {
+        "Title": "Doppelg\u00e4nger Causes Panic at College Campus",
+        "Information": "This is a developing story. Witnesses report doppelg\u00e4nger causes panic at college campus around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Supernatural Underground",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Marcone",
+            "Molly Carpenter",
+            "Lara Raith"
+        ]
+    },
+    {
+        "Title": "Bookstore Fire Linked to Demonic Possession",
+        "Information": "This is a developing story. Witnesses report bookstore fire linked to demonic possession around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Supernatural Underground",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Lara Raith"
+        ]
+    },
+    {
+        "Title": "City Bus Passenger Claims Time Loop Encounter",
+        "Information": "This is a developing story. Witnesses report city bus passenger claims time loop encounter around midnight. Local authorities and supernatural agents have been informed. The full implications are unknown.",
+        "Level": "Paranet",
+        "PlayerDisplay": true,
+        "NPCs": [
+            "Toot-Toot"
+        ]
+    }
+	]
+}

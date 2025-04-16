@@ -3,6 +3,7 @@
       {"name": "Title", "type": "text"},
       {"name": "Information", "type": "longtext"},
       {"name": "Level", "type": "longtext"},
+      {"name": "PlayerDisplay", "type": "boolean"},
       {"name": "NPCs", "type": "list", "linked_type": "NPCs"}
   ]
 }

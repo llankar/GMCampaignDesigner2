@@ -948,6 +948,7 @@ class MainWindow(ctk.CTk):
             "Title": "TEXT",
             "Information": "TEXT",
             "Level": "TEXT",
+            "PlayerDisplay": "BOOLEAN",
             "NPCs": "TEXT"
         }
         alter_table_if_missing("npcs", npcs_columns)
