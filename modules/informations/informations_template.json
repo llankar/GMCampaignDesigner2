@@ -1,0 +1,8 @@
+{
+  "fields": [
+      {"name": "Title", "type": "text"},
+      {"name": "Information", "type": "longtext"},
+      {"name": "Level", "type": "longtext"},
+      {"name": "NPCs", "type": "list", "linked_type": "NPCs"}
+  ]
+}

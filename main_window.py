@@ -159,6 +159,7 @@ class MainWindow(ctk.CTk):
             "manage_factions": self.load_icon("faction_icon.png", size=(64, 64)),
             "manage_places": self.load_icon("places_icon.png", size=(64, 64)),
             "manage_objects": self.load_icon("objects_icon.png", size=(64, 64)),
+            "manage_informations": self.load_icon("informations_icon.png", size=(64, 64)),
             "export_scenarios": self.load_icon("export_icon.png", size=(64, 64)),
             "gm_screen": self.load_icon("gm_screen_icon.png", size=(64, 64)),
             "npc_graph": self.load_icon("npc_graph_icon.png", size=(64, 64)),
@@ -228,6 +229,7 @@ class MainWindow(ctk.CTk):
             ("manage_factions", "Manage Factions", lambda: self.open_entity("factions")),
             ("manage_places", "Manage Places", lambda: self.open_entity("places")),
             ("manage_objects", "Manage Objects", lambda: self.open_entity("objects")),
+            ("manage_informations", "Manage Informations", lambda: self.open_entity("informations")),
             ("export_scenarios", "Export Scenarios", self.preview_and_export_scenarios),
             ("gm_screen", "Open GM Screen", self.open_gm_screen),
             ("npc_graph", "Open NPC Graph Editor", self.open_npc_graph_editor),
@@ -242,7 +244,7 @@ class MainWindow(ctk.CTk):
             row = idx // columns
             col = idx % columns
             btn = create_icon_button(icons_frame, self.icons[icon_key], tooltip, cmd)
-            btn.grid(row=row, column=col, padx=10, pady=10)
+            btn.grid(row=row, column=col, padx=5, pady=5)
             self.icon_buttons.append(btn)
 
     def create_content_area(self):
@@ -942,12 +944,19 @@ class MainWindow(ctk.CTk):
             "Genre": "TEXT",
             "Portrait": "TEXT"
         }
+        informations_columns = {
+            "Title": "TEXT",
+            "Information": "TEXT",
+            "Level": "TEXT",
+            "NPCs": "TEXT"
+        }
         alter_table_if_missing("npcs", npcs_columns)
         alter_table_if_missing("scenarios", scenarios_columns)
         alter_table_if_missing("factions", factions_columns)
         alter_table_if_missing("places", places_columns)
         alter_table_if_missing("objects", objects_columns)
         alter_table_if_missing("creatures", creatures_columns)
+        alter_table_if_missing("informations", informations_columns)
 
     def launch_swarmui(self):
         global SWARMUI_PROCESS
