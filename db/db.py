@@ -97,7 +97,15 @@ def initialize_db():
             Portrait TEXT
         )
     ''')
-    
+    # Informations – using fields from informations_template.json
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS informations (
+            Title TEXT PRIMARY KEY,
+            Information TEXT,
+            Level TEXT,
+            NPCs TEXT
+        )
+    ''')
     conn.commit()
     conn.close()
 
