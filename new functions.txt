@@ -1,0 +1,11 @@
+done
+clickable popups on NPC nodes with background
+map image background with markers to place each location
+database with Informations : Title, Information, truth_level, origin npc
+
+to do
+Database with Clues : Name, Type (crime, magic, , Information, location + web display on map
+Graph for factions with relations + Web display 
+Party Reputation Tracker : Deeds/Crimes
+
+ 
