@@ -2,9 +2,9 @@ done
 clickable popups on NPC nodes with background
 map image background with markers to place each location
 database with Informations : Title, Information, truth_level, origin npc
+Database with Clues : Name, Type (crime, magic, , Information, location), description and web display + player add and store in db
 
 to do
-Database with Clues : Name, Type (crime, magic, , Information, location), description and web display + player add and store in db
 Graph for factions with relations + Web display 
 Party Reputation Tracker : Deeds/Crimes
 

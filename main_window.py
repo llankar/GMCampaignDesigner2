@@ -30,7 +30,6 @@ from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
 from modules.helpers import text_helpers
-from modules.web.npc_graph_webviewer import launch_web_viewer
 from db.db import load_schema_from_json
 
 # Set up CustomTkinter appearance

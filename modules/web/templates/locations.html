@@ -1,102 +1,240 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>Locations - {{ db_name }}</title>
+    <meta charset="UTF-8">
+    <title>Locations – {{ db_name }}</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
-            padding: 20px;
+            font-family: Georgia, serif;
+            background: url('/static/filing_cabinet_background.png') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 50px;
         }
 
         h1 {
-            color: #1D3572;
+            color: #1b1f3a;
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 40px;
         }
 
-        .place-card {
-            margin: 10px 0;
-            background: #fff;
-            padding: 10px;
-            border-radius: 4px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        .file-stack {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .place-header {
+        .file-wrapper {
+            position: relative;
+            margin-bottom: -20px;
+            /* less overlap for readable tabs */
+            z-index: 1;
+        }
+
+        .file-wrapper.active {
+            z-index: 10;
+        }
+
+        .folder-tab {
             cursor: pointer;
-            font-size: 18px;
-            color: #1D3572;
-            margin-bottom: 5px;
+            display: block;
+            overflow: visible;
+            transition: transform .1s;
         }
 
-        .place-header:hover {
-            text-decoration: underline;
+        .folder-tab:hover {
+            transform: translateY(-2px);
         }
 
-        .place-details {
+        .case-file {
             display: none;
-            padding-top: 10px;
-        }
-
-        .portrait {
-            width: 150px;
-            object-fit: contain;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            cursor: pointer;
+            margin-top: -4px;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         .description {
-            font-size: 14px;
-            color: #333;
+            font-size: 16px;
+            color: #1d2b53;
+            line-height: 1.5;
+            margin-top: 0;
+        }
+
+        .portrait {
+            width: 140px;
+            float: right;
+            margin-left: 20px;
+            margin-top: 10px;
+            /* ensure inside border */
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+        }
+
+        .threat-level {
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        .threat-icon {
+            font-size: 18px;
+            color: darkred;
+            margin-right: 4px;
+        }
+
+        a.back-link {
+            color: #1d2b53;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+            margin-top: 40px;
+        }
+
+        #imageModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #imageModal img {
+            max-width: 90%;
+            max-height: 90%;
+            transition: transform .3s, opacity .3s;
         }
     </style>
     <script>
-        function toggleDetails(id) {
-            const d = document.getElementById(id);
-            d.style.display = (d.style.display === 'block') ? 'none' : 'block';
+        function adjustSize(svg) {
+            const fo = svg.querySelector('foreignObject'),
+                div = fo.querySelector('div'),
+                rect = svg.querySelector('rect');
+            const h = Math.ceil(div.getBoundingClientRect().height);
+            const foH = h + 20;
+            fo.setAttribute('height', foH);
+            const totalH = 60 + foH; // accommodate new y-offset of 60
+            svg.setAttribute('height', totalH);
+            svg.setAttribute('viewBox', `0 0 600 ${totalH}`);
+            rect.setAttribute('height', totalH);
         }
-    
+
+        function toggleCase(id) {
+            document.querySelectorAll('.case-file').forEach(el => {
+                const wrap = el.parentNode;
+                if (el.id === id) {
+                    if (el.style.display === 'block') {
+                        el.style.display = 'none';
+                        wrap.classList.remove('active');
+                    } else {
+                        el.style.display = 'block';
+                        wrap.classList.add('active');
+                        adjustSize(el);
+                    }
+                } else {
+                    el.style.display = 'none';
+                    wrap.classList.remove('active');
+                }
+            });
+        }
+
         function showImageModal(src) {
-        const modal = document.getElementById('imageModal');
-                const img   = document.getElementById('modalImage');
-                img.src       = src;
-                modal.style.display = 'block';
+            const m = document.getElementById('imageModal'),
+                img = m.querySelector('img');
+            img.src = src; m.style.display = 'flex';
+            img.style.transform = 'scale(0.3)'; img.style.opacity = '0';
+            setTimeout(() => { img.style.transform = 'scale(1)'; img.style.opacity = '1'; }, 10);
         }
+
         function hideImageModal() {
-        const modal = document.getElementById('imageModal');
-                const img   = document.getElementById('modalImage');
-                modal.style.display = 'none';
-                img.src = '';  // clear out the src if you like
+            const m = document.getElementById('imageModal'),
+                img = m.querySelector('img');
+            img.style.transform = 'scale(0.3)'; img.style.opacity = '0';
+            setTimeout(() => { m.style.display = 'none'; img.src = ''; }, 300);
         }
-        </script>
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const cases = Array.from(document.querySelectorAll('.case-file')),
+                wrappers = Array.from(document.querySelectorAll('.file-wrapper'));
+            if (cases.length) {
+                const lastIdx = cases.length - 1,
+                    lastCase = cases[lastIdx],
+                    wrap = wrappers[lastIdx];
+                lastCase.style.display = 'block';
+                wrap.classList.add('active');
+                adjustSize(lastCase);
+            }
+        });
     </script>
 </head>
 
 <body>
-    <h1>Locations - {{ db_name }}</h1>
-    {% for place in places %}
-    <div class="place-card">
-        <div class="place-header" onclick="toggleDetails('details{{ loop.index }}')">
-            {{ place["Name"] }}
-        </div>
-        <div class="place-details" id="details{{ loop.index }}">
-            {% if place['PortraitURL'] %}
-            <img class="portrait" src="{{ place['PortraitURL'] }}" alt="Portrait for {{ place['Name'] }}"
-               onclick='showImageModal("{{ place.PortraitURL }}")'>
-            {% endif %}
-            <div class="description">{{ place["DisplayDescription"]|safe }}</div>
-        </div>
-    </div>
-    {% endfor %}
-    <p><a href="{{ url_for('welcome') }}">Back to Welcome</a></p>
+    <h1>Locations – {{ db_name }}</h1>
+    <div class="file-stack">
+        {% for place in places %}
+        <div class="file-wrapper">
+            <!-- TAB at 75% width, with wrapping title -->
+            <svg class="folder-tab" onclick="toggleCase('case{{ loop.index }}')" xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 450 70" width="450" height="70">
+                <path d="M0 70 Q30 0 150 0 H430 Q450 0 450 20 V70 H0 Z" fill="#e7d1a6" stroke="#c9a76d" stroke-width="4"
+                    rx="12" ry="12" />
+                <foreignObject x="70" y="15" width="240" height="40">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Georgia, serif;
+                              font-size:19px;
+                              fill:#705a3c;
+                              font-weight:bold;
+                              line-height:1.1;
+                              word-wrap:break-word;">
+                        {{ place.Name }}
+                    </div>
+                </foreignObject>
+                {% if place.Confidential %}
+                <g transform="translate(150,8) rotate(-10)">
+                    <rect x="0" y="0" width="120" height="26" rx="3" fill="#b71c1c" />
+                    <text x="60" y="18" fill="#fff" font-family="Courier New" font-size="12" font-weight="bold"
+                        text-anchor="middle">CONFIDENTIAL</text>
+                </g>
+                {% endif %}
+            </svg>
 
-    <!-- Fullscreen image modal -->
-    <div id="imageModal" onclick="hideImageModal()"
-        style="display:none; position:fixed; top:0; left:0;
-                width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999; text-align:center; padding-top:30px;">
-        <img id="modalImage" src="" style="max-width:90%; max-height:90%; border-radius:8px;">
+            <!-- FULL-WIDTH BODY at 600px, border matches tab color -->
+            <svg id="case{{ loop.index }}" class="case-file" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 180"
+                width="600" height="180" >
+                <rect x="0" y="0" width="600" height="180" rx="12" ry="12" fill="#f1e4c0" stroke="#e7d1a6"
+                    stroke-width="0.6cm" />
+                {% if place.Secured %}
+                <g transform="translate(430,20)">
+                    <rect x="0" y="0" width="100" height="28" rx="4" fill="#3c763d" />
+                    <text x="50" y="18" fill="#fff" font-family="Courier New" font-size="14" font-weight="bold"
+                        text-anchor="middle">SECURED</text>
+                </g>
+                {% endif %}
+                <foreignObject x="20" y="60" width="560" height="120">
+                    <div xmlns="http://www.w3.org/1999/xhtml">
+                        {% if place.PortraitURL %}
+                        <img src="{{ place.PortraitURL }}" class="portrait"
+                            onclick="showImageModal('{{ place.PortraitURL }}')" alt="{{ place.Name }} portrait" />
+                        {% endif %}
+                        <p class="description">{{ place.DisplayDescription|safe }}</p>
+                        {% if place.ThreatLevel %}
+                        <p class="threat-level">Threat Level: {% for _ in range(place.ThreatLevel) %}<span
+                                class="threat-icon">☠️</span>{% endfor %}</p>
+                        {% endif %}
+                    </div>
+                </foreignObject>
+            </svg>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a href="{{ url_for('welcome') }}" class="back-link">Back to Welcome</a>
+    <div id="imageModal" onclick="hideImageModal()">
+        <img src="" alt="Enlarged portrait" />
     </div>
 </body>
 
