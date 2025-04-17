@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Locations - {{ db_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1D3572;
+        }
+
+        .place-card {
+            margin: 10px 0;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .place-header {
+            cursor: pointer;
+            font-size: 18px;
+            color: #1D3572;
+            margin-bottom: 5px;
+        }
+
+        .place-header:hover {
+            text-decoration: underline;
+        }
+
+        .place-details {
+            display: none;
+            padding-top: 10px;
+        }
+
+        .portrait {
+            width: 150px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+    <script>
+        function toggleDetails(id) {
+            const d = document.getElementById(id);
+            d.style.display = (d.style.display === 'block') ? 'none' : 'block';
+        }
+    
+        function showImageModal(src) {
+        const modal = document.getElementById('imageModal');
+                const img   = document.getElementById('modalImage');
+                img.src       = src;
+                modal.style.display = 'block';
+        }
+        function hideImageModal() {
+        const modal = document.getElementById('imageModal');
+                const img   = document.getElementById('modalImage');
+                modal.style.display = 'none';
+                img.src = '';  // clear out the src if you like
+        }
+        </script>
+    </script>
+</head>
+
+<body>
+    <h1>Locations - {{ db_name }}</h1>
+    {% for place in places %}
+    <div class="place-card">
+        <div class="place-header" onclick="toggleDetails('details{{ loop.index }}')">
+            {{ place["Name"] }}
+        </div>
+        <div class="place-details" id="details{{ loop.index }}">
+            {% if place['PortraitURL'] %}
+            <img class="portrait" src="{{ place['PortraitURL'] }}" alt="Portrait for {{ place['Name'] }}"
+               onclick='showImageModal("{{ place.PortraitURL }}")'>
+            {% endif %}
+            <div class="description">{{ place["DisplayDescription"]|safe }}</div>
+        </div>
+    </div>
+    {% endfor %}
+    <p><a href="{{ url_for('welcome') }}">Back to Welcome</a></p>
+
+    <!-- Fullscreen image modal -->
+    <div id="imageModal" onclick="hideImageModal()"
+        style="display:none; position:fixed; top:0; left:0;
+                width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999; text-align:center; padding-top:30px;">
+        <img id="modalImage" src="" style="max-width:90%; max-height:90%; border-radius:8px;">
+    </div>
+</body>
+
+</html>

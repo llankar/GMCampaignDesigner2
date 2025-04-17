@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Clues – {{ db_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet" />
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Permanent Marker', cursive;
+            background: url('/assets/images/corkboard_bg.png') center/cover no-repeat;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 3.5em;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .add-clue-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #ffe066;
+            color: #333;
+            font-size: 1.2em;
+            font-family: inherit;
+            text-decoration: none;
+            border: 2px solid #e0d4a3;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .add-clue-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* board fills below header */
+        .board {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 120px);
+        }
+
+        .clue-card {
+            position: absolute;
+            /* absolute from the start */
+            background: #fff8e1;
+            border: 1px solid #e0d4a3;
+            padding: 15px 10px 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transform: rotate(var(--angle));
+            transition: transform .2s;
+            width: auto;
+            min-width: 180px;
+            max-width: 300px;
+            cursor: grab;
+            font-family: inherit;
+        }
+
+        .clue-card:hover {
+            transform: rotate(0deg) scale(1.02);
+            z-index: 100;
+        }
+
+        .clue-card::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            width: 48px;
+            height: 48px;
+            background: url('/assets/images/thumbtack.png') no-repeat center/contain;
+            transform: translateX(-50%);
+        }
+
+        .clue-card h2 {
+            margin: 0 0 .5em;
+            font-size: 1.3em;
+            color: #333;
+        }
+
+        .clue-card .type {
+            font-size: .9em;
+            color: #555;
+            margin-bottom: .5em;
+        }
+
+        .clue-card .desc {
+            font-size: 1em;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Clues</h1>
+        <a href="{{ url_for('add_clue') }}" class="add-clue-btn">+ Add New Clue</a>
+    </div>
+
+    <div class="board">
+        {% for clue in clues %}
+        <div class="clue-card" style="--angle: {{ [-5,-3,-1,1,3,5]|random }}deg;">
+            <h2>{{ clue.Name }}</h2>
+            {% if clue.Type %}<div class="type">{{ clue.Type }}</div>{% endif %}
+            <div class="desc">{{ clue.DisplayDescription|safe }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.querySelector('.board');
+            const width = board.clientWidth;
+            const height = board.clientHeight;
+
+            // place cards randomly without overlap
+            const cards = Array.from(board.children);
+            const placedRects = [];
+
+            function rectsOverlap(a, b) {
+                return !(a.left + a.width < b.left ||
+                    b.left + b.width < a.left ||
+                    a.top + a.height < b.top ||
+                    b.top + b.height < a.top);
+            }
+
+            cards.forEach(card => {
+                const cw = card.offsetWidth, ch = card.offsetHeight;
+                let x, y, rect, tries = 0;
+                do {
+                    x = Math.random() * (width - cw);
+                    y = Math.random() * (height - ch);
+                    rect = { left: x, top: y, width: cw, height: ch };
+                    tries++;
+                } while (placedRects.some(r => rectsOverlap(r, rect)) && tries < 200);
+                card.style.left = x + 'px';
+                card.style.top = y + 'px';
+                placedRects.push(rect);
+
+                // now make it draggable
+                card.addEventListener('pointerdown', e => {
+                    e.preventDefault();
+                    card.setPointerCapture(e.pointerId);
+                    const shiftX = e.clientX - card.getBoundingClientRect().left;
+                    const shiftY = e.clientY - card.getBoundingClientRect().top;
+                    card.style.cursor = 'grabbing';
+
+                    function onPointerMove(ev) {
+                        card.style.left = (ev.clientX - shiftX - board.getBoundingClientRect().left) + 'px';
+                        card.style.top = (ev.clientY - shiftY - board.getBoundingClientRect().top) + 'px';
+                    }
+
+                    function onPointerUp(ev) {
+                        card.releasePointerCapture(e.pointerId);
+                        card.removeEventListener('pointermove', onPointerMove);
+                        card.removeEventListener('pointerup', onPointerUp);
+                        card.style.cursor = 'grab';
+                    }
+
+                    card.addEventListener('pointermove', onPointerMove);
+                    card.addEventListener('pointerup', onPointerUp);
+                });
+                card.ondragstart = () => false;
+            });
+        });
+    </script>
+</body>
+
+</html>
