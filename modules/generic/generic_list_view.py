@@ -51,6 +51,9 @@ class GenericListView(ctk.CTkFrame):
         # Setup Treeview frame with a dark background.
         tree_frame = ctk.CTkFrame(self, fg_color="#2B2B2B")
         tree_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        # We'll use grid inside tree_frame
+        tree_frame.grid_rowconfigure(0, weight=1)
+        tree_frame.grid_columnconfigure(0, weight=1)
 
         # Create a local ttk style for the Treeview.
         style = ttk.Style(self)
@@ -67,25 +70,44 @@ class GenericListView(ctk.CTkFrame):
                         font=("Sego UI", 10, "bold"))
         style.map("Custom.Treeview", background=[("selected", "#2B2B2B")])
 
-        # Create the Treeview with extra columns defined in self.columns.
-        self.tree = ttk.Treeview(tree_frame,
-                                 columns=self.columns,
-                                 show="tree headings",
-                                 selectmode="browse",
-                                 style="Custom.Treeview")
-        # Column #0 displays only the unique field ("Name").
-        self.tree.heading("#0", text="Name", command=lambda: self.sort_column(self.unique_field))
+        # Create the Treeview...
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=self.columns,
+            show="tree headings",
+            selectmode="browse",
+            style="Custom.Treeview"
+        )
+        # --- column/heading setup (you need this!) ---
+        # #0 is your “unique field” (Name or Title)
+        self.tree.heading("#0",
+            text=self.unique_field,
+            command=lambda: self.sort_column(self.unique_field)
+        )
         self.tree.column("#0", width=180, anchor="w")
 
-        # Setup extra columns using their own names as headers.
+        # now all the other fields
         for col in self.columns:
-            self.tree.heading(col, text=col, command=lambda c=col: self.sort_column(c))
+            # make sure the lambda captures the current col
+            self.tree.heading(col,
+                text=col,
+                command=lambda c=col: self.sort_column(c)
+            )
             self.tree.column(col, width=150, anchor="w")
+        # --- end heading setup ---
 
+        # Vertical scrollbar
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=vsb.set)
-        vsb.pack(side="right", fill="y")
-        self.tree.pack(fill="both", expand=True)
+
+        # Horizontal scrollbar
+        hsb = ttk.Scrollbar(tree_frame, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(xscrollcommand=hsb.set)
+
+        # Grid them all
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        vsb.grid( row=0, column=1, sticky="ns"  )
+        hsb.grid( row=1, column=0, sticky="ew"  )
 
         self.tree.bind("<Double-1>", self.on_double_click)
         self.tree.bind("<Button-3>", self.on_right_click)
