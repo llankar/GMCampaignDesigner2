@@ -1,10 +1,42 @@
 # db.py
 import sqlite3
 import os
+import json
 import re
 import platform
 from modules.helpers.config_helper import ConfigHelper
 import logging
+
+# Map our JSON “type” names to SQLite types
+_SQLITE_TYPE = {
+    "text":     "TEXT",
+    "longtext": "TEXT",
+    "boolean":  "BOOLEAN",
+    "list":     "TEXT",    # we’ll store lists as JSON strings
+}
+
+def load_schema_from_json(entity_name):
+    """
+    Opens PROJECT_ROOT/modules/<entity_name>/<entity_name>_template.json
+    and returns [(col_name, sql_type), …].
+    """
+    # __file__ is .../GMCampaignDesigner2/db/db.py
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    json_path    = os.path.join(
+        project_root,
+        "modules",           # <-- your modules folder
+        entity_name,        # e.g. "npcs"
+        f"{entity_name}_template.json"
+    )
+    with open(json_path, encoding="utf-8") as f:
+        tmpl = json.load(f)
+
+    schema = []
+    for field in tmpl["fields"]:
+        name = field["name"]
+        jtype = field["type"]
+        schema.append((name, _SQLITE_TYPE.get(jtype, "TEXT")))
+    return schema
 
 def get_connection():
     # Read the database path from the config; default to "campaign.db"
@@ -32,81 +64,21 @@ def get_connection():
     return sqlite3.connect(DB_PATH)
 
 def initialize_db():
-    conn = get_connection()
+    conn   = get_connection()
     cursor = conn.cursor()
-    
-    # NPCs – using fields from npcs_template.json
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS npcs (
-            Name TEXT PRIMARY KEY,
-            Role TEXT,
-            Description TEXT,
-            Secret TEXT,
-            Quote TEXT,
-            RoleplayingCues TEXT,
-            Personality TEXT,
-            Motivation TEXT,
-            Background TEXT,
-            Traits TEXT,
-            Genre TEXT,
-            Factions TEXT,
-            Objects TEXT,
-            Portrait TEXT
-        )
-    ''')
-    
-    # Scenarios – using fields from scenarios_template.json
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS scenarios (
-            Title TEXT PRIMARY KEY,
-            Summary TEXT,
-            Secrets TEXT,
-            Places TEXT,
-            NPCs TEXT,
-            Objects TEXT
-        )
-    ''')
-    
-    # Factions – using fields from factions_template.json
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS factions (
-            Name TEXT PRIMARY KEY,
-            Description TEXT,
-            Secrets TEXT
-        )
-    ''')
-    
-    # Places – using fields from places_template.json
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS places (
-            Name TEXT PRIMARY KEY,
-            Description TEXT,
-            NPCs TEXT,
-            PlayerDisplay BOOLEAN DEFAULT 0,
-            Secrets TEXT,
-            Portrait TEXT
-        )
-    ''')
-    
-    # Objects – using fields from objects_template.json
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS objects (
-            Name TEXT PRIMARY KEY,
-            Description TEXT,
-            Secrets TEXT,
-            Portrait TEXT
-        )
-    ''')
-    # Informations – using fields from informations_template.json
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS informations (
-            Title TEXT PRIMARY KEY,
-            Information TEXT,
-            Level TEXT,
-            PlayerDisplay BOOLEAN DEFAULT 0,
-            NPCs TEXT
-        )
-    ''')
+
+    for table in ["npcs","scenarios","factions","places","objects","informations"]:
+        schema = load_schema_from_json(table)
+        # assume first field is the PK:
+        pk = schema[0][0]
+        cols_sql = ",\n    ".join(f"{col} {typ}" for col,typ in schema)
+        ddl = f"""
+        CREATE TABLE IF NOT EXISTS {table} (
+            {cols_sql},
+            PRIMARY KEY({pk})
+        )"""
+        cursor.execute(ddl)
+
     conn.commit()
     conn.close()
 

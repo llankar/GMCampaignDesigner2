@@ -32,6 +32,7 @@ from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
 from modules.helpers import text_helpers
 from modules.web.npc_graph_webviewer import launch_web_viewer
+from db.db import load_schema_from_json
 
 # Set up CustomTkinter appearance
 ctk.set_appearance_mode("Dark")
@@ -77,73 +78,7 @@ class MainWindow(ctk.CTk):
         db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
         init_db(db_path, self.update_table_schema)
 
-    def update_table_schema(self, conn, cursor):
-        def alter_table_if_missing(table, required_columns):
-            cursor.execute(f"PRAGMA table_info({table})")
-            existing_columns = {row["name"] for row in cursor.fetchall()}
-            for col, col_def in required_columns.items():
-                if col not in existing_columns:
-                    alter_query = f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"
-                    cursor.execute(alter_query)
-                    #logging.debug("Added column '%s' to table '%s'.", col, table)
-        npcs_columns = {
-            "Name": "TEXT",
-            "Role": "TEXT",
-            "Description": "TEXT",
-            "Secret": "TEXT",
-            "Quote": "TEXT",
-            "RoleplayingCues": "TEXT",
-            "Personality": "TEXT",
-            "Motivation": "TEXT",
-            "Background": "TEXT",
-            "Traits": "TEXT",
-            "Genre": "TEXT",
-            "Factions": "TEXT",
-            "Objects": "TEXT",
-            "Portrait": "TEXT"
-        }
-        scenarios_columns = {
-            "Title": "TEXT",
-            "Summary": "TEXT",
-            "Secrets": "TEXT",
-            "Places": "TEXT",
-            "NPCs": "TEXT",
-            "Creatures": "TEXT",
-            "Objects": "TEXT"
-        }
-        factions_columns = {
-            "Name": "TEXT",
-            "Description": "TEXT",
-            "Secrets": "TEXT"
-        }
-        places_columns = {
-            "Name": "TEXT",
-            "Description": "TEXT",
-            "NPCs": "TEXT"
-        }
-        objects_columns = {
-            "Name": "TEXT",
-            "Description": "TEXT",
-            "Secrets": "TEXT",
-            "Portrait": "TEXT"
-        }
-        creatures_columns = {
-            "Name": "TEXT",
-            "Type": "TEXT",
-            "Description": "TEXT",
-            "Weakness": "TEXT",
-            "Powers": "TEXT",
-            "Stats": "TEXT",
-            "Background": "TEXT",
-            "Genre": "TEXT",
-            "Portrait": "TEXT"
-        }
-        alter_table_if_missing("npcs", npcs_columns)
-        alter_table_if_missing("scenarios", scenarios_columns)
-        alter_table_if_missing("factions", factions_columns)
-        alter_table_if_missing("places", places_columns)
-        alter_table_if_missing("objects", objects_columns)
-        alter_table_if_missing("creatures", creatures_columns)
+    
 
     def create_layout(self):
         self.main_frame = ctk.CTkFrame(self)
@@ -881,83 +816,50 @@ class MainWindow(ctk.CTk):
         conn.close()
 
     def update_table_schema(self, conn, cursor):
-        def alter_table_if_missing(table, required_columns):
-            cursor.execute(f"PRAGMA table_info({table})")
-            existing_columns = {row["name"] for row in cursor.fetchall()}
-            for col, col_def in required_columns.items():
-                if col not in existing_columns:
-                    alter_query = f"ALTER TABLE {table} ADD COLUMN {col} {col_def}"
-                    cursor.execute(alter_query)
-                    print(f"Added column '{col}' to table '{table}'.")
-        npcs_columns = {
-            "Name": "TEXT",
-            "Role": "TEXT",
-            "Description": "TEXT",
-            "Secret": "TEXT",
-            "Quote": "TEXT",
-            "RoleplayingCues": "TEXT",
-            "Personality": "TEXT",
-            "Motivation": "TEXT",
-            "Background": "TEXT",
-            "Traits": "TEXT",
-            "Genre": "TEXT",
-            "Factions": "TEXT",
-            "Objects": "TEXT",
-            "Portrait": "TEXT"
-        }
-        scenarios_columns = {
-            "Title": "TEXT",
-            "Summary": "TEXT",
-            "Secrets": "TEXT",
-            "Places": "TEXT",
-            "NPCs": "TEXT",
-            "Creatures": "TEXT",
-            "Objects": "TEXT"
-        }
-        factions_columns = {
-            "Name": "TEXT",
-            "Description": "TEXT",
-            "Secrets": "TEXT"
-        }
-        places_columns = {
-            "Name": "TEXT",
-            "Description": "TEXT",
-            "NPCs": "TEXT",
-            "Secrets": "TEXT",
-            "PlayerDisplay": "BOOLEAN",
-            "Portrait": "TEXT"
-        }
-        objects_columns = {
-            "Name": "TEXT",
-            "Description": "TEXT",
-            "Secrets": "TEXT",
-            "Portrait": "TEXT"
-        }
-        creatures_columns = {
-            "Name": "TEXT",
-            "Type": "TEXT",
-            "Description": "TEXT",
-            "Weakness": "TEXT",
-            "Powers": "TEXT",
-            "Stats": "TEXT",
-            "Background": "TEXT",
-            "Genre": "TEXT",
-            "Portrait": "TEXT"
-        }
-        informations_columns = {
-            "Title": "TEXT",
-            "Information": "TEXT",
-            "Level": "TEXT",
-            "PlayerDisplay": "BOOLEAN",
-            "NPCs": "TEXT"
-        }
-        alter_table_if_missing("npcs", npcs_columns)
-        alter_table_if_missing("scenarios", scenarios_columns)
-        alter_table_if_missing("factions", factions_columns)
-        alter_table_if_missing("places", places_columns)
-        alter_table_if_missing("objects", objects_columns)
-        alter_table_if_missing("creatures", creatures_columns)
-        alter_table_if_missing("informations", informations_columns)
+        """
+        For each entity:
+        - If its table is missing, CREATE it from modules/<entity>/<entity>_template.json
+        - Else, ALTER it to add any new columns defined in that same JSON
+        """
+        entities = [
+            "npcs",
+            "scenarios",
+            "factions",
+            "places",
+            "objects",
+            "creatures",      # new one
+            "informations",
+        ]
+
+        for ent in entities:
+            schema = load_schema_from_json(ent)
+            pk     = schema[0][0]                # assume first field is PK
+            cols   = ",\n    ".join(f"{c} {t}" for c, t in schema)
+
+            # 1) does table exist?
+            cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+                (ent,)
+            )
+            if not cursor.fetchone():
+                # create the whole table
+                ddl = f"""
+                CREATE TABLE {ent} (
+                    {cols},
+                    PRIMARY KEY({pk})
+                )"""
+                cursor.execute(ddl)
+            else:
+                # just add any missing columns
+                cursor.execute(f"PRAGMA table_info({ent})")
+                existing = {row["name"] for row in cursor.fetchall()}
+                for col, typ in schema:
+                    if col not in existing:
+                        cursor.execute(
+                            f"ALTER TABLE {ent} ADD COLUMN {col} {typ}"
+                        )
+
+        conn.commit()
 
     def launch_swarmui(self):
         global SWARMUI_PROCESS
