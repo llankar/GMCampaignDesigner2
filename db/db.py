@@ -67,7 +67,7 @@ def initialize_db():
     conn   = get_connection()
     cursor = conn.cursor()
 
-    for table in ["npcs","scenarios","factions","places","objects","informations"]:
+    for table in ["npcs","scenarios","factions","places","objects","informations","clues"]:
         schema = load_schema_from_json(table)
         # assume first field is the PK:
         pk = schema[0][0]

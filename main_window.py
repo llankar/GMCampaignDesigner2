@@ -18,7 +18,6 @@ from modules.helpers.window_helper import position_window_at_top
 from modules.helpers.template_loader import load_template
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.swarmui_helper import get_available_models
-from modules.helpers.db_helper import init_db
 from modules.ui.tooltip import ToolTip
 from modules.ui.icon_button import create_icon_button
 
@@ -55,7 +54,6 @@ class MainWindow(ctk.CTk):
 
         position_window_at_top(self)
         self.set_window_icon()
-        self.init_db()
         self.create_layout()
         self.load_icons()
         self.create_sidebar()
@@ -74,12 +72,6 @@ class MainWindow(ctk.CTk):
         icon_image = PhotoImage(file=os.path.join("assets", "GMCampaignDesigner logo.png"))
         self.tk.call('wm', 'iconphoto', self._w, icon_image)
 
-    def init_db(self):
-        db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db")
-        init_db(db_path, self.update_table_schema)
-
-    
-
     def create_layout(self):
         self.main_frame = ctk.CTkFrame(self)
         self.main_frame.pack(fill="both", expand=True)
@@ -95,6 +87,7 @@ class MainWindow(ctk.CTk):
             "manage_places": self.load_icon("places_icon.png", size=(64, 64)),
             "manage_objects": self.load_icon("objects_icon.png", size=(64, 64)),
             "manage_informations": self.load_icon("informations_icon.png", size=(64, 64)),
+            "manage_clues": self.load_icon("clues_icon.png", size=(64, 64)),
             "export_scenarios": self.load_icon("export_icon.png", size=(64, 64)),
             "gm_screen": self.load_icon("gm_screen_icon.png", size=(64, 64)),
             "npc_graph": self.load_icon("npc_graph_icon.png", size=(64, 64)),
@@ -165,6 +158,7 @@ class MainWindow(ctk.CTk):
             ("manage_places", "Manage Places", lambda: self.open_entity("places")),
             ("manage_objects", "Manage Objects", lambda: self.open_entity("objects")),
             ("manage_informations", "Manage Informations", lambda: self.open_entity("informations")),
+            ("manage_clues", "Manage Clues", lambda: self.open_entity("clues")),
             ("export_scenarios", "Export Scenarios", self.preview_and_export_scenarios),
             ("gm_screen", "Open GM Screen", self.open_gm_screen),
             ("npc_graph", "Open NPC Graph Editor", self.open_npc_graph_editor),
@@ -313,66 +307,107 @@ class MainWindow(ctk.CTk):
         ScenarioImportWindow(container)
 
     def change_database_storage(self):
-        choice = messagebox.askquestion("Change Database", "Do you want to open an existing database file?")
+        # 1) Pick or create .db
+        choice = messagebox.askquestion(
+            "Change Database",
+            "Do you want to open an existing database file?"
+        )
         if choice == "yes":
-            file_path = filedialog.askopenfilename(
+            new_db_path = filedialog.askopenfilename(
                 title="Select Database",
                 filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
             )
-            if not file_path:
-                return
-            new_db_path = file_path
         else:
             new_db_path = filedialog.asksaveasfilename(
                 title="Create New Database",
                 defaultextension=".db",
                 filetypes=[("SQLite DB Files", "*.db"), ("All Files", "*.*")]
             )
-            if not new_db_path:
-                return
-            conn = sqlite3.connect(new_db_path)
-            cursor = conn.cursor()
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS nodes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    npc_name TEXT,
-                    x INTEGER,
-                    y INTEGER,
-                    color TEXT
-                )
-            ''')
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS links (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    npc_name1 TEXT,
-                    npc_name2 TEXT,
-                    text TEXT,
-                    arrow_mode TEXT
-                )
-            ''')
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS shapes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type TEXT,
-                    x INTEGER,
-                    y INTEGER,
-                    w INTEGER,
-                    h INTEGER,
-                    color TEXT,
-                    tag TEXT,
-                    z INTEGER
-                )
-            ''')
-            conn.commit()
-            conn.close()
+        if not new_db_path:
+            return
+
+        # 2) Persist to config so get_connection()/init_db() will pick it up
         ConfigHelper.set("Database", "path", new_db_path)
-        self.init_db()
-        self.place_wrapper = GenericModelWrapper("places")
-        self.npc_wrapper = GenericModelWrapper("npcs")
-        self.faction_wrapper = GenericModelWrapper("factions")
-        self.object_wrapper = GenericModelWrapper("objects")
+
+        # 3) Open a fresh connection and create all tables based on JSON templates
+        conn = sqlite3.connect(new_db_path)
+        cursor = conn.cursor()
+
+        # For each entity, load its template and build a CREATE TABLE
+        for entity in ("npcs", "scenarios", "factions",
+                    "places", "objects", "creatures", "informations","clues"):
+
+            tpl = load_template(entity)   # loads modules/<entity>/<entity>_template.json
+            cols = []
+            for i, field in enumerate(tpl["fields"]):
+                name = field["name"]
+                ftype = field["type"]
+                # map JSON -> SQL
+                if ftype in ("text", "longtext"):
+                    sql_type = "TEXT"
+                elif ftype == "boolean":
+                    sql_type = "BOOLEAN"
+                elif ftype == "list":
+                    # we store lists as JSON strings
+                    sql_type = "TEXT"
+                else:
+                    sql_type = "TEXT"
+
+                # first field is primary key
+                if i == 0:
+                    cols.append(f"{name} {sql_type} PRIMARY KEY")
+                else:
+                    cols.append(f"{name} {sql_type}")
+
+            ddl = f"CREATE TABLE IF NOT EXISTS {entity} ({', '.join(cols)})"
+            cursor.execute(ddl)
+
+        # 4) Re‑create the graph viewer tables
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS nodes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                npc_name TEXT,
+                x INTEGER,
+                y INTEGER,
+                color TEXT
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS links (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                npc_name1 TEXT,
+                npc_name2 TEXT,
+                text TEXT,
+                arrow_mode TEXT
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS shapes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                type TEXT,
+                x INTEGER,
+                y INTEGER,
+                w INTEGER,
+                h INTEGER,
+                color TEXT,
+                tag TEXT,
+                z INTEGER
+            )
+        """)
+
+        conn.commit()
+        conn.close()
+
+        # 5) Re‑initialise your in‑memory wrappers & update the label
+        #    (and run any schema‐migrations if you still need them)
+        self.place_wrapper    = GenericModelWrapper("places")
+        self.npc_wrapper      = GenericModelWrapper("npcs")
+        self.faction_wrapper  = GenericModelWrapper("factions")
+        self.object_wrapper   = GenericModelWrapper("objects")
+        self.creature_wrapper = GenericModelWrapper("creatures")
+
         db_name = os.path.splitext(os.path.basename(new_db_path))[0]
-        self.db_name_label.configure(text=f"{db_name}")
+        self.db_name_label.configure(text=db_name)
 
     def select_swarmui_path(self):
         folder = filedialog.askdirectory(title="Select SwarmUI Path")
@@ -829,6 +864,7 @@ class MainWindow(ctk.CTk):
             "objects",
             "creatures",      # new one
             "informations",
+            "clues"
         ]
 
         for ent in entities:
