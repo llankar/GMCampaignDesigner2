@@ -7,4 +7,4 @@ cd /var/services/homes/llankar/Drive/rpg/Python/GMCampaignDesigner2
 
 # Run the Flask app using the module command.
 # (Make sure you run from the project root so Python locates your packages.)
-python -m modules.web.npc_graph_webviewer
+python -m modules.web.GM_webviewer
