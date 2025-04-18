@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Clues – {{ db_name }}</title>
+    <title>Clues – {{ db_name }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet" />
     <style>
         html,
@@ -13,11 +13,15 @@
             padding: 20px;
             font-family: 'Permanent Marker', cursive;
             background: url('/assets/images/corkboard_bg.png') center/cover no-repeat;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 20px
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
         }
 
         .header h1 {
@@ -28,6 +32,7 @@
         }
 
         .add-clue-btn {
+            display: inline-block;
             margin-top: 10px;
             padding: 10px 20px;
             background: #ffe066;
@@ -46,32 +51,31 @@
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
         }
 
-        /* board fills below header */
         .board {
             position: relative;
             width: 100%;
-            height: calc(100vh - 120px);
+            /* no CSS height */
+            z-index: 1;
         }
 
         .clue-card {
             position: absolute;
-            /* absolute from the start */
             background: #fff8e1;
             border: 1px solid #e0d4a3;
             padding: 15px 10px 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             transform: rotate(var(--angle));
             transition: transform .2s;
-            width: auto;
             min-width: 180px;
             max-width: 300px;
             cursor: grab;
             font-family: inherit;
+            z-index: 2;
         }
 
         .clue-card:hover {
             transform: rotate(0deg) scale(1.02);
-            z-index: 100;
+            z-index: 1001;
         }
 
         .clue-card::before {
@@ -111,68 +115,126 @@
         <a href="{{ url_for('add_clue') }}" class="add-clue-btn">+ Add New Clue</a>
     </div>
 
-    <div class="board">
+    <div class="board" id="board">
         {% for clue in clues %}
-        <div class="clue-card" style="--angle: {{ [-5,-3,-1,1,3,5]|random }}deg;">
+        <div class="clue-card" data-id="{{ loop.index0 }}" style="--angle: {{ [-5,-3,-1,1,3,5]|random }}deg;">
             <h2>{{ clue.Name }}</h2>
-            {% if clue.Type %}<div class="type">{{ clue.Type }}</div>{% endif %}
+            {% if clue.Type %}
+            <div class="type">{{ clue.Type }}</div>
+            {% endif %}
             <div class="desc">{{ clue.DisplayDescription|safe }}</div>
         </div>
         {% endfor %}
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const board = document.querySelector('.board');
-            const width = board.clientWidth;
-            const height = board.clientHeight;
+        document.addEventListener('DOMContentLoaded', async () => {
+            const board = document.getElementById('board'),
+                W = board.clientWidth,
+                cards = Array.from(board.querySelectorAll('.clue-card'));
 
-            // place cards randomly without overlap
-            const cards = Array.from(board.children);
-            const placedRects = [];
+            // 1) Load saved positions
+            let saved = {};
+            try {
+                const res = await fetch('/api/clue-positions');
+                saved = await res.json();
+            } catch (_) { }
 
-            function rectsOverlap(a, b) {
-                return !(a.left + a.width < b.left ||
-                    b.left + b.width < a.left ||
-                    a.top + a.height < b.top ||
-                    b.top + b.height < a.top);
+            // 2) Place cards and build full map
+            const fullMap = {}, placed = [];
+            function overlap(a, b) {
+                return !(
+                    a.left + a.w < b.left ||
+                    b.left + b.w < a.left ||
+                    a.top + a.h < b.top ||
+                    b.top + b.h < a.top
+                );
             }
 
             cards.forEach(card => {
-                const cw = card.offsetWidth, ch = card.offsetHeight;
+                const id = card.dataset.id,
+                    cw = card.offsetWidth, ch = card.offsetHeight;
                 let x, y, rect, tries = 0;
-                do {
-                    x = Math.random() * (width - cw);
-                    y = Math.random() * (height - ch);
-                    rect = { left: x, top: y, width: cw, height: ch };
-                    tries++;
-                } while (placedRects.some(r => rectsOverlap(r, rect)) && tries < 200);
+
+                if (saved[id] != null) {
+                    x = saved[id].x;
+                    y = saved[id].y;
+                } else {
+                    do {
+                        x = Math.random() * (W - cw);
+                        y = Math.random() * (window.innerHeight - ch);
+                        rect = { left: x, top: y, w: cw, h: ch };
+                        tries++;
+                    } while (placed.some(r => overlap(r, rect)) && tries < 200);
+                    placed.push(rect);
+                }
+
                 card.style.left = x + 'px';
                 card.style.top = y + 'px';
-                placedRects.push(rect);
+                fullMap[id] = { x, y };
+            });
 
-                // now make it draggable
+            // 3) Bulk‑save full map
+            try {
+                await fetch('/api/clue-positions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fullMap)
+                });
+            } catch (_) { }
+
+            // 4) Resize board to include all cards
+            let maxBottom = 0;
+            cards.forEach(c => {
+                const top = parseFloat(c.style.top),
+                    h = c.offsetHeight;
+                maxBottom = Math.max(maxBottom, top + h);
+            });
+            // add some padding
+            board.style.height = (maxBottom + 20) + 'px';
+
+            // 5) Make draggable & save on drop
+            cards.forEach(card => {
                 card.addEventListener('pointerdown', e => {
                     e.preventDefault();
                     card.setPointerCapture(e.pointerId);
-                    const shiftX = e.clientX - card.getBoundingClientRect().left;
-                    const shiftY = e.clientY - card.getBoundingClientRect().top;
+                    const sx = e.clientX, sy = e.clientY,
+                        ox = card.offsetLeft, oy = card.offsetTop;
                     card.style.cursor = 'grabbing';
 
-                    function onPointerMove(ev) {
-                        card.style.left = (ev.clientX - shiftX - board.getBoundingClientRect().left) + 'px';
-                        card.style.top = (ev.clientY - shiftY - board.getBoundingClientRect().top) + 'px';
+                    function onMove(ev) {
+                        card.style.left = ox + (ev.clientX - sx) + 'px';
+                        card.style.top = oy + (ev.clientY - sy) + 'px';
                     }
-
-                    function onPointerUp(ev) {
+                    async function onUp() {
                         card.releasePointerCapture(e.pointerId);
-                        card.removeEventListener('pointermove', onPointerMove);
-                        card.removeEventListener('pointerup', onPointerUp);
+                        document.removeEventListener('pointermove', onMove);
+                        document.removeEventListener('pointerup', onUp);
                         card.style.cursor = 'grab';
+
+                        // save new pos
+                        await fetch('/api/clue-position', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id: card.dataset.id,
+                                x: parseFloat(card.style.left),
+                                y: parseFloat(card.style.top)
+                            })
+                        });
+
+                        // recompute board height in case moved below
+                        let mb = 0;
+                        cards.forEach(c2 => {
+                            const t = parseFloat(c2.style.top),
+                                h = c2.offsetHeight;
+                            mb = Math.max(mb, t + h);
+                        });
+                        board.style.height = (mb + 20) + 'px';
                     }
 
-                    card.addEventListener('pointermove', onPointerMove);
-                    card.addEventListener('pointerup', onPointerUp);
+                    document.addEventListener('pointermove', onMove);
+                    document.addEventListener('pointerup', onUp);
                 });
                 card.ondragstart = () => false;
             });
