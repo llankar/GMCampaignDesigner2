@@ -2,240 +2,301 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Locations – {{ db_name }}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet" />
+
     <style>
+        html,
         body {
-            font-family: Georgia, serif;
-            background: url('/static/filing_cabinet_background.png') no-repeat center center fixed;
-            background-size: cover;
             margin: 0;
-            padding: 50px;
+            padding: 20px;
+            font-family: 'Permanent Marker', cursive;
+            background: url('/assets/images/corkboard_bg.png') center/cover no-repeat;
+            overflow-x: hidden;
         }
 
-        h1 {
-            color: #1b1f3a;
+        .header {
             text-align: center;
-            font-size: 36px;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
-        .file-stack {
-            max-width: 800px;
-            margin: 0 auto;
+        .header h1 {
+            margin: 0;
+            font-size: 3.5em;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
 
-        .file-wrapper {
-            position: relative;
-            margin-bottom: -20px;
-            /* less overlap for readable tabs */
-            z-index: 1;
-        }
-
-        .file-wrapper.active {
-            z-index: 10;
-        }
-
-        .folder-tab {
-            cursor: pointer;
-            display: block;
-            overflow: visible;
-            transition: transform .1s;
-        }
-
-        .folder-tab:hover {
-            transform: translateY(-2px);
-        }
-
-        .case-file {
-            display: none;
-            margin-top: -4px;
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .description {
-            font-size: 16px;
-            color: #1d2b53;
-            line-height: 1.5;
-            margin-top: 0;
-        }
-
-        .portrait {
-            width: 140px;
-            float: right;
-            margin-left: 20px;
+        .back-link {
+            display: inline-block;
             margin-top: 10px;
-            /* ensure inside border */
-            border: 2px solid #ccc;
+            padding: 10px 20px;
+            background: #ffe066;
+            color: #333;
+            font-family: inherit;
+            font-size: 1.2em;
+            text-decoration: none;
+            border: 2px solid #e0d4a3;
             border-radius: 8px;
-            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform .2s, box-shadow .2s;
         }
 
-        .threat-level {
-            margin-top: 10px;
-            font-size: 15px;
+        .back-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
         }
 
-        .threat-icon {
-            font-size: 18px;
-            color: darkred;
-            margin-right: 4px;
+        .board {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        a.back-link {
-            color: #1d2b53;
-            font-weight: bold;
-            text-align: center;
-            display: block;
-            margin-top: 40px;
+        .doodle {
+            position: absolute;
+            z-index: 1;
+            opacity: 0.7;
+            pointer-events: none;
+            width: 100px;
+            height: auto;
         }
 
-        #imageModal {
-            display: none;
-            position: fixed;
+        .card {
+            --rotation: 0deg;
+            position: absolute;
+            z-index: 10;
+            width: 250px;
+            height: 160px;
+            transform: rotate(var(--rotation));
+            transform-origin: center center;
+            perspective: 600px;
+            cursor: grab;
+        }
+
+        .inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform .6s ease;
+        }
+
+        .card.flipped .inner {
+            transform: rotateY(180deg);
+        }
+
+        .front,
+        .back {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
+            backface-visibility: hidden;
+            border: 2px solid #444;
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2);
+            background-color: #fdfcf7;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        #imageModal img {
-            max-width: 90%;
-            max-height: 90%;
-            transition: transform .3s, opacity .3s;
+        .front {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .front .title {
+            padding: 10px;
+            font-family: 'Special Elite', cursive;
+            font-size: 1.2em;
+            color: #333;
+            text-align: center;
+        }
+
+        /* ★ add stamp graphic to the back face ★ */
+        .back {
+            transform: rotateY(180deg);
+            overflow-y: auto;
+            padding: 10px;
+            font-family: Georgia, serif;
+            font-size: 1em;
+            line-height: 1.4;
+            color: #111;
+            position: relative;
+            /* for ::before */
+        }
+
+        .back .title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 1.1em;
+        }
+
+        .back::before {
+            content: "";
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 30px;
+            height: 30px;
+            background: url('/assets/images/postage-stamp.png') no-repeat center/contain;
+            opacity: 0.6;
+            transform: rotate(-1deg);
+            pointer-events: none;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        @media (max-width:640px) {
+            .card {
+                width: 80vw;
+                height: 50vw;
+            }
         }
     </style>
-    <script>
-        function adjustSize(svg) {
-            const fo = svg.querySelector('foreignObject'),
-                div = fo.querySelector('div'),
-                rect = svg.querySelector('rect');
-            const h = Math.ceil(div.getBoundingClientRect().height);
-            const foH = h + 20;
-            fo.setAttribute('height', foH);
-            const totalH = 60 + foH; // accommodate new y-offset of 60
-            svg.setAttribute('height', totalH);
-            svg.setAttribute('viewBox', `0 0 600 ${totalH}`);
-            rect.setAttribute('height', totalH);
-        }
-
-        function toggleCase(id) {
-            document.querySelectorAll('.case-file').forEach(el => {
-                const wrap = el.parentNode;
-                if (el.id === id) {
-                    if (el.style.display === 'block') {
-                        el.style.display = 'none';
-                        wrap.classList.remove('active');
-                    } else {
-                        el.style.display = 'block';
-                        wrap.classList.add('active');
-                        adjustSize(el);
-                    }
-                } else {
-                    el.style.display = 'none';
-                    wrap.classList.remove('active');
-                }
-            });
-        }
-
-        function showImageModal(src) {
-            const m = document.getElementById('imageModal'),
-                img = m.querySelector('img');
-            img.src = src; m.style.display = 'flex';
-            img.style.transform = 'scale(0.3)'; img.style.opacity = '0';
-            setTimeout(() => { img.style.transform = 'scale(1)'; img.style.opacity = '1'; }, 10);
-        }
-
-        function hideImageModal() {
-            const m = document.getElementById('imageModal'),
-                img = m.querySelector('img');
-            img.style.transform = 'scale(0.3)'; img.style.opacity = '0';
-            setTimeout(() => { m.style.display = 'none'; img.src = ''; }, 300);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const cases = Array.from(document.querySelectorAll('.case-file')),
-                wrappers = Array.from(document.querySelectorAll('.file-wrapper'));
-            if (cases.length) {
-                const lastIdx = cases.length - 1,
-                    lastCase = cases[lastIdx],
-                    wrap = wrappers[lastIdx];
-                lastCase.style.display = 'block';
-                wrap.classList.add('active');
-                adjustSize(lastCase);
-            }
-        });
-    </script>
 </head>
 
 <body>
-    <h1>Locations – {{ db_name }}</h1>
-    <div class="file-stack">
-        {% for place in places %}
-        <div class="file-wrapper">
-            <!-- TAB at 75% width, with wrapping title -->
-            <svg class="folder-tab" onclick="toggleCase('case{{ loop.index }}')" xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 450 70" width="450" height="70">
-                <path d="M0 70 Q30 0 150 0 H430 Q450 0 450 20 V70 H0 Z" fill="#e7d1a6" stroke="#c9a76d" stroke-width="4"
-                    rx="12" ry="12" />
-                <foreignObject x="70" y="15" width="240" height="40">
-                    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Georgia, serif;
-                              font-size:19px;
-                              fill:#705a3c;
-                              font-weight:bold;
-                              line-height:1.1;
-                              word-wrap:break-word;">
-                        {{ place.Name }}
-                    </div>
-                </foreignObject>
-                {% if place.Confidential %}
-                <g transform="translate(150,8) rotate(-10)">
-                    <rect x="0" y="0" width="120" height="26" rx="3" fill="#b71c1c" />
-                    <text x="60" y="18" fill="#fff" font-family="Courier New" font-size="12" font-weight="bold"
-                        text-anchor="middle">CONFIDENTIAL</text>
-                </g>
-                {% endif %}
-            </svg>
+    <div class="header">
+        <h1>Locations – {{ db_name }}</h1>
+        <a href="{{ url_for('welcome') }}" class="back-link">← Back to Welcome</a>
+    </div>
 
-            <!-- FULL-WIDTH BODY at 600px, border matches tab color -->
-            <svg id="case{{ loop.index }}" class="case-file" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 180"
-                width="600" height="180" >
-                <rect x="0" y="0" width="600" height="180" rx="12" ry="12" fill="#f1e4c0" stroke="#e7d1a6"
-                    stroke-width="0.6cm" />
-                {% if place.Secured %}
-                <g transform="translate(430,20)">
-                    <rect x="0" y="0" width="100" height="28" rx="4" fill="#3c763d" />
-                    <text x="50" y="18" fill="#fff" font-family="Courier New" font-size="14" font-weight="bold"
-                        text-anchor="middle">SECURED</text>
-                </g>
-                {% endif %}
-                <foreignObject x="20" y="60" width="560" height="120">
-                    <div xmlns="http://www.w3.org/1999/xhtml">
-                        {% if place.PortraitURL %}
-                        <img src="{{ place.PortraitURL }}" class="portrait"
-                            onclick="showImageModal('{{ place.PortraitURL }}')" alt="{{ place.Name }} portrait" />
-                        {% endif %}
-                        <p class="description">{{ place.DisplayDescription|safe }}</p>
-                        {% if place.ThreatLevel %}
-                        <p class="threat-level">Threat Level: {% for _ in range(place.ThreatLevel) %}<span
-                                class="threat-icon">☠️</span>{% endfor %}</p>
-                        {% endif %}
-                    </div>
-                </foreignObject>
-            </svg>
+    <div class="board" id="board">
+        {% for p in places %}
+        <div class="card" data-index="{{ loop.index0 }}">
+            <div class="inner">
+                <!-- FRONT -->
+                <div class="front">
+                    {% if p.PortraitURL %}
+                    <img src="{{ p.PortraitURL }}" alt="{{ p.Name }}">
+                    {% else %}
+                    <div class="title">{{ p.Name }}</div>
+                    {% endif %}
+                </div>
+                <!-- BACK -->
+                <div class="back">
+                    <div class="title">{{ p.Name }}</div>
+                    <p>{{ p.DisplayDescription|safe }}</p>
+                    {% if p.ThreatLevel %}
+                    <p>{% for _ in range(p.ThreatLevel) %}☠️{% endfor %}</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
 
-    <a href="{{ url_for('welcome') }}" class="back-link">Back to Welcome</a>
-    <div id="imageModal" onclick="hideImageModal()">
-        <img src="" alt="Enlarged portrait" />
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('board'),
+                bw = board.clientWidth,
+                vh = window.innerHeight,
+                cards = Array.from(board.querySelectorAll('.card')),
+                doodles = [
+                    '/assets/images/doodle_arrow.png',
+                    '/assets/images/doodle_interro.png',
+                    '/assets/images/doodle_exclam.png',
+                    '/assets/images/doodle_star.png',
+                    '/assets/images/doodle_symbol.png',
+                    '/assets/images/doodle_secret.png'
+                ];
+
+            // scatter doodles
+            for (let i = 0; i < 6; i++) {
+                const d = document.createElement('img');
+                d.src = doodles[Math.floor(Math.random() * doodles.length)];
+                d.className = 'doodle';
+                d.style.top = Math.random() * (vh - 100) + 'px';
+                d.style.left = Math.random() * (bw - 100) + 'px';
+                d.style.transform = `rotate(${(Math.random() * 30 - 15).toFixed(1)}deg)`;
+                board.appendChild(d);
+            }
+
+            // grid for visible area
+            const cellW = 180 + 15, cellH = (180 * 0.64) + 15,
+                cols = Math.max(1, Math.floor(bw / cellW)),
+                rows = Math.max(1, Math.floor(vh / cellH)),
+                visibleCount = cols * rows;
+
+            // helper: collision test
+            function intersects(a, b) {
+                return !(a.x + a.w < b.x ||
+                    b.x + b.w < a.x ||
+                    a.y + a.h < b.y ||
+                    b.y + b.h < a.y);
+            }
+            const placedRects = [];
+
+            cards.forEach((card, idx) => {
+                // random rotation
+                card.style.setProperty('--rotation', (Math.random() * 6 - 3).toFixed(2) + 'deg');
+                // random size
+                const w = 180 + Math.random() * 140;
+                card.style.width = w + 'px';
+                card.style.height = (w * 0.64) + 'px';
+
+                // placement
+                let x, y, rect, tries = 0;
+                if (idx < visibleCount) {
+                    do {
+                        x = Math.random() * (bw - card.offsetWidth);
+                        y = Math.random() * (vh - card.offsetHeight);
+                        rect = { x, y, w: card.offsetWidth, h: card.offsetHeight };
+                        tries++;
+                    } while (placedRects.some(r => intersects(r, rect)) && tries < 200);
+                    placedRects.push(rect);
+                } else {
+                    x = Math.random() * (bw - card.offsetWidth);
+                    y = vh + 50 + Math.random() * vh;
+                }
+                card.style.left = x + 'px';
+                card.style.top = y + 'px';
+
+                // dragging
+                card.addEventListener('pointerdown', e => {
+                    e.preventDefault();
+                    card.setPointerCapture(e.pointerId);
+                    const sx = e.clientX, sy = e.clientY,
+                        ox = card.offsetLeft, oy = card.offsetTop;
+                    card.style.zIndex = 1000;
+                    function onMove(ev) {
+                        card.style.left = ox + (ev.clientX - sx) + 'px';
+                        card.style.top = oy + (ev.clientY - sy) + 'px';
+                    }
+                    function onUp() {
+                        card.releasePointerCapture(e.pointerId);
+                        document.removeEventListener('pointermove', onMove);
+                        document.removeEventListener('pointerup', onUp);
+                        card.style.zIndex = '';
+                    }
+                    document.addEventListener('pointermove', onMove);
+                    document.addEventListener('pointerup', onUp);
+                });
+
+                // flip
+                card.addEventListener('click', e => {
+                    if (card.hasPointerCapture(e.pointerId)) return;
+                    card.classList.toggle('flipped');
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
