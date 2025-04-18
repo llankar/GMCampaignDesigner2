@@ -47,6 +47,81 @@ logging.debug("PORTRAITS_DIR: %s", PORTRAITS_DIR)
 # Shared positions JSON file (for clues)
 # ——————————————————————————————————————————————————————————
 POSITIONS_FILE = os.path.join(BASE_DIR, "data", "save", "clue_positions.json")
+LINKS_FILE = os.path.join(BASE_DIR, "data", "save", "clue_links.json")
+
+def load_links():
+    """
+    Load and return the list of saved links.
+    Returns a list of dicts: [{ "from": "...", "to": "...", "text": "...", "color": "..." }, …]
+    """
+    try:
+        with open(LINKS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def save_links_list(links_list):
+    os.makedirs(os.path.dirname(LINKS_FILE), exist_ok=True)
+    with open(LINKS_FILE, "w", encoding="utf-8") as f:
+        json.dump(links_list, f, indent=2)
+        
+def save_link(link):
+    """
+    Append one link to the saved list and write back to disk.
+    `link` should be a dict like { "from": "...", "to": "...", "text": "...", "color": "..." }.
+    """
+    links = load_links()
+    links.append(link)
+    os.makedirs(os.path.dirname(LINKS_FILE), exist_ok=True)
+    with open(LINKS_FILE, "w", encoding="utf-8") as f:
+        json.dump(links, f, indent=2)
+
+@app.route('/api/clue-link-delete', methods=['POST'])
+def delete_clue_link():
+    data = request.get_json() or {}
+    idx = data.get("index")
+    if idx is None:
+        return jsonify(error="Missing index"), 400
+    links = load_links()
+    try:
+        idx = int(idx)
+        if 0 <= idx < len(links):
+            links.pop(idx)
+            save_links_list(links)
+            return jsonify(success=True)
+    except (ValueError, TypeError):
+        pass
+    return jsonify(error="Invalid index"), 404
+
+@app.route('/api/clue-delete', methods=['POST'])
+def delete_clue():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    if not name:
+        return jsonify(error="Missing clue name"), 400
+
+    wrapper = GenericModelWrapper("clues")
+    items = wrapper.load_items()
+
+    # Find all indices (as strings) of clues matching this name
+    removed_ids = [str(i) for i, c in enumerate(items)
+                if c.get("Name", "").strip() == name]
+    if not removed_ids:
+        return jsonify(error="Clue not found"), 404
+
+    # 1) Remove the clue(s) from the database
+    new_items = [c for c in items if c.get("Name", "").strip() != name]
+    wrapper.save_items(new_items)
+
+    # 2) Remove any links that reference those clue IDs
+    links = load_links()
+    filtered_links = [
+        l for l in links
+        if l.get("from") not in removed_ids and l.get("to") not in removed_ids
+    ]
+    save_links_list(filtered_links)
+
+    return jsonify(success=True)
 
 def load_positions():
     try:
@@ -172,9 +247,27 @@ def news_view():
 
 @app.route('/clues')
 def clues_view():
+    links = [
+        {"from":"0", "to":"2", "text":"leads to",     "color":"#d6336c"},
+        {"from":"2", "to":"5", "text":"related",        "color":"#198754"},
+        {"from":"5", "to":"0", "text":"contains",     "color":"#0d6efd"},
+    ]
     return render_template('clues.html',
                         clues=get_clues_list(),
+                        links=links,
                         db_name=DB_NAME)
+
+@app.route('/api/clue-links', methods=['GET'])
+def get_clue_links():
+    # return a list of your saved links
+    # e.g. load from JSON or your DB
+    return jsonify(load_links())
+
+@app.route('/api/clue-link', methods=['POST'])
+def add_clue_link():
+    link = request.get_json()  # {from, to, text, color}
+    save_link(link)
+    return '', 204
 
 @app.route('/clues/add', methods=['GET','POST'])
 def add_clue():
