@@ -30,7 +30,7 @@ from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
 from modules.helpers import text_helpers
-from db.db import load_schema_from_json
+from db.db import load_schema_from_json, initialize_db
 
 # Set up CustomTkinter appearance
 ctk.set_appearance_mode("Dark")
@@ -50,7 +50,7 @@ class MainWindow(ctk.CTk):
         self.geometry("1920x980")
         self.minsize(1920, 980)
         self.attributes("-fullscreen", True)
-
+        initialize_db()
         position_window_at_top(self)
         self.set_window_icon()
         self.create_layout()
@@ -349,6 +349,9 @@ class MainWindow(ctk.CTk):
                 elif ftype == "list":
                     # we store lists as JSON strings
                     sql_type = "TEXT"
+                elif ftype == "file":
+                    # we store lists as JSON strings
+                    sql_type = "TEXT"
                 else:
                     sql_type = "TEXT"
 
@@ -404,6 +407,8 @@ class MainWindow(ctk.CTk):
         self.faction_wrapper  = GenericModelWrapper("factions")
         self.object_wrapper   = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")
+        self.information_wrapper = GenericModelWrapper("informations")
+        self.clues_wrapper = GenericModelWrapper("clues")
 
         db_name = os.path.splitext(os.path.basename(new_db_path))[0]
         self.db_name_label.configure(text=db_name)
@@ -849,52 +854,7 @@ class MainWindow(ctk.CTk):
             print("No NPC records were updated. Either all have portraits or no matches were found.")
         conn.close()
 
-    def update_table_schema(self, conn, cursor):
-        """
-        For each entity:
-        - If its table is missing, CREATE it from modules/<entity>/<entity>_template.json
-        - Else, ALTER it to add any new columns defined in that same JSON
-        """
-        entities = [
-            "npcs",
-            "scenarios",
-            "factions",
-            "places",
-            "objects",
-            "creatures",      # new one
-            "informations",
-            "clues"
-        ]
-
-        for ent in entities:
-            schema = load_schema_from_json(ent)
-            pk     = schema[0][0]                # assume first field is PK
-            cols   = ",\n    ".join(f"{c} {t}" for c, t in schema)
-
-            # 1) does table exist?
-            cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-                (ent,)
-            )
-            if not cursor.fetchone():
-                # create the whole table
-                ddl = f"""
-                CREATE TABLE {ent} (
-                    {cols},
-                    PRIMARY KEY({pk})
-                )"""
-                cursor.execute(ddl)
-            else:
-                # just add any missing columns
-                cursor.execute(f"PRAGMA table_info({ent})")
-                existing = {row["name"] for row in cursor.fetchall()}
-                for col, typ in schema:
-                    if col not in existing:
-                        cursor.execute(
-                            f"ALTER TABLE {ent} ADD COLUMN {col} {typ}"
-                        )
-
-        conn.commit()
+    
 
     def launch_swarmui(self):
         global SWARMUI_PROCESS

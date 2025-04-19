@@ -111,6 +111,17 @@
             line-height: 1.4;
         }
 
+        /* Attachment link styling */
+        .news-card .attachment {
+            margin-top: 8px;
+        }
+
+        .news-card .attachment a {
+            display: inline-block;
+            font-size: 0.9em;
+            text-decoration: none;
+        }
+
         .doodle {
             position: absolute;
             z-index: 1;
@@ -136,6 +147,13 @@
             <div class="level">Level: {{ info.DisplayLevel|safe }}</div>
             {% endif %}
             <div class="content">{{ info.DisplayInformation|safe }}</div>
+            {% if info.Attachment %}
+            <div class="attachment">
+                <a href="{{ url_for('information_upload', filename=info.Attachment) }}" + download>
+                    📎 {{ info.Attachment }}
+                </a>
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -195,7 +213,7 @@
             }
 
             const firstRowHeight = Math.max(cards[0]?.offsetHeight || 0, cards[1]?.offsetHeight || 0);
-            const startY = margin + firstRowHeight/8 + margin;
+            const startY = margin + firstRowHeight / 8 + margin;
 
             const rest = cards.slice(2).sort((a, b) => b.offsetWidth - a.offsetWidth);
             rest.forEach(card => {
@@ -221,7 +239,9 @@
 
             // Draggable cards
             cards.forEach(card => {
-                card.addEventListener('pointerdown', e => {
+                 card.addEventListener('pointerdown', e => {
+                    // if the user actually clicked a link, let the browser handle it
+                    if (e.target.closest('a')) return;
                     e.preventDefault();
                     card.setPointerCapture(e.pointerId);
                     const startX = e.clientX, startY = e.clientY;

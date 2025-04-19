@@ -38,7 +38,12 @@ BASE_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 GRAPH_DIR = os.path.join(BASE_DIR, "assets", "graphs")
 PORTRAITS_DIR = os.path.join(BASE_DIR, "assets", "portraits")
 FALLBACK_PORTRAIT = "/assets/images/fallback.png"
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "assets", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 logging.debug("DB_PATH: %s", DB_PATH)
 logging.debug("GRAPH_DIR: %s", GRAPH_DIR)
 logging.debug("PORTRAITS_DIR: %s", PORTRAITS_DIR)
@@ -352,6 +357,51 @@ def set_all_clue_positions():
     positions = request.get_json() or {}
     save_positions(positions)
     return jsonify(success=True)
-    
+
+@app.route('/uploads/informations/<path:filename>')
+def information_upload(filename):
+    # by using as_attachment=True, Flask will send
+    # a Content‑Disposition: attachment header,
+    # which forces a download dialog (or open if the browser supports it)
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'],
+        filename,
+        as_attachment=True
+    )
+@app.route('/informations/add', methods=['GET', 'POST'])
+def add_information():
+    if request.method == 'POST':
+        title = request.form.get('Title', '').strip()
+        info_txt = request.form.get('Information', '').strip()
+        level = request.form.get('Level', '').strip()
+        display = bool(request.form.get('PlayerDisplay'))
+        npcs = request.form.getlist('NPCs')  # adjust if you need multi-select
+
+        attachment = request.files.get('Attachment')
+        filename = ""
+        if attachment and attachment.filename:
+            # secure the filename however your project prefers
+            filename = attachment.filename
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            attachment.save(save_path)
+
+        # save to the generic “informations” table
+        wrapper = GenericModelWrapper("informations")
+        items = wrapper.load_items()
+        items.append({
+            "Title": title,
+            "Information": info_txt,
+            "Level": level,
+            "PlayerDisplay": display,
+            "NPCs": npcs,
+            "Attachment": filename
+        })
+        wrapper.save_items(items)
+
+        return redirect(url_for('news_view'))
+
+    # GET → render a simple form
+    return render_template('add_information.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=31000, debug=True)
