@@ -119,6 +119,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 self.create_dynamic_combobox_list(field)
             elif field["type"] == "boolean":
                 self.create_boolean_field(field)
+            elif field["type"] == "file":
+                self.create_file_field(field)
             else:
                 self.create_text_entry(field)
 
@@ -139,7 +141,48 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         # Optionally, adjust window position.
         position_window_at_top(self)
+    def create_file_field(self, field):
+        frame = ctk.CTkFrame(self.scroll_frame)
+        frame.pack(fill="x", pady=5)
 
+        # load existing attachment name (if any)
+        self.attachment_filename = self.item.get(field["name"], "")
+        label_text = os.path.basename(self.attachment_filename) or "[No Attachment]"
+
+        self.attach_label = ctk.CTkLabel(frame, text=label_text)
+        self.attach_label.pack(side="left", padx=5)
+
+        ctk.CTkButton(
+            frame,
+            text="Browse Attachment",
+            command=self.select_attachment
+        ).pack(side="left", padx=5)
+
+        # placeholder so save() sees the key
+        self.field_widgets[field["name"]] = None
+
+    def select_attachment(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Attachment",
+            filetypes=[("All Files", "*.*")]
+        )
+        if not file_path:
+            return
+
+        # ensure upload folder
+        upload_folder = os.path.join(os.getcwd(), "assets", "uploads")
+        os.makedirs(upload_folder, exist_ok=True)
+
+        # copy into uploads/
+        filename = os.path.basename(file_path)
+        dest = os.path.join(upload_folder, filename)
+        try:
+            shutil.copy(file_path, dest)
+            self.attachment_filename = filename
+            self.attach_label.configure(text=filename)
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not copy file:\n{e}")
+    
     def create_boolean_field(self, field):
         # Define the two possible dropdown options.
         options = ["True", "False"]
@@ -535,6 +578,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
                     self.item[field["name"]] = data
             elif field["name"] in ["Places", "NPCs", "Factions", "Objects", "Creatures"]:
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
+            elif field["type"] == "file":
+                # store the filename (not full path) into the model
+                self.item[field["name"]] = getattr(self, "attachment_filename", "")
             elif field["name"] == "Portrait":
                 self.item[field["name"]] = self.portrait_path
             elif field["type"] == "boolean":

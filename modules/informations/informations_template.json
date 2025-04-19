@@ -4,6 +4,7 @@
       {"name": "Information", "type": "longtext"},
       {"name": "Level", "type": "longtext"},
       {"name": "PlayerDisplay", "type": "boolean"},
-      {"name": "NPCs", "type": "list", "linked_type": "NPCs"}
+      {"name": "NPCs", "type": "list", "linked_type": "NPCs"},
+      {"name": "Attachment", "type": "file"}
   ]
 }
