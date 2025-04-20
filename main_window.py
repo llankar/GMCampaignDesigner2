@@ -25,6 +25,7 @@ from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.scenarios.scenario_detail_view import ScenarioDetailView
 from modules.npcs.npc_graph_editor import NPCGraphEditor
+from modules.pcs.pc_graph_editor import PCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.scenarios.scenario_importer import ScenarioImportWindow
@@ -82,6 +83,7 @@ class MainWindow(ctk.CTk):
             "change_db": self.load_icon("database_icon.png", size=(48, 48)),
             "swarm_path": self.load_icon("folder_icon.png", size=(48, 48)),
             "manage_scenarios": self.load_icon("scenario_icon.png", size=(48, 48)),
+            "manage_pcs": self.load_icon("pc_icon.png", size=(48, 48)),
             "manage_npcs": self.load_icon("npc_icon.png", size=(48, 48)),
             "manage_creatures": self.load_icon("creature_icon.png", size=(48, 48)),
             "manage_factions": self.load_icon("faction_icon.png", size=(48, 48)),
@@ -92,6 +94,7 @@ class MainWindow(ctk.CTk):
             "export_scenarios": self.load_icon("export_icon.png", size=(48, 48)),
             "gm_screen": self.load_icon("gm_screen_icon.png", size=(48, 48)),
             "npc_graph": self.load_icon("npc_graph_icon.png", size=(48, 48)),
+            "pc_graph": self.load_icon("pc_graph_icon.png", size=(48, 48)),
             "faction_graph": self.load_icon("faction_graph_icon.png", size=(48, 48)),
             "scenario_graph": self.load_icon("scenario_graph_icon.png", size=(48, 48)),
             "generate_portraits": self.load_icon("generate_icon.png", size=(48, 48)),
@@ -154,6 +157,7 @@ class MainWindow(ctk.CTk):
             ("change_db", "Change Data Storage", self.change_database_storage),
             ("swarm_path", "Set SwarmUI Path", self.select_swarmui_path),
             ("manage_scenarios", "Manage Scenarios", lambda: self.open_entity("scenarios")),
+            ("manage_pcs", "Manage PCs", lambda: self.open_entity("pcs")),
             ("manage_npcs", "Manage NPCs", lambda: self.open_entity("npcs")),
             ("manage_creatures", "Manage Creatures", lambda: self.open_entity("creatures")),
             ("manage_factions", "Manage Factions", lambda: self.open_entity("factions")),
@@ -164,6 +168,7 @@ class MainWindow(ctk.CTk):
             ("export_scenarios", "Export Scenarios", self.preview_and_export_scenarios),
             ("gm_screen", "Open GM Screen", self.open_gm_screen),
             ("npc_graph", "Open NPC Graph Editor", self.open_npc_graph_editor),
+            ("pc_graph", "Open PC Graph Editor", self.open_pc_graph_editor),
             ("faction_graph", "Open Factions Graph Editor", self.open_faction_graph_editor),
             ("scenario_graph", "Open Scenario Graph Editor", self.open_scenario_graph_editor),
             ("generate_portraits", "Generate Portraits", self.generate_missing_portraits),
@@ -197,6 +202,7 @@ class MainWindow(ctk.CTk):
     def init_wrappers(self):
         self.place_wrapper = GenericModelWrapper("places")
         self.npc_wrapper = GenericModelWrapper("npcs")
+        self.pc_wrapper = GenericModelWrapper("pcs")
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")
@@ -296,6 +302,13 @@ class MainWindow(ctk.CTk):
         npc_graph_editor = NPCGraphEditor(container, self.npc_wrapper, self.faction_wrapper)
         npc_graph_editor.pack(fill="both", expand=True)
 
+    def open_pc_graph_editor(self):
+        self.clear_main_content()
+        container = ctk.CTkFrame(self.content_frame)
+        container.pack(fill="both", expand=True)
+        pc_graph_editor = PCGraphEditor(container, self.pc_wrapper, self.faction_wrapper)
+        pc_graph_editor.pack(fill="both", expand=True)
+
     def open_scenario_graph_editor(self):
         self.clear_main_content()
         container = ctk.CTkFrame(self.content_frame)
@@ -344,7 +357,7 @@ class MainWindow(ctk.CTk):
         cursor = conn.cursor()
 
         # For each entity, load its template and build a CREATE TABLE
-        for entity in ("npcs", "scenarios", "factions",
+        for entity in ("pcs","npcs", "scenarios", "factions",
                     "places", "objects", "creatures", "informations","clues"):
 
             tpl = load_template(entity)   # loads modules/<entity>/<entity>_template.json
@@ -415,6 +428,7 @@ class MainWindow(ctk.CTk):
         #    (and run any schema‐migrations if you still need them)
         self.place_wrapper    = GenericModelWrapper("places")
         self.npc_wrapper      = GenericModelWrapper("npcs")
+        self.pc_wrapper      = GenericModelWrapper("pcs")
         self.faction_wrapper  = GenericModelWrapper("factions")
         self.object_wrapper   = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")

@@ -9,6 +9,7 @@ from modules.helpers.text_helpers import format_longtext
 from customtkinter import CTkLabel, CTkImage
 from modules.generic.entity_detail_factory import create_entity_detail_frame
 from modules.npcs.npc_graph_editor import NPCGraphEditor
+from modules.pcs.pc_graph_editor import PCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
 from modules.generic.generic_list_selection_view import GenericListSelectionView   
 
@@ -34,6 +35,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             "Scenarios": GenericModelWrapper("scenarios"),
             "Places": GenericModelWrapper("places"),
             "NPCs": GenericModelWrapper("npcs"),
+            "PCs": GenericModelWrapper("pcs"),
             "Factions": GenericModelWrapper("factions"),
             "Creatures": GenericModelWrapper("Creatures")
         }
@@ -42,6 +44,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             "Scenarios": self.load_template("scenarios/scenarios_template.json"),
             "Places": self.load_template("places/places_template.json"),
             "NPCs": self.load_template("npcs/npcs_template.json"),
+            "PCs": self.load_template("pcs/pcs_template.json"),
             "Factions": self.load_template("factions/factions_template.json"),
             "Creatures": self.load_template("creatures/creatures_template.json")
         }
@@ -328,7 +331,7 @@ class ScenarioDetailView(ctk.CTkFrame):
 
     def add_new_tab(self):
         # Added "Scenario Graph Editor" to the list of options.
-        options = ["Factions", "Places", "NPCs", "Creatures","Scenarios", "Note Tab", "NPC Graph", "Scenario Graph Editor"]
+        options = ["Factions", "Places", "NPCs", "PCs", "Creatures","Scenarios", "Note Tab", "NPC Graph", "Scenario Graph Editor"]
         popup = ctk.CTkToplevel(self)
         popup.title("Create New Tab")
         popup.geometry("300x250")
@@ -351,6 +354,10 @@ class ScenarioDetailView(ctk.CTkFrame):
         elif entity_type == "NPC Graph":
             self.add_tab("NPC Graph", self.create_npc_graph_frame(),
                         content_factory=lambda master: self.create_npc_graph_frame(master))
+            return
+        elif entity_type == "PC Graph":
+            self.add_tab("PC Graph", self.create_pc_graph_frame(),
+                        content_factory=lambda master: self.create_pc_graph_frame(master))
             return
         elif entity_type == "Scenario Graph Editor":
             self.add_tab("Scenario Graph Editor", self.create_scenario_graph_frame(),
@@ -411,6 +418,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             frame,
             self.wrappers["Scenarios"],
             self.wrappers["NPCs"],
+            self.wrappers["PCs"],
             self.wrappers["Creatures"],
             self.wrappers["Places"]
         )
@@ -423,7 +431,7 @@ class ScenarioDetailView(ctk.CTkFrame):
             master = self.content_area
         frame = ctk.CTkFrame(master)
         template = self.templates[entity_type]
-        if (entity_type == "NPCs" or entity_type == "Creatures" ) and "Portrait" in entity and os.path.exists(entity["Portrait"]):
+        if (entity_type == "NPCs" or entity_type == "PCs" or entity_type == "Creatures" ) and "Portrait" in entity and os.path.exists(entity["Portrait"]):
             img = Image.open(entity["Portrait"])
             img = img.resize((200, 200), Image.Resampling.LANCZOS)
             ctk_image = ctk.CTkImage(light_image=img, size=(200, 200))
@@ -438,7 +446,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         for field in template["fields"]:
             field_name = field["name"]
             field_type = field["type"]
-            if (entity_type == "NPCs" or entity_type == "Creatures") and field_name == "Portrait":
+            if (entity_type == "NPCs" or entity_type == "PCs" or entity_type == "Creatures") and field_name == "Portrait":
                 continue
             if field_type == "longtext":
                 self.insert_longtext(frame, field_name, entity.get(field_name, ""))
@@ -528,6 +536,15 @@ class ScenarioDetailView(ctk.CTkFrame):
             master = self.content_area
         frame = ctk.CTkFrame(master)
         graph_editor = NPCGraphEditor(frame, self.wrappers["NPCs"], self.wrappers["Factions"])
+        graph_editor.pack(fill="both", expand=True)
+        frame.graph_editor = graph_editor  # Save a reference for state management
+        return frame
+    
+    def create_pc_graph_frame(self, master=None):
+        if master is None:
+            master = self.content_area
+        frame = ctk.CTkFrame(master)
+        graph_editor = PCGraphEditor(frame, self.wrappers["PCs"], self.wrappers["Factions"])
         graph_editor.pack(fill="both", expand=True)
         frame.graph_editor = graph_editor  # Save a reference for state management
         return frame
