@@ -145,7 +145,7 @@ def save_positions(positions):
 # ——————————————————————————————————————————————————————————
 def get_graph_list():
     try:
-        files = [f for f in os.listdir(GRAPH_DIR) if f.lower().endswith(".json")]
+        files = [f for f in os.listdir(GRAPH_DIR+"/npcs/") if f.lower().endswith(".json")]
         logging.debug("Found graph files: %s", files)
         return files
     except Exception as e:
@@ -298,7 +298,7 @@ def npc_graph():
     graph_file = request.args.get("graph")
     if not graph_file:
         return jsonify(error="No graph specified"), 400
-    path = os.path.join(GRAPH_DIR, graph_file)
+    path = os.path.join(GRAPH_DIR+"/npcs/", graph_file)
     if not os.path.exists(path):
         return jsonify(error="Graph file not found"), 404
     with open(path, encoding='utf-8') as f:
@@ -313,7 +313,7 @@ def npc_graph():
         name = node.get("npc_name","")
         src = portrait_map.get(name,"").strip()
         if src:
-            node["portrait"] = f"/portraits/{os.path.basename(src)}"
+            node["portrait"] = f"{os.path.basename(src)}"
         else:
             node["portrait"] = FALLBACK_PORTRAIT
         match = next((n for n in npcs if n.get("Name","").strip()==name), None)
@@ -402,6 +402,42 @@ def add_information():
 
     # GET → render a simple form
     return render_template('add_information.html')
+@app.route('/factions')
+def factions_view():
+    selected = request.args.get("graph")
+    if selected:
+        title = os.path.splitext(selected)[0]
+        return render_template('factions.html',
+                            page_title=title,
+                            selected_graph=selected)
+    else:
+        try:
+            files = [f for f in os.listdir(GRAPH_DIR+"/factions/")
+                    if f.lower().endswith('.json')]
+        except Exception:
+            files = []
+        return render_template('faction_list.html',
+                            graph_files=files)
 
+@app.route('/api/faction-graph')
+def faction_graph():
+    graph_file = request.args.get("graph")
+    if not graph_file:
+        return jsonify(error="No graph specified"), 400
+    path = os.path.join(GRAPH_DIR+"/factions/", graph_file)
+    if not os.path.exists(path):
+        return jsonify(error="Graph file not found"), 404
+
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+
+    # Ensure every node has the properties our Cytoscape template expects:
+    for node in data.get("nodes", []):
+        # no portraits for factions
+        node["portrait"] = FALLBACK_PORTRAIT
+        # map a "description" field → popup background
+        node["background"] = node.get("description", "(No description)")
+    return jsonify(data)
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=31000, debug=True)
