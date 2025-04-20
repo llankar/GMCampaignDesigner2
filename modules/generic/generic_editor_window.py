@@ -45,7 +45,8 @@ def load_factions_list():
 
 def load_npcs_list():
     return load_entities_list("npcs")
-
+def load_pcs_list():
+    return load_entities_list("pcs")
 def load_places_list():
     return load_entities_list("places")
 
@@ -115,7 +116,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             ctk.CTkLabel(self.scroll_frame, text=field["name"]).pack(pady=(5, 0), anchor="w")
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
-            elif field["name"] in ["NPCs", "Places", "Factions", "Objects", "Creatures"]:
+            elif field["name"] in ["NPCs", "Places", "Factions", "Objects", "Creatures", "PCs"]:
                 self.create_dynamic_combobox_list(field)
             elif field["type"] == "boolean":
                 self.create_boolean_field(field)
@@ -476,8 +477,10 @@ class GenericEditorWindow(ctk.CTkToplevel):
         container.pack(fill="x", pady=5)
 
         combobox_list = []
-
-        if field["name"] == "NPCs":
+        if field["name"] == "PCs":
+            options_list = load_pcs_list()
+            label_text = "Add NPC"
+        elif field["name"] == "NPCs":
             options_list = load_npcs_list()
             label_text = "Add NPC"
         elif field["name"] == "Places":
@@ -576,7 +579,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
                     self.item[field["name"]] = ""
                 else:
                     self.item[field["name"]] = data
-            elif field["name"] in ["Places", "NPCs", "Factions", "Objects", "Creatures"]:
+            elif field["name"] in ["Places", "NPCs", "Factions", "Objects", "Creatures", "PCs"]:	
                 self.item[field["name"]] = [cb.get() for cb in widget if cb.get()]
             elif field["type"] == "file":
                 # store the filename (not full path) into the model

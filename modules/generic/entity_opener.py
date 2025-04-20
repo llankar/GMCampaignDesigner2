@@ -34,4 +34,33 @@ def open_detached_npc(npc_name):
     #    (no new tabs, no attach/detach)
     entity_frame = detail_view.create_entity_frame("NPCs", item)
     entity_frame.pack(fill="both", expand=True)
-    
+
+def open_detached_pc(pc_name):
+        """
+        Opens the specified NPC in a brand-new Toplevel window
+        using a minimal ScenarioDetailView to show the NPC data
+        (but not as a tab).
+        """
+        # 1. Load the NPC from JSON
+        pc_wrapper = GenericModelWrapper("pcs")
+        items = pc_wrapper.load_items()
+        item = next((i for i in items if i.get("Name") == pc_name), None)
+        if not item:
+                messagebox.showerror("Error", f"PC '{pc_name}' not found.")
+                return
+
+        # 2. Create a new Toplevel window
+        window = ctk.CTkToplevel()
+        window.title(f"PC: {pc_name}")
+        window.geometry("800x600")
+
+        # 3. Create a minimal ScenarioDetailView (or a custom UI) for display
+
+        dummy_scenario = {"Title": f"Entity: {pc_name}"}
+        detail_view = ScenarioDetailView(window, scenario_item=dummy_scenario)
+        detail_view.pack(fill="both", expand=True)
+
+        # 4. Create just the single NPC frame inside this detail view
+        #        (no new tabs, no attach/detach)
+        entity_frame = detail_view.create_entity_frame("PCs", item)
+        entity_frame.pack(fill="both", expand=True)

@@ -59,7 +59,7 @@ def initialize_db():
     cursor = conn.cursor()
 
     # Create tables if missing
-    for table in ["npcs","scenarios","factions","places","objects","informations","clues"]:
+    for table in ["pcs","npcs","scenarios","factions","places","objects","informations","clues"]:
         schema = load_schema_from_json(table)
         pk = schema[0][0]
         cols_sql = ",\n    ".join(f"{col} {typ}" for col,typ in schema)
@@ -90,7 +90,8 @@ def update_table_schema(conn, cursor):
         "objects",
         "creatures",      # new one
         "informations",
-        "clues"
+        "clues",
+        "pcs"
     ]
 
     for ent in entities:
