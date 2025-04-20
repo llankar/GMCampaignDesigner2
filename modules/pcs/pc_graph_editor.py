@@ -15,6 +15,9 @@ import tkinter as tk  # standard tkinter
 from PIL import Image, ImageTk
 import os, ctypes
 from ctypes import wintypes
+import textwrap
+import re
+from tkinter.font import Font  # add at top of file
 
 
 ctk.set_appearance_mode("Dark")
@@ -678,108 +681,84 @@ class PCGraphEditor(ctk.CTkFrame):
     # and calculates/stores their bounding boxes.
     # ─────────────────────────────────────────────────────────────────────────
     def draw_nodes(self):
-        NODE_WIDTH = 150
-        TEXT_LINE_HEIGHT = 20
-        TEXT_PADDING = 10
+        TEXT_PADDING       = 10
+        LINE_SPACING       = 18
+        MAX_CHARS_PER_LINE = 50  # you can bump this if you still want some wrapping
 
-        # Path to your node PNG file
-        node_holder_path = os.path.join("assets", "pc_node.png")
+        # Create a font object so we can measure pixel widths
+        font = Font(family="Arial", size=9)
 
         for node in self.graph["nodes"]:
             pc_name = node["pc_name"]
-            tag = f"pc_{pc_name.replace(' ', '_')}"
-            x, y = self.node_positions.get(tag, (node["x"], node["y"]))
+            tag     = f"pc_{pc_name.replace(' ', '_')}"
 
-            # pc data
-            pc_data = self.pcs.get(pc_name, {})
-            role = pc_data.get("Role", "")
-
-            # Handle Factions to avoid showing Python list/dict with braces
-            faction_value = pc_data.get("Factions", "")
-            if isinstance(faction_value, list):
-                faction_text = ", ".join(str(f) for f in faction_value)
-            elif isinstance(faction_value, (set, dict)):
-                faction_text = ", ".join(str(f) for f in faction_value)
+            # ── Normalize Traits ─────────────────────────────────
+            raw_traits = self.pcs.get(pc_name, {}).get("Traits", "")
+            if isinstance(raw_traits, str):
+                trait_text = raw_traits
+            elif isinstance(raw_traits, list):
+                # each list item is one trait; join with a space so we don't
+                # immediately split them on newline
+                trait_text = "  ".join(str(item) for item in raw_traits)
+            elif isinstance(raw_traits, dict):
+                trait_text = raw_traits.get("text", json.dumps(raw_traits))
             else:
-                faction_text = str(faction_value) if faction_value else ""
+                trait_text = str(raw_traits)
 
-            # Build text lines: first is name, then role, then faction.
-            lines = [pc_name, role, faction_text]
-            # Filter out any empty strings
-            lines = [line for line in lines if line.strip()]
+            # ── Split only on semicolons (not on newlines!) ───────
+            parts = [p.strip() for p in re.split(r";", trait_text) if p.strip()]
 
-            # Handle portrait if available
-            portrait_path = pc_data.get("Portrait", "")
-            has_portrait = portrait_path and os.path.exists(portrait_path)
-            portrait_height = 0
-            portrait_width = 0
-            if has_portrait:
-                img = Image.open(portrait_path)
-                orig_w, orig_h = img.size
-                max_portrait_width = NODE_WIDTH - 4
-                max_portrait_height = 80
-                ratio = min(max_portrait_width / orig_w, max_portrait_height / orig_h)
-                portrait_width = int(orig_w * ratio)
-                portrait_height = int(orig_h * ratio)
-                img = img.resize((portrait_width, portrait_height), Image.Resampling.LANCZOS)
-                photo = ImageTk.PhotoImage(img)
-                self.node_images[pc_name] = photo
+            # ── Wrap each part to avoid absurdly long lines ────────
+            wrapped = []
+            for part in parts:
+                lines = textwrap.wrap(part, width=MAX_CHARS_PER_LINE)
+                wrapped.extend(lines or [part])
 
-            # Calculate node height based on portrait and text
-            node_height = portrait_height + (len(lines) * TEXT_LINE_HEIGHT) + TEXT_PADDING + 20
+            # ── Build the full list of lines (name, role, traits) ─
+            raw_role = self.pcs.get(pc_name, {}).get("Role")
+            role     = raw_role.strip() if isinstance(raw_role, str) else ""
 
-            # Draw a colored rectangle as the background
-            node_color = node.get("color", "#1D3572")
+            all_lines = [pc_name]
+            if role:
+                all_lines.append(role)
+            all_lines.extend(wrapped)
+
+            # ── Figure out how big it needs to be ───────────────────
+            # measure the widest line in pixels
+            max_px = max(font.measure(line) for line in all_lines)
+            node_w = max_px + 2 * TEXT_PADDING
+            node_h = TEXT_PADDING*2 + len(all_lines) * LINE_SPACING
+
+            # positions
+            x, y = self.node_positions.get(tag, (node["x"], node["y"]))
+            left   = x - node_w/2
+            top    = y - node_h/2
+            right  = x + node_w/2
+            bottom = y + node_h/2
+
+            # ── Draw the rectangle ───────────────────────────────────
             rect_id = self.canvas.create_rectangle(
-                x - NODE_WIDTH // 2, y - node_height // 2,
-                x + NODE_WIDTH // 2, y + node_height // 2,
-                fill=node_color,
+                left, top, right, bottom,
+                fill=node.get("color", "#1D3572"),
                 outline="",
-                width=2,
-                tags=(tag,)
+                tags=(tag, "node")
             )
+            # store for later color‐changes
             self.node_rectangles[tag] = rect_id
-
-            # Draw the PNG overlay if it exists
-            if os.path.exists(node_holder_path):
-                holder_img = Image.open(node_holder_path)
-                holder_img = holder_img.resize((NODE_WIDTH, node_height), Image.Resampling.LANCZOS)
-                holder_photo = ImageTk.PhotoImage(holder_img)
-                if not hasattr(self, "node_holder_images"):
-                    self.node_holder_images = {}
-                self.node_holder_images[pc_name] = holder_photo
-                self.canvas.create_image(x, y, image=holder_photo, tags=(tag,))
-
-            # Store bounding box for link calculations
-            left = x - (NODE_WIDTH // 2)
-            top = y - (node_height // 2)
-            right = x + (NODE_WIDTH // 2)
-            bottom = y + (node_height // 2)
+            # store for arrow‐head positioning
             self.node_bboxes[tag] = (left, top, right, bottom)
 
-            # Determine vertical starting point
-            current_y = top + TEXT_PADDING
-            if has_portrait:
-                portrait_center_y = current_y + (portrait_height // 2)
-                self.canvas.create_image(x, portrait_center_y,
-                                        image=self.node_images[pc_name],
-                                        tags=(tag,))
-                current_y += portrait_height + TEXT_PADDING
-
-            # Draw each line of text separately.
-            # The first line (name) is bold; others are normal.
-            for i, line in enumerate(lines):
-                if i == 0:
-                    font = ("Arial", 9, "bold")
-                else:
-                    font = ("Arial", 9)
-                self.canvas.create_text(
-                    x, current_y + i * TEXT_LINE_HEIGHT,
-                    text=line,
-                    fill="white",
-                    font=font,
-                    tags=(tag,)
-                )
+            # ── Draw the text ───────────────────────────────────────
+            text_block = "\n".join(all_lines)
+            self.canvas.create_text(
+                x, top + TEXT_PADDING + LINE_SPACING/2,
+                text=text_block,
+                fill="white",
+                font=("Arial", 9),
+                tags=(tag, "node"),
+                anchor="n",
+                width=node_w - 2*TEXT_PADDING
+            )
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_all_links
