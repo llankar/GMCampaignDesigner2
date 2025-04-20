@@ -1,0 +1,34 @@
+{
+  "nodes": [
+    {
+      "name": "Winter Court",
+      "x": 880.0,
+      "y": 300.0,
+      "tag": "faction_Winter_Court"
+    },
+    {
+      "name": "White Council",
+      "x": 579.0,
+      "y": 236.0,
+      "tag": "faction_White_Council"
+    },
+    {
+      "name": "Summer Court",
+      "x": 534.0,
+      "y": 546.0,
+      "tag": "faction_Summer_Court"
+    }
+  ],
+  "links": [
+    {
+      "from": "faction_Winter_Court",
+      "to": "faction_White_Council",
+      "text": "asa"
+    },
+    {
+      "from": "faction_White_Council",
+      "to": "faction_Summer_Court",
+      "text": "asaa"
+    }
+  ]
+}
