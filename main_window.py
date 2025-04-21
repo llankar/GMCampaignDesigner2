@@ -33,6 +33,7 @@ from modules.generic.export_for_foundry import preview_and_export_foundry
 from modules.helpers import text_helpers
 from db.db import load_schema_from_json, initialize_db
 from modules.factions.faction_graph_editor import FactionGraphEditor
+from modules.pcs.display_pcs import display_pcs_in_banner
 
 
 # Set up CustomTkinter appearance
@@ -53,6 +54,7 @@ class MainWindow(ctk.CTk):
         self.geometry("1920x980")
         self.minsize(1920, 980)
         self.attributes("-fullscreen", True)
+        self.current_open_view = None
         initialize_db()
         position_window_at_top(self)
         self.set_window_icon()
@@ -188,6 +190,112 @@ class MainWindow(ctk.CTk):
         self.content_frame = ctk.CTkFrame(self.main_frame)
         self.content_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
+        self.content_frame.grid_rowconfigure(0, weight=1)
+        self.content_frame.grid_rowconfigure(1, weight=0)
+        self.content_frame.grid_columnconfigure(0, weight=1)
+
+        # ✅ Always explicitly create these initially:
+        self.banner_frame = ctk.CTkFrame(self.content_frame, height=150, fg_color="#444")
+        self.inner_content_frame = ctk.CTkFrame(self.content_frame, fg_color="#222")
+
+        self.banner_toggle_btn = ctk.CTkButton(
+            self.sidebar_inner,
+            text="▼",
+            width=40,
+            height=30,
+            command=self._toggle_banner,
+            fg_color="#555",
+            hover_color="#777",
+            font=("", 16)
+        )
+        self.banner_toggle_btn.place(relx=1.0, rely=0.0, anchor="ne")
+
+        self.banner_visible = False
+        self.current_open_view = None
+
+    def _toggle_banner(self):
+        if self.banner_visible:
+            # COLLAPSE BANNER
+            if self.banner_frame.winfo_exists():
+                self.banner_frame.grid_remove()
+            if self.inner_content_frame.winfo_exists():
+                self.inner_content_frame.grid_remove()
+
+            if self.current_open_view:
+                # Save entity and then destroy
+                entity = self.current_open_entity
+                self.current_open_view.destroy()
+
+                # Re-create content in content_frame
+                self.current_open_view = ctk.CTkFrame(self.content_frame)
+                self.current_open_view.grid(row=0, column=0, sticky="nsew")
+
+                wrapper = GenericModelWrapper(entity)
+                template = load_template(entity)
+                view = GenericListView(self.current_open_view, wrapper, template)
+                view.pack(fill="both", expand=True)
+
+                load_button = ctk.CTkButton(
+                    self.current_open_view,
+                    text=f"Load {entity.capitalize()}",
+                    command=lambda: self.load_items_from_json(view, entity)
+                )
+                load_button.pack(pady=5)
+
+            self.content_frame.grid_rowconfigure(0, weight=1)
+            self.content_frame.grid_rowconfigure(1, weight=0)
+
+            self.banner_visible = False
+            self.banner_toggle_btn.configure(text="▼")
+        else:
+            # EXPAND BANNER
+            if not self.banner_frame.winfo_exists():
+                self.banner_frame = ctk.CTkFrame(self.content_frame, height=150, fg_color="#444")
+
+            if not self.inner_content_frame.winfo_exists():
+                self.inner_content_frame = ctk.CTkFrame(self.content_frame, fg_color="#222")
+
+            self.banner_frame.grid(row=0, column=0, sticky="ew")
+            self.inner_content_frame.grid(row=1, column=0, sticky="nsew")
+            pcs_items = {pc["Name"]: pc for pc in self.pc_wrapper.load_items()}
+            if pcs_items:
+                display_pcs_in_banner(self.banner_frame, pcs_items)
+
+            # ✅ CRITICAL FIX: make inner_content_frame fully expandable
+            self.inner_content_frame.grid_rowconfigure(0, weight=1)
+            self.inner_content_frame.grid_columnconfigure(0, weight=1)
+
+            if self.current_open_view:
+                entity = self.current_open_entity
+                self.current_open_view.destroy()
+
+                self.current_open_view = ctk.CTkFrame(self.inner_content_frame)
+                self.current_open_view.grid(row=0, column=0, sticky="nsew")
+
+                wrapper = GenericModelWrapper(entity)
+                template = load_template(entity)
+                view = GenericListView(self.current_open_view, wrapper, template)
+                view.pack(fill="both", expand=True)
+
+                load_button = ctk.CTkButton(
+                    self.current_open_view,
+                    text=f"Load {entity.capitalize()}",
+                    command=lambda: self.load_items_from_json(view, entity)
+                )
+                load_button.pack(pady=5)
+
+            self.content_frame.grid_rowconfigure(0, weight=0)
+            self.content_frame.grid_rowconfigure(1, weight=1)
+
+            self.banner_visible = True
+            self.banner_toggle_btn.configure(text="▲")
+    
+    def get_content_container(self):
+        """Choose correct parent depending on banner state."""
+        if self.banner_visible:
+            return self.inner_content_frame
+        else:
+            return self.content_frame
     def create_exit_button(self):
         exit_button = ctk.CTkButton(self, text="✕", command=self.destroy,
                                     fg_color="red", hover_color="#AA0000",
@@ -206,29 +314,56 @@ class MainWindow(ctk.CTk):
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")
-
+            
     def open_faction_graph_editor(self):
-        self.clear_main_content()
+        self.clear_current_content()
         container = ctk.CTkFrame(self.content_frame)
-        container.pack(fill="both", expand=True)
+        container.grid(row=0, column=0, sticky="nsew")
         editor = FactionGraphEditor(container, GenericModelWrapper("factions"))
         editor.pack(fill="both", expand=True)
 
     # =============================================================
     # Methods Called by Icon Buttons (Event Handlers)
     # =============================================================
-    def clear_main_content(self):
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
+    def clear_current_content(self):
+        if self.banner_visible:
+            # If banner is visible, clear only inner_content_frame
+            for widget in self.inner_content_frame.winfo_children():
+                widget.destroy()
+        else:
+            # If banner is hidden, clear ONLY dynamic children of content_frame, NOT banner_frame
+            for widget in self.content_frame.winfo_children():
+                if widget not in (self.banner_frame, self.inner_content_frame):
+                    widget.destroy()
+    
+    def move_current_view(self):
+        """Move the current open view to the correct container based on banner state."""
+        if self.current_open_view is not None:
+            try:
+                self.current_open_view.grid_forget()
+            except tk.TclError:
+                # If the widget was destroyed (because it was inside inner_content_frame), clear it
+                self.current_open_view = None
+                return
+
+            parent = self.get_content_container()
+            self.current_open_view.master = parent
+            self.current_open_view.grid(row=0, column=0, sticky="nsew")
 
     def open_entity(self, entity):
-        self.clear_main_content()
-        container = ctk.CTkFrame(self.content_frame)
-        container.pack(fill="both", expand=True)
-        model_wrapper = GenericModelWrapper(entity)
+        self.clear_current_content()
+        target_parent = self.get_content_container()
+
+        container = ctk.CTkFrame(target_parent)
+        container.grid(row=0, column=0, sticky="nsew")
+        self.current_open_view = container
+        self.current_open_entity = entity  # ✅ Add this clearly!
+
+        wrapper = GenericModelWrapper(entity)
         template = load_template(entity)
-        view = GenericListView(container, model_wrapper, template)
+        view = GenericListView(container, wrapper, template)
         view.pack(fill="both", expand=True)
+
         load_button = ctk.CTkButton(
             container,
             text=f"Load {entity.capitalize()}",
@@ -258,9 +393,9 @@ class MainWindow(ctk.CTk):
         if not scenarios:
             messagebox.showwarning("No Scenarios", "No scenarios available.")
             return
-        self.clear_main_content()
+        self.clear_current_content()
         container = ctk.CTkFrame(self.content_frame, fg_color="#2B2B2B")
-        container.pack(fill="both", expand=True)
+        container.grid(row=0, column=0, sticky="nsew")
         select_label = ctk.CTkLabel(
             container,
             text="Select a Scenario",
@@ -287,7 +422,7 @@ class MainWindow(ctk.CTk):
                 messagebox.showwarning("No Selection", "Please select a scenario.")
                 return
             selected_scenario = scenarios[selection[0]]
-            self.clear_main_content()
+            self.clear_current_content()
             detail_container = ctk.CTkFrame(self.content_frame)
             detail_container.pack(fill="both", expand=True)
             scenario_detail_view = ScenarioDetailView(detail_container, scenario_item=selected_scenario)
@@ -296,23 +431,23 @@ class MainWindow(ctk.CTk):
         open_button.pack(pady=10)
 
     def open_npc_graph_editor(self):
-        self.clear_main_content()
+        self.clear_current_content()
         container = ctk.CTkFrame(self.content_frame)
-        container.pack(fill="both", expand=True)
+        container.grid(row=0, column=0, sticky="nsew")
         npc_graph_editor = NPCGraphEditor(container, self.npc_wrapper, self.faction_wrapper)
         npc_graph_editor.pack(fill="both", expand=True)
 
     def open_pc_graph_editor(self):
-        self.clear_main_content()
+        self.clear_current_content()
         container = ctk.CTkFrame(self.content_frame)
-        container.pack(fill="both", expand=True)
+        container.grid(row=0, column=0, sticky="nsew")
         pc_graph_editor = PCGraphEditor(container, self.pc_wrapper, self.faction_wrapper)
         pc_graph_editor.pack(fill="both", expand=True)
 
     def open_scenario_graph_editor(self):
-        self.clear_main_content()
+        self.clear_current_content()
         container = ctk.CTkFrame(self.content_frame)
-        container.pack(fill="both", expand=True)
+        container.grid(row=0, column=0, sticky="nsew")
         scenario_wrapper = GenericModelWrapper("scenarios")
         npc_wrapper = GenericModelWrapper("npcs")
         creature_wrapper = GenericModelWrapper("creatures")
@@ -324,9 +459,9 @@ class MainWindow(ctk.CTk):
         preview_and_export_foundry(self)
 
     def open_scenario_importer(self):
-        self.clear_main_content()
+        self.clear_current_content()
         container = ctk.CTkFrame(self.content_frame)
-        container.pack(fill="both", expand=True)
+        container.grid(row=0, column=0, sticky="nsew")
         ScenarioImportWindow(container)
 
     def change_database_storage(self):
@@ -878,32 +1013,6 @@ class MainWindow(ctk.CTk):
         else:
             print("No NPC records were updated. Either all have portraits or no matches were found.")
         conn.close()
-
-    
-
-    def launch_swarmui(self):
-        global SWARMUI_PROCESS
-        swarmui_path = ConfigHelper.get("Paths", "swarmui_path", fallback=r"E:\SwarmUI\SwarmUI")
-        SWARMUI_CMD = os.path.join(swarmui_path, "launch-windows.bat")
-        env = os.environ.copy()
-        env.pop('VIRTUAL_ENV', None)
-        if SWARMUI_PROCESS is None or SWARMUI_PROCESS.poll() is not None:
-            try:
-                SWARMUI_PROCESS = subprocess.Popen(
-                    SWARMUI_CMD,
-                    shell=True,
-                    cwd=swarmui_path,
-                    env=env
-                )
-                time.sleep(120.0)
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
-
-    def cleanup_swarmui(self):
-        global SWARMUI_PROCESS
-        if SWARMUI_PROCESS is not None and SWARMUI_PROCESS.poll() is None:
-            SWARMUI_PROCESS.terminate()
-
 
 if __name__ == "__main__":
     app = MainWindow()
