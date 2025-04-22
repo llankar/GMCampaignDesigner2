@@ -1,5 +1,5 @@
 import customtkinter as ctk
-
+from modules.helpers.text_helpers import format_multiline_text
 def display_pcs_in_banner(banner_frame, pcs_items):
     # Clear previous banner content
     for widget in banner_frame.winfo_children():
@@ -84,13 +84,13 @@ def display_pcs_in_banner(banner_frame, pcs_items):
             add_large_label(pc_frame, "Name", pc_data["Name"])
 
         if pc_data.get("Background"):
-            add_label(pc_frame, "Background", pc_data["Background"])
+            add_label(pc_frame, "Background",format_multiline_text( pc_data["Background"]))
 
         if pc_data.get("Secret"):
-            add_label(pc_frame, "Secret", pc_data["Secret"])
+            add_label(pc_frame, "Secret", format_multiline_text(pc_data["Secret"]))
 
         if pc_data.get("Traits"):
-            add_label(pc_frame, "Traits", pc_data["Traits"])
+            add_label(pc_frame, "Traits", format_multiline_text(pc_data["Traits"]))
 
         # Move to next column/row
         col_idx += 1

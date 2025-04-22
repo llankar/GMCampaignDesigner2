@@ -214,6 +214,71 @@ class MainWindow(ctk.CTk):
         self.current_open_view = None
 
     def _toggle_banner(self):
+        # --- GRAPH MODE?  (no current_open_entity but a graph_type set) ---
+        if self.current_open_entity is None and getattr(self, "_graph_type", None):
+            # snapshot existing graph state
+            old_container = self.current_open_view
+            old_editor    = getattr(old_container, "graph_editor", None)
+            state         = old_editor.get_state() if old_editor else None
+
+            # hide or show banner + inner frames
+            if self.banner_visible:
+                self.banner_frame.grid_remove()
+                self.inner_content_frame.grid_remove()
+                self.content_frame.grid_rowconfigure(0, weight=1)
+                self.content_frame.grid_rowconfigure(1, weight=0)
+                self.banner_visible = False
+                self.banner_toggle_btn.configure(text="▼")
+            else:
+                self.banner_frame.grid(row=0, column=0, sticky="ew")
+                self.inner_content_frame.grid(row=1, column=0, sticky="nsew")
+                display_pcs_in_banner(
+                    self.banner_frame,
+                    {pc["Name"]: pc for pc in self.pc_wrapper.load_items()}
+                )
+                self.inner_content_frame.grid_rowconfigure(0, weight=1)
+                self.inner_content_frame.grid_columnconfigure(0, weight=1)
+                self.content_frame.grid_rowconfigure(0, weight=0)
+                self.content_frame.grid_rowconfigure(1, weight=1)
+                self.banner_visible = True
+                self.banner_toggle_btn.configure(text="▲")
+
+            # destroy the old container (it was still parented in the wrong frame)
+            old_container.destroy()
+
+            # now re‐create the same graph under the correct container
+            parent = self.get_content_container()
+            new_container = ctk.CTkFrame(parent)
+            new_container.grid(row=0, column=0, sticky="nsew")
+            parent.grid_rowconfigure(0, weight=1)
+            parent.grid_columnconfigure(0, weight=1)
+
+            # re‐instantiate the proper editor type, then restore its state
+            if self._graph_type == 'npc':
+                editor = NPCGraphEditor(new_container, self.npc_wrapper, self.faction_wrapper)
+            elif self._graph_type == 'pc':
+                editor = PCGraphEditor(new_container, self.pc_wrapper, self.faction_wrapper)
+            elif self._graph_type == 'faction':
+                editor = FactionGraphEditor(new_container, self.faction_wrapper)
+            else:  # 'scenario'
+                editor = ScenarioGraphEditor(
+                    new_container,
+                    GenericModelWrapper("scenarios"),
+                    GenericModelWrapper("npcs"),
+                    GenericModelWrapper("creatures"),
+                    GenericModelWrapper("places")
+                )
+
+            editor.pack(fill="both", expand=True)
+            if state is not None and hasattr(editor, "set_state"):
+                editor.set_state(state)
+
+            # save the new container/editor
+            new_container.graph_editor = editor
+            self.current_open_view     = new_container
+            # leave current_open_entity = None
+
+            return  # end of graph‐mode toggle
         if self.banner_visible:
             # COLLAPSE BANNER
             if self.banner_frame.winfo_exists():
@@ -258,8 +323,7 @@ class MainWindow(ctk.CTk):
             self.banner_frame.grid(row=0, column=0, sticky="ew")
             self.inner_content_frame.grid(row=1, column=0, sticky="nsew")
             pcs_items = {pc["Name"]: pc for pc in self.pc_wrapper.load_items()}
-            if pcs_items:
-                display_pcs_in_banner(self.banner_frame, pcs_items)
+            display_pcs_in_banner(self.banner_frame, pcs_items)
 
             # ✅ CRITICAL FIX: make inner_content_frame fully expandable
             self.inner_content_frame.grid_rowconfigure(0, weight=1)
@@ -316,11 +380,24 @@ class MainWindow(ctk.CTk):
         self.creature_wrapper = GenericModelWrapper("creatures")
 
     def open_faction_graph_editor(self):
+        self._graph_type = 'faction'
         self.clear_current_content()
-        container = ctk.CTkFrame(self.content_frame)
+        self.banner_toggle_btn.configure(state="normal")
+        parent = self.get_content_container()
+
+        container = ctk.CTkFrame(parent)
         container.grid(row=0, column=0, sticky="nsew")
-        editor = FactionGraphEditor(container, GenericModelWrapper("factions"))
+        parent.grid_rowconfigure(0, weight=1)
+        parent.grid_columnconfigure(0, weight=1)
+
+        editor = FactionGraphEditor(container, self.faction_wrapper)
         editor.pack(fill="both", expand=True)
+
+        # keep both container and editor so we can snapshot/restore
+        container.graph_editor = editor
+        self.current_open_view   = container
+        self.current_open_entity = None
+        
 
     # =============================================================
     # Methods Called by Icon Buttons (Event Handlers)
@@ -473,29 +550,67 @@ class MainWindow(ctk.CTk):
         self.inner_content_frame.grid_columnconfigure(0, weight=1)
 
     def open_npc_graph_editor(self):
+        self._graph_type = 'npc'
         self.clear_current_content()
-        container = ctk.CTkFrame(self.content_frame)
+        self.banner_toggle_btn.configure(state="normal")
+        parent = self.get_content_container()
+
+        container = ctk.CTkFrame(parent)
         container.grid(row=0, column=0, sticky="nsew")
-        npc_graph_editor = NPCGraphEditor(container, self.npc_wrapper, self.faction_wrapper)
-        npc_graph_editor.pack(fill="both", expand=True)
+        parent.grid_rowconfigure(0, weight=1)
+        parent.grid_columnconfigure(0, weight=1)
+
+        editor = NPCGraphEditor(container, self.npc_wrapper, self.faction_wrapper)
+        editor.pack(fill="both", expand=True)
+
+        # keep both container and editor so we can snapshot/restore
+        container.graph_editor = editor
+        self.current_open_view   = container
+        self.current_open_entity = None
+
 
     def open_pc_graph_editor(self):
+        self._graph_type = 'pc'
         self.clear_current_content()
-        container = ctk.CTkFrame(self.content_frame)
+        self.banner_toggle_btn.configure(state="normal")
+        parent = self.get_content_container()
+
+        container = ctk.CTkFrame(parent)
         container.grid(row=0, column=0, sticky="nsew")
-        pc_graph_editor = PCGraphEditor(container, self.pc_wrapper, self.faction_wrapper)
-        pc_graph_editor.pack(fill="both", expand=True)
+        parent.grid_rowconfigure(0, weight=1)
+        parent.grid_columnconfigure(0, weight=1)
+
+        editor = PCGraphEditor(container, self.pc_wrapper, self.faction_wrapper)
+        editor.pack(fill="both", expand=True)
+
+        container.graph_editor = editor
+        self.current_open_view   = container
+        self.current_open_entity = None
+
 
     def open_scenario_graph_editor(self):
+        self._graph_type = 'scenario'
         self.clear_current_content()
-        container = ctk.CTkFrame(self.content_frame)
+        self.banner_toggle_btn.configure(state="normal")
+        parent = self.get_content_container()
+
+        container = ctk.CTkFrame(parent)
         container.grid(row=0, column=0, sticky="nsew")
-        scenario_wrapper = GenericModelWrapper("scenarios")
-        npc_wrapper = GenericModelWrapper("npcs")
-        creature_wrapper = GenericModelWrapper("creatures")
-        place_wrapper = GenericModelWrapper("places")
-        editor = ScenarioGraphEditor(container, scenario_wrapper, npc_wrapper, creature_wrapper, place_wrapper)
+        parent.grid_rowconfigure(0, weight=1)
+        parent.grid_columnconfigure(0, weight=1)
+
+        editor = ScenarioGraphEditor(
+            container,
+            GenericModelWrapper("scenarios"),
+            GenericModelWrapper("npcs"),
+            GenericModelWrapper("creatures"),
+            GenericModelWrapper("places")
+        )
         editor.pack(fill="both", expand=True)
+
+        container.graph_editor = editor
+        self.current_open_view   = container
+        self.current_open_entity = None
 
     def export_foundry(self):
         preview_and_export_foundry(self)

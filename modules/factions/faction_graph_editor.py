@@ -179,7 +179,17 @@ class FactionGraphEditor(ctk.CTkFrame):
                                 if l["from"]!=tag and l["to"]!=tag]
         self.node_positions.pop(tag,None)
         self.draw_graph()
+    def get_state(self):
+        return {
+            "graph": self.graph.copy(),
+            "node_positions": self.node_positions.copy(),
+            # include any other state needed
+        }
 
+    def set_state(self, state):
+        self.graph = state.get("graph", {}).copy()
+        self.node_positions = state.get("node_positions", {}).copy()
+        self.draw_graph()  # Refresh the drawing
     # --- save / load ---
     def save_graph(self):
         path = filedialog.asksaveasfilename(defaultextension=".json")
