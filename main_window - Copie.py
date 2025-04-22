@@ -289,7 +289,7 @@ class MainWindow(ctk.CTk):
 
             self.banner_visible = True
             self.banner_toggle_btn.configure(text="▲")
-
+    
     def get_content_container(self):
         """Choose correct parent depending on banner state."""
         if self.banner_visible:
@@ -314,7 +314,7 @@ class MainWindow(ctk.CTk):
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")
-
+            
     def open_faction_graph_editor(self):
         self.clear_current_content()
         container = ctk.CTkFrame(self.content_frame)
@@ -335,7 +335,7 @@ class MainWindow(ctk.CTk):
             for widget in self.content_frame.winfo_children():
                 if widget not in (self.banner_frame, self.inner_content_frame):
                     widget.destroy()
-
+    
     def move_current_view(self):
         """Move the current open view to the correct container based on banner state."""
         if self.current_open_view is not None:
@@ -353,7 +353,7 @@ class MainWindow(ctk.CTk):
     def open_entity(self, entity):
         self.clear_current_content()
         target_parent = self.get_content_container()
-        self.banner_toggle_btn._state="normal"
+
         container = ctk.CTkFrame(target_parent)
         container.grid(row=0, column=0, sticky="nsew")
         self.current_open_view = container
@@ -388,8 +388,6 @@ class MainWindow(ctk.CTk):
             messagebox.showerror("Error", f"Failed to load {entity_name}: {e}")
 
     def open_gm_screen(self):
-        # if we’re coming from an open_entity(), blow away its frame
-        self.clear_current_content()
         # 1) Récupère la liste des scénarios
         scenario_wrapper = GenericModelWrapper("scenarios")
         scenarios = scenario_wrapper.load_items()
@@ -456,21 +454,6 @@ class MainWindow(ctk.CTk):
 
         open_button = ctk.CTkButton(container, text="Open Scenario", command=open_selected_scenario)
         open_button.pack(pady=10)
-        
-        # tell the code the banner is now up
-        self.banner_visible = True
-        self.banner_toggle_btn.configure(text="▲")
-        self.banner_toggle_btn._state="disabled"
-
-        # make sure row 0 (the banner) stays at its natural height,
-        # and row 1 (the inner content) takes all the rest
-        self.content_frame.grid_rowconfigure(0, weight=0)
-        self.content_frame.grid_rowconfigure(1, weight=1)
-        self.content_frame.grid_columnconfigure(0, weight=1)
-
-        # make the inner_content_frame fill its entire cell
-        self.inner_content_frame.grid_rowconfigure(0, weight=1)
-        self.inner_content_frame.grid_columnconfigure(0, weight=1)
 
     def open_npc_graph_editor(self):
         self.clear_current_content()
