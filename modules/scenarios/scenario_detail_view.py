@@ -94,14 +94,12 @@ class ScenarioDetailView(ctk.CTkFrame):
 
         # Example usage: create the first tab from the scenario_item
         scenario_name = scenario_item.get("Title", "Unnamed Scenario")
+        frame = create_entity_detail_frame("Scenarios", scenario_item, master=self.content_area, open_entity_callback=self.open_entity_tab)
         self.add_tab(
             scenario_name,
-            self.create_entity_frame("Scenarios", scenario_item),
-            content_factory=lambda master: self.create_entity_frame("Scenarios", scenario_item, master=master)
+            frame,
+            content_factory=lambda master: create_entity_detail_frame("Scenarios", scenario_item, master=master, open_entity_callback=self.open_entity_tab)
         )
-
-
-
 
     def load_template(self, filename):
         base_path = os.path.dirname(__file__)
@@ -334,7 +332,7 @@ class ScenarioDetailView(ctk.CTkFrame):
         options = ["Factions", "Places", "NPCs", "PCs", "Creatures","Scenarios", "Note Tab", "NPC Graph", "Scenario Graph Editor"]
         popup = ctk.CTkToplevel(self)
         popup.title("Create New Tab")
-        popup.geometry("300x250")
+        popup.geometry("300x400")
         popup.transient(self.winfo_toplevel())
         popup.grab_set()
         popup.focus_force()
