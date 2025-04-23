@@ -54,7 +54,8 @@ class MainWindow(ctk.CTk):
         self.geometry("1920x980")
         self.minsize(1920, 980)
         self.attributes("-fullscreen", True)
-        self.current_open_view = None
+        self.current_open_view   = None
+        self.current_open_entity = None    # ← initialize here to avoid AttributeError
         initialize_db()
         position_window_at_top(self)
         self.set_window_icon()
