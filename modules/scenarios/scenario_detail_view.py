@@ -416,7 +416,6 @@ class ScenarioDetailView(ctk.CTkFrame):
             frame,
             self.wrappers["Scenarios"],
             self.wrappers["NPCs"],
-            self.wrappers["PCs"],
             self.wrappers["Creatures"],
             self.wrappers["Places"]
         )
