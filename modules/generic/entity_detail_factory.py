@@ -100,7 +100,8 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
     content_frame.portrait_images = {}
 
     # If entity_type is "NPCs" and the entity has a valid Portrait, load and show it.
-    if (entity_type == "NPCs" or entity_type == "PCs" or entity_type == "Creatures") and "Portrait" in entity and os.path.exists(entity["Portrait"]):
+    portrait_path = entity.get("Portrait")
+    if (entity_type in {"NPCs", "PCs", "Creatures"}) and portrait_path and os.path.exists(portrait_path):
         try:
             img = Image.open(entity["Portrait"])
             img = img.resize(PORTRAIT_SIZE, Image.Resampling.LANCZOS)
