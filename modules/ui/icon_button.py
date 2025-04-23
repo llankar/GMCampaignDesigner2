@@ -3,8 +3,8 @@ import customtkinter as ctk
 from modules.ui.tooltip import ToolTip
 
 def create_icon_button(parent, icon, tooltip_text, command):
-    # Use a container with a background matching your dark theme.
     container = tk.Frame(parent, bg="#2B2B2B")
+
     btn = ctk.CTkButton(
         container,
         text="",
@@ -19,5 +19,7 @@ def create_icon_button(parent, icon, tooltip_text, command):
         border_color="#005fa3"
     )
     btn.pack()
-    ToolTip(container, tooltip_text)
+
+    ToolTip(btn, tooltip_text)  # ✅ Tooltip tied to the actual button, not frame
+
     return container
