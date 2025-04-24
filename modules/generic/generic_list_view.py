@@ -4,7 +4,7 @@ import os, ctypes
 from ctypes import wintypes
 import customtkinter as ctk
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 from screeninfo import get_monitors
 from modules.generic.generic_editor_window import GenericEditorWindow
@@ -14,7 +14,6 @@ MAX_PORTRAIT_SIZE = (1024, 1024)
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
-# Helper function to get monitor information using ctypes and Windows API.
 def get_monitors():
     monitors = []
     def monitor_enum_proc(hMonitor, hdcMonitor, lprcMonitor, dwData):
@@ -31,7 +30,6 @@ def get_monitors():
 
 def sanitize_id(s):
     return re.sub(r'[^a-zA-Z0-9]+', '_', str(s)).strip('_')
-
 
 class _ToolTip:
     """Simple tooltip for a Treeview showing full cell text on hover."""
@@ -83,7 +81,6 @@ class _ToolTip:
             self.tipwindow = None
             self.text = ""
 
-
 class GenericListView(ctk.CTkFrame):
     def __init__(self, master, model_wrapper, template, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
@@ -94,7 +91,6 @@ class GenericListView(ctk.CTkFrame):
         self.items = self.model_wrapper.load_items()
         self.filtered_items = list(self.items)
 
-        # Unique field and extra columns
         self.unique_field = next(
             (f["name"] for f in self.template["fields"] if f["name"] != "Portrait"),
             None
@@ -113,10 +109,10 @@ class GenericListView(ctk.CTkFrame):
         search_entry.pack(side="left", fill="x", expand=True, padx=5)
         search_entry.bind("<Return>", lambda e: self.filter_items(self.search_var.get()))
         ctk.CTkButton(search_frame, text="Filter",
-                    command=lambda: self.filter_items(self.search_var.get()))\
+            command=lambda: self.filter_items(self.search_var.get()))\
         .pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Add",
-                    command=self.add_item)\
+            command=self.add_item)\
         .pack(side="left", padx=5)
 
         # --- Treeview setup ---
@@ -165,13 +161,10 @@ class GenericListView(ctk.CTkFrame):
         vsb.grid(row=0, column=1, sticky="ns")
         hsb.grid(row=1, column=0, sticky="ew")
 
-        # Bind events
         self.tree.bind("<Double-1>", self.on_double_click)
         self.tree.bind("<Button-3>", self.on_right_click)
-        # Tooltip for full text on hover
         self._tooltip = _ToolTip(self.tree)
 
-        # Populate
         self.refresh_list()
 
     def refresh_list(self):
@@ -240,15 +233,22 @@ class GenericListView(ctk.CTkFrame):
         if not iid:
             return
         self.tree.selection_set(iid)
+        # only show portrait if the item actually has one
+        item = next((it for it in self.filtered_items
+                    if sanitize_id(str(it.get(self.unique_field, ""))) == iid),
+                    None)
+        portrait_path = item.get("Portrait", "") if item else ""
+        has_portrait = bool(portrait_path and os.path.exists(portrait_path))
+
         menu = tk.Menu(self, tearoff=0)
-        menu.add_command(label="Show Portrait",
-                        command=lambda: self.show_portrait_window(iid))
+        if has_portrait:
+            menu.add_command(label="Show Portrait",
+                            command=lambda: self.show_portrait_window(iid))
         menu.add_command(label="Delete",
                         command=lambda: self.delete_item(iid))
         menu.post(event.x_root, event.y_root)
 
     def show_portrait_window(self, iid):
-        # find the item data
         item = next((it for it in self.filtered_items
                     if sanitize_id(str(it.get(self.unique_field, ""))) == iid),
                     None)
@@ -266,7 +266,6 @@ class GenericListView(ctk.CTkFrame):
             messagebox.showerror("Error", f"Failed to load image: {e}")
             return
 
-        # scale to fit MAX_PORTRAIT_SIZE
         ow, oh = img.size
         mw, mh = MAX_PORTRAIT_SIZE
         scale = min(mw/ow, mh/oh, 1)
@@ -274,69 +273,28 @@ class GenericListView(ctk.CTkFrame):
             img = img.resize((int(ow*scale), int(oh*scale)), Image.Resampling.LANCZOS)
 
         photo = ImageTk.PhotoImage(img)
-        # keep reference
         if not hasattr(self, "_portrait_refs"):
             self._portrait_refs = {}
         self._portrait_refs[iid] = photo
 
-        # Obtain monitor information using ctypes.
         monitors = get_monitors()
-    #logging.debug("Detected monitors: " + str(monitors))
+        target = monitors[1] if len(monitors)>1 else monitors[0]
+        sx, sy, sw, sh = target
 
-        # Choose the second monitor if available; otherwise, use the primary monitor.
-        if len(monitors) > 1:
-            target_monitor = monitors[1]
-        #logging.debug(f"Using second monitor: {target_monitor}")
-        else:
-            target_monitor = monitors[0]
-        #logging.debug("Only one monitor available; using primary monitor.")
-
-        screen_x, screen_y, screen_width, screen_height = target_monitor
-    #logging.debug(f"Target screen: ({screen_x}, {screen_y}, {screen_width}, {screen_height})")
-
-        # Scale the image if it's larger than the monitor dimensions (without upscaling).
-        img_width, img_height = img.size
-        scale = min(screen_width / img_width, screen_height / img_height, 1)
-        new_size = (int(img_width * scale), int(img_height * scale))
-    #logging.debug(f"Scaling factor: {scale}, new image size: {new_size}")
-        if scale < 1:
-            resample_method = getattr(Image, "Resampling", Image).LANCZOS
-            img = img.resize(new_size, resample_method)
-        #logging.debug("Image resized.")
-
-        portrait_img = ImageTk.PhotoImage(img)
-        # Persist the image reference to prevent garbage collection.
-        
-        # Create a normal Toplevel window (with standard window decorations).
         win = ctk.CTkToplevel(self)
-        win.title(item["Name"])
-        # Set the window geometry to match the target monitor's dimensions and position.
-        win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
+        win.title(item.get(self.unique_field, "Portrait"))
+        win.geometry(f"{sw}x{sh}+{sx}+{sy}")
         win.update_idletasks()
-    #logging.debug("Window created on target monitor with screen size.")
 
-        # Create a frame with a black background to hold the content.
-        content_frame = tk.Frame(win, bg="white")
-        content_frame.pack(fill="both", expand=True)
-
-        # Add a label to display the NPC name.
-        name_label = tk.Label(content_frame, text=item["Name"],
-                            font=("Arial", 40, "bold"),
-                            fg="white", bg="white")
-        name_label.pack(pady=20)
-    #logging.debug("NPC name label created.")
-
-        # Add a label to display the portrait image.
-        image_label = tk.Label(content_frame, image=portrait_img, bg="white")
-        image_label.image = portrait_img  # persist reference
-        image_label.pack(expand=True)
-    #logging.debug("Portrait image label created.")
-        new_x = screen_x + 0 #1920
-        win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
-    #logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")
-        # Bind a click event to close the window.
+        content = tk.Frame(win, bg="white")
+        content.pack(fill="both", expand=True)
+        tk.Label(content, text=item.get(self.unique_field, ""),
+                font=("Arial", 40, "bold"), fg="white", bg="white")\
+        .pack(pady=20)
+        lbl = tk.Label(content, image=photo, bg="white")
+        lbl.image = photo
+        lbl.pack(expand=True)
         win.bind("<Button-1>", lambda e: win.destroy())
-    #logging.debug("Window displayed; waiting for click to close.")
 
     def delete_item(self, iid):
         self.items = [it for it in self.items
@@ -374,7 +332,8 @@ class GenericListView(ctk.CTkFrame):
         added = 0
         for itm in items:
             nid = sanitize_id(str(itm.get(self.unique_field, "")))
-            if not any(sanitize_id(str(i.get(self.unique_field, ""))) == nid for i in self.items):
+            if not any(sanitize_id(str(i.get(self.unique_field, ""))) == nid
+                    for i in self.items):
                 self.items.append(itm)
                 added += 1
         if added:
