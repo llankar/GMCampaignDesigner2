@@ -1,11 +1,12 @@
 import re
 import time
-import os
+import os, ctypes
+from ctypes import wintypes
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from PIL import Image, ImageTk
-
+from screeninfo import get_monitors
 from modules.generic.generic_editor_window import GenericEditorWindow
 
 PORTRAIT_FOLDER = "assets/portraits"
@@ -13,10 +14,23 @@ MAX_PORTRAIT_SIZE = (1024, 1024)
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+# Helper function to get monitor information using ctypes and Windows API.
+def get_monitors():
+    monitors = []
+    def monitor_enum_proc(hMonitor, hdcMonitor, lprcMonitor, dwData):
+        rect = lprcMonitor.contents
+        monitors.append((rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top))
+        return True
+    MonitorEnumProc = ctypes.WINFUNCTYPE(wintypes.BOOL,
+                                        wintypes.HMONITOR,
+                                        wintypes.HDC,
+                                        ctypes.POINTER(wintypes.RECT),
+                                        wintypes.LPARAM)
+    ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
+    return monitors
 
 def sanitize_id(s):
-    sanitized = re.sub(r'[^a-zA-Z0-9]+', '_', str(s))
-    return sanitized.strip('_')
+    return re.sub(r'[^a-zA-Z0-9]+', '_', str(s)).strip('_')
 
 
 class _ToolTip:
@@ -29,7 +43,6 @@ class _ToolTip:
         widget.bind("<Leave>", self._on_leave)
 
     def _on_motion(self, event):
-        # identify row & column under cursor
         rowid = self.widget.identify_row(event.y)
         colid = self.widget.identify_column(event.x)
         if rowid and colid:
@@ -228,9 +241,102 @@ class GenericListView(ctk.CTkFrame):
             return
         self.tree.selection_set(iid)
         menu = tk.Menu(self, tearoff=0)
+        menu.add_command(label="Show Portrait",
+                        command=lambda: self.show_portrait_window(iid))
         menu.add_command(label="Delete",
                         command=lambda: self.delete_item(iid))
         menu.post(event.x_root, event.y_root)
+
+    def show_portrait_window(self, iid):
+        # find the item data
+        item = next((it for it in self.filtered_items
+                    if sanitize_id(str(it.get(self.unique_field, ""))) == iid),
+                    None)
+        if not item:
+            messagebox.showerror("Error", "Item not found.")
+            return
+        path = item.get("Portrait", "")
+        if not path or not os.path.exists(path):
+            messagebox.showerror("Error", "No valid portrait available.")
+            return
+
+        try:
+            img = Image.open(path)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load image: {e}")
+            return
+
+        # scale to fit MAX_PORTRAIT_SIZE
+        ow, oh = img.size
+        mw, mh = MAX_PORTRAIT_SIZE
+        scale = min(mw/ow, mh/oh, 1)
+        if scale < 1:
+            img = img.resize((int(ow*scale), int(oh*scale)), Image.Resampling.LANCZOS)
+
+        photo = ImageTk.PhotoImage(img)
+        # keep reference
+        if not hasattr(self, "_portrait_refs"):
+            self._portrait_refs = {}
+        self._portrait_refs[iid] = photo
+
+        # Obtain monitor information using ctypes.
+        monitors = get_monitors()
+    #logging.debug("Detected monitors: " + str(monitors))
+
+        # Choose the second monitor if available; otherwise, use the primary monitor.
+        if len(monitors) > 1:
+            target_monitor = monitors[1]
+        #logging.debug(f"Using second monitor: {target_monitor}")
+        else:
+            target_monitor = monitors[0]
+        #logging.debug("Only one monitor available; using primary monitor.")
+
+        screen_x, screen_y, screen_width, screen_height = target_monitor
+    #logging.debug(f"Target screen: ({screen_x}, {screen_y}, {screen_width}, {screen_height})")
+
+        # Scale the image if it's larger than the monitor dimensions (without upscaling).
+        img_width, img_height = img.size
+        scale = min(screen_width / img_width, screen_height / img_height, 1)
+        new_size = (int(img_width * scale), int(img_height * scale))
+    #logging.debug(f"Scaling factor: {scale}, new image size: {new_size}")
+        if scale < 1:
+            resample_method = getattr(Image, "Resampling", Image).LANCZOS
+            img = img.resize(new_size, resample_method)
+        #logging.debug("Image resized.")
+
+        portrait_img = ImageTk.PhotoImage(img)
+        # Persist the image reference to prevent garbage collection.
+        
+        # Create a normal Toplevel window (with standard window decorations).
+        win = ctk.CTkToplevel(self)
+        win.title(item["Name"])
+        # Set the window geometry to match the target monitor's dimensions and position.
+        win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
+        win.update_idletasks()
+    #logging.debug("Window created on target monitor with screen size.")
+
+        # Create a frame with a black background to hold the content.
+        content_frame = tk.Frame(win, bg="white")
+        content_frame.pack(fill="both", expand=True)
+
+        # Add a label to display the NPC name.
+        name_label = tk.Label(content_frame, text=item["Name"],
+                            font=("Arial", 40, "bold"),
+                            fg="white", bg="white")
+        name_label.pack(pady=20)
+    #logging.debug("NPC name label created.")
+
+        # Add a label to display the portrait image.
+        image_label = tk.Label(content_frame, image=portrait_img, bg="white")
+        image_label.image = portrait_img  # persist reference
+        image_label.pack(expand=True)
+    #logging.debug("Portrait image label created.")
+        new_x = screen_x + 0 #1920
+        win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
+    #logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")
+        # Bind a click event to close the window.
+        win.bind("<Button-1>", lambda e: win.destroy())
+    #logging.debug("Window displayed; waiting for click to close.")
 
     def delete_item(self, iid):
         self.items = [it for it in self.items
@@ -267,8 +373,8 @@ class GenericListView(ctk.CTkFrame):
     def add_items(self, items):
         added = 0
         for itm in items:
-            new_id = sanitize_id(str(itm.get(self.unique_field, "")))
-            if not any(sanitize_id(str(i.get(self.unique_field, ""))) == new_id for i in self.items):
+            nid = sanitize_id(str(itm.get(self.unique_field, "")))
+            if not any(sanitize_id(str(i.get(self.unique_field, ""))) == nid for i in self.items):
                 self.items.append(itm)
                 added += 1
         if added:
