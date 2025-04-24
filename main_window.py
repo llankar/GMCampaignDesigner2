@@ -306,7 +306,14 @@ class MainWindow(ctk.CTk):
                     text=f"Load {entity.capitalize()}",
                     command=lambda: self.load_items_from_json(view, entity)
                 )
-                load_button.pack(pady=5)
+                load_button.pack(side="right", padx=(5,5))
+                # Assuming `editor_window` is your CTkToplevel or CTkFrame
+                save_btn = ctk.CTkButton(
+                    self.current_open_view,
+                    text=f"Save {entity.capitalize()}",
+                    command=lambda: self.save_items_to_json(view, entity)
+                )
+                save_btn.pack(side="right", padx=(5,5))
 
             self.content_frame.grid_rowconfigure(0, weight=1)
             self.content_frame.grid_rowconfigure(1, weight=0)
@@ -347,7 +354,14 @@ class MainWindow(ctk.CTk):
                     text=f"Load {entity.capitalize()}",
                     command=lambda: self.load_items_from_json(view, entity)
                 )
-                load_button.pack(pady=5)
+                load_button.pack(side="right", padx=(5,5))
+                # Assuming `editor_window` is your CTkToplevel or CTkFrame
+                save_btn = ctk.CTkButton(
+                    self.current_open_view,
+                    text=f"Save {entity.capitalize()}",
+                    command=lambda: self.save_items_to_json(view, entity)
+                )
+                save_btn.pack(side="right", padx=(5,5))
 
             self.content_frame.grid_rowconfigure(0, weight=0)
             self.content_frame.grid_rowconfigure(1, weight=1)
@@ -447,7 +461,48 @@ class MainWindow(ctk.CTk):
             text=f"Load {entity.capitalize()}",
             command=lambda: self.load_items_from_json(view, entity)
         )
-        load_button.pack(pady=5)
+        load_button.pack(side="right", padx=(5,5))
+        # Assuming `editor_window` is your CTkToplevel or CTkFrame
+        save_btn = ctk.CTkButton(
+            container,
+            text=f"Save {entity.capitalize()}",
+            command=lambda: self.save_items_to_json(view, entity)
+        )
+        save_btn.pack(side="right", padx=(5,5))
+    
+    def save_items_to_json(self, view, entity_name):
+        # 1) Ask the user where to save
+        path = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")],
+            title=f"Export {entity_name.capitalize()} to JSON"
+        )
+        if not path:
+            return  # user hit “Cancel”
+
+        # 2) Grab the items from the view if possible…
+        try:
+            # GenericListView *might* have a method or attribute that holds its current items
+            items = view.get_items()                # ← if you’ve added a get_items()
+        except AttributeError:
+            try:
+                items = view.items                  # ← or maybe it’s stored in view.items
+            except Exception:
+                # 3) …otherwise fall back on the DB
+                wrapper = GenericModelWrapper(entity_name)
+                items   = wrapper.load_items()
+
+        # 4) Serialize to JSON
+        data = { entity_name: items }
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save {entity_name}:\n{e}")
+            return
+
+        # 5) Let the user know it worked
+        messagebox.showinfo("Export Successful", f"Wrote {len(items)} {entity_name} to:\n{path}")
 
     def load_items_from_json(self, view, entity_name):
         file_path = filedialog.askopenfilename(

@@ -1,0 +1,286 @@
+{
+    "pcs": [
+        {
+            "Name": "Elio Raith",
+            "Role": "",
+            "Background": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Secret": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Factions": [
+                "White Court"
+            ],
+            "Objects": [],
+            "Portrait": null,
+            "Traits": {
+                "text": "White Court Vampire\nT\u00eate mise \u00e0 prix (Van Helsing)\nBo\u00eete de nuit + Hell\u2019s Gates + Terrain neutre\nFils de Lara Raith (Protection)\nM\u00e9decin en cours d\u2019\u00e9veil\u00a0: Esther Ramirez\nDuelliste au pistolet de premi\u00e8re classe\nM\u00e9diateur des accords Unseelie",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            }
+        },
+        {
+            "Name": "Dylan Reed",
+            "Role": null,
+            "Background": null,
+            "Secret": null,
+            "Factions": null,
+            "Objects": null,
+            "Portrait": null,
+            "Traits": "Vieux Biker Ex\u2011Sh\u00e9riff et Lycanthrope\nSe sent coupable pour l'assassinat de sa famille (Sam Wilson)\nGarde beaucoup de potes dans la police\nVideur au Hell's Gate\nPr\u00e9sident MC 'Old Guns'\nDeidre a un crush sur Dylan\nTueur de vampires Rouges"
+        },
+        {
+            "Name": "Alex Khitrov",
+            "Role": null,
+            "Background": null,
+            "Secret": null,
+            "Factions": null,
+            "Objects": null,
+            "Portrait": null,
+            "Traits": "Reporter chevronn\u00e9 de tablo\u00efd et Ours Garou\nMes origines russes me jouent souvent des tours\nGrand amateur de photo sport et de muscle cars\nVit dans un ancien garage dans le quartier de South Deering\nForme d\u2019Ours de Sib\u00e9rie"
+        },
+        {
+            "Name": "Dj\u00e9sabel Wallace",
+            "Role": "",
+            "Background": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Secret": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Factions": [
+                "White Council"
+            ],
+            "Objects": [],
+            "Portrait": null,
+            "Traits": {
+                "text": "Prodigieuse Magicienne de la Gu\u00e9rison et de la Protection\nGardien de la Claymore D\u00e9moniaque de William Wallace\nExperte en connaissance occulte\nJe poss\u00e8de le n\u00e9cronomicon pand\u00e9monium\nLe nom Wallace est connu comme famille riche d'\u00c9cosse\nJe suis devenu une Warden du Conseil Blanc\nJ'ai une \u00c9l\u00e8ve \u00e0 l'\u00e9p\u00e9e de Damocl\u00e8s",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            }
+        },
+        {
+            "Name": "Ava Jackson",
+            "Role": "",
+            "Background": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Secret": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Factions": [
+                "Knights of the Cross"
+            ],
+            "Objects": [],
+            "Portrait": null,
+            "Traits": {
+                "text": "Cascadeuse renomm\u00e9e et Chevalier de la Croix\nDivorc\u00e9e\u00a0: ses\u00a02\u00a0enfants sont tout pour elle\nVeut ramener l\u2019espoir \u00e0 l\u2019humanit\u00e9\nAncienne drogu\u00e9e qui ne retombera jamais\nEn mission pour Dieu",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            }
+        },
+        {
+            "Name": "Walker Westfield 'Wes'",
+            "Role": "",
+            "Background": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Secret": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Factions": [
+                "Summer Court"
+            ],
+            "Objects": [],
+            "Portrait": null,
+            "Traits": {
+                "text": "Nettoyeur et Chevalier de la Cour d\u2019\u00c9t\u00e9\nProtecteur et amateur de femmes\nEx\u2011Tireur d\u2019\u00e9lite du SWAT\nAime secr\u00e8tement Maab",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            }
+        },
+        {
+            "Name": "Damas Kinos",
+            "Role": "",
+            "Background": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Secret": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Factions": [
+                "Red Court"
+            ],
+            "Objects": [],
+            "Portrait": null,
+            "Traits": {
+                "text": "Seigneur de guerre de la cour rouge\nCode de l\u2019honneur\nDuelliste redoutable\nISEULT (Enchanteresse)\nALISTAIR (Mage, Manipulation)",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            }
+        },
+        {
+            "Name": "Jeanne\u00a0Marie",
+            "Role": null,
+            "Background": null,
+            "Secret": null,
+            "Factions": null,
+            "Objects": null,
+            "Portrait": null,
+            "Traits": "Valkyrie en charge de la c\u00f4te est des\u00a0US\nNe sais pas r\u00e9sister \u00e0 un d\u00e9fi\nAncienne guerri\u00e8re, favorite d\u2019Odin\nBerserker rapide et implacable"
+        },
+        {
+            "Name": "Dong\u00a0Han",
+            "Role": "",
+            "Background": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Secret": {
+                "text": "None",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            },
+            "Factions": [
+                "Winter Court"
+            ],
+            "Objects": [],
+            "Portrait": null,
+            "Traits": {
+                "text": "Sidhe de la Cour d\u2019Hiver, Renard D\u00e9mon\nDemi\u2011sang humaine\nTatoueuse mystique talentueuse\nMeilleure traqueuse de la Cour d\u2019Hiver\nJe suis chez moi \u00e0 Chinatown\nMarraine du dernier Walker",
+                "formatting": {
+                    "bold": [],
+                    "italic": [],
+                    "underline": [],
+                    "left": [],
+                    "center": [],
+                    "right": []
+                }
+            }
+        }
+    ]
+}
