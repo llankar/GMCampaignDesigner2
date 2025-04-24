@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container entry-form">
+    <h1>{{ 'Edit' if entry else 'New' }} Entry</h1>
+    <form method="post">
+        <label>Title</label>
+        <input type="text" name="title" value="{{ entry.title if entry else '' }}" required>
+
+        <label>Tags (comma-separated)</label>
+        <input type="text" name="tags" value="{{ entry.tags if entry else '' }}">
+
+        <label>Content</label>
+        <textarea name="content" rows="12" required>{{ entry.content if entry else '' }}</textarea>
+
+        <button type="submit">💾 Save</button>
+        <a class="button-group" href="{{ url_for('journal.list_entries') }}">← Cancel</a>
+    </form>
+</div>
+{% endblock %}

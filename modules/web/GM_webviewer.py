@@ -4,20 +4,39 @@ import json
 import logging
 import platform
 
-from flask import Flask, jsonify, render_template, request, send_from_directory, redirect, url_for, current_app
+from flask import (
+    Flask, jsonify, render_template, request,
+    send_from_directory, redirect, url_for,
+    current_app, Blueprint, flash
+)
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import (
+    LoginManager, UserMixin,
+    login_user, login_required,
+    logout_user, current_user
+)
+from werkzeug.security import generate_password_hash, check_password_hash
+import bleach
+from datetime import datetime
+from sqlalchemy.orm import joinedload
+
 from modules.helpers.config_helper import ConfigHelper
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.text_helpers import format_multiline_text
 
+# ──────────────────────────────────────────────────────────────────────────────
 # Set up logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s [%(levelname)s] %(message)s')
+# ──────────────────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] %(message)s'
+)
 
 app = Flask(__name__)
 
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 # Paths & DB Name
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 raw_db_path = ConfigHelper.get("Database", "path", fallback="default_campaign.db").strip()
 is_windows_style_path = re.match(r"^[a-zA-Z]:[\\/]", raw_db_path)
 if platform.system() != "Windows" and is_windows_style_path:
@@ -32,33 +51,191 @@ else:
 
 DB_NAME = os.path.basename(DB_PATH).replace(".db", "")
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Flask Config for SQLAlchemy and Auth
+# ──────────────────────────────────────────────────────────────────────────────
+app.config['SECRET_KEY'] = 'your-secret-key'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{DB_PATH}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'auth.login'
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Models
+# ──────────────────────────────────────────────────────────────────────────────
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+
+class JournalEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    tags = db.Column(db.String(200), nullable=True)  # comma-separated tags
+    user = db.relationship('User', backref='journal_entries')
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Authentication Blueprint
+# ──────────────────────────────────────────────────────────────────────────────
+auth_bp = Blueprint('auth', __name__)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password_hash, password):
+            login_user(user)
+            return redirect(url_for('welcome'))
+        flash('Invalid credentials', 'danger')
+    return render_template('login.html')
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username','').strip()
+        password = request.form.get('password','')
+        password2 = request.form.get('password2','')
+
+        # Simple validation
+        if not username or not password:
+            flash('Username and password are required', 'danger')
+            return redirect(url_for('auth.register'))
+        if password != password2:
+            flash('Passwords do not match', 'danger')
+            return redirect(url_for('auth.register'))
+        if User.query.filter_by(username=username).first():
+            flash('Username already taken', 'danger')
+            return redirect(url_for('auth.register'))
+
+        # Create & log in new user
+        pw_hash = generate_password_hash(password)
+        user = User(username=username, password_hash=pw_hash)
+        db.session.add(user)
+        db.session.commit()
+        login_user(user)
+        return redirect(url_for('welcome'))
+
+    return render_template('register.html')
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('auth.login'))
+
+app.register_blueprint(auth_bp)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Journal Blueprint
+# ──────────────────────────────────────────────────────────────────────────────
+journal_bp = Blueprint('journal', __name__, url_prefix='/journals')
+
+@journal_bp.route('/', methods=['GET'])
+@login_required
+def list_entries():
+    # eager‐load .user to avoid extra queries
+    entries = (JournalEntry.query
+            .options(joinedload(JournalEntry.user))
+            .order_by(JournalEntry.created_at.desc())
+            .all())
+    return render_template('journals.html', entries=entries)
+@journal_bp.route('/<int:entry_id>', methods=['GET'])
+@login_required
+def view_entry(entry_id):
+    # Fetch any entry by its ID (no user_id check)
+    entry = JournalEntry.query.get_or_404(entry_id)
+    return render_template('journal_view.html', entry=entry)
+
+@journal_bp.route('/new', methods=['GET', 'POST'])
+@login_required
+def new_entry():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        raw_content = request.form.get('content', '').strip()
+        # option A: use set union
+        allowed_tags = bleach.sanitizer.ALLOWED_TAGS.union({'p','h1','h2','br'})
+        content = bleach.clean(
+            raw_content,
+            tags=allowed_tags,
+            attributes={'a': ['href', 'title']},
+            strip=True
+        )
+        tags = request.form.get('tags', '').strip()
+        entry = JournalEntry(
+            user_id=current_user.id,
+            title=title,
+            content=content,
+            tags=tags
+        )
+        db.session.add(entry)
+        db.session.commit()
+        return redirect(url_for('journal.list_entries'))
+    return render_template('journal_edit.html', entry=None)
+
+@journal_bp.route('/edit/<int:entry_id>', methods=['GET', 'POST'])
+@login_required
+def edit_entry(entry_id):
+    entry = JournalEntry.query.get_or_404(entry_id)
+    if entry.user_id != current_user.id:
+        return redirect(url_for('journal.list_entries'))
+    if request.method == 'POST':
+        entry.title = request.form.get('title', '').strip()
+        raw_content = request.form.get('content', '').strip()
+        # option A: use set union
+        allowed_tags = bleach.sanitizer.ALLOWED_TAGS.union({'p','h1','h2','br'})
+        entry.content = bleach.clean(
+            raw_content,
+            tags=allowed_tags,
+            attributes={'a': ['href', 'title']},
+            strip=True)
+        entry.tags = request.form.get('tags', '').strip()
+        db.session.commit()
+        return redirect(url_for('journal.view_entry', entry_id=entry.id))
+    return render_template('journal_edit.html', entry=entry)
+
+@journal_bp.route('/delete/<int:entry_id>', methods=['POST'])
+@login_required
+def delete_entry(entry_id):
+    entry = JournalEntry.query.get_or_404(entry_id)
+    if entry.user_id == current_user.id:
+        db.session.delete(entry)
+        db.session.commit()
+    return redirect(url_for('journal.list_entries'))
+
+app.register_blueprint(journal_bp)
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Directories for assets
-CURRENT_DIR = os.path.dirname(__file__)
-BASE_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
-GRAPH_DIR = os.path.join(BASE_DIR, "assets", "graphs")
-PORTRAITS_DIR = os.path.join(BASE_DIR, "assets", "portraits")
+# ──────────────────────────────────────────────────────────────────────────────
+CURRENT_DIR    = os.path.dirname(__file__)
+BASE_DIR       = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
+GRAPH_DIR      = os.path.join(BASE_DIR, "assets", "graphs")
+PORTRAITS_DIR  = os.path.join(BASE_DIR, "assets", "portraits")
 FALLBACK_PORTRAIT = "/assets/images/fallback.png"
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "assets", "uploads")
+UPLOAD_FOLDER  = os.path.join(BASE_DIR, "assets", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 logging.debug("DB_PATH: %s", DB_PATH)
 logging.debug("GRAPH_DIR: %s", GRAPH_DIR)
 logging.debug("PORTRAITS_DIR: %s", PORTRAITS_DIR)
 
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 # Shared positions JSON file (for clues)
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 POSITIONS_FILE = os.path.join(BASE_DIR, "data", "save", "clue_positions.json")
-LINKS_FILE = os.path.join(BASE_DIR, "data", "save", "clue_links.json")
+LINKS_FILE     = os.path.join(BASE_DIR, "data", "save", "clue_links.json")
 
 def load_links():
-    """
-    Load and return the list of saved links.
-    Returns a list of dicts: [{ "from": "...", "to": "...", "text": "...", "color": "..." }, …]
-    """
     try:
         with open(LINKS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -69,12 +246,8 @@ def save_links_list(links_list):
     os.makedirs(os.path.dirname(LINKS_FILE), exist_ok=True)
     with open(LINKS_FILE, "w", encoding="utf-8") as f:
         json.dump(links_list, f, indent=2)
-        
+
 def save_link(link):
-    """
-    Append one link to the saved list and write back to disk.
-    `link` should be a dict like { "from": "...", "to": "...", "text": "...", "color": "..." }.
-    """
     links = load_links()
     links.append(link)
     os.makedirs(os.path.dirname(LINKS_FILE), exist_ok=True)
@@ -108,17 +281,14 @@ def delete_clue():
     wrapper = GenericModelWrapper("clues")
     items = wrapper.load_items()
 
-    # Find all indices (as strings) of clues matching this name
     removed_ids = [str(i) for i, c in enumerate(items)
                 if c.get("Name", "").strip() == name]
     if not removed_ids:
         return jsonify(error="Clue not found"), 404
 
-    # 1) Remove the clue(s) from the database
     new_items = [c for c in items if c.get("Name", "").strip() != name]
     wrapper.save_items(new_items)
 
-    # 2) Remove any links that reference those clue IDs
     links = load_links()
     filtered_links = [
         l for l in links
@@ -140,9 +310,9 @@ def save_positions(positions):
     with open(POSITIONS_FILE, "w", encoding="utf-8") as f:
         json.dump(positions, f, indent=2)
 
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 # Data loaders
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 def get_graph_list():
     try:
         files = [f for f in os.listdir(GRAPH_DIR+"/npcs/") if f.lower().endswith(".json")]
@@ -215,9 +385,9 @@ def get_clues_list():
         logging.error("Error loading clues: %s", e)
         return []
 
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 # Routes
-# ——————————————————————————————————————————————————————————
+# ──────────────────────────────────────────────────────────────────────────────
 @app.route('/')
 def default():
     return redirect(url_for('welcome'))
@@ -253,9 +423,9 @@ def news_view():
 @app.route('/clues')
 def clues_view():
     links = [
-        {"from":"0", "to":"2", "text":"leads to",     "color":"#d6336c"},
-        {"from":"2", "to":"5", "text":"related",        "color":"#198754"},
-        {"from":"5", "to":"0", "text":"contains",     "color":"#0d6efd"},
+        {"from":"0","to":"2","text":"leads to","color":"#d6336c"},
+        {"from":"2","to":"5","text":"related","color":"#198754"},
+        {"from":"5","to":"0","text":"contains","color":"#0d6efd"},
     ]
     return render_template('clues.html',
                         clues=get_clues_list(),
@@ -264,19 +434,17 @@ def clues_view():
 
 @app.route('/api/clue-links', methods=['GET'])
 def get_clue_links():
-    # return a list of your saved links
-    # e.g. load from JSON or your DB
     return jsonify(load_links())
 
 @app.route('/api/clue-link', methods=['POST'])
 def add_clue_link():
-    link = request.get_json()  # {from, to, text, color}
+    link = request.get_json()
     save_link(link)
-    return '', 204
+    return ('', 204)
 
 @app.route('/clues/add', methods=['GET','POST'])
 def add_clue():
-    if request.method=='POST':
+    if request.method == 'POST':
         name = request.form.get('Name','').strip()
         type_ = request.form.get('Type','').strip()
         desc = request.form.get('Description','').strip()
@@ -284,10 +452,10 @@ def add_clue():
             wrapper = GenericModelWrapper("clues")
             items = wrapper.load_items()
             items.append({
-                "Name":name,
-                "Type":type_,
-                "Description":desc,
-                "PlayerDisplay":True
+                "Name": name,
+                "Type": type_,
+                "Description": desc,
+                "PlayerDisplay": True
             })
             wrapper.save_items(items)
         return redirect(url_for('clues_view'))
@@ -309,14 +477,11 @@ def npc_graph():
         npcs = GenericModelWrapper("npcs").load_items()
     except:
         pass
-    for node in data.get("nodes",[]):
+    for node in data.get("nodes", []):
         name = node.get("npc_name","")
         src = portrait_map.get(name,"").strip()
-        if src:
-            node["portrait"] = f"{os.path.basename(src)}"
-        else:
-            node["portrait"] = FALLBACK_PORTRAIT
-        match = next((n for n in npcs if n.get("Name","").strip()==name), None)
+        node["portrait"] = os.path.basename(src) if src else FALLBACK_PORTRAIT
+        match = next((n for n in npcs if n.get("Name","").strip() == name), None)
         node["background"] = format_multiline_text(match.get("Background","")) if match else "(No background)"
     return jsonify(data)
 
@@ -333,14 +498,13 @@ def set_clue_position():
     if cid is None or x is None or y is None:
         return jsonify(error="Missing id, x, or y"), 400
     positions = load_positions()
-    positions[cid] = {"x":float(x), "y":float(y)}
+    positions[cid] = {"x": float(x), "y": float(y)}
     save_positions(positions)
     return jsonify(success=True)
 
 @app.route("/portraits/<path:filename>")
 def get_portrait(filename):
     return send_from_directory(PORTRAITS_DIR, filename)
-
 
 @app.route("/assets/<path:filename>")
 def get_asset(filename):
@@ -349,25 +513,18 @@ def get_asset(filename):
 
 @app.route('/api/clue-positions', methods=['POST'])
 def set_all_clue_positions():
-    """
-    Overwrite the entire clue_positions.json with the provided map.
-    Expects a JSON body of the form:
-    { "<id>": {"x":123,"y":45}, ... }
-    """
     positions = request.get_json() or {}
     save_positions(positions)
     return jsonify(success=True)
 
 @app.route('/uploads/informations/<path:filename>')
 def information_upload(filename):
-    # by using as_attachment=True, Flask will send
-    # a Content‑Disposition: attachment header,
-    # which forces a download dialog (or open if the browser supports it)
     return send_from_directory(
         app.config['UPLOAD_FOLDER'],
         filename,
         as_attachment=True
     )
+
 @app.route('/informations/add', methods=['GET', 'POST'])
 def add_information():
     if request.method == 'POST':
@@ -375,17 +532,15 @@ def add_information():
         info_txt = request.form.get('Information', '').strip()
         level = request.form.get('Level', '').strip()
         display = bool(request.form.get('PlayerDisplay'))
-        npcs = request.form.getlist('NPCs')  # adjust if you need multi-select
+        npcs = request.form.getlist('NPCs')
 
         attachment = request.files.get('Attachment')
         filename = ""
         if attachment and attachment.filename:
-            # secure the filename however your project prefers
             filename = attachment.filename
             save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             attachment.save(save_path)
 
-        # save to the generic “informations” table
         wrapper = GenericModelWrapper("informations")
         items = wrapper.load_items()
         items.append({
@@ -397,11 +552,10 @@ def add_information():
             "Attachment": filename
         })
         wrapper.save_items(items)
-
         return redirect(url_for('news_view'))
 
-    # GET → render a simple form
     return render_template('add_information.html')
+
 @app.route('/factions')
 def factions_view():
     selected = request.args.get("graph")
@@ -412,8 +566,10 @@ def factions_view():
                             selected_graph=selected)
     else:
         try:
-            files = [f for f in os.listdir(GRAPH_DIR+"/factions/")
-                    if f.lower().endswith('.json')]
+            files = [
+                f for f in os.listdir(GRAPH_DIR+"/factions/")
+                if f.lower().endswith('.json')
+            ]
         except Exception:
             files = []
         return render_template('faction_list.html',
@@ -427,17 +583,14 @@ def faction_graph():
     path = os.path.join(GRAPH_DIR+"/factions/", graph_file)
     if not os.path.exists(path):
         return jsonify(error="Graph file not found"), 404
-
     with open(path, encoding='utf-8') as f:
         data = json.load(f)
-
-    # Ensure every node has the properties our Cytoscape template expects:
     for node in data.get("nodes", []):
-        # no portraits for factions
         node["portrait"] = FALLBACK_PORTRAIT
-        # map a "description" field → popup background
         node["background"] = node.get("description", "(No description)")
     return jsonify(data)
-    
+
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(host='0.0.0.0', port=31000, debug=True)
