@@ -12,15 +12,9 @@
     "color": "#000000"
   },
   {
-    "from": "5",
-    "to": "10",
-    "text": "sqqsq",
-    "color": "#dc3545"
-  },
-  {
     "from": "8",
     "to": "2",
-    "text": "test1",
-    "color": "#6f42c1"
+    "text": "Test1",
+    "color": "#007bff"
   }
 ]
