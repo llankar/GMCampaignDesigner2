@@ -16,6 +16,8 @@ from flask_login import (
     logout_user, current_user
 )
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+
 import bleach
 from datetime import datetime
 from sqlalchemy.orm import joinedload
@@ -33,6 +35,8 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
+# register a Jinja filter so you can do {{ entry.attachments|loads }}
+app.jinja_env.filters['loads'] = json.loads
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Paths & DB Name
@@ -77,6 +81,7 @@ class JournalEntry(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     tags = db.Column(db.String(200), nullable=True)  # comma-separated tags
+    attachments = db.Column(db.Text, nullable=True)  # JSON-encoded list of filenames
     user = db.relationship('User', backref='journal_entries')
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -86,7 +91,7 @@ auth_bp = Blueprint('auth', __name__)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -170,12 +175,22 @@ def new_entry():
             strip=True
         )
         tags = request.form.get('tags', '').strip()
+        # handle attachments
+        files = request.files.getlist('attachments')
+        saved = []
+        for f in files:
+            if f and f.filename:
+                fn = secure_filename(f.filename)
+                path = os.path.join(app.config['UPLOAD_FOLDER'], fn)
+                f.save(path)
+                saved.append(fn)
         entry = JournalEntry(
             user_id=current_user.id,
             title=title,
             content=content,
             tags=tags
         )
+        attachments=json.dumps(saved)
         db.session.add(entry)
         db.session.commit()
         return redirect(url_for('journal.list_entries'))
@@ -198,6 +213,14 @@ def edit_entry(entry_id):
             attributes={'a': ['href', 'title']},
             strip=True)
         entry.tags = request.form.get('tags', '').strip()
+        # append new attachments
+        existing = json.loads(entry.attachments or '[]')
+        for f in request.files.getlist('attachments'):
+            if f and f.filename:
+                fn = secure_filename(f.filename)
+                f.save(os.path.join(app.config['UPLOAD_FOLDER'], fn))
+                existing.append(fn)
+        entry.attachments = json.dumps(existing)
         db.session.commit()
         return redirect(url_for('journal.view_entry', entry_id=entry.id))
     return render_template('journal_edit.html', entry=entry)
@@ -394,8 +417,19 @@ def default():
 
 @app.route('/welcome')
 def welcome():
-    return render_template('welcome.html', db_name=DB_NAME)
+    # look for a matching background
+    bg_dir = os.path.join(BASE_DIR, "assets", "images", "backgrounds")
+    fname = f"{DB_NAME}.png"
+    if os.path.exists(os.path.join(bg_dir, fname)):
+        bg_path = f"/assets/images/backgrounds/{fname}"
+    else:
+        bg_path = "/assets/images/backgrounds/default_campaign.png"
 
+    return render_template(
+        'welcome.html',
+        db_name=DB_NAME,
+        bg_image=bg_path
+    )
 @app.route('/npc')
 def npc_view():
     selected = request.args.get("graph")
