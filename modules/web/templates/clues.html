@@ -30,7 +30,23 @@
             color: #070707;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
-
+        .header h1 .add-clue-button {
+            display: inline-block;
+            margin-left: 15px;
+            padding: 0.2em 0.6em;
+            font-size: 0.4em;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid #070707;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #070707;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+        }
+        .header h1 .add-clue-button:hover {
+            background: rgba(255,255,255,0.5);
+            transform: translateY(-1px);
+        }
         .board {
             position: relative;
             width: 100%;
@@ -100,7 +116,25 @@
             line-height: 1.4;
             white-space: pre-wrap;
         }
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #ffe066;
+            color: #333;
+            font-size: 1.2em;
+            font-family: inherit;
+            text-decoration: none;
+            border: 2px solid #e0d4a3;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform .2s, box-shadow .2s;
+        }
 
+        .back-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
         #context-menu,
         #link-menu {
             position: absolute;
@@ -149,10 +183,14 @@
 
 <body>
     <div class="header">
-        <h1>Clues</h1>
-        <small>Right‑click a note or link for actions</small>
+        <h1>
+            Clues
+            <a href="{{ url_for('add_clue') }}" class="add-clue-button">Add Clue</a>
+            </h1>
+        <medium>Right-click a note or link for actions</medium>
     </div>
-
+    <a href="{{ url_for('welcome') }}" class="back-link">← Back to Welcome</a>
+  
     <div class="board" id="board">
         <!-- SVG layer for links -->
         <svg id="link-layer" class="link-layer"></svg>
@@ -165,7 +203,7 @@
         </div>
         {% endfor %}
     </div>
-
+    
     <!-- Context menus -->
     <div id="context-menu">
         <ul>
