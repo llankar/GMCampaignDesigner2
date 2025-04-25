@@ -6,6 +6,19 @@
         {% if entry.tags %} • {{ entry.tags }}{% endif %}
     </div>
     <div class="content">{{ entry.content|safe }}</div>
+
+    {% set files = entry.attachments and entry.attachments|loads or [] %}
+    {% if files %}
+    <div class="attachments">
+        <h3>Attachments</h3>
+        <ul>
+            {% for fn in files %}
+            <li><a href="/assets/uploads/{{ fn }}" target="_blank">{{ fn }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <div class="button-group">
         <a href="{{ url_for('journal.edit_entry', entry_id=entry.id) }}">✎ Edit</a>
         <form action="{{ url_for('journal.delete_entry', entry_id=entry.id) }}" method="post" style="display:inline">
