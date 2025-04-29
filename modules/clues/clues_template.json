@@ -3,6 +3,7 @@
       {"name": "Name", "type": "text"},
       {"name": "Type", "type": "text"},
       {"name": "Description", "type": "longtext"},
-      {"name": "PlayerDisplay", "type": "boolean"}
+      {"name": "PlayerDisplay", "type": "boolean"},
+      {"name": "Portrait", "type": "text"}
   ]
 }

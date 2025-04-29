@@ -3,6 +3,7 @@ import re
 import json
 import logging
 import platform
+import html
 
 from flask import (
     Flask, jsonify, render_template, request,
@@ -407,6 +408,13 @@ def get_clues_list():
                 # fallback: plain text with linebreaks
                 text = str(desc).replace("\n", "<br>")
                 clue["DisplayDescription"] = html.escape(text)
+            portrait = str(clue.get("Portrait") or "").strip()
+            if portrait:
+                portrait = portrait.replace("\\","/").lstrip("/")
+                clue["PortraitURL"] = f"/portraits/{os.path.basename(portrait)}"
+            else:
+                clue["PortraitURL"] = None
+
             filtered.append(clue)
     return filtered
 
