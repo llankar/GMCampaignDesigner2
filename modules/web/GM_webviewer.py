@@ -24,7 +24,7 @@ from sqlalchemy.orm import joinedload
 
 from modules.helpers.config_helper import ConfigHelper
 from modules.generic.generic_model_wrapper import GenericModelWrapper
-from modules.helpers.text_helpers import format_multiline_text
+from modules.helpers.text_helpers import format_multiline_text, rtf_to_html
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Set up logging
@@ -395,18 +395,20 @@ def get_informations_list():
         return []
 
 def get_clues_list():
-    try:
-        wrapper = GenericModelWrapper("clues")
-        filtered = []
-        for clue in wrapper.load_items():
-            if clue.get("PlayerDisplay") in (True,"True","true",1,"1"):
-                clue["DisplayDescription"] = format_multiline_text(clue.get("Description",""))
-                filtered.append(clue)
-        logging.debug("Filtered clues: %d", len(filtered))
-        return filtered
-    except Exception as e:
-        logging.error("Error loading clues: %s", e)
-        return []
+    wrapper = GenericModelWrapper("clues")
+    filtered = []
+    for clue in wrapper.load_items():
+        if clue.get("PlayerDisplay") in (True,"True","true",1,"1"):
+            desc = clue.get("Description", "")
+            # if it's RTF‐JSON, convert to HTML; else just escape lines
+            if isinstance(desc, dict) and "text" in desc:
+                clue["DisplayDescription"] = rtf_to_html(desc)
+            else:
+                # fallback: plain text with linebreaks
+                text = str(desc).replace("\n", "<br>")
+                clue["DisplayDescription"] = html.escape(text)
+            filtered.append(clue)
+    return filtered
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Routes
@@ -475,25 +477,6 @@ def add_clue_link():
     link = request.get_json()
     save_link(link)
     return ('', 204)
-
-@app.route('/clues/add', methods=['GET','POST'])
-def add_clue():
-    if request.method == 'POST':
-        name = request.form.get('Name','').strip()
-        type_ = request.form.get('Type','').strip()
-        desc = request.form.get('Description','').strip()
-        if name:
-            wrapper = GenericModelWrapper("clues")
-            items = wrapper.load_items()
-            items.append({
-                "Name": name,
-                "Type": type_,
-                "Description": desc,
-                "PlayerDisplay": True
-            })
-            wrapper.save_items(items)
-        return redirect(url_for('clues_view'))
-    return render_template('add_clue.html')
 
 @app.route('/api/npc-graph')
 def npc_graph():
@@ -624,6 +607,47 @@ def faction_graph():
         node["background"] = node.get("description", "(No description)")
     return jsonify(data)
 
+
+@app.route('/clues/add', methods=['GET','POST'])
+def add_clue():
+    wrapper = GenericModelWrapper("clues")
+    if request.method == 'POST':
+        # parse the RTF-JSON
+        desc = json.loads(request.form['Description'])
+        items = wrapper.load_items()
+        items.append({
+        "Name":          request.form['Name'].strip(),
+        "Type":          request.form['Type'].strip(),
+        "Description":   desc,
+        "PlayerDisplay": bool(request.form.get('PlayerDisplay'))
+        })
+        wrapper.save_items(items)
+        return redirect(url_for('clues_view'))
+
+    return render_template('clue_form.html', clue=None)
+
+
+@app.route('/clues/edit/<int:idx>', methods=['GET','POST'])
+def edit_clue(idx):
+    wrapper = GenericModelWrapper("clues")
+    items   = wrapper.load_items()
+    if idx < 0 or idx >= len(items):
+        return redirect(url_for('clues_view'))
+
+    if request.method == 'POST':
+        # parse the RTF-JSON
+        desc = json.loads(request.form['Description'])
+        items[idx] = {
+        "Name":          request.form['Name'].strip(),
+        "Type":          request.form['Type'].strip(),
+        "Description":   desc,
+        "PlayerDisplay": bool(request.form.get('PlayerDisplay'))
+        }
+        wrapper.save_items(items)
+        return redirect(url_for('clues_view'))
+
+    # GET: just hand the existing dict back into your form
+    return render_template('clue_form.html', clue=items[idx])
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

@@ -5,7 +5,9 @@ database with Informations : Title, Information, truth_level, origin npc
 Database with Clues : Name, Type (crime, magic, , Information, location), description and web display + player add and store in db
 
 to do
-Graph for factions with relations + Web display 
-Party Reputation Tracker : Deeds/Crimes
+Graph for factions with relations Done + Web display TBD
+Clues : add Image to clue board
+Clues : Modify existing clue 
+
 
  

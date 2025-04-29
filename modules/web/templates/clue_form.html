@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block head %}
+<!-- TinyMCE: community (no API key) -->
+<script src="https://cdn.tiny.cloud/1/l8uouai837afv287zc4ol6pmojd90cxgg9uqvznm9q3pqulf/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container entry-form">
+    <h1>{{ 'Edit' if clue else 'Add' }} Clue</h1>
+    <form id="clueForm" method="post">
+        <label>Name</label>
+        <input type="text" name="Name" value="{{ clue.Name if clue else '' }}" required>
+
+        <label>Type</label>
+        <input type="text" name="Type" value="{{ clue.Type if clue else '' }}">
+
+        <label>Description</label>
+        <!-- The WYSIWYG editor -->
+        <textarea id="tinymceDesc"></textarea>
+
+        <!-- Hidden: carry final RTF JSON on submit -->
+        <input type="hidden" name="Description" id="rtfJson">
+
+        <!-- Hidden: bootstrap value (RTF JSON or plain text) -->
+        <input type="hidden" id="existingDescription" value='{{ clue.Description | tojson }}'>
+
+        <label>
+            <input type="checkbox" name="PlayerDisplay" {% if clue and clue.PlayerDisplay %}checked{% endif %}>
+            Show to players
+        </label>
+
+        <button type="submit">
+            💾 {{ 'Save Changes' if clue else 'Save Clue' }}
+        </button>
+        <a class="button-group" href="{{ url_for('clues_view') }}">← Cancel</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ——— Conversion: HTML ⇄ RTF-JSON ———————————————————————
+    function htmlToRtf(root) {
+        let text = "", idx = 0;
+        const formatting = {
+            bold: [], italic: [], underline: [],
+            list: [], link: []
+        };
+
+        function recurse(node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                text += node.nodeValue;
+                idx += node.nodeValue.length;
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const start = idx;
+                node.childNodes.forEach(recurse);
+                const end = idx;
+
+                const tag = node.tagName.toLowerCase();
+                if (tag === "strong" || tag === "b")
+                    formatting.bold.push([start, end]);
+                if (tag === "em" || tag === "i")
+                    formatting.italic.push([start, end]);
+                if (tag === "u")
+                    formatting.underline.push([start, end]);
+                if (tag === "li")
+                    formatting.list.push([start, end]);
+                if (tag === "a")
+                    formatting.link.push({ range: [start, end], href: node.getAttribute("href") });
+
+                if (tag === "p" || tag === "li") {
+                    text += "\n"; idx += 1;
+                }
+            }
+        }
+
+        recurse(root);
+        return { text, formatting };
+    }
+
+    function rtfToHtml(rtf) {
+        let html = rtf.text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\n/g, "<br>");
+
+        // apply bold/italic/underline
+        [
+            ...rtf.formatting.bold.map(r => ({ ...r, tag: "strong" })),
+            ...rtf.formatting.italic.map(r => ({ ...r, tag: "em" })),
+            ...rtf.formatting.underline.map(r => ({ ...r, tag: "u" }))
+        ]
+            .sort((a, b) => b[0] - a[0])
+            .forEach(({ 0: s, 1: e, tag }) => {
+                html = html.slice(0, e) + `</${tag}>` + html.slice(e);
+                html = html.slice(0, s) + `<${tag}>` + html.slice(s);
+            });
+
+        return html;
+    }
+
+    // ——— Boot TinyMCE and wire up save/load —————————————————
+    document.addEventListener("DOMContentLoaded", function () {
+        // Load whatever was stored last time:
+        let existing;
+        try {
+            existing = JSON.parse(
+                document.getElementById("existingDescription").value
+            );
+        } catch {
+            existing = null;
+        }
+
+        tinymce.init({
+            selector: "#tinymceDesc",
+            menubar: false,
+            plugins: "link lists",
+            toolbar: "undo redo | bold italic underline | bullist numlist | link",
+            branding: false,
+            forced_root_block: false,
+            setup(editor) {
+                editor.on("init", () => {
+                    if (existing && existing.text != null) {
+                        // RTF-JSON → HTML
+                        editor.setContent(rtfToHtml(existing), { format: "html" });
+                        document.getElementById("rtfJson").value =
+                            JSON.stringify(existing);
+                    } else {
+                        // plain-text fallback
+                        editor.setContent(existing || "", { format: "text" });
+                    }
+                });
+            }
+        });
+
+        // On form submit: HTML → RTF-JSON
+        document.getElementById("clueForm")
+            .addEventListener("submit", function () {
+                const html = tinymce.get("tinymceDesc")
+                    .getContent({ format: "html" });
+                const div = document.createElement("div");
+                div.innerHTML = html;
+                const rtf = htmlToRtf(div);
+                document.getElementById("rtfJson").value =
+                    JSON.stringify(rtf);
+            });
+    });
+</script>
+{% endblock %}
