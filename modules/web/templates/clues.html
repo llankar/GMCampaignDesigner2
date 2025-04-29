@@ -207,6 +207,7 @@
     <!-- Context menus -->
     <div id="context-menu">
         <ul>
+            <li id="ctx-edit-clue">Edit Clue</li>
             <li id="ctx-add-link">Add Link</li>
             <li id="ctx-delete-clue">Delete Clue</li>
         </ul>
@@ -225,6 +226,7 @@
                 cards = Array.from(board.querySelectorAll('.clue-card')),
                 ctxMenu = document.getElementById('context-menu'),
                 linkMenu = document.getElementById('link-menu'),
+                editClueOpt = document.getElementById('ctx-edit-clue');
                 addLinkOpt = document.getElementById('ctx-add-link'),
                 delClueOpt = document.getElementById('ctx-delete-clue'),
                 delLinkOpt = document.getElementById('ctx-del-link'),
@@ -414,7 +416,12 @@
                 if (!ctxMenu.contains(e.target)) ctxMenu.style.display = 'none';
                 if (!linkMenu.contains(e.target)) linkMenu.style.display = 'none';
             });
-
+            editClueOpt.addEventListener('click', () => {
+                ctxMenu.style.display = 'none';
+                const idx = ctxCard.dataset.id;
+                // navigate to the edit page for this clue
+                window.location.href = `/clues/edit/${idx}`;
+            });
             // 8) Add Link
             addLinkOpt.addEventListener('click', () => {
                 ctxMenu.style.display = 'none';
