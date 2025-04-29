@@ -892,7 +892,8 @@ class NPCGraphEditor(ctk.CTkFrame):
                 for n in self.graph["nodes"]
             }
             for node in self.graph["nodes"]:
-                node["color"] = "#1D3572"
+                # only default to blue if no color was saved
+                node.setdefault("color", "#1D3572")
             for link in self.graph["links"]:
                 link["arrow_mode"] = link.get("arrow_mode", "both")
             
