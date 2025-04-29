@@ -23,7 +23,7 @@
         <input type="hidden" name="Description" id="rtfJson">
 
         <!-- Hidden: bootstrap value (RTF JSON or plain text) -->
-        <input type="hidden" id="existingDescription" value='{{ clue.Description | tojson }}'>
+        <input type="hidden" id="existingDescription" value='{{ clue.Description | tojson if clue else "null" }}'>
 
         <label>
             <input type="checkbox" name="PlayerDisplay" {% if clue and clue.PlayerDisplay %}checked{% endif %}>
