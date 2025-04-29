@@ -188,28 +188,62 @@ class RichTextEditor(ctk.CTkFrame):
     # Helper Methods to Save/Load Formatting
     # ----------------------
     def get_text_data(self):
-        """Returns a dictionary with the plain text and formatting ranges."""
+        """Returns a dict with plain text and *integer* formatting ranges."""
         text = self.text_widget.get("1.0", "end-1c")
         tags = ["bold", "italic", "underline", "left", "center", "right"]
         formatting = {}
+
         for tag in tags:
-            ranges = self.text_widget.tag_ranges(tag)
             formatting[tag] = []
+            ranges = self.text_widget.tag_ranges(tag)
+            # ranges comes back as [start1, end1, start2, end2, ...]
             for i in range(0, len(ranges), 2):
-                start = str(ranges[i])
-                end = str(ranges[i+1])
-                formatting[tag].append((start, end))
+                start_idx = str(ranges[i])
+                end_idx   = str(ranges[i+1])
+                start_off = self._index_to_offset(start_idx)
+                end_off   = self._index_to_offset(end_idx)
+                formatting[tag].append((start_off, end_off))
+
         return {"text": text, "formatting": formatting}
 
     def load_text_data(self, data):
-        """Loads text and applies formatting from a dictionary."""
+        """Loads text and applies formatting from RTF-JSON (with numeric offsets)."""
+        # 1) Clear existing content and insert all text
         self.text_widget.delete("1.0", "end")
-        self.text_widget.insert("1.0", data.get("text", ""))
-        formatting = data.get("formatting", {})
-        for tag, ranges in formatting.items():
-            for start, end in ranges:
-                self.text_widget.tag_add(tag, start, end)
+        text = data.get("text", "") if isinstance(data, dict) else str(data)
+        self.text_widget.insert("1.0", text)
+
+        # 2) Apply each formatting run, converting numeric offsets to Tk indices
+        formatting = data.get("formatting", {}) if isinstance(data, dict) else {}
+        for tag, runs in formatting.items():
+            for start, end in runs:
+                # Convert numeric offsets into "1.0 + N chars"
+                try:
+                    s = int(start)
+                    e = int(end)
+                    idx1 = f"1.0 + {s} chars"
+                    idx2 = f"1.0 + {e} chars"
+                except (ValueError, TypeError):
+                    # If already in "line.char" form, use directly
+                    idx1 = start
+                    idx2 = end
+                self.text_widget.tag_add(tag, idx1, idx2)
 
     def get_text(self):
         """For backward compatibility, return plain text."""
         return self.text_widget.get("1.0", "end-1c")
+    
+    def _index_to_offset(self, index_str):
+        """
+        Turn a Tk index like "3.14" (line 3, column 14) into a
+        single integer offset in the full self.text_widget content.
+        """
+        # Split "line.col" into ints
+        line, col = map(int, index_str.split('.'))
+        # Grab all text up through that line
+        full = self.text_widget.get("1.0", "end-1c")
+        lines = full.split('\n')
+        # Sum lengths (+1 for each newline) of all *previous* lines:
+        prev = sum(len(l) + 1 for l in lines[:line-1])
+        # Then add the column offset on this line:
+        return prev + col
