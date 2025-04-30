@@ -11,15 +11,16 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
 
-from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.generic.generic_editor_window import GenericEditorWindow
+from modules.generic.generic_list_selection_view import GenericListSelectionView
 from modules.npcs import npc_opener
 from customtkinter import CTkImage
 from modules.generic.entity_detail_factory import create_entity_detail_frame, open_entity_window
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.text_helpers import format_longtext
+
 
 # Global constants
 PORTRAIT_FOLDER = "assets/portraits"
@@ -115,14 +116,40 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         ctk.CTkButton(toolbar, text="Save Graph", command=self.save_graph).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Load Graph", command=self.load_graph).pack(side="left", padx=5)
 
+    
     def select_scenario(self):
+        def on_scenario_selected(scenario_name):
+            # Lookup the full pc dictionary using the pc wrapper.
+            scenario_list = self.scenario_wrapper.load_items()
+            selected_scenario = None
+            for scenario in scenario_list:
+                if scenario.get("Title") == scenario_name:
+                    selected_scenario = scenario
+                    break
+            if not selected_scenario:
+                messagebox.showerror("Error", f"scenario '{scenario_name}' not found.")
+                return
+            dialog.destroy()
+            self.load_scenario(selected_scenario)
+
         scenario_template = load_template("scenarios")
-        def on_scenario_selected(scenario_data):
-            self.load_scenario(scenario_data)
-        dialog = EntitySelectionDialog(
-            self, "Scenarios", self.scenario_wrapper, scenario_template, on_scenario_selected
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Select scenario")
+        dialog.geometry("1200x800")
+        dialog.transient(self)
+        dialog.grab_set()
+        dialog.focus_force()
+        # The new GenericListSelectionView returns the pc name (string)
+        selection_view = GenericListSelectionView(
+            dialog,
+            "scenarios",
+            self.scenario_wrapper,
+            scenario_template,
+            on_select_callback=lambda et, scenario: on_scenario_selected(scenario)
         )
+        selection_view.pack(fill="both", expand=True)
         dialog.wait_window()
+
 
     def display_portrait_window(self):
        #logging.debug("Entering display_portrait_window")

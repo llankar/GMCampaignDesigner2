@@ -53,6 +53,10 @@ class FactionGraphEditor(ctk.CTkFrame):
         template = {"fields":[{"name":"Name","type":"text"}]}
         dialog = ctk.CTkToplevel(self)
         dialog.title("Select Faction")
+        dialog.geometry("1200x800")
+        dialog.transient(self)
+        dialog.grab_set()
+        dialog.focus_force()
         lst = GenericListSelectionView(dialog, "Factions", self.faction_wrapper, template,
                                     on_select_callback=lambda et,name: self._on_faction_chosen(name, dialog))
         dialog.transient(self.winfo_toplevel())
