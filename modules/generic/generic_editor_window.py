@@ -360,14 +360,15 @@ class GenericEditorWindow(ctk.CTkToplevel):
             self.generate_secret_text()
 
             npcs_list = load_npcs_list()
+            creatures_list = load_creatures_list()
             places_list = load_places_list()
 
             selected_npcs = random.sample(npcs_list, 3) if len(npcs_list) >= 3 else npcs_list
             selected_places = random.sample(places_list, 3) if len(places_list) >= 3 else places_list
-
+            selected_creatures = random.sample(creatures_list, 3) if len(creatures_list) >= 3 else creatures_list
             self.item["NPCs"] = selected_npcs
             self.item["Places"] = selected_places
-
+            self.item["Creatures"] = selected_creatures
             # --- NPCs ---
             npc_widgets = self.field_widgets.get("NPCs", [])
             add_npc_combobox = self.field_widgets.get("NPCs_add_combobox")
@@ -380,7 +381,18 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 widget.delete(0, "end")
                 widget.insert(0, selected_npcs[i])
                 widget.configure(state="readonly")
+            # --- Creatures ---
+            creature_widgets = self.field_widgets.get("Creatures", [])
+            add_creatures_combobox = self.field_widgets.get("Creatures_add_combobox")
+            while len(creature_widgets) < 3:
+                add_creatures_combobox()
+                creature_widgets = self.field_widgets["Creatures"]  # Update after adding new combobox
 
+            for i, widget in enumerate(creature_widgets[:3]):
+                widget.configure(state="normal")
+                widget.delete(0, "end")
+                widget.insert(0, selected_creatures[i])
+                widget.configure(state="readonly")
             # --- Places ---
             place_widgets = self.field_widgets.get("Places", [])
             add_place_combobox = self.field_widgets.get("Places_add_combobox")
