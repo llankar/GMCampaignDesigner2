@@ -18,7 +18,11 @@ class GenericListSelectionView(ctk.CTkFrame):
         # Use the first field that is not "Portrait" as the unique field
         self.unique_field = next((f["name"] for f in self.template["fields"] if f["name"] != "Portrait"), None)
         # Extra columns: all fields except "Portrait" and the unique field
-        self.columns = [f["name"] for f in self.template["fields"] if f["name"] not in ["Portrait", self.unique_field]]
+        self.columns = [
+            f["name"]
+            for f in self.template["fields"]
+            if f["name"] not in ["Portrait", self.unique_field]
+        ]
 
         # --- Create Search Bar ---
         search_frame = ctk.CTkFrame(self)
@@ -36,40 +40,62 @@ class GenericListSelectionView(ctk.CTkFrame):
         # --- Create a local ttk style for the Treeview ---
         style = ttk.Style(self)
         style.theme_use("clam")
-        style.configure("Custom.Treeview",
-                        background="#2B2B2B",      # dark gray for cells
-                        fieldbackground="#2B2B2B", # dark gray for empty area
-                        foreground="white",       # white text
-                        rowheight=25,
-                        font=("Segoe UI", 10))
-        style.configure("Custom.Treeview.Heading",
-                        background="#2B2B2B",
-                        foreground="white",
-                        font=("Segoe UI", 10, "bold"))
+        style.configure(
+            "Custom.Treeview",
+            background="#2B2B2B",
+            fieldbackground="#2B2B2B",
+            foreground="white",
+            rowheight=25,
+            font=("Segoe UI", 10),
+        )
+        style.configure(
+            "Custom.Treeview.Heading",
+            background="#2B2B2B",
+            foreground="white",
+            font=("Segoe UI", 10, "bold"),
+        )
         style.map("Custom.Treeview", background=[("selected", "#2B2B2B")])
 
         # --- Create the Treeview using the custom style ---
-        self.tree = ttk.Treeview(tree_frame,
-                                columns=self.columns,
-                                show="tree headings",
-                                selectmode="browse",
-                                style="Custom.Treeview")
-        self.tree.heading("#0", text=self.unique_field)
+        self.tree = ttk.Treeview(
+            tree_frame,
+            columns=self.columns,
+            show="tree headings",
+            selectmode="browse",
+            style="Custom.Treeview",
+        )
+        # Make header clicks sort the column
+        self.tree.heading(
+            "#0",
+            text=self.unique_field,
+            command=lambda c=self.unique_field: self.sort_column(c),
+        )
         self.tree.column("#0", width=150, anchor="w")
         for col in self.columns:
-            self.tree.heading(col, text=col)
+            self.tree.heading(
+                col,
+                text=col,
+                command=lambda c=col: self.sort_column(c),
+            )
             self.tree.column(col, width=100, anchor="w")
-        # Add a vertical scrollbar
+
+        # --- Add vertical and horizontal scrollbars ---
         vsb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
-        self.tree.configure(yscrollcommand=vsb.set)
+        hsb = ttk.Scrollbar(tree_frame, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
         vsb.pack(side="right", fill="y")
+        hsb.pack(side="bottom", fill="x")
+
+        # --- Pack the Treeview ---
         self.tree.pack(fill="both", expand=True)
 
-        # Bind double-click event
+        # Bind double-click event and initial refresh
         self.tree.bind("<Double-1>", self.on_double_click)
         self.refresh_list()
 
-        ctk.CTkButton(self, text="Open Selected", command=self.open_selected).pack(side="bottom", pady=5)
+        ctk.CTkButton(self, text="Open Selected", command=self.open_selected).pack(
+            side="bottom", pady=5
+        )
 
         # --- Center the window if master is a Toplevel ---
         if isinstance(self.master, tk.Toplevel):
@@ -81,7 +107,6 @@ class GenericListSelectionView(ctk.CTkFrame):
             x = (screen_width - width) // 2
             y = (screen_height - height) // 2
             self.master.geometry(f"{width}x{height}+{x}+{y}")
-
     def refresh_list(self):
         self.tree.delete(*self.tree.get_children())
         for item in self.filtered_items:
@@ -99,6 +124,24 @@ class GenericListSelectionView(ctk.CTkFrame):
 
             values = [get_display_value(item.get(col, "")) for col in self.columns]
             self.tree.insert("", "end", iid=iid, text=raw_val, values=values)
+    
+    def sort_column(self, column_name):
+        # Initialize sort directions dict on first use
+        if not hasattr(self, "sort_directions"):
+            self.sort_directions = {}
+
+        # Toggle sort order: True=ascending, False=descending
+        asc = self.sort_directions.get(column_name, True)
+        self.sort_directions[column_name] = not asc
+
+        # Perform the in-place sort on filtered_items
+        self.filtered_items.sort(
+            key=lambda item: str(item.get(column_name, "") or "").lower(),
+            reverse=not asc,
+        )
+
+        # Refresh the Treeview to reflect the new order
+        self.refresh_list()
 
     def filter_items(self):
         query = self.search_var.get().strip().lower()
