@@ -5,7 +5,6 @@ from tkinter import filedialog, messagebox, ttk, Menu
 from PIL import Image, ImageTk
 from modules.generic.generic_list_selection_view import GenericListSelectionView
 from modules.helpers.template_loader import load_template
-from modules.generic.entity_selection_dialog import EntitySelectionDialog
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 import math
 #import logging
