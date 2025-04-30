@@ -291,7 +291,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 })
 
         # Creature nodes
-        creatures_list = scenario.get("Creatures", [])
+        creatures_list = scenario.get("Creatures") or []
         creatures_count = len(creatures_list)
         if creatures_count > 0:
             # Define an arc for creatures (e.g. between 150° and 210°)
