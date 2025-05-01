@@ -16,7 +16,7 @@ from modules.generic.generic_list_selection_view import GenericListSelectionView
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)  # Thumbnail size for lists
 
-class ScenarioDetailView(ctk.CTkFrame):
+class GMScreenView(ctk.CTkFrame):
     def __init__(self, master, scenario_item, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         # Persistent cache for portrait images
@@ -191,12 +191,12 @@ class ScenarioDetailView(ctk.CTkFrame):
         req_width = new_frame.winfo_reqwidth()
         req_height = new_frame.winfo_reqheight()
 
-        if not hasattr(ScenarioDetailView, 'detached_count'):
-            ScenarioDetailView.detached_count = 0
-        offset_x = ScenarioDetailView.detached_count * (req_width + 10)
+        if not hasattr(GMScreenView, 'detached_count'):
+            GMScreenView.detached_count = 0
+        offset_x = GMScreenView.detached_count * (req_width + 10)
         offset_y = 0
         detached_window.geometry(f"{req_width}x{req_height}+{offset_x}+{offset_y}")
-        ScenarioDetailView.detached_count += 1
+        GMScreenView.detached_count += 1
 
         print(f"[DETACH] New frame in detached window created: {new_frame}")
 
