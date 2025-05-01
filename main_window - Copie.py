@@ -23,7 +23,7 @@ from modules.ui.icon_button import create_icon_button
 
 from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
-from modules.scenarios.scenario_detail_view import ScenarioDetailView
+from scenarios.gm_screen_view import GMScreenView
 from modules.npcs.npc_graph_editor import NPCGraphEditor
 from modules.pcs.pc_graph_editor import PCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
@@ -449,7 +449,7 @@ class MainWindow(ctk.CTk):
                 w.destroy()
             detail_container = ctk.CTkFrame(parent)
             detail_container.grid(row=0, column=0, sticky="nsew")
-            view = ScenarioDetailView(detail_container, scenario_item=selected)
+            view = GMScreenView(detail_container, scenario_item=selected)
             view.pack(fill="both", expand=True)
 
         open_button = ctk.CTkButton(container, text="Open Scenario", command=open_selected_scenario)

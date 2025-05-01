@@ -1,14 +1,14 @@
 import customtkinter as ctk
 from tkinter import messagebox
 import os
-from modules.scenarios.scenario_detail_view import ScenarioDetailView
+from scenarios.gm_screen_view import GMScreenView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.template_loader import load_template
 
 def open_detached_npc(npc_name):
     """
     Opens the specified NPC in a brand-new Toplevel window
-    using a minimal ScenarioDetailView to show the NPC data
+    using a minimal GMScreenView to show the NPC data
     (but not as a tab).
     """
     # 1. Load the NPC from JSON
@@ -24,10 +24,10 @@ def open_detached_npc(npc_name):
     window.title(f"NPC: {npc_name}")
     window.geometry("800x600")
 
-    # 3. Create a minimal ScenarioDetailView (or a custom UI) for display
+    # 3. Create a minimal GMScreenView (or a custom UI) for display
   
     dummy_scenario = {"Title": f"Entity: {npc_name}"}
-    detail_view = ScenarioDetailView(window, scenario_item=dummy_scenario)
+    detail_view = GMScreenView(window, scenario_item=dummy_scenario)
     detail_view.pack(fill="both", expand=True)
 
     # 4. Create just the single NPC frame inside this detail view
@@ -38,7 +38,7 @@ def open_detached_npc(npc_name):
 def open_detached_pc(pc_name):
         """
         Opens the specified NPC in a brand-new Toplevel window
-        using a minimal ScenarioDetailView to show the NPC data
+        using a minimal GMScreenView to show the NPC data
         (but not as a tab).
         """
         # 1. Load the NPC from JSON
@@ -54,10 +54,10 @@ def open_detached_pc(pc_name):
         window.title(f"PC: {pc_name}")
         window.geometry("800x600")
 
-        # 3. Create a minimal ScenarioDetailView (or a custom UI) for display
+        # 3. Create a minimal GMScreenView (or a custom UI) for display
 
         dummy_scenario = {"Title": f"Entity: {pc_name}"}
-        detail_view = ScenarioDetailView(window, scenario_item=dummy_scenario)
+        detail_view = GMScreenView(window, scenario_item=dummy_scenario)
         detail_view.pack(fill="both", expand=True)
 
         # 4. Create just the single NPC frame inside this detail view

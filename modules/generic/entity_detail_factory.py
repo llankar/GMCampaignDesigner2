@@ -6,9 +6,11 @@ from modules.helpers.text_helpers import format_longtext
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from tkinter import Toplevel, messagebox
+from tkinter import ttk
 
 # Configure portrait size.
 PORTRAIT_SIZE = (200, 200)
+_open_entity_windows = {}
 wrappers = {
             "Scenarios": GenericModelWrapper("scenarios"),
             "Places": GenericModelWrapper("places"),
@@ -59,35 +61,163 @@ def insert_links(parent, header, items, linked_type, open_entity_callback):
             label.bind("<Button-1>", lambda event, l=linked_type, i=item: open_entity_callback(l, i))
 
 
-def open_entity_tab(entity_type , name, master):
-    wrapper = wrappers[entity_type]
+def open_entity_tab(entity_type, name, master):
+    """
+    Opens (or focuses) a detail window for the given entity_type/name.
+    Debug prints added to trace why/when new windows are created.
+    """
+    print(f"[DEBUG] open_entity_tab called with entity_type={entity_type!r}, name={name!r}")
+
+    # 1) Build a unique key and look for an existing window
+    window_key = f"{entity_type}:{name}"
+    print(f"[DEBUG] computed window_key={window_key!r}")
+    existing = _open_entity_windows.get(window_key)
+    print(f"[DEBUG] lookup existing window: {existing!r}")
+    if existing:
+        alive = existing.winfo_exists()
+        print(f"[DEBUG] existing.winfo_exists() = {alive}")
+        if alive:
+            print(f"[DEBUG] -> focusing existing window for {window_key}")
+            existing.deiconify()
+            existing.lift()
+            return
+        else:
+            print(f"[DEBUG] -> found dead window object, removing from registry")
+            _open_entity_windows.pop(window_key, None)
+
+    # 2) Load the data item
+    print(f"[DEBUG] loading items for type={entity_type}")
+    wrapper = wrappers.get(entity_type)
+    if not wrapper:
+        print(f"[DEBUG] ERROR: unknown wrapper for {entity_type}")
+        messagebox.showerror("Error", f"Unknown type '{entity_type}'")
+        return
+
     items = wrapper.load_items()
-    key = "Title" if entity_type == "Scenarios" else "Name"
-    item = next((i for i in items if i.get(key) == name), None)
+    print(f"[DEBUG] loaded {len(items)} items")
+    key_field = "Title" if entity_type == "Scenarios" else "Name"
+    item = next((i for i in items if i.get(key_field) == name), None)
+    print(f"[DEBUG] lookup item by key_field={key_field!r}: found={item is not None}")
     if not item:
+        print(f"[DEBUG] ERROR: item not found")
         messagebox.showerror("Error", f"{entity_type[:-1]} '{name}' not found.")
         return
-    
-    # Then add the frame to a new separate window.
+
+    # 3) Create a new Toplevel window
+    print(f"[DEBUG] creating new CTkToplevel for {window_key}")
     new_window = ctk.CTkToplevel()
     new_window.title(f"{entity_type[:-1]}: {name}")
     new_window.geometry("1000x600")
     new_window.minsize(1000, 600)
     new_window.configure(padx=10, pady=10)
 
-    # Create a scrollable container inside the new window.
+    # 4) Build the scrollable detail frame inside it
+    print(f"[DEBUG] building scrollable detail frame")
     scrollable_container = ctk.CTkScrollableFrame(new_window)
     scrollable_container.pack(fill="both", expand=True)
-
-    # Create the detail frame and pack it into the scrollable container.
-    frame = create_entity_detail_frame(entity_type, item, master=scrollable_container)
+    frame = create_entity_detail_frame(
+        entity_type,
+        item,
+        master=scrollable_container,
+        open_entity_callback=open_entity_tab
+    )
     frame.pack(fill="both", expand=True)
 
-    new_window.mainloop()
+    # 5) Register it and hook the close event
+    print(f"[DEBUG] registering new window in _open_entity_windows[{window_key!r}]")
+    _open_entity_windows[window_key] = new_window
 
+    def _on_close():
+        print(f"[DEBUG] window {window_key!r} closing, removing from registry")
+        _open_entity_windows.pop(window_key, None)
+        new_window.destroy()
+
+    new_window.protocol("WM_DELETE_WINDOW", _on_close)
+    print(f"[DEBUG] open_entity_tab completed for {window_key}")
     
-   
+def create_scenario_detail_frame(entity_type,scenario_item,master,open_entity_callback=None):
+    """
+    Build a scrollable detail view for a scenario with:
+    1) A header zone (raw Title + Summary, no labels)
+    2) The rest of the fields rendered via your insert_* helpers,
+        with lists going through insert_links so callbacks fire.
+    """
+    # — Outer scrollable container —
+    frame = ctk.CTkScrollableFrame(master)
+    frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+    # ——— HEADER ———
+    CTkLabel(
+        frame,
+        text=scenario_item.get("Title", ""),
+        font=("Arial", 28, "bold")
+    ).pack(anchor="w", pady=(0, 5))
+
+    CTkLabel(
+        frame,
+        text=format_longtext(scenario_item.get("Summary", "")),
+        font=("Arial", 14),
+        wraplength=1620,
+        justify="left"
+    ).pack(fill="x", pady=(0, 15))
+
+    ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
+    CTkLabel(
+        frame,
+        text="Secrets",
+        font=("Arial", 18)
+    ).pack(anchor="w", pady=(0, 5))
+    CTkLabel(
+        frame,
+        text=format_longtext(scenario_item.get("Secrets", "")),
+        font=("Arial", 14),
+        wraplength=1620,
+        justify="left"
+    ).pack(fill="x", pady=(0, 15))
+    ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
+    # ——— BODY: render all other fields via your helpers ———
+    tpl = load_template(entity_type.lower())
+    for field in tpl["fields"]:
+        name = field["name"]
+        if name in ("Title", "Summary", "Secrets"):
+            continue
+
+        ftype = field["type"]
+        value = scenario_item.get(name, "")
+
+        if ftype == "text":
+            insert_text(frame, name, value)
+        elif ftype == "longtext":
+            insert_longtext(frame, name, value)
+        elif ftype == "list":
+            linked = field.get("linked_type")
+            # ← pass your real callback HERE:
+            insert_links(
+                frame,
+                name,
+                value or [],
+                linked,
+                open_entity_callback
+            )
+
+        # separator after each section
+        ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
+
+    return frame
+
 def create_entity_detail_frame(entity_type, entity, master, open_entity_callback=None):
+    """
+    Routes Scenarios through our custom header/body and
+    everything else through the generic detail path.
+    """
+    if entity_type == "Scenarios":
+        return create_scenario_detail_frame(
+            entity_type,
+            entity,
+            master,
+            open_entity_callback
+        )
+
     # Create a scrollable container instead of a plain frame.
     scrollable_container = ctk.CTkScrollableFrame(master)
     scrollable_container.pack(fill="both", expand=True)
