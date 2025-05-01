@@ -27,13 +27,13 @@ from modules.scenarios.scenario_detail_view import ScenarioDetailView
 from modules.npcs.npc_graph_editor import NPCGraphEditor
 from modules.pcs.pc_graph_editor import PCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
-from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.scenarios.scenario_importer import ScenarioImportWindow
 from modules.generic.export_for_foundry import preview_and_export_foundry
 from modules.helpers import text_helpers
 from db.db import load_schema_from_json, initialize_db
 from modules.factions.faction_graph_editor import FactionGraphEditor
 from modules.pcs.display_pcs import display_pcs_in_banner
+from modules.generic.generic_list_selection_view import GenericListSelectionView
 
 
 # Set up CustomTkinter appearance
@@ -521,65 +521,39 @@ class MainWindow(ctk.CTk):
             messagebox.showerror("Error", f"Failed to load {entity_name}: {e}")
 
     def open_gm_screen(self):
-        # if we’re coming from an open_entity(), blow away its frame
+        # 1) Clear any existing content
         self.clear_current_content()
-        # 1) Récupère la liste des scénarios
+        # 2) Load all scenarios
         scenario_wrapper = GenericModelWrapper("scenarios")
         scenarios = scenario_wrapper.load_items()
         if not scenarios:
             messagebox.showwarning("No Scenarios", "No scenarios available.")
             return
 
-        # 2) Affiche systématiquement la bannière des PCs
-        #    si elle n'est pas déjà mappée dans le grid
+        # 3) Ensure the PC‐banner is shown and up to date
         if not self.banner_frame.winfo_ismapped():
             self.banner_frame.grid(row=0, column=0, sticky="ew")
-        # Recharge à jour la liste des PCs
         pcs_items = {pc["Name"]: pc for pc in self.pc_wrapper.load_items()}
         if pcs_items:
             display_pcs_in_banner(self.banner_frame, pcs_items)
 
-        # 3) Prépare la zone de contenu (inner_content_frame) sous la bannière
+        # 4) Prepare inner content area
         self.inner_content_frame.grid(row=1, column=0, sticky="nsew")
-        # Vide uniquement inner_content_frame
         for w in self.inner_content_frame.winfo_children():
             w.destroy()
         parent = self.inner_content_frame
 
-        # 4) Construit l'UI de sélection de scénario
-        container = ctk.CTkFrame(parent, fg_color="#2B2B2B")
-        container.grid(row=0, column=0, sticky="nsew")
-
-        select_label = ctk.CTkLabel(
-            container,
-            text="Select a Scenario",
-            font=("Helvetica", 16, "bold"),
-            fg_color="#2B2B2B",
-            text_color="white"
-        )
-        select_label.pack(pady=10)
-
-        listbox = Listbox(
-            container,
-            selectmode="single",
-            height=15,
-            bg="#2B2B2B",
-            fg="white",
-            highlightthickness=0,
-            bd=0
-        )
-        listbox.pack(fill="both", expand=True, padx=10, pady=10)
-
-        for scenario in scenarios:
-            listbox.insert("end", scenario["Title"])
-
-        def open_selected_scenario():
-            selection = listbox.curselection()
-            if not selection:
-                messagebox.showwarning("No Selection", "Please select a scenario.")
+        # 5) Callback to open a selected scenario in detail
+        def on_scenario_select(entity_type, entity_name):
+            selected = next(
+                (s for s in scenarios
+                if s.get("Name", s.get("Title", "")) == entity_name),
+                None
+            )
+            if not selected:
+                messagebox.showwarning("Not Found", f"Scenario '{entity_name}' not found.")
                 return
-            selected = scenarios[selection[0]]
-            # Nettoie la zone et affiche les détails
+            # clear list and show scenario detail
             for w in parent.winfo_children():
                 w.destroy()
             detail_container = ctk.CTkFrame(parent)
@@ -587,21 +561,27 @@ class MainWindow(ctk.CTk):
             view = ScenarioDetailView(detail_container, scenario_item=selected)
             view.pack(fill="both", expand=True)
 
-        open_button = ctk.CTkButton(container, text="Open Scenario", command=open_selected_scenario)
-        open_button.pack(pady=10)
-        
-        # tell the code the banner is now up
+        # 6) Insert the generic list‐selection view
+        list_selection = GenericListSelectionView(
+            parent,
+            "scenarios",
+            scenario_wrapper,
+            load_template("scenarios"),
+            on_select_callback=on_scenario_select
+        )
+        list_selection.pack(fill="both", expand=True)
+
+        # 7) Lock banner and configure grid weights
         self.banner_visible = True
         self.banner_toggle_btn.configure(text="▲")
-        self.banner_toggle_btn._state="disabled"
+        self.banner_toggle_btn._state = "disabled"
 
-        # make sure row 0 (the banner) stays at its natural height,
-        # and row 1 (the inner content) takes all the rest
+        # Make row 0 (banner) fixed height, row 1 (content) expand
         self.content_frame.grid_rowconfigure(0, weight=0)
         self.content_frame.grid_rowconfigure(1, weight=1)
         self.content_frame.grid_columnconfigure(0, weight=1)
 
-        # make the inner_content_frame fill its entire cell
+        # Make the inner_content_frame fully fill its cell
         self.inner_content_frame.grid_rowconfigure(0, weight=1)
         self.inner_content_frame.grid_columnconfigure(0, weight=1)
 
