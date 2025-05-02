@@ -42,11 +42,33 @@ def display_pcs_in_banner(banner_frame, pcs_items):
     banner_frame.grid_columnconfigure(0, weight=1)
 
     # Enable mousewheel vertical scroll
+    # ─────────────────────────────────────────────────────────────────
+    # SCROLL‐ONLY‐WHEN‐OVER: bind wheel globally when the mouse is
+    # inside the banner's canvas, unbind when it leaves.
+    # ─────────────────────────────────────────────────────────────────
+
     def _on_mousewheel(event):
-        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        # Normalize delta across platforms
+        delta = event.delta if hasattr(event, "delta") else (120 if event.num == 4 else -120)
+        canvas.yview_scroll(int(-1 * (delta / 120)), "units")
+        return "break"
 
-    canvas.bind_all("<MouseWheel>", _on_mousewheel)
+    def _bind_banner_scroll(_):
+        # Any wheel anywhere now drives the banner canvas
+        canvas.bind_all("<MouseWheel>",     _on_mousewheel)
+        canvas.bind_all("<Button-4>",        _on_mousewheel)
+        canvas.bind_all("<Button-5>",        _on_mousewheel)
 
+    def _unbind_banner_scroll(_):
+    # Restore default: no global banner binding
+        canvas.unbind_all("<MouseWheel>")
+        canvas.unbind_all("<Button-4>")
+        canvas.unbind_all("<Button-5>")
+
+    # Hook enter/leave on the canvas that actually shows the banner cards
+    canvas.bind("<Enter>", _bind_banner_scroll)
+    canvas.bind("<Leave>", _unbind_banner_scroll)
+    
     # Layout settings
     max_columns = visible_cards  # 6 cards per row
     row_idx = 0
@@ -97,3 +119,15 @@ def display_pcs_in_banner(banner_frame, pcs_items):
         if col_idx >= max_columns:
             col_idx = 0
             row_idx += 1
+    # ─────────────────────────────────────────────────────────────────
+    # Ensure the scrollregion is correct *once*, as soon as the
+    # canvas/children have been laid out.
+    # ─────────────────────────────────────────────────────────────────
+    # ──── Critical: after a short delay (once the banner is visible and laid out),
+    # force a single recalc of the scrollregion, so the vertical thumb is correct.
+    def _fix_scroll():
+        banner_frame.update_idletasks()                     # ensure all geometry is finalized
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    # Schedule it once, 100ms after creation
+    banner_frame.after(100, _fix_scroll)
