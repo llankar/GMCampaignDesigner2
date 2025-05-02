@@ -143,7 +143,7 @@ def create_scenario_detail_frame(entity_type,scenario_item,master,open_entity_ca
         with lists going through insert_links so callbacks fire.
     """
     # — Outer scrollable container —
-    frame = ctk.CTkScrollableFrame(master)
+    frame = ctk.CTkFrame(master)
     frame.pack(fill="both", expand=True, padx=20, pady=20)
 
     # ——— HEADER ———
@@ -219,11 +219,9 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
         )
 
     # Create a scrollable container instead of a plain frame.
-    scrollable_container = ctk.CTkScrollableFrame(master)
-    scrollable_container.pack(fill="both", expand=True)
-
+    
     # Create the actual content frame inside the scrollable container.
-    content_frame = ctk.CTkFrame(scrollable_container)
+    content_frame = ctk.CTkFrame(master)
     content_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
     # This local cache is used for portrait images (if any).
@@ -263,7 +261,7 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
             if linked_type:
                 insert_links(content_frame, field_name, entity.get(field_name) or [], linked_type, open_entity_callback)
     # Return the scrollable container so that whoever creates the window or tab gets a frame with scrollbars.
-    return scrollable_container
+    return content_frame
 
 def open_entity_window(entity_type, name):
         # Look up the entity using the wrappers dictionary.
