@@ -238,24 +238,16 @@ def insert_npc_table(parent, header, npc_names, open_entity_callback):
 
             widget.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
 
-def create_scenario_detail_frame(entity_type,scenario_item,master,open_entity_callback=None):
+def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity_callback=None):
     """
     Build a scrollable detail view for a scenario with:
-    1) A header zone (raw Title + Summary, no labels)
-    2) The rest of the fields rendered via your insert_* helpers,
-        with lists going through insert_links so callbacks fire.
+    1) A header zone (Title, Summary, Secrets)
+    2) Then the rest of the fields, but NPCs always before Places.
     """
-    # — Outer scrollable container —
     frame = ctk.CTkFrame(master)
     frame.pack(fill="both", expand=True, padx=20, pady=20)
 
     # ——— HEADER ———
-    CTkLabel(
-        frame,
-        text=scenario_item.get("Title", ""),
-        font=("Arial", 28, "bold")
-    ).pack(anchor="w", pady=(0, 5))
-
     CTkLabel(
         frame,
         text=format_longtext(scenario_item.get("Summary", "")),
@@ -263,13 +255,45 @@ def create_scenario_detail_frame(entity_type,scenario_item,master,open_entity_ca
         wraplength=1620,
         justify="left"
     ).pack(fill="x", pady=(0, 15))
-
     ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
-    CTkLabel(
-        frame,
-        text="Secrets",
-        font=("Arial", 18)
-    ).pack(anchor="w", pady=(0, 5))
+
+    # ——— BODY — prepare fields in the custom order ———
+    tpl = load_template(entity_type.lower())
+    # remove header fields
+    body_fields = [
+        f for f in tpl["fields"]
+        if f["name"] not in ("Title", "Summary", "Secrets")
+    ]
+    # group them
+    npc_fields   = [f for f in body_fields if f.get("linked_type") == "NPCs"]
+    creature_fields = [f for f in body_fields if f.get("linked_type") == "Creatures"]
+    place_fields = [f for f in body_fields if f.get("linked_type") == "Places"]
+    other_fields = [f for f in body_fields if f not in npc_fields + place_fields + creature_fields]
+    ordered_fields = npc_fields + creature_fields + place_fields + other_fields
+
+    # render in that order
+    for field in ordered_fields:
+        name  = field["name"]
+        ftype = field["type"]
+        value = scenario_item.get(name) or ""
+
+        if ftype == "text":
+            insert_text(frame, name, value)
+        elif ftype == "longtext":
+            insert_longtext(frame, name, value)
+        elif ftype == "list":
+            linked = field.get("linked_type")
+            items  = value if isinstance(value, list) else []
+            if linked == "NPCs":
+                insert_npc_table(frame, "NPCs", items, open_entity_callback)
+            elif linked == "Places":
+                insert_links(frame, "Places", items, "Places", open_entity_callback)
+            else:
+                insert_links(frame, name, items, linked, open_entity_callback)
+
+        ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
+    CTkLabel(frame, text="Secrets", font=("Arial", 18))\
+    .pack(anchor="w", pady=(0, 5))
     CTkLabel(
         frame,
         text=format_longtext(scenario_item.get("Secrets", "")),
@@ -278,30 +302,6 @@ def create_scenario_detail_frame(entity_type,scenario_item,master,open_entity_ca
         justify="left"
     ).pack(fill="x", pady=(0, 15))
     ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
-    # ——— BODY: render all other fields via your helpers ———
-    tpl = load_template(entity_type.lower())
-    for field in tpl["fields"]:
-        name = field["name"]
-        if name in ("Title", "Summary", "Secrets"):
-            continue
-        ftype = field["type"]
-        value = scenario_item.get(name, "")
-        if ftype == "text":
-            insert_text(frame, name, value)
-        elif ftype == "longtext":
-            insert_longtext(frame, name, value)
-        elif ftype == "list":
-            linked = field.get("linked_type")
-            items  = scenario_item.get(name) or []
-            if linked == "NPCs":
-                items = scenario_item.get("NPCs", [])
-                insert_npc_table(frame, "NPCs", items, open_entity_callback)
-            else:
-                insert_links(frame, name, items, linked, open_entity_callback)
-
-        # separator after each section
-        ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
-
     return frame
 
 def create_entity_detail_frame(entity_type, entity, master, open_entity_callback=None):
