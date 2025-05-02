@@ -147,96 +147,169 @@ def unwrap_value(val):
     return str(val)
 
 def insert_npc_table(parent, header, npc_names, open_entity_callback):
-    """
-    Displays NPCs in rows, with columns:
-    Name | Secret | Background | Factions | Traits
-    The Name column is styled like links (blue) and is clickable.
-    """
     CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold"))\
-        .pack(anchor="w", padx=10, pady=(10, 2))
+        .pack(anchor="w", padx=10, pady=(1, 2))
 
     table = ctk.CTkFrame(parent)
-    table.pack(fill="both", expand=True, padx=10, pady=(0,10))
+    table.pack(fill="both", expand=True, padx=10, pady=(0,0))
 
-    cols         = ["Name", "Secret", "Background", "Factions", "Traits"]
-    weights      = [1, 2, 2, 1, 4]
-    wrap_lengths = [120, 250, 250, 150, 500]
-    text_heights = {1: 50, 2: 50, 4: 75}
+    cols         = ["Portrait", "Name", "Secret", "Background", "Factions", "Traits"]
+    weights      = [0,         1,       2,        2,            1,          4     ]
+    wrap_lengths = [0,       120,     250,      250,          100,        500   ]
+    text_heights = {2: 60, 3: 60, 5: 60}
 
+    # configure columns
     for idx, w in enumerate(weights):
         table.grid_columnconfigure(idx, weight=w)
 
-    # Header row
+    # configure all rows to expand equally (after we place them)
+    # we'll do that after row creation below
+
+    # header row
     for c, col_name in enumerate(cols):
         CTkLabel(table, text=col_name, font=("Arial", 12, "bold"))\
-            .grid(row=0, column=c, padx=5, pady=5, sticky="nsew")
+            .grid(row=0, column=c, padx=5, pady=1, sticky="nsew")
 
-    # Load NPC data
-    npc_wrapper = GenericModelWrapper("npcs")
-    all_npcs    = npc_wrapper.load_items()
-    npc_map     = {npc.get("Name"): npc for npc in all_npcs}
+    # load data
+    wrapper = GenericModelWrapper("npcs")
+    all_npcs = wrapper.load_items()
+    npc_map   = {npc["Name"]: npc for npc in all_npcs}
 
-    for r, npc_name in enumerate(npc_names, start=1):
-        data = npc_map.get(npc_name, {}) or {}
+    for r, name in enumerate(npc_names, start=1):
+        data = npc_map.get(name, {}) or {}
 
-        # Prepare values
-        secret_text     = format_longtext(unwrap_value(data.get("Secret")),     max_length=2000)
-        background_text = format_longtext(unwrap_value(data.get("Background")), max_length=2000)
-        factions_list   = data.get("Factions") or []
-        traits_text     = format_longtext(unwrap_value(data.get("Traits")), max_length=2000)
+        # portrait
+        portrait_path = data.get("Portrait")
+        if portrait_path and os.path.exists(portrait_path):
+            img = Image.open(portrait_path).resize((40,40), Image.Resampling.LANCZOS)
+            photo = CTkImage(light_image=img, size=(40,40))
+            widget = CTkLabel(table, image=photo, text="", anchor="center")
+            widget.image = photo
+        else:
+            widget = CTkLabel(table, text="", anchor="center")
+        widget.grid(row=r, column=0, padx=5, pady=5, sticky="nsew")
 
-        def unwrap_list(lst):
-            out = []
-            for item in lst:
-                if isinstance(item, dict):
-                    out.append(item.get("text", ""))
-                else:
-                    out.append(str(item))
-            return out
+        # other columns
+        secret     = format_longtext(data.get("Secret",""))
+        background = format_longtext(data.get("Background",""))
+        factions   = ", ".join(data.get("Factions") or [])
+        traits     = format_longtext(data.get("Traits"))
 
-        factions_text = ", ".join(unwrap_list(factions_list))
-        
-
-        values = [
-            data.get("Name", ""),
-            secret_text,
-            background_text,
-            factions_text,
-            traits_text
-        ]
-
-        for c, txt in enumerate(values):
+        values = [name, secret, background, factions, traits]
+        for c, txt in enumerate(values, start=1):
             if c in text_heights:
-                # long‑text columns as a disabled textbox
-                widget = CTkTextbox(table, wrap="word", height=text_heights[c])
-                widget.insert = widget._textbox.insert
-                widget.insert("1.0", txt)
-                widget.configure(state="disabled")
+                cell = CTkTextbox(table, wrap="word", height=text_heights[c])
+                cell.insert = cell._textbox.insert
+                cell.insert("1.0", txt)
+                cell.configure(state="disabled")
             else:
-                # Name column styled like link
-                if c == 0:
-                    widget = CTkLabel(
+                if c == 1:
+                    cell = CTkLabel(
                         table,
                         text=txt,
                         text_color="#00BFFF",
                         font=("Arial", 12, "underline"),
-                        cursor="hand2"
+                        cursor="hand2",
+                        anchor="center",
+                        justify="center"
+
                     )
                     if open_entity_callback:
-                        widget.bind(
+                        cell.bind(
                             "<Button-1>",
-                            lambda e, nm=npc_name: open_entity_callback("NPCs", nm)
+                            lambda e, nm=name: open_entity_callback("NPCs", nm)
                         )
                 else:
-                    widget = CTkLabel(
+                    cell = CTkLabel(
                         table,
                         text=txt,
                         font=("Arial", 12),
                         wraplength=wrap_lengths[c],
-                        justify="left"
+                        justify="left",
+                        anchor="w"
                     )
+            cell.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
 
-            widget.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
+        # make this row expandable so portrait centers vertically
+        table.grid_rowconfigure(r, weight=1)
+
+def insert_creature_table(parent, header, creature_names, open_entity_callback):
+    CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")) \
+        .pack(anchor="w", padx=10, pady=(1, 2))
+
+    table = ctk.CTkFrame(parent)
+    table.pack(fill="both", expand=True, padx=10, pady=(0,0))
+
+    cols         = ["Portrait", "Name", "Weakness", "Powers", "Stats"]
+    weights      = [0,         1,       3,          3,        2     ]
+    wrap_lengths = [0,       150,     400,        400,      300   ]
+    text_heights = {2: 60, 3: 60,    4: 60}
+
+    for idx, w in enumerate(weights):
+        table.grid_columnconfigure(idx, weight=w)
+
+    for c, col in enumerate(cols):
+        CTkLabel(table, text=col, font=("Arial", 12, "bold")) \
+            .grid(row=0, column=c, padx=5, pady=1, sticky="nsew")
+
+    wrapper       = GenericModelWrapper("creatures")
+    all_creatures = wrapper.load_items()
+    creature_map  = {cr["Name"]: cr for cr in all_creatures}
+
+    for r, name in enumerate(creature_names, start=1):
+        data = creature_map.get(name, {}) or {}
+
+        # portrait
+        portrait_path = data.get("Portrait")
+        if portrait_path and os.path.exists(portrait_path):
+            img = Image.open(portrait_path).resize((40,40), Image.Resampling.LANCZOS)
+            photo = CTkImage(light_image=img, size=(40,40))
+            widget = CTkLabel(table, image=photo, text="", anchor="center")
+            widget.image = photo
+        else:
+            widget = CTkLabel(table, text="", anchor="center")
+        widget.grid(row=r, column=0, padx=5, pady=5, sticky="nsew")
+
+        # other columns
+        weakness = format_longtext(data.get("Weakness",""), max_length=2000)
+        powers   = format_longtext(data.get("Powers",""),   max_length=2000)
+        stats    = format_longtext(data.get("Stats",""),    max_length=2000)
+
+        values = [name, weakness, powers, stats]
+        for c, txt in enumerate(values, start=1):
+            if c in text_heights:
+                cell = CTkTextbox(table, wrap="word", height=text_heights[c])
+                cell.insert = cell._textbox.insert
+                cell.insert("1.0", txt)
+                cell.configure(state="disabled")
+            else:
+                if c == 1:
+                    cell = CTkLabel(
+                        table,
+                        text=txt,
+                        text_color="#00BFFF",
+                        font=("Arial", 12, "underline"),
+                        cursor="hand2",
+                        anchor="center",
+                        justify="center"
+                    )
+                    if open_entity_callback:
+                        cell.bind(
+                            "<Button-1>",
+                            lambda e, nm=name: open_entity_callback("Creatures", nm)
+                        )
+                else:
+                    cell = CTkLabel(
+                        table,
+                        text=txt,
+                        font=("Arial", 12),
+                        wraplength=wrap_lengths[c],
+                        justify="left",
+                        anchor="w"
+                    )
+            cell.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
+
+        table.grid_rowconfigure(r, weight=1)
 
 def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity_callback=None):
     """
@@ -245,8 +318,8 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
     2) Then the rest of the fields, but NPCs always before Places.
     """
     frame = ctk.CTkFrame(master)
-    frame.pack(fill="both", expand=True, padx=20, pady=20)
-
+    frame.pack(fill="both", expand=True, padx=20, pady=10)
+    ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=1)
     # ——— HEADER ———
     CTkLabel(
         frame,
@@ -286,12 +359,14 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
             items  = value if isinstance(value, list) else []
             if linked == "NPCs":
                 insert_npc_table(frame, "NPCs", items, open_entity_callback)
+            elif linked == "Creatures":
+                insert_creature_table(frame, "Creatures", items, open_entity_callback)
             elif linked == "Places":
                 insert_links(frame, "Places", items, "Places", open_entity_callback)
             else:
                 insert_links(frame, name, items, linked, open_entity_callback)
 
-        ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
+        ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=1)
     CTkLabel(frame, text="Secrets", font=("Arial", 18))\
     .pack(anchor="w", pady=(0, 5))
     CTkLabel(
