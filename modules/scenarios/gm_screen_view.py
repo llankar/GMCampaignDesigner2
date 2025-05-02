@@ -89,9 +89,9 @@ class GMScreenView(ctk.CTkFrame):
         self.add_button.pack(side="right", padx=5, pady=5)
 
         # Main content area for scenario details
-        self.content_area = ctk.CTkFrame(self)
+        self.content_area = ctk.CTkScrollableFrame(self)
         self.content_area.pack(fill="both", expand=True)
-
+        
         # Example usage: create the first tab from the scenario_item
         scenario_name = scenario_item.get("Title", "Unnamed Scenario")
         frame = create_entity_detail_frame("Scenarios", scenario_item, master=self.content_area, open_entity_callback=self.open_entity_tab)
@@ -351,15 +351,15 @@ class GMScreenView(ctk.CTkFrame):
             return
         elif entity_type == "NPC Graph":
             self.add_tab("NPC Graph", self.create_npc_graph_frame(),
-                        content_factory=lambda master: self.create_npc_graph_frame(master))
+                        content_factory=lambda master: self.create_npc_graph_frame(self.content_area))
             return
         elif entity_type == "PC Graph":
             self.add_tab("PC Graph", self.create_pc_graph_frame(),
-                        content_factory=lambda master: self.create_pc_graph_frame(master))
+                        content_factory=lambda master: self.create_pc_graph_frame(self.content_area))
             return
         elif entity_type == "Scenario Graph Editor":
             self.add_tab("Scenario Graph Editor", self.create_scenario_graph_frame(),
-                        content_factory=lambda master: self.create_scenario_graph_frame(master))
+                        content_factory=lambda master: self.create_scenario_graph_frame(self.content_area))
             return
 
         model_wrapper = self.wrappers[entity_type]
@@ -532,6 +532,7 @@ class GMScreenView(ctk.CTkFrame):
         if master is None:
             master = self.content_area
         frame = ctk.CTkFrame(master)
+        frame.pack_propagate(False)
         graph_editor = NPCGraphEditor(frame, self.wrappers["NPCs"], self.wrappers["Factions"])
         graph_editor.pack(fill="both", expand=True)
         frame.graph_editor = graph_editor  # Save a reference for state management
@@ -541,6 +542,7 @@ class GMScreenView(ctk.CTkFrame):
         if master is None:
             master = self.content_area
         frame = ctk.CTkFrame(master)
+        frame.pack_propagate(False)
         graph_editor = PCGraphEditor(frame, self.wrappers["PCs"], self.wrappers["Factions"])
         graph_editor.pack(fill="both", expand=True)
         frame.graph_editor = graph_editor  # Save a reference for state management
