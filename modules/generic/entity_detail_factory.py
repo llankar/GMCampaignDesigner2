@@ -134,7 +134,110 @@ def open_entity_tab(entity_type, name, master):
 
     new_window.protocol("WM_DELETE_WINDOW", _on_close)
     print(f"[DEBUG] open_entity_tab completed for {window_key}")
-    
+
+def unwrap_value(val):
+    """
+    If val is a dict with a 'text' key, return that.
+    Otherwise, return str(val) (or '' if None).
+    """
+    if isinstance(val, dict):
+        return val.get("text", "")
+    if val is None:
+        return ""
+    return str(val)
+
+def insert_npc_table(parent, header, npc_names, open_entity_callback):
+    """
+    Displays NPCs in rows, with columns:
+    Name | Secret | Background | Factions | Traits
+    The Name column is styled like links (blue) and is clickable.
+    """
+    CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold"))\
+        .pack(anchor="w", padx=10, pady=(10, 2))
+
+    table = ctk.CTkFrame(parent)
+    table.pack(fill="both", expand=True, padx=10, pady=(0,10))
+
+    cols         = ["Name", "Secret", "Background", "Factions", "Traits"]
+    weights      = [1, 2, 2, 1, 4]
+    wrap_lengths = [120, 250, 250, 150, 500]
+    text_heights = {1: 50, 2: 50, 4: 75}
+
+    for idx, w in enumerate(weights):
+        table.grid_columnconfigure(idx, weight=w)
+
+    # Header row
+    for c, col_name in enumerate(cols):
+        CTkLabel(table, text=col_name, font=("Arial", 12, "bold"))\
+            .grid(row=0, column=c, padx=5, pady=5, sticky="nsew")
+
+    # Load NPC data
+    npc_wrapper = GenericModelWrapper("npcs")
+    all_npcs    = npc_wrapper.load_items()
+    npc_map     = {npc.get("Name"): npc for npc in all_npcs}
+
+    for r, npc_name in enumerate(npc_names, start=1):
+        data = npc_map.get(npc_name, {}) or {}
+
+        # Prepare values
+        secret_text     = format_longtext(unwrap_value(data.get("Secret")),     max_length=2000)
+        background_text = format_longtext(unwrap_value(data.get("Background")), max_length=2000)
+        factions_list   = data.get("Factions") or []
+        traits_text     = format_longtext(unwrap_value(data.get("Traits")), max_length=2000)
+
+        def unwrap_list(lst):
+            out = []
+            for item in lst:
+                if isinstance(item, dict):
+                    out.append(item.get("text", ""))
+                else:
+                    out.append(str(item))
+            return out
+
+        factions_text = ", ".join(unwrap_list(factions_list))
+        
+
+        values = [
+            data.get("Name", ""),
+            secret_text,
+            background_text,
+            factions_text,
+            traits_text
+        ]
+
+        for c, txt in enumerate(values):
+            if c in text_heights:
+                # long‑text columns as a disabled textbox
+                widget = CTkTextbox(table, wrap="word", height=text_heights[c])
+                widget.insert = widget._textbox.insert
+                widget.insert("1.0", txt)
+                widget.configure(state="disabled")
+            else:
+                # Name column styled like link
+                if c == 0:
+                    widget = CTkLabel(
+                        table,
+                        text=txt,
+                        text_color="#00BFFF",
+                        font=("Arial", 12, "underline"),
+                        cursor="hand2"
+                    )
+                    if open_entity_callback:
+                        widget.bind(
+                            "<Button-1>",
+                            lambda e, nm=npc_name: open_entity_callback("NPCs", nm)
+                        )
+                else:
+                    widget = CTkLabel(
+                        table,
+                        text=txt,
+                        font=("Arial", 12),
+                        wraplength=wrap_lengths[c],
+                        justify="left"
+                    )
+
+            widget.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
+
 def create_scenario_detail_frame(entity_type,scenario_item,master,open_entity_callback=None):
     """
     Build a scrollable detail view for a scenario with:
@@ -181,24 +284,20 @@ def create_scenario_detail_frame(entity_type,scenario_item,master,open_entity_ca
         name = field["name"]
         if name in ("Title", "Summary", "Secrets"):
             continue
-
         ftype = field["type"]
         value = scenario_item.get(name, "")
-
         if ftype == "text":
             insert_text(frame, name, value)
         elif ftype == "longtext":
             insert_longtext(frame, name, value)
         elif ftype == "list":
             linked = field.get("linked_type")
-            # ← pass your real callback HERE:
-            insert_links(
-                frame,
-                name,
-                value or [],
-                linked,
-                open_entity_callback
-            )
+            items  = scenario_item.get(name) or []
+            if linked == "NPCs":
+                items = scenario_item.get("NPCs", [])
+                insert_npc_table(frame, "NPCs", items, open_entity_callback)
+            else:
+                insert_links(frame, name, items, linked, open_entity_callback)
 
         # separator after each section
         ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)

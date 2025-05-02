@@ -9,7 +9,7 @@ def display_pcs_in_banner(banner_frame, pcs_items):
     card_width = 300  # Width for each PC card
     visible_cards = 6  # 6 cards visible without scrolling
     banner_visible_width = card_width * visible_cards
-    banner_visible_height = 260  # Adjusted compact height
+    banner_visible_height = 220  # Adjusted compact height
 
     # Create scrollable canvas
     canvas = ctk.CTkCanvas(
@@ -105,14 +105,14 @@ def display_pcs_in_banner(banner_frame, pcs_items):
         if pc_data.get("Name"):
             add_large_label(pc_frame, "Name", pc_data["Name"])
 
+        if pc_data.get("Traits"):
+            add_label(pc_frame, "Traits", format_multiline_text(pc_data["Traits"]))
+        
         if pc_data.get("Background"):
             add_label(pc_frame, "Background",format_multiline_text( pc_data["Background"]))
 
         if pc_data.get("Secret"):
             add_label(pc_frame, "Secret", format_multiline_text(pc_data["Secret"]))
-
-        if pc_data.get("Traits"):
-            add_label(pc_frame, "Traits", format_multiline_text(pc_data["Traits"]))
 
         # Move to next column/row
         col_idx += 1
