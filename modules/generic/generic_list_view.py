@@ -6,27 +6,14 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-from screeninfo import get_monitors
 from modules.generic.generic_editor_window import GenericEditorWindow
+from modules.ui.image_viewer import show_portrait
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (1024, 1024)
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
-def get_monitors():
-    monitors = []
-    def monitor_enum_proc(hMonitor, hdcMonitor, lprcMonitor, dwData):
-        rect = lprcMonitor.contents
-        monitors.append((rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top))
-        return True
-    MonitorEnumProc = ctypes.WINFUNCTYPE(wintypes.BOOL,
-                                        wintypes.HMONITOR,
-                                        wintypes.HDC,
-                                        ctypes.POINTER(wintypes.RECT),
-                                        wintypes.LPARAM)
-    ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
-    return monitors
 
 def sanitize_id(s):
     return re.sub(r'[^a-zA-Z0-9]+', '_', str(s)).strip('_')
@@ -166,6 +153,18 @@ class GenericListView(ctk.CTkFrame):
         self._tooltip = _ToolTip(self.tree)
 
         self.refresh_list()
+    
+    def show_portrait_window(self, iid):
+        item = next((it for it in self.filtered_items
+                    if sanitize_id(str(it.get(self.unique_field, ""))) == iid),
+                    None)
+        if not item:
+            messagebox.showerror("Error", "Item not found.")
+            return
+        path = item.get("Portrait", "")
+        title = str(item.get(self.unique_field, ""))
+        # Delegate to our new helper
+        show_portrait(path, title)
 
     def refresh_list(self):
         self.tree.delete(*self.tree.get_children())
@@ -247,55 +246,7 @@ class GenericListView(ctk.CTkFrame):
         menu.add_command(label="Delete",
                         command=lambda: self.delete_item(iid))
         menu.post(event.x_root, event.y_root)
-
-    def show_portrait_window(self, iid):
-        item = next((it for it in self.filtered_items
-                    if sanitize_id(str(it.get(self.unique_field, ""))) == iid),
-                    None)
-        if not item:
-            messagebox.showerror("Error", "Item not found.")
-            return
-        path = item.get("Portrait", "")
-        if not path or not os.path.exists(path):
-            messagebox.showerror("Error", "No valid portrait available.")
-            return
-
-        try:
-            img = Image.open(path)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to load image: {e}")
-            return
-
-        ow, oh = img.size
-        mw, mh = MAX_PORTRAIT_SIZE
-        scale = min(mw/ow, mh/oh, 1)
-        if scale < 1:
-            img = img.resize((int(ow*scale), int(oh*scale)), Image.Resampling.LANCZOS)
-
-        photo = ImageTk.PhotoImage(img)
-        if not hasattr(self, "_portrait_refs"):
-            self._portrait_refs = {}
-        self._portrait_refs[iid] = photo
-
-        monitors = get_monitors()
-        target = monitors[1] if len(monitors)>1 else monitors[0]
-        sx, sy, sw, sh = target
-
-        win = ctk.CTkToplevel(self)
-        win.title(item.get(self.unique_field, "Portrait"))
-        win.geometry(f"{sw}x{sh}+{sx}+{sy}")
-        win.update_idletasks()
-
-        content = tk.Frame(win, bg="white")
-        content.pack(fill="both", expand=True)
-        tk.Label(content, text=item.get(self.unique_field, ""),
-                font=("Arial", 40, "bold"), fg="white", bg="white")\
-        .pack(pady=20)
-        lbl = tk.Label(content, image=photo, bg="white")
-        lbl.image = photo
-        lbl.pack(expand=True)
-        win.bind("<Button-1>", lambda e: win.destroy())
-
+    
     def delete_item(self, iid):
         self.items = [it for it in self.items
                     if sanitize_id(str(it.get(self.unique_field, ""))) != iid]

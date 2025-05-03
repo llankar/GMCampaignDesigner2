@@ -20,7 +20,7 @@ from customtkinter import CTkImage
 from modules.generic.entity_detail_factory import create_entity_detail_frame, open_entity_window
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.text_helpers import format_longtext
-
+from modules.ui.image_viewer import show_portrait
 
 # Global constants
 PORTRAIT_FOLDER = "assets/portraits"
@@ -29,19 +29,6 @@ ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 #logging.basicConfig(level=logging.DEBUG)
 
-def get_monitors():
-    monitors = []
-    def monitor_enum_proc(hMonitor, hdcMonitor, lprcMonitor, dwData):
-        rect = lprcMonitor.contents
-        monitors.append((rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top))
-        return True
-    MonitorEnumProc = ctypes.WINFUNCTYPE(wintypes.BOOL,
-                                        wintypes.HMONITOR,
-                                        wintypes.HDC,
-                                        ctypes.POINTER(wintypes.RECT),
-                                        wintypes.LPARAM)
-    ctypes.windll.user32.EnumDisplayMonitors(0, 0, MonitorEnumProc(monitor_enum_proc), 0)
-    return monitors
 
 def clean_longtext(data, max_length=2000):
     # First, get the plain text using your existing helper.
@@ -175,44 +162,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         if not portrait_path or not os.path.exists(portrait_path):
             messagebox.showerror("Error", "No valid portrait found for this entity.")
             return
-
-        try:
-            img = Image.open(portrait_path)
-        except Exception as e:
-            messagebox.showerror("Error", f"Error loading portrait: {e}")
-            return
-
-        monitors = get_monitors()
-        target_monitor = monitors[1] if len(monitors) > 1 else monitors[0]
-        screen_x, screen_y, screen_width, screen_height = target_monitor
-        img_width, img_height = img.size
-        scale = min(screen_width / img_width, screen_height / img_height, 1)
-        new_size = (int(img_width * scale), int(img_height * scale))
-        if scale < 1:
-            resample_method = getattr(Image, "Resampling", Image).LANCZOS
-            img = img.resize(new_size, resample_method)
-
-        win = ctk.CTkToplevel(self)
-        win.title(name_key)
-        win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
-        win.update_idletasks()
-
-        portrait_img = ImageTk.PhotoImage(img, master=win)
-        self.node_images[f"window_{name_key}"] = portrait_img
-
-        content_frame = tk.Frame(win, bg="white")
-        content_frame.pack(fill="both", expand=True)
-        name_label = tk.Label(content_frame, text=name_key,
-                            font=("Arial", 40, "bold"),
-                            fg="white", bg="white")
-        name_label.pack(pady=20)
-        image_label = tk.Label(content_frame, image=portrait_img, bg="#2B2B2B")
-        image_label.image = portrait_img
-        image_label.pack(expand=True)
-
-        new_x = screen_x
-        win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
-        win.bind("<Button-1>", lambda e: win.destroy())
+        show_portrait(portrait_path, name_key)
+        
 
     def load_scenario(self, scenario):
         # Use full text; no truncation—wrapping will be handled by canvas.
