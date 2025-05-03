@@ -7,6 +7,7 @@ from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from tkinter import Toplevel, messagebox
 from tkinter import ttk
+from modules.ui.image_viewer import show_portrait
 
 # Configure portrait size.
 PORTRAIT_SIZE = (200, 200)
@@ -185,6 +186,11 @@ def insert_npc_table(parent, header, npc_names, open_entity_callback):
             photo = CTkImage(light_image=img, size=(40,40))
             widget = CTkLabel(table, image=photo, text="", anchor="center")
             widget.image = photo
+            # clicking the thumbnail pops up the full‑screen viewer
+            widget.bind(
+                "<Button-1>",
+                lambda e, p=portrait_path, n=name: show_portrait(p, n)
+            )
         else:
             widget = CTkLabel(table, text="", anchor="center")
         widget.grid(row=r, column=0, padx=5, pady=5, sticky="nsew")
@@ -266,6 +272,10 @@ def insert_creature_table(parent, header, creature_names, open_entity_callback):
             photo = CTkImage(light_image=img, size=(40,40))
             widget = CTkLabel(table, image=photo, text="", anchor="center")
             widget.image = photo
+            widget.bind(
+                "<Button-1>",
+                lambda e, p=portrait_path, n=name: show_portrait(p, n)
+            )
         else:
             widget = CTkLabel(table, text="", anchor="center")
         widget.grid(row=r, column=0, padx=5, pady=5, sticky="nsew")

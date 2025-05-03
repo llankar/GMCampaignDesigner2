@@ -17,7 +17,7 @@ from ctypes import wintypes
 import textwrap
 import re
 from tkinter.font import Font  # add at top of file
-
+from modules.ui.image_viewer import show_portrait
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -137,101 +137,30 @@ class PCGraphEditor(ctk.CTkFrame):
         pc_opener.open_pc_editor_window(pc_name)
         # ─────────────────────────────────────────────────────────────────────────
     def display_portrait_window(self):
-        """Display the pc's portrait in a normal window (with decorations) that is
-        sized and positioned to cover the second monitor (if available).  
         """
-        #logging.debug("Entering display_portrait_window")
-        
-        # Check if a valid pc is selected.
-        if not self.selected_node or not self.selected_node.startswith("pc_"):
-            messagebox.showerror("Error", "No pc selected.")
-           #logging.error("No pc selected.")
+        Delegate portrait‐popping to the shared `show_portrait` helper.
+        """
+        # 1) Validate that an NPC is selected
+        node = self.selected_node
+        if not node or not node.startswith("npc_"):
+            messagebox.showerror("Error", "No NPC selected.")
             return
 
-        # Extract pc name from the node tag.
-        pc_name = self.selected_node.replace("pc_", "").replace("_", " ")
-       #logging.debug(f"Extracted pc name: {pc_name}")
-
-        pc_data = self.pcs.get(pc_name)
-        if not pc_data:
-            messagebox.showerror("Error", f"pc '{pc_name}' not found.")
-           #logging.error(f"pc '{pc_name}' not found.")
+        # 2) Look up the NPC data
+        npc_key = node.replace("npc_", "").replace("_", " ")
+        npc_data = self.npcs.get(npc_key)
+        if not npc_data:
+            messagebox.showerror("Error", f"NPC '{npc_key}' not found.")
             return
 
-        portrait_path = pc_data.get("Portrait", "")
-       #logging.debug(f"Portrait path: {portrait_path}")
+        # 3) Grab the portrait path
+        portrait_path = npc_data.get("Portrait", "")
         if not portrait_path or not os.path.exists(portrait_path):
-            messagebox.showerror("Error", "No valid portrait found for this pc.")
-           #logging.error("No valid portrait found.")
+            messagebox.showerror("Error", "No valid portrait found for this NPC.")
             return
 
-        try:
-            img = Image.open(portrait_path)
-           #logging.debug(f"Image opened successfully, original size: {img.size}")
-        except Exception as e:
-            messagebox.showerror("Error", f"Error loading portrait: {e}")
-           #logging.exception("Error loading portrait:")
-            return
-
-        # Obtain monitor information using ctypes.
-        monitors = get_monitors()
-       #logging.debug("Detected monitors: " + str(monitors))
-
-        # Choose the second monitor if available; otherwise, use the primary monitor.
-        if len(monitors) > 1:
-            target_monitor = monitors[1]
-           #logging.debug(f"Using second monitor: {target_monitor}")
-        else:
-            target_monitor = monitors[0]
-           #logging.debug("Only one monitor available; using primary monitor.")
-
-        screen_x, screen_y, screen_width, screen_height = target_monitor
-       #logging.debug(f"Target screen: ({screen_x}, {screen_y}, {screen_width}, {screen_height})")
-
-        # Scale the image if it's larger than the monitor dimensions (without upscaling).
-        img_width, img_height = img.size
-        scale = min(screen_width / img_width, screen_height / img_height, 1)
-        new_size = (int(img_width * scale), int(img_height * scale))
-       #logging.debug(f"Scaling factor: {scale}, new image size: {new_size}")
-        if scale < 1:
-            resample_method = getattr(Image, "Resampling", Image).LANCZOS
-            img = img.resize(new_size, resample_method)
-           #logging.debug("Image resized.")
-        
-        portrait_img = ImageTk.PhotoImage(img)
-        # Persist the image reference to prevent garbage collection.
-        self.node_images[f"window_{pc_name}"] = portrait_img
-
-        # Create a normal Toplevel window (with standard window decorations).
-        win = ctk.CTkToplevel(self)
-        win.title(pc_name)
-        # Set the window geometry to match the target monitor's dimensions and position.
-        win.geometry(f"{screen_width}x{screen_height}+{screen_x}+{screen_y}")
-        win.update_idletasks()
-       #logging.debug("Window created on target monitor with screen size.")
-
-        # Create a frame with a black background to hold the content.
-        content_frame = tk.Frame(win, bg="white")
-        content_frame.pack(fill="both", expand=True)
-
-        # Add a label to display the pc name.
-        name_label = tk.Label(content_frame, text=pc_name,
-                            font=("Arial", 40, "bold"),
-                            fg="white", bg="white")
-        name_label.pack(pady=20)
-       #logging.debug("pc name label created.")
-
-        # Add a label to display the portrait image.
-        image_label = tk.Label(content_frame, image=portrait_img, bg="white")
-        image_label.image = portrait_img  # persist reference
-        image_label.pack(expand=True)
-       #logging.debug("Portrait image label created.")
-        new_x = screen_x + 0 #1920
-        win.geometry(f"{screen_width}x{screen_height}+{new_x}+{screen_y}")
-       #logging.debug(f"Window moved 1920 pixels to the right: new x-coordinate is {new_x}")        
-        # Bind a click event to close the window.
-        win.bind("<Button-1>", lambda e: win.destroy())
-       #logging.debug("Window displayed; waiting for click to close.")
+        # 4) Hand off to the shared window
+        show_portrait(portrait_path, npc_key)
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: _on_mousewheel_y
