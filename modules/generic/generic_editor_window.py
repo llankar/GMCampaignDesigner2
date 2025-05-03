@@ -1,5 +1,4 @@
 import customtkinter as ctk
-import json
 import os
 import requests 
 import subprocess
@@ -13,11 +12,111 @@ from tkinter import filedialog,  messagebox
 from modules.helpers.swarmui_helper import get_available_models
 from modules.helpers.config_helper import ConfigHelper
 from modules.generic.generic_model_wrapper import GenericModelWrapper
-
-import csv
+import tkinter as tk
 import random
 
 SWARMUI_PROCESS = None
+class CustomDropdown(ctk.CTkToplevel):
+    def __init__(self, master, options, command, width=None, max_height=300, **kwargs):
+        """
+        master      – parent widget (usually the root or your main window)
+        options     – list of strings
+        command     – callback(value) when the user selects
+        width       – desired pixel width (defaults to master widget’s width)
+        max_height  – maximum pixel height
+        """
+        super().__init__(master, **kwargs)
+        self.command         = command
+        self.all_options     = list(options)
+        self.filtered_options= list(options)
+        self.max_height      = max_height
+        self.overrideredirect(True)
+
+        # ─── Search Entry ─────────────────────────────────────────────────────
+        self.search_var = ctk.StringVar()
+        self.search_var.trace_add("write", self._on_search_change)
+        self.entry = ctk.CTkEntry(self, textvariable=self.search_var,
+                                placeholder_text="Search…")
+        self.entry.pack(fill="x", padx=5, pady=(5, 0))
+        self.entry.bind("<Return>", lambda e: self._on_activate(e))
+        self.entry.focus_set()
+       
+        # ─── Listbox + Scrollbar ─────────────────────────────────────────────
+        container = tk.Frame(self)
+        container.pack(fill="both", expand=True, padx=5, pady=5)
+        self.listbox = tk.Listbox(container, exportselection=False)
+        self.scroll  = tk.Scrollbar(container, command=self.listbox.yview)
+        self.listbox.config(yscrollcommand=self.scroll.set)
+
+        # let python size the listbox for us, then enforce max_height below
+        self.listbox.pack(side="left", fill="both", expand=True)
+        self.scroll.pack(side="right", fill="y")
+
+        # ─── Now populate & size ────────────────────────────────────────────
+        self._populate_options()
+        self.update_idletasks()  # make sure all req sizes are calculated
+
+        # determine final geometry
+        final_w = width or master.winfo_width()
+        total_req_h = self.winfo_reqheight()
+        final_h = min(total_req_h, self.max_height)
+
+        # master = the widget you clicked on (you should pass its .winfo_toplevel())
+        # you still need to set x,y yourself in open_dropdown:
+        self.geometry(f"{final_w}x{final_h}")
+
+        # ensure clicks in entry/listbox don't close us
+        self.grab_set()
+
+        # ─── Event Bindings ────────────────────────────────────────────────
+        self.listbox.bind("<Double-Button-1>", self._on_activate)
+        self.listbox.bind("<Return>",         self._on_activate)
+        for seq in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
+            self.listbox.bind(seq, self._on_mousewheel)
+
+        for widget in (self, self.entry, self.listbox):
+            widget.bind("<Escape>", lambda e: self.destroy())
+        self.after_idle(lambda: self.entry.focus_set())
+
+        self.after_idle(lambda: self.bind("<FocusOut>", self._on_focus_out))
+        self.listbox.bind("<Return>", self._on_activate)
+        self.entry.bind("<Down>", lambda e: self.listbox.focus_set())
+                        
+    def _populate_options(self):
+        self.listbox.delete(0, tk.END)
+        for opt in self.filtered_options:
+            self.listbox.insert(tk.END, opt)
+        if self.filtered_options:
+            self.listbox.selection_set(0)
+
+    def _on_search_change(self, *args):
+        q = self.search_var.get().lower()
+        if q:
+            self.filtered_options = [o for o in self.all_options if q in o.lower()]
+        else:
+            self.filtered_options = list(self.all_options)
+        self._populate_options()
+        # after filter, we could also dynamically resize height if you like
+
+    def _on_activate(self, event):
+        sel = self.listbox.curselection()
+        if not sel: return
+        value = self.filtered_options[sel[0]]
+        self.command(value)
+        self.destroy()
+
+    def _on_mousewheel(self, event):
+        if event.num == 4 or event.delta > 0:
+            self.listbox.yview_scroll(-1, "units")
+        else:
+            self.listbox.yview_scroll(1,  "units")
+
+    def _on_focus_out(self, event):
+        # if the new focus is still inside our Toplevel, do nothing
+        new = self.focus_get()
+        if new and str(new).startswith(str(self)):
+            return
+        self.destroy()
 
 def load_entities_list(entity_type):
     """
@@ -84,7 +183,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         self.saved = False
         self.model_wrapper = model_wrapper
         self.field_widgets = {}
-
+        
         self.transient(master)
         self.lift()
         self.grab_set()
@@ -491,7 +590,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         combobox_list = []
         if field["name"] == "PCs":
             options_list = load_pcs_list()
-            label_text = "Add NPC"
+            label_text = "Add PC"
         elif field["name"] == "NPCs":
             options_list = load_npcs_list()
             label_text = "Add NPC"
@@ -518,14 +617,21 @@ class GenericEditorWindow(ctk.CTkToplevel):
             combobox_list.remove(entry_widget)
 
         def open_dropdown(widget, var):
-            top = widget.winfo_toplevel()
             x = widget.winfo_rootx()
             y = widget.winfo_rooty() + widget.winfo_height()
-            dropdown = self.CustomDropdown(top, options=options_list, command=lambda val: var.set(val))
-            dropdown.geometry(f"+{x}+{y}")
+            dropdown = CustomDropdown(
+                widget.winfo_toplevel(),
+                options=options_list,
+                command=lambda v: var.set(v),
+                width=widget.winfo_width(),
+                max_height=200
+            )
+            dropdown.geometry(f"{widget.winfo_width()}x{dropdown.winfo_reqheight()}+{x}+{y}")
             dropdown.lift()
-            dropdown.attributes("-topmost", True)
-            dropdown.focus_set()
+            dropdown.grab_set()
+
+            # move keyboard focus into the search box immediately
+            dropdown.entry.focus_set()
 
         def add_combobox(initial_value=None):
             row = ctk.CTkFrame(container)
@@ -534,6 +640,10 @@ class GenericEditorWindow(ctk.CTkToplevel):
             var = ctk.StringVar()
             entry = ctk.CTkEntry(row, textvariable=var, state="readonly")
             entry.pack(side="left", expand=True, fill="x")
+
+            # open the dropdown on click *or* focus for EVERY dynamic combobox:
+            entry.bind("<Button-1>",  lambda e, w=entry, v=var: open_dropdown(w, v))
+            entry.bind("<Button-1>", lambda e, w=entry, v=var: open_dropdown(w, v))
 
             if initial_value and initial_value in options_list:
                 var.set(initial_value)
@@ -813,59 +923,4 @@ class GenericEditorWindow(ctk.CTkToplevel):
         
         return dest_path
     
-    class CustomDropdown(ctk.CTkToplevel):
-        def __init__(self, master, options, command, **kwargs):
-            super().__init__(master, **kwargs)
-            self.command = command  # Callback when an option is selected.
-            self.all_options = options  # Keep the full list for filtering.
-            self.filtered_options = options.copy()  # Start with all options.
-            self.overrideredirect(True)  # Remove window decorations
-
-            # Create a StringVar for searching.
-            self.search_var = ctk.StringVar()
-            self.search_var.trace("w", self.on_search_change)
-
-            # Create a search entry at the top of the dropdown.
-            search_entry = ctk.CTkEntry(self, textvariable=self.search_var, placeholder_text="Search...")
-            search_entry.pack(fill="x", padx=5, pady=(5, 0))
-
-            # Create the scrollable frame for the options.
-            self.scrollable = ctk.CTkScrollableFrame(self)
-            self.scrollable.pack(fill="both", expand=True, padx=5, pady=5)
-
-            # Initialize a list to hold the option buttons.
-            self.option_buttons = []
-            self.populate_options()
-
-            # Bind mouse wheel events for scrolling.
-            self.scrollable.bind("<MouseWheel>", self.on_mousewheel)
-            self.scrollable.bind("<Button-4>", self.on_mousewheel)  # Linux up
-            self.scrollable.bind("<Button-5>", self.on_mousewheel)  # Linux down
-
-        def populate_options(self):
-            # Remove any existing option buttons.
-            for widget in self.scrollable.winfo_children():
-                widget.destroy()
-            self.option_buttons = []
-            # Create a button for each option in the filtered list.
-            for opt in self.filtered_options:
-                btn = ctk.CTkButton(self.scrollable, text=opt, command=lambda o=opt: self.select(o))
-                btn.pack(fill="x", padx=5, pady=2)
-                self.option_buttons.append(btn)
-
-        def on_search_change(self, *args):
-            query = self.search_var.get().lower()
-            # Filter options based on whether the query is found (case-insensitive).
-            self.filtered_options = [opt for opt in self.all_options if query in opt.lower()]
-            self.populate_options()
-
-        def on_mousewheel(self, event):
-            # Scroll the canvas based on mouse wheel events.
-            if event.num == 4 or event.delta > 0:
-                self.scrollable._parent_canvas.yview_scroll(-1, "units")
-            elif event.num == 5 or event.delta < 0:
-                self.scrollable._parent_canvas.yview_scroll(1, "units")
-
-        def select(self, option):
-            self.command(option)
-            self.destroy()
+    
