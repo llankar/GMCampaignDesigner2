@@ -4,6 +4,7 @@
       {"name": "Type", "type": "text"},
       {"name": "Description", "type": "longtext"},
       {"name": "PlayerDisplay", "type": "boolean"},
-      {"name": "Portrait", "type": "text"}
+      {"name": "Portrait", "type": "text"},
+      {"name": "Attachment", "type": "file"}
   ]
 }

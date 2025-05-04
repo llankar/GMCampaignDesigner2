@@ -549,7 +549,13 @@ def information_upload(filename):
         filename,
         as_attachment=True
     )
-
+@app.route('/uploads/clues/<path:filename>')
+def clue_upload(filename):
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'],
+        filename,
+        as_attachment=True
+    )
 @app.route('/informations/add', methods=['GET', 'POST'])
 def add_information():
     if request.method == 'POST':
