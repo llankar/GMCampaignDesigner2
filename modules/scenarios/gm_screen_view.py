@@ -37,7 +37,9 @@ class GMScreenView(ctk.CTkFrame):
             "NPCs": GenericModelWrapper("npcs"),
             "PCs": GenericModelWrapper("pcs"),
             "Factions": GenericModelWrapper("factions"),
-            "Creatures": GenericModelWrapper("Creatures")
+            "Creatures": GenericModelWrapper("Creatures"),
+            "Clues": GenericModelWrapper("clues"),
+            "Informations": GenericModelWrapper("informations")
         }
 
         self.templates = {
@@ -46,7 +48,9 @@ class GMScreenView(ctk.CTkFrame):
             "NPCs": self.load_template("npcs/npcs_template.json"),
             "PCs": self.load_template("pcs/pcs_template.json"),
             "Factions": self.load_template("factions/factions_template.json"),
-            "Creatures": self.load_template("creatures/creatures_template.json")
+            "Creatures": self.load_template("creatures/creatures_template.json"),
+            "Clues": self.load_template("clues/clues_template.json"),
+            "Informations": self.load_template("informations/informations_template.json")
         }
 
         self.tabs = {}
@@ -329,7 +333,7 @@ class GMScreenView(ctk.CTkFrame):
 
     def add_new_tab(self):
         # Added "Scenario Graph Editor" to the list of options.
-        options = ["Factions", "Places", "NPCs", "PCs", "Creatures","Scenarios", "Note Tab", "NPC Graph", "PC Graph", "Scenario Graph Editor"]
+        options = ["Factions", "Places", "NPCs", "PCs", "Creatures","Scenarios", "Clues", "Informations","Note Tab", "NPC Graph", "PC Graph", "Scenario Graph Editor"]
         popup = ctk.CTkToplevel(self)
         popup.title("Create New Tab")
         popup.geometry("300x400")
@@ -394,7 +398,7 @@ class GMScreenView(ctk.CTkFrame):
         """
         wrapper = self.wrappers[entity_type]
         items = wrapper.load_items()
-        key = "Title" if entity_type == "Scenarios" else "Name"
+        key = "Title" if (entity_type == "Scenarios" or entity_type == "Informations") else "Name"
         item = next((i for i in items if i.get(key) == name), None)
         if not item:
             messagebox.showerror("Error", f"{entity_type[:-1]} '{name}' not found.")
