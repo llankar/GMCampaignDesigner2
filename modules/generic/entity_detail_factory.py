@@ -423,6 +423,10 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
             portrait_label.entity_name = entity.get("Name", "")
             portrait_label.is_portrait = True
             content_frame.portrait_images[entity.get("Name", "")] = ctk_image
+            portrait_label.bind(
+                "<Button-1>",
+                lambda e, p=portrait_path, n=portrait_label.entity_name: show_portrait(p, n)
+            )
             portrait_label.pack(pady=10)
             content_frame.portrait_label = portrait_label
         except Exception as e:
