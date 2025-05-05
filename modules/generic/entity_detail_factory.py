@@ -25,7 +25,7 @@ wrappers = {
 def insert_text(parent, header, content):
     label = ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold"))
     label.pack(anchor="w", padx=10)
-    box = ctk.CTkTextbox(parent, wrap="word", height=80)
+    box = ctk.CTkTextbox(parent, wrap="word", height=40)
     # Ensure content is a plain string.
     if isinstance(content, dict):
         content = content.get("text", "")
@@ -46,11 +46,27 @@ def insert_text(parent, header, content):
 
 def insert_longtext(parent, header, content):
     ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
-    formatted_text = format_longtext(content, max_length=2000)
-    box = CTkTextbox(parent, wrap="word", height=120)
+
+    # Convert to string and format
+    if isinstance(content, dict):
+        text = content.get("text", "")
+    else:
+        text = str(content)
+    formatted_text = format_longtext(text, max_length=2000)
+
+    box = CTkTextbox(parent, wrap="word")
+    box.insert = box._textbox.insert
     box.insert("1.0", formatted_text)
     box.configure(state="disabled")
     box.pack(fill="x", padx=10, pady=5)
+
+    # Resize after layout
+    def update_height():
+        lines = int(box._textbox.count("1.0", "end", "displaylines")[0])
+        clamped = max(2, min(lines, 20))
+        box.configure(height=clamped)
+
+    box.after(100, update_height)
 
 def insert_links(parent, header, items, linked_type, open_entity_callback):
     ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")).pack(anchor="w", padx=10)
