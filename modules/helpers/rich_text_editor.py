@@ -37,17 +37,28 @@ class RichTextEditor(ctk.CTkFrame):
         numbered_button = MinimalCTkButton(toolbar, text="Numbered List", command=self.toggle_numbered_list)
         numbered_button.pack(side="left", padx=5)
 
-        self.text_widget = tk.Text(self, wrap="word", font=("Helvetica", 12))
-        self.text_widget.pack(expand=True, fill="both", padx=5, pady=5)
-        self.text_widget.insert("1.0", initial_text)
+        # === Create the text widget ===
+        self.text_widget = tk.Text(self, wrap="word", font=("Helvetica", 12), height=4)
+        self.text_widget.pack(fill="x", padx=5, pady=5)
 
+        # Insert any initial text (if any)
+        self.text_widget.insert("1.0", initial_text)
+        self.text_widget.bind("<KeyRelease>", self.update_text_height)
+        # --- Resize dynamically on content ---
+        self.update_text_height()  # Initial height
+        # Run once on init and bind to typing
+        
         self.text_widget.tag_configure("bold", font=("Helvetica", 12, "bold"))
         self.text_widget.tag_configure("italic", font=("Helvetica", 12, "italic"))
         self.text_widget.tag_configure("underline", font=("Helvetica", 12, "underline"))
         self.text_widget.tag_configure("left", justify="left")
         self.text_widget.tag_configure("center", justify="center")
         self.text_widget.tag_configure("right", justify="right")
-
+    
+    def update_text_height(self, event=None):
+        lines = int(self.text_widget.count("1.0", "end", "displaylines")[0])
+        clamped = max(1, min(lines, 100))
+        self.text_widget.configure(height=clamped)
     # ----------------------
     # Formatting Functions
     # ----------------------
@@ -212,7 +223,7 @@ class RichTextEditor(ctk.CTkFrame):
         self.text_widget.delete("1.0", "end")
         text = data.get("text", "") if isinstance(data, dict) else str(data)
         self.text_widget.insert("1.0", text)
-
+        
         # 2) Apply each formatting run, converting numeric offsets to Tk indices
         formatting = data.get("formatting", {}) if isinstance(data, dict) else {}
         for tag, runs in formatting.items():
@@ -228,7 +239,7 @@ class RichTextEditor(ctk.CTkFrame):
                     idx1 = start
                     idx2 = end
                 self.text_widget.tag_add(tag, idx1, idx2)
-
+        self.after(100, self.update_text_height)
     def get_text(self):
         """For backward compatibility, return plain text."""
         return self.text_widget.get("1.0", "end-1c")

@@ -4,7 +4,7 @@ import requests
 import subprocess
 import time
 import shutil
-from modules.helpers import rich_text_editor, text_helpers
+from modules.helpers import text_helpers
 from modules.helpers.rich_text_editor import RichTextEditor
 from modules.helpers.window_helper import position_window_at_top
 from PIL import Image, ImageTk
@@ -231,7 +231,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         req_width = self.winfo_reqwidth()
         req_height = self.winfo_reqheight()
         # Enforce a minimum size if needed.
-        min_width, min_height = 1000, 880
+        min_width, min_height = 1000, 1050
         if req_width < min_width:
             req_width = min_width
         if req_height < min_height:
@@ -307,13 +307,14 @@ class GenericEditorWindow(ctk.CTkToplevel):
         editor.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
 
         if isinstance(value, dict):
-            editor.load_text_data(value)
+            editor.load_text_data(value)         
         else:
             if not isinstance(value, str):
                 value = str(value)
             editor.text_widget.insert("1.0", value)
 
-        editor.pack(fill="both", expand=True, pady=5)
+        editor.pack(fill="x", pady=5)
+        
         self.field_widgets[field["name"]] = editor
 
         # For scenario Summary fields, add a button to generate a description from CSV
