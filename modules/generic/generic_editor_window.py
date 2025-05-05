@@ -188,8 +188,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
         self.lift()
         self.grab_set()
         self.focus_force()
-
-        self.title("Create Item" if creation_mode else "Edit Item")
+        self.bind("<Escape>", lambda e: self.destroy())
+        item_type = self.model_wrapper.entity_type.capitalize()[:-1]  # "npcs" → "Npc"
+        self.title(f"Create {item_type}" if creation_mode else f"Edit {item_type}")
 
         self.main_frame = ctk.CTkFrame(self)
         self.main_frame.pack(fill="both", expand=True)

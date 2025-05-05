@@ -15,12 +15,11 @@ from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.generic.generic_list_selection_view import GenericListSelectionView
-from modules.npcs import npc_opener
-from customtkinter import CTkImage
 from modules.generic.entity_detail_factory import create_entity_detail_frame, open_entity_window
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.text_helpers import format_longtext
 from modules.ui.image_viewer import show_portrait
+from modules.helpers.template_loader import load_template
 
 # Global constants
 PORTRAIT_FOLDER = "assets/portraits"
@@ -592,39 +591,40 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         if not node_tag:
             return
         if node_tag.startswith("scenario_"):
-            scenario_template = load_template("scenarios")
-            if self.scenario:
-                GenericEditorWindow(None, self.scenario, scenario_template, self.scenario_wrapper, True)
+            entity_type = "scenarios"
+            entity_name = node_tag.replace("scenario_", "").replace("_", " ")
+            entity = self.scenario
+            wrapper=self.scenario_wrapper
         elif node_tag.startswith("npc_"):
             entity_type = "NPCs"
             entity_name = node_tag.replace("npc_", "").replace("_", " ")
             entity = self.npcs.get(entity_name)
-            template_path = "npcs/npcs_template.json"
+            wrapper=self.npc_wrapper
         elif node_tag.startswith("creature_"):
             entity_type = "Creatures"
             entity_name = node_tag.replace("creature_", "").replace("_", " ")
             entity = self.creatures.get(entity_name)
-            template_path = "creatures/creatures_template.json"
+            wrapper=self.creature_wrapper
+            
         elif node_tag.startswith("place_"):
             entity_type = "Places"
             entity_name = node_tag.replace("place_", "").replace("_", " ")
             entity = self.places.get(entity_name)
-            template_path = "places/places_template.json"
+            wrapper=self.place_wrapper
         elif node_tag.startswith("faction_"):
             entity_type = "Factions"
             entity_name = node_tag.replace("faction_", "").replace("_", " ")
             entity = self.factions.get(entity_name)
-            template_path = "factions/factions_template.json"
+            wrapper=self.faction_wrapper
         else:
             return
 
         if not entity:
             messagebox.showerror("Error", f"{entity_type[:-1]} '{entity_name}' not found.")
             return
-        win = tk.Toplevel(self)
-        win.title(entity_name)
-        detail_frame = create_entity_detail_frame(entity_type, entity, master=win, open_entity_callback=open_entity_window)
-        detail_frame.pack(fill="both", expand=True)
+
+        template = load_template(entity_type.lower())
+        GenericEditorWindow(None, entity, template,wrapper)
 
     def on_right_click(self, event):
         x = self.canvas.canvasx(event.x)
@@ -740,7 +740,16 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     node_tag = f"place_{node['name'].replace(' ', '_')}"
                 self.node_positions[node_tag] = (node["x"], node["y"])
             self.draw_graph()
-
+        # Try to find the scenario node and set self.scenario
+        scenario_node = next((n for n in self.graph["nodes"] if n["type"] == "scenario"), None)
+        if scenario_node:
+            title = scenario_node["name"]
+            all_scenarios = self.scenario_wrapper.load_items()
+            matched = next((s for s in all_scenarios if s.get("Title") == title), None)
+            if matched:
+                self.scenario = matched
+            else:
+                print(f"[WARNING] Scenario titled '{title}' not found in data.")
     def get_state(self):
         return {
             "graph": self.graph,
