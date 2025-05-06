@@ -23,7 +23,7 @@ from modules.helpers.template_loader import load_template
 
 # Global constants
 PORTRAIT_FOLDER = "assets/portraits"
-MAX_PORTRAIT_SIZE = (64, 64)
+MAX_PORTRAIT_SIZE = (128, 128)
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 #logging.basicConfig(level=logging.DEBUG)
@@ -50,9 +50,10 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.npc_wrapper = npc_wrapper
         self.creature_wrapper = creature_wrapper
         self.place_wrapper = place_wrapper
+        self.node_holder_images = {}    # ← keep PhotoImage refs here
         self.node_bboxes = {}
         self.node_images = {}  # Prevent garbage collection of PhotoImage objects
-
+        self.overlay_images={}
         # Preload NPC, Creature and Place data for quick lookup.
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
         self.creatures = {creature["Name"]: creature for creature in self.creature_wrapper.load_items()}
@@ -73,7 +74,10 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.original_positions = {}
 
         self.init_toolbar()
+        postit_path = "assets/images/post-it.png"
+        pin_path = "assets/images/thumbtack.png"
 
+      
         # Create canvas with scrollbars.
         self.canvas_frame = ctk.CTkFrame(self)
         self.canvas_frame.pack(fill="both", expand=True)
@@ -84,7 +88,13 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.canvas.grid(row=0, column=0, sticky="nsew")
         VIRTUAL_WIDTH = 5000
         VIRTUAL_HEIGHT = 5000
-       
+        if os.path.exists(postit_path):
+            img = Image.open(postit_path).convert("RGBA")
+            self.postit_base = img
+
+        if os.path.exists(pin_path):
+            pin_img = Image.open(pin_path)
+            self.pin_image = ImageTk.PhotoImage(pin_img.resize((32, 32), Image.Resampling.LANCZOS), master=self.canvas)
         # Load and display the background image at the top-left
         background_path = "assets/images/corkboard_bg.png"
        
@@ -459,21 +469,11 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             return None, (0, 0)
     
     def draw_nodes(self):
-        node_png_path = os.path.join("assets", "scenario_node.png")
+        postit_path = os.path.join("assets", "post-it.png")
         scale = self.canvas_scale
 
-        MAX_OVERLAY_WIDTH = int(300 * scale)
-        MAX_OVERLAY_HEIGHT = int(250 * scale)
-        NPC_TEXT_WRAP = int(120 * scale)
         GAP = int(5 * scale)
         PAD = int(10 * scale)
-
-        default_colors = {
-            "scenario": "darkolivegreen",
-            "npc": "darkslateblue",
-            "place": "sienna",
-            "creature": "darkorange"
-        }
 
         if not hasattr(self, "node_bboxes"):
             self.node_bboxes = {}
@@ -491,136 +491,150 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         for node in self.graph["nodes"]:
             node_type = node["type"]
             node_name = node["name"]
-            x, y = node["x"], node["y"]
-            color = node.get("color", default_colors.get(node_type, "darkslategray"))
             node_tag = f"{node_type}_{node_name.replace(' ', '_')}"
-
-            # Determine content
+            x, y = node["x"], node["y"]
+            data = node.get("data", {})
             title_text = node_name
+
+            # Determine body text
             if node_type == "scenario":
-                summary = node["data"].get("Summary", "")
-                secret = node["data"].get("Secret", "")
-                body_text = f"{summary}\n Secrets: {secret}" if secret else summary
-                wrap_width = MAX_OVERLAY_WIDTH - 2 * PAD
+                summary = data.get("Summary", "")
+                secret = data.get("Secret", "")
+                body_text = f"{summary}\nSecrets: {secret}" if secret else summary
             elif node_type == "place":
-                description = node["data"].get("Description", "")
-                secret = node["data"].get("Secret", "")
-                body_text = f"{description}\nSecret: {secret}" if secret else description
-                wrap_width = MAX_OVERLAY_WIDTH - 2 * PAD
+                desc = data.get("Description", "")
+                secret = data.get("Secret", "")
+                body_text = f"{desc}\nSecret: {secret}" if secret else desc
             elif node_type == "creature":
-                stats = node["data"].get("Stats", {})
+                stats = data.get("Stats", {})
                 stats_text = stats.get("text", "No Stats") if isinstance(stats, dict) else str(stats)
-                weakness = node["data"].get("Weakness", "")
+                weakness = data.get("Weakness", "")
                 body_text = f"Stats: {stats_text}\nWeakness: {weakness}" if weakness else f"Stats: {stats_text}"
-                wrap_width = NPC_TEXT_WRAP
             else:
-                traits = node["data"].get("Traits", "")
-                secret = node["data"].get("Secret", "")
+                traits = data.get("Traits", "")
+                secret = data.get("Secret", "")
                 body_text = f"{traits}\nSecret: {secret}" if secret else traits
-                wrap_width = NPC_TEXT_WRAP
-
-            # Font scaling
-            title_font = tkFont.Font(family="Arial", size=max(1, int(10 * scale)), weight="bold")
-            body_font = tkFont.Font(family="Arial", size=max(1, int(9 * scale)))
-
-            title_h = measure_text_height(title_text, title_font, wrap_width)
-            body_h = measure_text_height(body_text, body_font, wrap_width)
-            gap_between = int(4 * scale)
-            total_text_height = title_h + gap_between + body_h
 
             # Portrait
             portrait = None
             p_w = p_h = 0
             if node_type in ["npc", "creature"]:
-                portrait, (p_w, p_h) = self.load_portrait_scaled(node["data"].get("Portrait", ""), node_tag, scale)
+                portrait, (p_w, p_h) = self.load_portrait_scaled(data.get("Portrait", ""), node_tag, scale)
 
-            if node_type in ["npc", "creature"] and portrait and p_w > 0:
-                desired_width = p_w + GAP + wrap_width + 2 * PAD
-                desired_height = max(p_h, total_text_height) + 2 * PAD
+            # === WRAP WIDTH + FONT MEASUREMENT ===
+            desired_chars_per_line = 40
+            avg_char_width = 7
+            wrap_width = max(90, int(desired_chars_per_line * avg_char_width))
+            if portrait and p_w > 0:
+                wrap_width = max(wrap_width, 160)
+
+            title_font = tkFont.Font(family="Arial", size=max(1, int(10 * scale)), weight="bold")
+            body_font = tkFont.Font(family="Arial", size=max(1, int(9 * scale)))
+
+            title_h = measure_text_height(title_text, title_font, wrap_width)
+            body_h = measure_text_height(body_text, body_font, wrap_width)
+            gap = int(4 * scale)
+            text_h = title_h + gap + body_h
+
+            # === NODE SIZE for PORTRAIT ON TOP ===
+            # width must fit whichever is wider: portrait or wrapped text
+            content_width  = max(p_w, wrap_width)
+            # height is portrait height + gap + total text height
+            content_height = p_h + (GAP if portrait else 0) + text_h
+
+            min_w = content_width + 2 * PAD
+            min_h = content_height + 2 * PAD
+
+            # === BACKGROUND IMAGE: fit post-it ≥ content, keep ratio ===
+            if self.postit_base:
+                orig_w, orig_h = self.postit_base.size
+
+                # scale so the post-it is at least as big as our minimum box
+                scale_factor = max(min_w / orig_w,
+                                min_h / orig_h)
+                node_width  = int(orig_w * scale_factor)
+                node_height  = int(orig_h * scale_factor)
+
+                # resize with preserved aspect ratio
+                scaled = self.postit_base.resize(
+                    (node_width, node_height),
+                    Image.Resampling.LANCZOS
+                )
+
+                # stash & draw
+                photo = ImageTk.PhotoImage(scaled, master=self.canvas)
+                self.node_holder_images[node_tag] = photo
+                self.canvas.create_image(
+                    x, y,
+                    image=photo,
+                    anchor="center",
+                    tags=("node", node_tag)
+                )
+
             else:
-                desired_width = wrap_width + 2 * PAD
-                desired_height = total_text_height + 2 * PAD
+                # fallback to a plain box if no post-it image
+                node_width, node_height = min_w, min_h
+                rect = self.canvas.create_rectangle(
+                    x - node_width/2, y - node_height/2,
+                    x + node_width/2, y + node_height/2,
+                    fill=node.get("color","white"),
+                    outline="black",
+                    tags=("node", node_tag)
+                )
+                self.node_rectangles[node_tag] = rect
+            # === PIN ===
+            if hasattr(self, "pin_image") and self.pin_image:
+                self.canvas.create_image(x, y - node_height // 2 - 10, image=self.pin_image, anchor="n", tags=("node", node_tag))
 
-            try:
-                overlay_img = Image.open(node_png_path)
-                overlay_img = overlay_img.resize((int(desired_width), int(desired_height)), Image.Resampling.LANCZOS)
-            except Exception as e:
-                print(f"Error loading overlay: {e}")
-                overlay_img = None
+            # compute top‐left corner of the node box
+            left = x - node_width/2
+            top  = y - node_height/2
 
-            left = x - (desired_width / 2)
-            top = y - (desired_height / 2)
-            right = x + (desired_width / 2)
-            bottom = y + (desired_height / 2)
-
-            rect_id = self.canvas.create_rectangle(
-                left, top, right, bottom,
-                fill=color, outline="", width=0,
-                tags=("node", node_tag)
-            )
-            self.node_rectangles[node_tag] = rect_id
-
-            if overlay_img:
-                overlay_photo = ImageTk.PhotoImage(overlay_img, master=self.canvas)
-                if not hasattr(self, "node_holder_images"):
-                    self.node_holder_images = {}
-                self.node_holder_images[node_tag] = overlay_photo
-                self.canvas.create_image(x, y, image=overlay_photo, tags=("node", node_tag))
-
-            if node_type in ["npc", "creature"] and portrait and p_w > 0:
-                portrait_x = left + PAD + (p_w / 2)
-                portrait_y = y
+            # 1) Portrait at top center
+            if portrait and p_w > 0:
+                portrait_x = x
+                # down from the top + PAD, half the portrait-height
+                portrait_y = top + PAD + p_h/2 +10
                 self.canvas.create_image(
                     portrait_x, portrait_y,
                     image=portrait,
                     anchor="center",
                     tags=("node", node_tag)
                 )
-                text_area_x = left + PAD + p_w + GAP
-                text_area_width = desired_width - (p_w + GAP + 2 * PAD)
-                content_top = y - (total_text_height / 2)
-                self.canvas.create_text(
-                    text_area_x + text_area_width / 2,
-                    content_top + title_h / 2,
-                    text=title_text,
-                    font=title_font,
-                    fill="white",
-                    width=text_area_width,
-                    anchor="center",
-                    tags=("node", node_tag)
-                )
-                self.canvas.create_text(
-                    text_area_x + text_area_width / 2,
-                    content_top + title_h + gap_between + body_h / 2,
-                    text=body_text,
-                    font=body_font,
-                    fill="white",
-                    width=text_area_width,
-                    anchor="center",
-                    tags=("node", node_tag)
-                )
+                # start text below the portrait + GAP
+                text_top = portrait_y + p_h/2 + GAP
             else:
-                content_top = y - (total_text_height / 2)
-                self.canvas.create_text(
-                    x, content_top + title_h / 2,
-                    text=title_text,
-                    font=title_font,
-                    fill="white",
-                    width=wrap_width,
-                    anchor="center",
-                    tags=("node", node_tag)
-                )
-                self.canvas.create_text(
-                    x, content_top + title_h + gap_between + body_h / 2,
-                    text=body_text,
-                    font=body_font,
-                    fill="white",
-                    width=wrap_width,
-                    anchor="center",
-                    tags=("node", node_tag)
-                )
+                # if no portrait, start text at top + PAD
+                text_top = top + PAD
 
-            self.node_bboxes[node_tag] = (left, top, right, bottom)
+            # 2) Title text
+            self.canvas.create_text(
+                x, text_top + title_h/2+10,
+                text=title_text,
+                font=title_font,
+                fill="black",
+                width=wrap_width,
+                anchor="center",
+                tags=("node", node_tag)
+            )
+
+            # 3) Body text just below the title
+            self.canvas.create_text(
+                x, text_top + title_h + (gap) + body_h/2+10,
+                text=body_text,
+                font=body_font,
+                fill="black",
+                width=wrap_width,
+                anchor="center",
+                tags=("node", node_tag)
+            )
+
+            self.node_bboxes[node_tag] = (
+                x - node_width / 2,
+                y - node_height / 2,
+                x + node_width / 2,
+                y + node_height / 2
+            )
 
     def draw_links(self):
         for link in self.graph["links"]:
@@ -664,22 +678,40 @@ class ScenarioGraphEditor(ctk.CTkFrame):
     def on_drag(self, event):
         if not self.selected_node or not self.drag_start:
             return
+
+        # 1) canvas coords & delta
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
         dx = x - self.drag_start[0]
         dy = y - self.drag_start[1]
+        if dx == 0 and dy == 0:
+            return
+
+        # 2) move only the selected items
         for item_id in self.selected_items:
             self.canvas.move(item_id, dx, dy)
-        old_x, old_y = self.node_positions.get(self.selected_node, (0, 0))
+
+        # 3) update position in memory
+        old_x, old_y = self.node_positions[self.selected_node]
         new_pos = (old_x + dx, old_y + dy)
         self.node_positions[self.selected_node] = new_pos
-        self.drag_start = (x, y)
         for node in self.graph["nodes"]:
-            node_tag = f"{node['type']}_{node['name'].replace(' ', '_')}"
-            if node_tag == self.selected_node:
+            tag = f"{node['type']}_{node['name'].replace(' ', '_')}"
+            if tag == self.selected_node:
                 node["x"], node["y"] = new_pos
                 break
-        self.draw_graph()
+
+        # 4) redraw just the links
+        self.canvas.delete("link")
+        self.draw_links()                   # draws + tag_lower("link") :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
+
+        # 5) **re-stack** them above the background
+        self.canvas.tag_lower("background")
+        self.canvas.tag_raise("link", "background")
+        # (optional) self.canvas.tag_raise("node")
+
+        # 6) reset drag origin
+        self.drag_start = (x, y)
 
     def on_double_click(self, event):
         x = self.canvas.canvasx(event.x)
