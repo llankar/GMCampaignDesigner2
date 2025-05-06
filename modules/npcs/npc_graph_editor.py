@@ -50,6 +50,10 @@ class NPCGraphEditor(ctk.CTkFrame):
             "links": [],
             "shapes": []  # 
         }
+        self.original_positions = {}  # Backup for original NPC positions
+        self.original_shape_positions = {}  # Backup for shapes
+        self.canvas_scale = 1.0
+        self.zoom_factor = 1.1
         self.shapes = {}  # this is for managing shape canvas objects
         self.shape_counter = 0  # if not already added
 
@@ -93,9 +97,48 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.canvas.bind("<Button-5>", self._on_mousewheel_y)
         self.canvas.bind("<Shift-Button-4>", self._on_mousewheel_x)
         self.canvas.bind("<Shift-Button-5>", self._on_mousewheel_x)
+        self.canvas.bind("<Control-MouseWheel>", self._on_zoom)  # Windows
+        self.canvas.bind("<Control-Button-4>", self._on_zoom)    # Linux scroll up
+        self.canvas.bind("<Control-Button-5>", self._on_zoom)    # Linux scroll down
     # Bind double-click on any NPC element to open the editor window
         self.canvas.bind("<Double-Button-1>", self.open_npc_editor)
 
+    def _on_zoom(self, event):
+        if event.delta > 0 or event.num == 4:
+            scale = self.zoom_factor
+        else:
+            scale = 1 / self.zoom_factor
+
+        new_scale = self.canvas_scale * scale
+        new_scale = max(0.5, min(new_scale, 2.5))
+        scale_change = new_scale / self.canvas_scale
+        self.canvas_scale = new_scale
+
+        # Use mouse as zoom anchor
+        anchor_x = self.canvas.canvasx(event.x)
+        anchor_y = self.canvas.canvasy(event.y)
+
+        # Update positions
+        for tag, (x, y) in self.node_positions.items():
+            dx = x - anchor_x
+            dy = y - anchor_y
+            new_x = anchor_x + dx * scale_change
+            new_y = anchor_y + dy * scale_change
+            self.node_positions[tag] = (new_x, new_y)
+            for node in self.graph["nodes"]:
+                node_tag = f"npc_{node['npc_name'].replace(' ', '_')}"
+                if node_tag == tag:
+                    node["x"], node["y"] = new_x, new_y
+                    break
+
+        # Also apply to shapes
+        for tag, shape in self.shapes.items():
+            dx = shape["x"] - anchor_x
+            dy = shape["y"] - anchor_y
+            shape["x"] = anchor_x + dx * scale_change
+            shape["y"] = anchor_y + dy * scale_change
+
+        self.draw_graph()
  # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: open_npc_editor
     # Opens the Generic Editor Window for the clicked NPC.
@@ -198,7 +241,27 @@ class NPCGraphEditor(ctk.CTkFrame):
         # 🆕 Add Shape Buttons
         ctk.CTkButton(toolbar, text="Add Rectangle", command=lambda: self.add_shape("rectangle")).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Add Oval", command=lambda: self.add_shape("oval")).pack(side="left", padx=5)
-        
+        ctk.CTkButton(toolbar, text="Reset Zoom", command=self.reset_zoom).pack(side="left", padx=5)
+
+    def reset_zoom(self):
+        self.canvas_scale = 1.0
+
+        # Restore NPC node positions
+        for node in self.graph["nodes"]:
+            tag = f"npc_{node['npc_name'].replace(' ', '_')}"
+            if tag in self.original_positions:
+                x, y = self.original_positions[tag]
+                node["x"], node["y"] = x, y
+                self.node_positions[tag] = (x, y)
+
+        # Restore shape positions
+        for shape in self.graph.get("shapes", []):
+            tag = shape["tag"]
+            if tag in self.original_shape_positions:
+                x, y = self.original_shape_positions[tag]
+                shape["x"], shape["y"] = x, y
+
+        self.draw_graph()
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: start_link_creation
@@ -596,11 +659,12 @@ class NPCGraphEditor(ctk.CTkFrame):
     # and calculates/stores their bounding boxes.
     # ─────────────────────────────────────────────────────────────────────────
     def draw_nodes(self):
-        NODE_WIDTH = 150
-        TEXT_LINE_HEIGHT = 20
-        TEXT_PADDING = 10
+        scale = self.canvas_scale
 
-        # Path to your node PNG file
+        NODE_WIDTH = int(150 * scale)
+        TEXT_LINE_HEIGHT = int(20 * scale)
+        TEXT_PADDING = int(10 * scale)
+
         node_holder_path = os.path.join("assets", "npc_node.png")
 
         for node in self.graph["nodes"]:
@@ -612,7 +676,7 @@ class NPCGraphEditor(ctk.CTkFrame):
             npc_data = self.npcs.get(npc_name, {})
             role = npc_data.get("Role", "")
 
-            # Handle Factions to avoid showing Python list/dict with braces
+            # Factions formatting
             faction_value = npc_data.get("Factions", "")
             if isinstance(faction_value, list):
                 faction_text = ", ".join(str(f) for f in faction_value)
@@ -621,12 +685,10 @@ class NPCGraphEditor(ctk.CTkFrame):
             else:
                 faction_text = str(faction_value) if faction_value else ""
 
-            # Build text lines: first is name, then role, then faction.
             lines = [npc_name, role, faction_text]
-            # Filter out any empty strings
             lines = [line for line in lines if line.strip()]
 
-            # Handle portrait if available
+            # Portrait handling
             portrait_path = npc_data.get("Portrait", "")
             has_portrait = portrait_path and os.path.exists(portrait_path)
             portrait_height = 0
@@ -635,7 +697,7 @@ class NPCGraphEditor(ctk.CTkFrame):
                 img = Image.open(portrait_path)
                 orig_w, orig_h = img.size
                 max_portrait_width = NODE_WIDTH - 4
-                max_portrait_height = 80
+                max_portrait_height = int(80 * scale)
                 ratio = min(max_portrait_width / orig_w, max_portrait_height / orig_h)
                 portrait_width = int(orig_w * ratio)
                 portrait_height = int(orig_h * ratio)
@@ -643,10 +705,10 @@ class NPCGraphEditor(ctk.CTkFrame):
                 photo = ImageTk.PhotoImage(img)
                 self.node_images[npc_name] = photo
 
-            # Calculate node height based on portrait and text
-            node_height = portrait_height + (len(lines) * TEXT_LINE_HEIGHT) + TEXT_PADDING + 20
+            # Calculate height
+            node_height = portrait_height + (len(lines) * TEXT_LINE_HEIGHT) + TEXT_PADDING + int(20 * scale)
 
-            # Draw a colored rectangle as the background
+            # Background rectangle
             node_color = node.get("color", "#1D3572")
             rect_id = self.canvas.create_rectangle(
                 x - NODE_WIDTH // 2, y - node_height // 2,
@@ -658,7 +720,7 @@ class NPCGraphEditor(ctk.CTkFrame):
             )
             self.node_rectangles[tag] = rect_id
 
-            # Draw the PNG overlay if it exists
+            # Node overlay image
             if os.path.exists(node_holder_path):
                 holder_img = Image.open(node_holder_path)
                 holder_img = holder_img.resize((NODE_WIDTH, node_height), Image.Resampling.LANCZOS)
@@ -668,29 +730,26 @@ class NPCGraphEditor(ctk.CTkFrame):
                 self.node_holder_images[npc_name] = holder_photo
                 self.canvas.create_image(x, y, image=holder_photo, tags=(tag,))
 
-            # Store bounding box for link calculations
+            # Store bounding box
             left = x - (NODE_WIDTH // 2)
             top = y - (node_height // 2)
             right = x + (NODE_WIDTH // 2)
             bottom = y + (node_height // 2)
             self.node_bboxes[tag] = (left, top, right, bottom)
 
-            # Determine vertical starting point
+            # Draw portrait
             current_y = top + TEXT_PADDING
             if has_portrait:
                 portrait_center_y = current_y + (portrait_height // 2)
-                self.canvas.create_image(x, portrait_center_y,
-                                        image=self.node_images[npc_name],
-                                        tags=(tag,))
+                self.canvas.create_image(x, portrait_center_y, image=self.node_images[npc_name], tags=(tag,))
                 current_y += portrait_height + TEXT_PADDING
 
-            # Draw each line of text separately.
-            # The first line (name) is bold; others are normal.
+            # Draw text lines
             for i, line in enumerate(lines):
                 if i == 0:
-                    font = ("Arial", 9, "bold")
+                    font = ("Arial", max(1, int(9 * scale)), "bold")
                 else:
-                    font = ("Arial", 9)
+                    font = ("Arial", max(1, int(9 * scale)))
                 self.canvas.create_text(
                     x, current_y + i * TEXT_LINE_HEIGHT,
                     text=line,
@@ -728,11 +787,16 @@ class NPCGraphEditor(ctk.CTkFrame):
             arrow_ids.append(self.draw_arrowhead(x2, y2, x1, y1, tag2))
 
         mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
-        text_id = self.canvas.create_text(mid_x, mid_y,
-                                        text=link["text"],
-                                        fill="white",
-                                        font=("Arial", 10, "bold"),
-                                        tags=("link_text",))
+        scale = self.canvas_scale
+        font_size = max(1, int(10 * scale))
+
+        text_id = self.canvas.create_text(
+            mid_x, mid_y,
+            text=link["text"],
+            fill="white",
+            font=("Arial", font_size, "bold"),
+            tags=("link_text",)
+        )
 
         # Store Canvas IDs clearly linked by npc pair
         key = (link["npc_name1"], link["npc_name2"])
@@ -833,7 +897,15 @@ class NPCGraphEditor(ctk.CTkFrame):
                 except (IndexError, ValueError):
                     pass
             self.shape_counter = max_counter + 1
+            self.original_positions = {
+                f"npc_{node['npc_name'].replace(' ', '_')}": (node["x"], node["y"])
+                for node in self.graph["nodes"]
+            }
 
+            self.original_shape_positions = {
+                shape["tag"]: (shape["x"], shape["y"])
+                for shape in self.graph.get("shapes", [])
+            }
             self.draw_graph()
 
 
@@ -1029,16 +1101,30 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.draw_shape(shape)
 
     def draw_shape(self, shape):
-        x, y, w, h = shape["x"], shape["y"], shape["w"], shape["h"]
-        left = x - w//2
-        top = y - h//2
-        right = x + w//2
-        bottom = y + h//2
+        scale = self.canvas_scale
+        x, y = shape["x"], shape["y"]
+        w = int(shape["w"] * scale)
+        h = int(shape["h"] * scale)
+
+        left = x - w // 2
+        top = y - h // 2
+        right = x + w // 2
+        bottom = y + h // 2
         tag = shape["tag"]
+
         if shape["type"] == "rectangle":
-            shape_id = self.canvas.create_rectangle(left, top, right, bottom, fill=shape["color"], tags=(tag, "shape"))
-        else:
-            shape_id = self.canvas.create_oval(left, top, right, bottom, fill=shape["color"], tags=(tag, "shape"))
+            shape_id = self.canvas.create_rectangle(
+                left, top, right, bottom,
+                fill=shape["color"],
+                tags=(tag, "shape")
+            )
+        else:  # oval
+            shape_id = self.canvas.create_oval(
+                left, top, right, bottom,
+                fill=shape["color"],
+                tags=(tag, "shape")
+            )
+
         shape["canvas_id"] = shape_id
 
     def draw_all_shapes(self):
