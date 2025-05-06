@@ -61,7 +61,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.scenario = None
         self.canvas_scale = 1.0
         self.zoom_factor = 1.1
-
+       
+        
         # Graph structure.
         self.graph = {"nodes": [], "links": []}
         self.node_positions = {}   # Maps node_tag -> (x, y)
@@ -81,6 +82,30 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.v_scrollbar = ttk.Scrollbar(self.canvas_frame, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(xscrollcommand=self.h_scrollbar.set, yscrollcommand=self.v_scrollbar.set)
         self.canvas.grid(row=0, column=0, sticky="nsew")
+        VIRTUAL_WIDTH = 5000
+        VIRTUAL_HEIGHT = 5000
+       
+        # Load and display the background image at the top-left
+        background_path = "assets/images/corkboard_bg.png"
+       
+        if os.path.exists(background_path):
+            self.background_image = Image.open(background_path)
+
+            # Resize the PIL image (e.g. 2x scale)
+            zoom_factor = 2
+            w=1920
+            h=1080
+            self.background_image = self.background_image.resize((w * zoom_factor, h * zoom_factor), Image.Resampling.LANCZOS)
+
+            self.background_photo = ImageTk.PhotoImage(self.background_image, master=self.canvas)
+            self.background_id = self.canvas.create_image(
+                0, 0,
+                image=self.background_photo,
+                anchor="center",  # or "nw" if you want top-left alignment
+                tags="background"
+            )
+            self.canvas.tag_lower("background")
+           
         self.h_scrollbar.grid(row=1, column=0, sticky="ew")
         self.v_scrollbar.grid(row=0, column=1, sticky="ns")
         self.canvas_frame.grid_rowconfigure(0, weight=1)
@@ -365,9 +390,27 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 })
 
         self.draw_graph()
+        self.canvas.update_idletasks()
+
+        # Center view on scenario node (or graph content center)
+        if scenario_tag in self.node_positions:
+            x, y = self.node_positions[scenario_tag]
+
+            # Get current scrollregion
+            scroll_x0, scroll_y0, scroll_x1, scroll_y1 = self.canvas.bbox("all")
+            canvas_width = self.canvas.winfo_width()
+            canvas_height = self.canvas.winfo_height()
+
+            # Calculate scroll fractions (clamped between 0.0 and 1.0)
+            scroll_x_frac = max(0.0, min(1.0, (x - canvas_width / 2 - scroll_x0) / (scroll_x1 - scroll_x0)))
+            scroll_y_frac = max(0.0, min(1.0, (y - canvas_height / 2 - scroll_y0) / (scroll_y1 - scroll_y0)))
+
+            self.canvas.xview_moveto(scroll_x_frac)
+            self.canvas.yview_moveto(scroll_y_frac)
 
     def draw_graph(self):
-        self.canvas.delete("all")
+        self.canvas.delete("node")
+        self.canvas.delete("link")
         self.node_rectangles.clear()
         self.draw_nodes()
         self.draw_links()
@@ -379,6 +422,12 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 bbox[0] - padding, bbox[1] - padding,
                 bbox[2] + padding, bbox[3] + padding
             ))
+        # Ensure proper layering
+        if hasattr(self, "background_id"):
+            self.canvas.tag_lower(self.background_id)
+
+        self.canvas.tag_raise("link")  # Put links behind everything
+        self.canvas.tag_raise("node")  # Bring nodes to the top
 
     def load_portrait(self, portrait_path, node_tag):
         if not portrait_path or not os.path.exists(portrait_path):
@@ -704,12 +753,16 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             self.show_node_menu(x, y)
 
     def _on_mousewheel_y(self, event):
+        if self.canvas.yview() == (0.0, 1.0):  # No scrolling available
+            return
         if event.num == 4 or event.delta > 0:
             self.canvas.yview_scroll(-1, "units")
         elif event.num == 5 or event.delta < 0:
             self.canvas.yview_scroll(1, "units")
 
     def _on_mousewheel_x(self, event):
+        if self.canvas.xview() == (0.0, 1.0):  # No scrolling available
+            return
         if event.num == 4 or event.delta > 0:
             self.canvas.xview_scroll(-1, "units")
         elif event.num == 5 or event.delta < 0:
@@ -812,6 +865,28 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         for node in self.graph["nodes"]:
             tag = f"{node['type']}_{node['name'].replace(' ', '_')}"
             self.original_positions[tag] = (node["x"], node["y"])
+        
+        # --- Scroll to center on the scenario node ---
+        self.canvas.update_idletasks()
+        scenario_node = next((n for n in self.graph["nodes"] if n["type"] == "scenario"), None)
+        if scenario_node:
+            tag = f"scenario_{scenario_node['name'].replace(' ', '_')}"
+            if tag in self.node_positions:
+                x, y = self.node_positions[tag]
+
+                # Get canvas scroll region and view dimensions
+                scroll_x0, scroll_y0, scroll_x1, scroll_y1 = self.canvas.bbox("all")
+                canvas_width = self.canvas.winfo_width()
+                canvas_height = self.canvas.winfo_height()
+
+                # Compute scroll fractions
+                scroll_x_frac = max(0.0, min(1.0, (x - canvas_width / 2 - scroll_x0) / (scroll_x1 - scroll_x0)))
+                scroll_y_frac = max(0.0, min(1.0, (y - canvas_height / 2 - scroll_y0) / (scroll_y1 - scroll_y0)))
+
+                self.canvas.xview_moveto(scroll_x_frac)
+                self.canvas.yview_moveto(scroll_y_frac)
+        
+        
     def get_state(self):
         return {
             "graph": self.graph,
