@@ -66,6 +66,9 @@ class MainWindow(ctk.CTk):
         self.create_exit_button()
         self.load_model_config()
         self.init_wrappers()
+        self.current_gm_view = None
+        root = self.winfo_toplevel()
+        root.bind_all("<Control-f>", self._on_ctrl_f)
 
     # ---------------------------
     # Setup and Layout Methods
@@ -396,6 +399,7 @@ class MainWindow(ctk.CTk):
 
     def open_faction_graph_editor(self):
         self._graph_type = 'faction'
+        self.current_gm_view = None
         self.clear_current_content()
         self.banner_toggle_btn.configure(state="normal")
         parent = self.get_content_container()
@@ -560,6 +564,8 @@ class MainWindow(ctk.CTk):
             detail_container.grid(row=0, column=0, sticky="nsew")
             view = GMScreenView(detail_container, scenario_item=selected)
             view.pack(fill="both", expand=True)
+            # track the active GM-screen view for our Ctrl+F handler
+            self.current_gm_view = view
 
         # 6) Insert the generic list‐selection view
         list_selection = GenericListSelectionView(
@@ -570,7 +576,7 @@ class MainWindow(ctk.CTk):
             on_select_callback=on_scenario_select
         )
         list_selection.pack(fill="both", expand=True)
-
+        self.current_gm_view = None
         # 7) Lock banner and configure grid weights
         self.banner_visible = True
         self.banner_toggle_btn.configure(text="▲")
@@ -587,6 +593,7 @@ class MainWindow(ctk.CTk):
 
     def open_npc_graph_editor(self):
         self._graph_type = 'npc'
+        self.current_gm_view = None
         self.clear_current_content()
         self.banner_toggle_btn.configure(state="normal")
         parent = self.get_content_container()
@@ -607,6 +614,7 @@ class MainWindow(ctk.CTk):
 
     def open_pc_graph_editor(self):
         self._graph_type = 'pc'
+        self.current_gm_view = None
         self.clear_current_content()
         self.banner_toggle_btn.configure(state="normal")
         parent = self.get_content_container()
@@ -626,6 +634,7 @@ class MainWindow(ctk.CTk):
 
     def open_scenario_graph_editor(self):
         self._graph_type = 'scenario'
+        self.current_gm_view = None
         self.clear_current_content()
         self.banner_toggle_btn.configure(state="normal")
         parent = self.get_content_container()
@@ -1206,6 +1215,12 @@ class MainWindow(ctk.CTk):
         else:
             print("No NPC records were updated. Either all have portraits or no matches were found.")
         conn.close()
+
+    def _on_ctrl_f(self, event=None):
+        """Global Ctrl+F binding: only opens search when GM screen is active."""
+        if self.current_gm_view:
+            self.current_gm_view.open_global_search()
+         # otherwise ignore silently
 
 if __name__ == "__main__":
     app = MainWindow()

@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import tkinter as tk
 import os
 import json
 from tkinter import filedialog, messagebox
@@ -99,12 +100,109 @@ class GMScreenView(ctk.CTkFrame):
         # Example usage: create the first tab from the scenario_item
         scenario_name = scenario_item.get("Title", "Unnamed Scenario")
         frame = create_entity_detail_frame("Scenarios", scenario_item, master=self.content_area, open_entity_callback=self.open_entity_tab)
+        
+        # Make sure the frame can get focus so the binding works
+        self.focus_set()
         self.add_tab(
             scenario_name,
             frame,
             content_factory=lambda master: create_entity_detail_frame("Scenarios", scenario_item, master=master, open_entity_callback=self.open_entity_tab)
         )
+        
+    
+    def open_global_search(self, event=None):
+        # Create popup
+        popup = ctk.CTkToplevel(self)
+        popup.title("Search Entities")
+        popup.geometry("400x300")
+        popup.transient(self.winfo_toplevel())
+        popup.grab_set()
 
+        # 1) Search entry
+        entry = ctk.CTkEntry(popup, placeholder_text="Type to search…")
+        entry.pack(fill="x", padx=10, pady=(10, 5))
+        # focus once window is up
+        popup.after(10, lambda: entry.focus_force())
+
+        # 2) Theme colors
+        raw_bg    = entry.cget("fg_color")
+        raw_txt   = entry.cget("text_color")
+        appearance = ctk.get_appearance_mode()    # "Dark" or "Light"
+        idx       = 1 if appearance == "Dark" else 0
+        bg_list   = raw_bg  if isinstance(raw_bg, (list, tuple))  else raw_bg.split()
+        txt_list  = raw_txt if isinstance(raw_txt,(list, tuple)) else raw_txt.split()
+        bg_color    = bg_list[idx]
+        text_color  = txt_list[idx]
+        sel_bg      = "#3a3a3a" if appearance == "Dark" else "#d9d9d9"
+
+        # 3) Listbox for results
+        listbox = tk.Listbox(
+            popup,
+            activestyle="none",
+            bg=bg_color,
+            fg=text_color,
+            highlightbackground=bg_color,
+            selectbackground=sel_bg,
+            selectforeground=text_color
+        )
+        listbox.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+
+        # 4) Navigation: ↓ from entry dives into list
+        def dive_into_list(evt):
+            if listbox.size() > 0:
+                listbox.selection_clear(0, "end")
+                listbox.selection_set(0)
+                listbox.activate(0)
+            listbox.focus_set()
+            return "break"
+        entry.bind("<Down>", dive_into_list)
+
+        # 5) Prepare storage for (type, name)
+        search_map = []
+
+        # 6) Populate & auto-select first
+        def populate(initial=False, query=""):
+            listbox.delete(0, "end")
+            search_map.clear()
+            for entity_type, wrapper in self.wrappers.items():
+                items = wrapper.load_items()
+                key = "Title" if entity_type in ("Scenarios", "Informations") else "Name"
+                for item in items:
+                    name = item.get(key, "")
+                    if initial or query in name.lower():
+                        display = f"{entity_type[:-1]}: {name}"
+                        listbox.insert("end", display)
+                        search_map.append((entity_type, name))
+            # auto-select first if present
+            if listbox.size() > 0:
+                listbox.selection_clear(0, "end")
+                listbox.selection_set(0)
+                listbox.activate(0)
+        # initial fill
+        populate(initial=True)
+
+        # 7) Filter on typing
+        def on_search(evt):
+            q = entry.get().strip().lower()
+            populate(initial=False, query=q)
+        entry.bind("<KeyRelease>", on_search)
+
+        # 8) Selection handler
+        def on_select(evt=None):
+            if not search_map:
+                return
+            idx = listbox.curselection()[0]
+            entity_type, name = search_map[idx]
+            self.open_entity_tab(entity_type, name)
+            popup.destroy()
+
+        # 9) Bind Enter to select from either widget
+        entry.bind("<Return>", lambda e: on_select())
+        listbox.bind("<Return>", lambda e: on_select())
+
+        # 10) Double-click also selects
+        listbox.bind("<Double-Button-1>", on_select)
+        
     def load_template(self, filename):
         base_path = os.path.dirname(__file__)
         template_path = os.path.join(base_path, "..", filename)
@@ -580,4 +678,9 @@ class GMScreenView(ctk.CTkFrame):
                 current_x += req_width + margin
                 if req_height > max_row_height:
                     max_row_height = req_height
-
+    def destroy(self):
+        # remove our global Ctrl+F handler
+        root = self.winfo_toplevel()
+        root.unbind_all("<Control-F>")
+        # now destroy as usual
+        super().destroy()
