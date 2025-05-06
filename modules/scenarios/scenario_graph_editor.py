@@ -62,7 +62,12 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.scenario = None
         self.canvas_scale = 1.0
         self.zoom_factor = 1.1
-       
+        self.type_icons = {
+            "npc":      self.load_icon("assets/npc_icon.png",      32, 0.6),
+            "place":    self.load_icon("assets/places_icon.png",    32, 0.6),
+            "scenario": self.load_icon("assets/gm_screen_icon.png", 32, 0.6),
+            "creature": self.load_icon("assets/creature_icon.png", 32, 0.6)
+        }
         
         # Graph structure.
         self.graph = {"nodes": [], "links": []}
@@ -76,8 +81,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.init_toolbar()
         postit_path = "assets/images/post-it.png"
         pin_path = "assets/images/thumbtack.png"
-
-      
+             
         # Create canvas with scrollbars.
         self.canvas_frame = ctk.CTkFrame(self)
         self.canvas_frame.pack(fill="both", expand=True)
@@ -469,19 +473,24 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             return None, (0, 0)
     
     def draw_nodes(self):
-        postit_path = os.path.join("assets", "post-it.png")
+
         scale = self.canvas_scale
 
         GAP = int(5 * scale)
         PAD = int(10 * scale)
 
+        # Prepare node_bboxes
         if not hasattr(self, "node_bboxes"):
             self.node_bboxes = {}
         else:
             self.node_bboxes.clear()
 
+        # Helper to measure wrapped text height
         def measure_text_height(text, font_obj, wrap_width):
-            temp_id = self.canvas.create_text(0, 0, text=text, font=font_obj, width=wrap_width, anchor="nw")
+            temp_id = self.canvas.create_text(0, 0, text=text,
+                                            font=font_obj,
+                                            width=wrap_width,
+                                            anchor="nw")
             bbox = self.canvas.bbox(temp_id)
             self.canvas.delete(temp_id)
             if bbox:
@@ -499,61 +508,66 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             # Determine body text
             if node_type == "scenario":
                 summary = data.get("Summary", "")
-                secret = data.get("Secret", "")
+                secret  = data.get("Secret", "")
                 body_text = f"{summary}\nSecrets: {secret}" if secret else summary
             elif node_type == "place":
-                desc = data.get("Description", "")
+                desc   = data.get("Description", "")
                 secret = data.get("Secret", "")
                 body_text = f"{desc}\nSecret: {secret}" if secret else desc
             elif node_type == "creature":
-                stats = data.get("Stats", {})
+                stats     = data.get("Stats", {})
                 stats_text = stats.get("text", "No Stats") if isinstance(stats, dict) else str(stats)
-                weakness = data.get("Weakness", "")
+                weakness  = data.get("Weakness", "")
                 body_text = f"Stats: {stats_text}\nWeakness: {weakness}" if weakness else f"Stats: {stats_text}"
             else:
                 traits = data.get("Traits", "")
                 secret = data.get("Secret", "")
                 body_text = f"{traits}\nSecret: {secret}" if secret else traits
 
-            # Portrait
+            # Load portrait if applicable
             portrait = None
             p_w = p_h = 0
             if node_type in ["npc", "creature"]:
-                portrait, (p_w, p_h) = self.load_portrait_scaled(data.get("Portrait", ""), node_tag, scale)
+                portrait, (p_w, p_h) = self.load_portrait_scaled(
+                    data.get("Portrait", ""),
+                    node_tag,
+                    scale
+                )
 
-            # === WRAP WIDTH + FONT MEASUREMENT ===
+            # Compute wrap width
             desired_chars_per_line = 40
             avg_char_width = 7
             wrap_width = max(90, int(desired_chars_per_line * avg_char_width))
             if portrait and p_w > 0:
                 wrap_width = max(wrap_width, 160)
 
-            title_font = tkFont.Font(family="Arial", size=max(1, int(10 * scale)), weight="bold")
-            body_font = tkFont.Font(family="Arial", size=max(1, int(9 * scale)))
+            # Fonts
+            title_font = tkFont.Font(family="Arial",
+                                    size=max(1, int(10 * scale)),
+                                    weight="bold")
+            body_font = tkFont.Font(family="Arial",
+                                    size=max(1, int(9 * scale)))
 
+            # Measure text heights
             title_h = measure_text_height(title_text, title_font, wrap_width)
-            body_h = measure_text_height(body_text, body_font, wrap_width)
-            gap = int(4 * scale)
-            text_h = title_h + gap + body_h
+            body_h  = measure_text_height(body_text,  body_font,  wrap_width)
+            gap     = int(4 * scale)
+            text_h  = title_h + gap + body_h
 
-            # === NODE SIZE for PORTRAIT ON TOP ===
-            # width must fit whichever is wider: portrait or wrapped text
+            # Node content size
             content_width  = max(p_w, wrap_width)
-            # height is portrait height + gap + total text height
             content_height = p_h + (GAP if portrait else 0) + text_h
-
             min_w = content_width + 2 * PAD
             min_h = content_height + 2 * PAD
 
-            # === BACKGROUND IMAGE: fit post-it ≥ content, keep ratio ===
+            # === BACKGROUND IMAGE: Post-it ===
             if self.postit_base:
                 orig_w, orig_h = self.postit_base.size
 
                 # scale so the post-it is at least as big as our minimum box
-                scale_factor = max(min_w / orig_w,
-                                min_h / orig_h)
+                scale_factor = max(min_w / orig_w, min_h / orig_h)
                 node_width  = int(orig_w * scale_factor)
-                node_height  = int(orig_h * scale_factor)
+                node_height = int(orig_h * scale_factor)
 
                 # resize with preserved aspect ratio
                 scaled = self.postit_base.resize(
@@ -561,9 +575,11 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     Image.Resampling.LANCZOS
                 )
 
-                # stash & draw
+                # create PhotoImage and stash it
                 photo = ImageTk.PhotoImage(scaled, master=self.canvas)
                 self.node_holder_images[node_tag] = photo
+
+                # draw the background post-it
                 self.canvas.create_image(
                     x, y,
                     image=photo,
@@ -571,8 +587,25 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     tags=("node", node_tag)
                 )
 
+                # ── NEW: draw the semitransparent watermark icon ──
+                icon = self.type_icons.get(node_type)
+                if icon:
+                    # compute top-left corner of the post-it
+                    left = x - node_width  / 2
+                    top  = y - node_height / 2
+                    # margin inside the pad
+                    margin = int(8 * scale)
+                    icon_x = left + margin + icon.width()//2
+                    icon_y = top  + margin + icon.height()//2
+                    self.canvas.create_image(
+                        icon_x, icon_y,
+                        image=icon,
+                        anchor="center",
+                        tags=("node", node_tag)
+                    )
+
             else:
-                # fallback to a plain box if no post-it image
+                # fallback to plain rectangle
                 node_width, node_height = min_w, min_h
                 rect = self.canvas.create_rectangle(
                     x - node_width/2, y - node_height/2,
@@ -582,34 +615,39 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                     tags=("node", node_tag)
                 )
                 self.node_rectangles[node_tag] = rect
-            # === PIN ===
-            if hasattr(self, "pin_image") and self.pin_image:
-                self.canvas.create_image(x, y - node_height // 2 - 10, image=self.pin_image, anchor="n", tags=("node", node_tag))
 
-            # compute top‐left corner of the node box
+            # === PIN (unchanged) ===
+            if hasattr(self, "pin_image") and self.pin_image:
+                self.canvas.create_image(
+                    x,
+                    y - node_height // 2 - 10,
+                    image=self.pin_image,
+                    anchor="n",
+                    tags=("node", node_tag)
+                )
+
+            # Compute content start coordinates
             left = x - node_width/2
             top  = y - node_height/2
 
             # 1) Portrait at top center
             if portrait and p_w > 0:
                 portrait_x = x
-                # down from the top + PAD, half the portrait-height
-                portrait_y = top + PAD + p_h/2 +10
+                portrait_y = top + PAD + p_h/2 + 10
                 self.canvas.create_image(
                     portrait_x, portrait_y,
                     image=portrait,
                     anchor="center",
                     tags=("node", node_tag)
                 )
-                # start text below the portrait + GAP
                 text_top = portrait_y + p_h/2 + GAP
             else:
-                # if no portrait, start text at top + PAD
                 text_top = top + PAD
 
             # 2) Title text
             self.canvas.create_text(
-                x, text_top + title_h/2+10,
+                x,
+                text_top + title_h/2 + 10,
                 text=title_text,
                 font=title_font,
                 fill="black",
@@ -618,9 +656,10 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 tags=("node", node_tag)
             )
 
-            # 3) Body text just below the title
+            # 3) Body text
             self.canvas.create_text(
-                x, text_top + title_h + (gap) + body_h/2+10,
+                x,
+                text_top + title_h + gap + body_h/2 + 10,
                 text=body_text,
                 font=body_font,
                 fill="black",
@@ -629,11 +668,12 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 tags=("node", node_tag)
             )
 
+            # Record bounding box for hit-testing
             self.node_bboxes[node_tag] = (
                 x - node_width / 2,
-                y - node_height / 2,
+                y - node_height/2,
                 x + node_width / 2,
-                y + node_height / 2
+                y + node_height/2
             )
 
     def draw_links(self):
@@ -929,3 +969,31 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.graph = state.get("graph", {})
         self.node_positions = state.get("node_positions", {})
         self.draw_graph()
+    def load_icon(self,path, size, opacity):
+        img = Image.open(path).convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
+        alpha = img.split()[3].point(lambda p: int(p * opacity))
+        img.putalpha(alpha)
+        return ImageTk.PhotoImage(img, master=self._canvas)
+        
+def make_watermarked_postit(base_path, icon_path, size=(200,200), icon_size=32, margin=8, opacity=80):
+        # 1) load base
+        base = Image.open(base_path).convert("RGBA")
+        base = base.resize(size, Image.ANTIALIAS)
+
+        # 2) load & prep icon
+        icon = Image.open(icon_path).convert("RGBA")
+        icon = icon.resize((icon_size, icon_size), Image.ANTIALIAS)
+        # tint down alpha
+        alpha = icon.split()[3].point(lambda p: p * (opacity/100))
+        icon.putalpha(alpha)
+
+        # 3) compute paste coords (bottom-right corner)
+        bx, by = base.size
+        ix, iy = icon.size
+        pos = (bx - ix - margin, by - iy - margin)
+
+        # 4) composite and convert to PhotoImage
+        base.paste(icon, pos, icon)
+        return ImageTk.PhotoImage(base)
+
+    
