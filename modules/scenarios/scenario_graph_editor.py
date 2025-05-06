@@ -59,6 +59,8 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.places = {pl["Name"]: pl for pl in self.place_wrapper.load_items()}
 
         self.scenario = None
+        self.canvas_scale = 1.0
+        self.zoom_factor = 1.1
 
         # Graph structure.
         self.graph = {"nodes": [], "links": []}
@@ -67,6 +69,7 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.selected_node = None
         self.selected_items = []
         self.drag_start = None
+        self.original_positions = {}
 
         self.init_toolbar()
 
@@ -82,25 +85,78 @@ class ScenarioGraphEditor(ctk.CTkFrame):
         self.v_scrollbar.grid(row=0, column=1, sticky="ns")
         self.canvas_frame.grid_rowconfigure(0, weight=1)
         self.canvas_frame.grid_columnconfigure(0, weight=1)
-
+       
         # Global mouse events.
         self.canvas.bind("<Button-1>", self.start_drag)
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<Button-3>", self.on_right_click)
         self.canvas.bind("<Double-Button-1>", self.on_double_click)
         self.canvas.bind("<MouseWheel>", self._on_mousewheel_y)
-        self.canvas.bind("<Shift-MouseWheel>", self._on_mousewheel_x)
-        self.canvas.bind("<Button-4>", self._on_mousewheel_y)
-        self.canvas.bind("<Button-5>", self._on_mousewheel_y)
+        self.canvas.bind("<Control-MouseWheel>", self._on_zoom)  # Windows
+        self.canvas.bind("<Control-Button-4>", self._on_zoom)    # Linux scroll up
+        self.canvas.bind("<Control-Button-5>", self._on_zoom)    # Linux scroll down
         self.canvas.bind("<Shift-Button-4>", self._on_mousewheel_x)
         self.canvas.bind("<Shift-Button-5>", self._on_mousewheel_x)
+    
+    def _on_zoom(self, event):
+        if event.delta > 0 or event.num == 4:
+            scale = self.zoom_factor
+        else:
+            scale = 1 / self.zoom_factor
 
+        new_scale = self.canvas_scale * scale
+        new_scale = max(0.5, min(new_scale, 2.5))  # Clamp zoom to reasonable range
+        scale_change = new_scale / self.canvas_scale
+        self.canvas_scale = new_scale
+
+        # Use mouse pointer as anchor for better UX
+        anchor_x = self.canvas.canvasx(event.x)
+        anchor_y = self.canvas.canvasy(event.y)
+
+        # Rescale all node positions
+        for tag, (x, y) in self.node_positions.items():
+            dx = x - anchor_x
+            dy = y - anchor_y
+            new_x = anchor_x + dx * scale_change
+            new_y = anchor_y + dy * scale_change
+            self.node_positions[tag] = (new_x, new_y)
+
+            # Update x/y in the node data as well
+            for node in self.graph["nodes"]:
+                node_tag = f"{node['type']}_{node['name'].replace(' ', '_')}"
+                if node_tag == tag:
+                    node["x"], node["y"] = new_x, new_y
+                    break
+
+        self.draw_graph()
+
+        # Optional: zoom font sizes, overlays, etc., here if you want to support them visually
+    def reset_zoom(self):
+        self.canvas_scale = 1.0
+
+        # Restore original node positions
+        for node in self.graph["nodes"]:
+            tag = f"{node['type']}_{node['name'].replace(' ', '_')}"
+            if tag in self.original_positions:
+                x, y = self.original_positions[tag]
+                node["x"] = x
+                node["y"] = y
+
+        # Rebuild node_positions from graph data
+        self.node_positions = {
+            f"{node['type']}_{node['name'].replace(' ', '_')}": (node["x"], node["y"])
+            for node in self.graph["nodes"]
+        }
+
+        self.draw_graph()
+    
     def init_toolbar(self):
         toolbar = ctk.CTkFrame(self)
         toolbar.pack(fill="x", padx=5, pady=5)
         ctk.CTkButton(toolbar, text="Select Scenario", command=self.select_scenario).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Save Graph", command=self.save_graph).pack(side="left", padx=5)
         ctk.CTkButton(toolbar, text="Load Graph", command=self.load_graph).pack(side="left", padx=5)
+        ctk.CTkButton(toolbar, text="Reset Zoom", command=self.reset_zoom).pack(side="left", padx=5)
 
     
     def select_scenario(self):
@@ -338,14 +394,30 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             print(f"Error loading portrait for {node_tag}: {e}")
             return None, (0, 0)
 
+    def load_portrait_scaled(self, portrait_path, node_tag, scale=1.0):
+        if not portrait_path or not os.path.exists(portrait_path):
+            return None, (0, 0)
+        try:
+            img = Image.open(portrait_path)
+            size = int(MAX_PORTRAIT_SIZE[0] * scale), int(MAX_PORTRAIT_SIZE[1] * scale)
+            resample_method = getattr(Image, "Resampling", Image).LANCZOS
+            img.thumbnail(size, resample_method)
+            portrait_image = ImageTk.PhotoImage(img, master=self.canvas)
+            self.node_images[node_tag] = portrait_image
+            return portrait_image, img.size
+        except Exception as e:
+            print(f"Error loading portrait for {node_tag}: {e}")
+            return None, (0, 0)
+    
     def draw_nodes(self):
         node_png_path = os.path.join("assets", "scenario_node.png")
-        # For scenario/place nodes, use a larger wrap width; NPC nodes use a smaller wrap.
-        MAX_OVERLAY_WIDTH = 300
-        MAX_OVERLAY_HEIGHT = 250
-        NPC_TEXT_WRAP = 120
-        GAP = 5
-        PAD = 10
+        scale = self.canvas_scale
+
+        MAX_OVERLAY_WIDTH = int(300 * scale)
+        MAX_OVERLAY_HEIGHT = int(250 * scale)
+        NPC_TEXT_WRAP = int(120 * scale)
+        GAP = int(5 * scale)
+        PAD = int(10 * scale)
 
         default_colors = {
             "scenario": "darkolivegreen",
@@ -374,60 +446,47 @@ class ScenarioGraphEditor(ctk.CTkFrame):
             color = node.get("color", default_colors.get(node_type, "darkslategray"))
             node_tag = f"{node_type}_{node_name.replace(' ', '_')}"
 
-            # Title is always the node name. For body text, include secret info where applicable.
+            # Determine content
             title_text = node_name
             if node_type == "scenario":
                 summary = node["data"].get("Summary", "")
                 secret = node["data"].get("Secret", "")
-                if secret:
-                    body_text = f"{summary}\n Secrets: {secret}"
-                else:
-                    body_text = summary
+                body_text = f"{summary}\n Secrets: {secret}" if secret else summary
                 wrap_width = MAX_OVERLAY_WIDTH - 2 * PAD
             elif node_type == "place":
                 description = node["data"].get("Description", "")
                 secret = node["data"].get("Secret", "")
-                if secret:
-                    body_text = f"{description}\nSecret: {secret}"
-                else:
-                    body_text = description
+                body_text = f"{description}\nSecret: {secret}" if secret else description
                 wrap_width = MAX_OVERLAY_WIDTH - 2 * PAD
             elif node_type == "creature":
-                stats = node["data"].get("Stats", "")
-                if isinstance(stats, dict):
-                    stats_text = stats.get("text", "No Stats")
-                else:
-                    stats_text = str(stats)
+                stats = node["data"].get("Stats", {})
+                stats_text = stats.get("text", "No Stats") if isinstance(stats, dict) else str(stats)
                 weakness = node["data"].get("Weakness", "")
-                if weakness:
-                    body_text = f"Stats: {stats_text}\nWeakness: {weakness}"
-                else:
-                    body_text = f"Stats: {stats_text}"
+                body_text = f"Stats: {stats_text}\nWeakness: {weakness}" if weakness else f"Stats: {stats_text}"
                 wrap_width = NPC_TEXT_WRAP
-            else:  # NPC nodes (and similar)
+            else:
                 traits = node["data"].get("Traits", "")
                 secret = node["data"].get("Secret", "")
-                if secret:
-                    body_text = f"{traits}\nSecret: {secret}"
-                else:
-                    body_text = traits
+                body_text = f"{traits}\nSecret: {secret}" if secret else traits
                 wrap_width = NPC_TEXT_WRAP
 
-            title_font = tkFont.Font(family="Arial", size=10, weight="bold")
-            body_font = tkFont.Font(family="Arial", size=9)
+            # Font scaling
+            title_font = tkFont.Font(family="Arial", size=max(1, int(10 * scale)), weight="bold")
+            body_font = tkFont.Font(family="Arial", size=max(1, int(9 * scale)))
 
             title_h = measure_text_height(title_text, title_font, wrap_width)
             body_h = measure_text_height(body_text, body_font, wrap_width)
-            gap_between = 4
+            gap_between = int(4 * scale)
             total_text_height = title_h + gap_between + body_h
 
+            # Portrait
             portrait = None
             p_w = p_h = 0
             if node_type in ["npc", "creature"]:
-                portrait, (p_w, p_h) = self.load_portrait(node["data"].get("Portrait", ""), node_tag)
+                portrait, (p_w, p_h) = self.load_portrait_scaled(node["data"].get("Portrait", ""), node_tag, scale)
 
             if node_type in ["npc", "creature"] and portrait and p_w > 0:
-                desired_width = p_w + GAP + NPC_TEXT_WRAP + 2 * PAD
+                desired_width = p_w + GAP + wrap_width + 2 * PAD
                 desired_height = max(p_h, total_text_height) + 2 * PAD
             else:
                 desired_width = wrap_width + 2 * PAD
@@ -750,6 +809,9 @@ class ScenarioGraphEditor(ctk.CTkFrame):
                 self.scenario = matched
             else:
                 print(f"[WARNING] Scenario titled '{title}' not found in data.")
+        for node in self.graph["nodes"]:
+            tag = f"{node['type']}_{node['name'].replace(' ', '_')}"
+            self.original_positions[tag] = (node["x"], node["y"])
     def get_state(self):
         return {
             "graph": self.graph,
