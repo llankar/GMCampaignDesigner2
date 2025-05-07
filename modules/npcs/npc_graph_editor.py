@@ -7,13 +7,14 @@ from modules.generic.generic_list_selection_view import GenericListSelectionView
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 import math
+from PIL import Image, ImageTk
 #import logging
 
 from modules.npcs import npc_opener
 import tkinter as tk  # standard tkinter
 from PIL import Image, ImageTk
-import os, ctypes
-from ctypes import wintypes
+import os
+import textwrap
 from modules.ui.image_viewer import show_portrait
 
 ctk.set_appearance_mode("Dark")
@@ -43,7 +44,8 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.npc_wrapper = npc_wrapper
         self.faction_wrapper = faction_wrapper
         self.npcs = {npc["Name"]: npc for npc in self.npc_wrapper.load_items()}
-        
+        self.canvas_scale = 1.0
+        self.zoom_factor = 1.1
         # Graph structure to hold nodes and links
         self.graph = {
             "nodes": [],
@@ -52,18 +54,18 @@ class NPCGraphEditor(ctk.CTkFrame):
         }
         self.original_positions = {}  # Backup for original NPC positions
         self.original_shape_positions = {}  # Backup for shapes
-        self.canvas_scale = 1.0
-        self.zoom_factor = 1.1
+       
         self.shapes = {}  # this is for managing shape canvas objects
         self.shape_counter = 0  # if not already added
 
+       
         # Dictionaries for node data
         self.node_positions = {}  # Current (x, y) positions of nodes
         self.node_images = {}     # Loaded images for node portraits
         self.node_rectangles = {} # Canvas rectangle IDs (for color changes)
         self.node_bboxes = {}     # Bounding boxes for nodes (used for arrow offsets)
         self.shape_counter = 0  # For unique shape tags
-
+        self.node_holder_images = {}  # PhotoImage refs for post-it & overlay images
         # Variables for selection and dragging
         self.selected_node = None
         self.selected_items = []  # All canvas items belonging to the selected node
@@ -84,6 +86,26 @@ class NPCGraphEditor(ctk.CTkFrame):
         self.canvas_frame.grid_rowconfigure(0, weight=1)
         self.canvas_frame.grid_columnconfigure(0, weight=1)
         
+        # — ADDED: Post-it style assets
+        postit_path = os.path.join("assets", "images", "post-it.png")
+        pin_path    = os.path.join("assets", "images", "thumbtack.png")
+        bg_path     = os.path.join("assets", "images", "corkboard_bg.png")
+
+        if os.path.exists(postit_path):
+            self.postit_base = Image.open(postit_path).convert("RGBA")
+        else:
+            self.postit_base = None
+
+        if os.path.exists(pin_path):
+            pin_img = Image.open(pin_path)
+            size = int(32 * self.canvas_scale)
+            pin_img = pin_img.resize((size, size), Image.Resampling.LANCZOS)
+            self.pin_image = ImageTk.PhotoImage(pin_img, master=self.canvas)
+        else:
+            self.pin_image = None
+
+        # draw corkboard background once the canvas exists
+        self.canvas.bind("<Configure>", self._on_canvas_configure)
         # Bind mouse events for dragging and context menus
         self.canvas.bind("<Button-1>", self.start_drag)
         self.canvas.bind("<B1-Motion>", self.on_drag)
@@ -391,16 +413,27 @@ class NPCGraphEditor(ctk.CTkFrame):
     # ─────────────────────────────────────────────────────────────────────────
     def place_pending_npc(self, event):
         npc_name = self.pending_npc["Name"]
-        tag = f"npc_{npc_name.replace(' ', '_')}"
-        x = self.canvas.canvasx(event.x)
-        y = self.canvas.canvasy(event.y)
+       
+        x0 = self.canvas.canvasx(event.x)
+        y0 = self.canvas.canvasy(event.y)
+        # new: derive a unique tag
+        base = f"npc_{npc_name.replace(' ', '_')}"
+        tag = base
+        i = 1
+        # bump the suffix until it’s unused
+        while tag in self.node_positions:
+            tag = f"{base}_{i}"
+            i += 1
+
         self.graph["nodes"].append({
             "npc_name": npc_name,
-            "x": x,
-            "y": y,
-            "color": "#1D3572"
+            "tag":       tag,      # store it on the node
+            "x":         x0,
+            "y":         y0,
+            # … any other fields …
         })
-        self.node_positions[tag] = (x, y)
+        self.node_positions[tag] = (x0, y0)
+      
         self.pending_npc = None
         self.canvas.unbind("<Button-1>")
         self.canvas.bind("<Button-1>", self.start_drag)
@@ -411,87 +444,84 @@ class NPCGraphEditor(ctk.CTkFrame):
     # Opens a faction selection dialog and adds all NPCs from the selected faction.
     # ─────────────────────────────────────────────────────────────────────────
     def add_faction(self):
-        # Flatten factions from all NPCs.
-        all_factions = []
-        for npc in self.npcs.values():
-            faction_value = npc.get("Factions")
-            if not faction_value:
-                continue
-            if isinstance(faction_value, list):
-                all_factions.extend(faction_value)
-            else:
-                all_factions.append(faction_value)
-        factions = sorted(set(all_factions))
-        if not factions:
-            messagebox.showerror("Error", "No factions found in NPC data.")
-            return
+        # ── 1) Show a modal dialog to pick a faction ─────────────────────
+        popup = ctk.CTkToplevel(self)
+        popup.title("Select Faction")
+        popup.geometry("400x300")
+        popup.transient(self.winfo_toplevel())
+        popup.grab_set()
+        popup.focus_force()
 
-        # Wrap each faction string in a dictionary with a "Name" field.
-        items = [{"Name": f} for f in factions]
-        # Define a simple template for factions.
-        template = {"fields": [{"name": "Name", "type": "text"}]}
-        
-        # Create a dummy model wrapper that returns our wrapped faction items.
-        class DummyModelWrapper:
-            def load_items(self):
-                return items
-        dummy_wrapper = DummyModelWrapper()
+        # We only need to display the “Name” field of each faction
+        faction_template = {"fields": [{"name": "Name", "type": "text"}]}
 
-        # Define the callback.
-        def on_faction_selected(faction_name):
-            # Close the selection popup immediately.
-            if selection_popup.winfo_exists():
-                selection_popup.destroy()
-            # Build a list of NPCs that have the selected faction.
+        # ── 2) Callback when the user double-clicks a faction ────────────
+        def on_faction_selected(entity_type, faction_name):
+            # close the dialog
+            if popup.winfo_exists():
+                popup.destroy()
+
+            # find all NPCs that list this faction
             faction_npcs = []
             for npc in self.npcs.values():
-                faction_value = npc.get("Factions")
-                if not faction_value:
-                    continue
-                if isinstance(faction_value, list):
-                    if faction_name in faction_value:
-                        faction_npcs.append(npc)
-                else:
-                    if faction_value == faction_name:
-                        faction_npcs.append(npc)
+                fv = npc.get("Factions")
+                if isinstance(fv, list) and faction_name in fv:
+                    faction_npcs.append(npc)
+                elif fv == faction_name:
+                    faction_npcs.append(npc)
+
             if not faction_npcs:
-                messagebox.showinfo("No NPCs", f"No NPCs found for faction '{faction_name}'.")
+                messagebox.showinfo("No NPCs", f"No NPCs found in faction '{faction_name}'.")
                 return
+
+            # ── 3) Place each NPC as its own post-it ─────────────────────
             start_x, start_y = 100, 100
-            spacing = 120
+            spacing = int(120 * self.canvas_scale)
             for i, npc in enumerate(faction_npcs):
-                npc_name = npc["Name"]
-                tag = f"npc_{npc_name.replace(' ', '_')}"
+                name = npc["Name"]
+                # generate a unique tag
+                base = f"npc_{name.replace(' ', '_')}"
+                tag = base
+                suffix = 1
+                while tag in self.node_positions:
+                    tag = f"{base}_{suffix}"
+                    suffix += 1
+
                 x = start_x + i * spacing
                 y = start_y
+
+                # record in the underlying graph
                 self.graph["nodes"].append({
-                    "npc_name": npc_name,
-                    "x": x,
-                    "y": y,
-                    "color": "#1D3572"
+                    "npc_name": name,
+                    "tag":       tag,
+                    "x":         x,
+                    "y":         y,
+                    "color":    "#1D3572"
                 })
+                # record its canvas position
                 self.node_positions[tag] = (x, y)
+
+            # ── 4) Restore drag handlers so these new nodes can be moved ───
+            self.canvas.unbind("<Button-1>")
+            self.canvas.bind("<Button-1>",        self.start_drag)
+            self.canvas.bind("<B1-Motion>",       self.on_drag)
+            self.canvas.bind("<ButtonRelease-1>", self.end_drag)
+
+            # ── 5) Redraw everything (post-its, portraits, links, etc.) ────
             self.draw_graph()
 
-        # Create a new selection popup.
-        selection_popup = ctk.CTkToplevel(self)
-        selection_popup.title("Select Faction")
-        selection_popup.geometry("1200x800")
-        selection_popup.transient(self.winfo_toplevel())
-        selection_popup.grab_set()
-        selection_popup.focus_force()
-        
-        
-        # Instantiate the selection view with our dummy wrapper.
-        selection_view = GenericListSelectionView(
-            selection_popup,
-            "Factions",
-            dummy_wrapper,
-            template,
-            on_select_callback=lambda et, faction: on_faction_selected(faction)
+        # ── 6) Instantiate the actual list view with your faction_wrapper ──
+        view = GenericListSelectionView(
+            master=popup,
+            entity_type="Faction",
+            model_wrapper=self.faction_wrapper,
+            template=faction_template,
+            on_select_callback=on_faction_selected
         )
-        selection_view.pack(fill="both", expand=True)
-        selection_popup.wait_window()
+        view.pack(fill="both", expand=True)
+
+        # block until the popup is closed
+        popup.wait_window()
 
     def update_links_positions_for_node(self, node_tag):
         node_name = node_tag.replace("npc_", "").replace("_", " ")
@@ -640,12 +670,26 @@ class NPCGraphEditor(ctk.CTkFrame):
     def delete_node(self):
         if not self.selected_node:
             return
-        node_name = self.selected_node.replace("npc_", "").replace("_", " ")
-        self.graph["nodes"] = [node for node in self.graph["nodes"] if node["npc_name"] != node_name]
-        self.graph["links"] = [link for link in self.graph["links"]
-                               if link["npc_name1"] != node_name and link["npc_name2"] != node_name]
-        if self.selected_node in self.node_positions:
-            del self.node_positions[self.selected_node]
+
+        tag = self.selected_node
+        # 1) Remove all canvas items for this node (post-it, pin, portrait, text)
+        self.canvas.delete(tag)
+
+        # 2) Compute the NPC’s name and remove from the model
+        node_name = tag.replace("npc_", "").replace("_", " ")
+        self.graph["nodes"] = [
+            n for n in self.graph["nodes"]
+            if n["npc_name"] != node_name
+        ]
+        self.graph["links"] = [
+            l for l in self.graph["links"]
+            if l["npc_name1"] != node_name and l["npc_name2"] != node_name
+        ]
+
+        # 3) Drop its saved position
+        self.node_positions.pop(tag, None)
+
+        # 4) Redraw the rest of the graph
         self.draw_graph()
 
     def redraw_after_drag(self):
@@ -653,6 +697,20 @@ class NPCGraphEditor(ctk.CTkFrame):
         self._redraw_scheduled = False
 
 
+    
+        # — ADDED: draw the corkboard background once canvas exists
+    def _on_canvas_configure(self, event):
+        if not hasattr(self, "_bg_drawn"):
+            bg_path = os.path.join("assets", "images", "corkboard_bg.png")
+            if os.path.exists(bg_path):
+                img = Image.open(bg_path)
+                img = img.resize((event.width, event.height), Image.Resampling.LANCZOS)
+                self.background_photo = ImageTk.PhotoImage(img, master=self.canvas)
+                self.background_id = self.canvas.create_image(
+                    0, 0, image=self.background_photo, anchor="nw", tags="background"
+                )
+                self.canvas.tag_lower("background")
+            self._bg_drawn = True
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_nodes
     # Iterates over all nodes in the graph, draws their rectangles, portraits, and labels,
@@ -660,103 +718,148 @@ class NPCGraphEditor(ctk.CTkFrame):
     # ─────────────────────────────────────────────────────────────────────────
     def draw_nodes(self):
         scale = self.canvas_scale
+        GAP = int(5 * scale)
+        PAD = int(10 * scale)
 
-        NODE_WIDTH = int(150 * scale)
-        TEXT_LINE_HEIGHT = int(20 * scale)
-        TEXT_PADDING = int(10 * scale)
-
-        node_holder_path = os.path.join("assets", "npc_node.png")
+        # Helper to measure wrapped text height
+        def measure_text_height(text, font, wrap_width):
+            tid = self.canvas.create_text(
+                0, 0,
+                text=text,
+                font=font,
+                width=wrap_width,
+                anchor="nw"
+            )
+            bbox = self.canvas.bbox(tid)
+            self.canvas.delete(tid)
+            return (bbox[3] - bbox[1]) if bbox else 0
 
         for node in self.graph["nodes"]:
             npc_name = node["npc_name"]
-            tag = f"npc_{npc_name.replace(' ', '_')}"
+            tag = node.get("tag")
             x, y = self.node_positions.get(tag, (node["x"], node["y"]))
 
-            # NPC data
-            npc_data = self.npcs.get(npc_name, {})
-            role = npc_data.get("Role", "")
+            # ── Load NPC data ─────────────────────────────────────────
+            data = self.npcs.get(npc_name, {})
+            role = data.get("Role", "")
+            fv = data.get("Factions", "")
+            fv_text = ", ".join(fv) if isinstance(fv, list) else str(fv) if fv else ""
 
-            # Factions formatting
-            faction_value = npc_data.get("Factions", "")
-            if isinstance(faction_value, list):
-                faction_text = ", ".join(str(f) for f in faction_value)
-            elif isinstance(faction_value, (set, dict)):
-                faction_text = ", ".join(str(f) for f in faction_value)
-            else:
-                faction_text = str(faction_value) if faction_value else ""
-
-            lines = [npc_name, role, faction_text]
-            lines = [line for line in lines if line.strip()]
-
-            # Portrait handling
-            portrait_path = npc_data.get("Portrait", "")
-            has_portrait = portrait_path and os.path.exists(portrait_path)
-            portrait_height = 0
-            portrait_width = 0
-            if has_portrait:
+            # ── Load & scale portrait ─────────────────────────────────
+            portrait_img = None
+            p_w = p_h = 0
+            portrait_path = data.get("Portrait", "")
+            if portrait_path and os.path.exists(portrait_path):
                 img = Image.open(portrait_path)
-                orig_w, orig_h = img.size
-                max_portrait_width = NODE_WIDTH - 4
-                max_portrait_height = int(80 * scale)
-                ratio = min(max_portrait_width / orig_w, max_portrait_height / orig_h)
-                portrait_width = int(orig_w * ratio)
-                portrait_height = int(orig_h * ratio)
-                img = img.resize((portrait_width, portrait_height), Image.Resampling.LANCZOS)
-                photo = ImageTk.PhotoImage(img)
-                self.node_images[npc_name] = photo
+                ow, oh = img.size
+                max_w = int(80 * scale)
+                max_h = int(80 * scale)
+                ratio = min(max_w/ow, max_h/oh, 1.0)
+                p_w, p_h = int(ow*ratio), int(oh*ratio)
+                img = img.resize((p_w, p_h), Image.Resampling.LANCZOS)
+                portrait_img = ImageTk.PhotoImage(img, master=self.canvas)
+                self.node_images[tag] = portrait_img
 
-            # Calculate height
-            node_height = portrait_height + (len(lines) * TEXT_LINE_HEIGHT) + TEXT_PADDING + int(20 * scale)
+            # ── Prepare title & body text ────────────────────────────
+            title_text = npc_name
+            body_text = "\n".join(filter(None, [role, fv_text]))
 
-            # Background rectangle
-            node_color = node.get("color", "#1D3572")
-            rect_id = self.canvas.create_rectangle(
-                x - NODE_WIDTH // 2, y - node_height // 2,
-                x + NODE_WIDTH // 2, y + node_height // 2,
-                fill=node_color,
-                outline="",
-                width=2,
-                tags=(tag,)
+            # ── Font definitions ─────────────────────────────────────
+            title_font = ("Arial", max(1, int(10 * scale)), "bold")
+            body_font  = ("Arial", max(1, int(9  * scale)))
+
+            # ── Compute wrap width & measure text heights ────────────
+            wrap_width = max(p_w, int(150 * scale)) - 2 * PAD
+            title_h = measure_text_height(title_text, title_font, wrap_width)
+            body_h  = measure_text_height(body_text,  body_font,  wrap_width) if body_text else 0
+
+            # ── Compute content & node dimensions ────────────────────
+            content_w = max(p_w, wrap_width)
+            content_h = (
+                p_h
+                + (GAP if p_h > 0 and (title_h > 0 or body_h > 0) else 0)
+                + title_h
+                + (GAP if body_h > 0 else 0)
+                + body_h
             )
-            self.node_rectangles[tag] = rect_id
+            min_w = content_w + 2 * PAD
+            min_h = content_h + 2 * PAD
 
-            # Node overlay image
-            if os.path.exists(node_holder_path):
-                holder_img = Image.open(node_holder_path)
-                holder_img = holder_img.resize((NODE_WIDTH, node_height), Image.Resampling.LANCZOS)
-                holder_photo = ImageTk.PhotoImage(holder_img)
-                if not hasattr(self, "node_holder_images"):
-                    self.node_holder_images = {}
-                self.node_holder_images[npc_name] = holder_photo
-                self.canvas.create_image(x, y, image=holder_photo, tags=(tag,))
-
-            # Store bounding box
-            left = x - (NODE_WIDTH // 2)
-            top = y - (node_height // 2)
-            right = x + (NODE_WIDTH // 2)
-            bottom = y + (node_height // 2)
-            self.node_bboxes[tag] = (left, top, right, bottom)
-
-            # Draw portrait
-            current_y = top + TEXT_PADDING
-            if has_portrait:
-                portrait_center_y = current_y + (portrait_height // 2)
-                self.canvas.create_image(x, portrait_center_y, image=self.node_images[npc_name], tags=(tag,))
-                current_y += portrait_height + TEXT_PADDING
-
-            # Draw text lines
-            for i, line in enumerate(lines):
-                if i == 0:
-                    font = ("Arial", max(1, int(9 * scale)), "bold")
-                else:
-                    font = ("Arial", max(1, int(9 * scale)))
-                self.canvas.create_text(
-                    x, current_y + i * TEXT_LINE_HEIGHT,
-                    text=line,
-                    fill="white",
-                    font=font,
-                    tags=(tag,)
+            # ── 1) Draw the post-it background ───────────────────────
+            if self.postit_base:
+                ow, oh = self.postit_base.size
+                sf = max(min_w / ow, min_h / oh)
+                node_w, node_h = int(ow * sf), int(oh * sf)
+                bg_img = self.postit_base.resize((node_w, node_h), Image.Resampling.LANCZOS)
+                bg_photo = ImageTk.PhotoImage(bg_img, master=self.canvas)
+                self.node_holder_images[tag] = bg_photo
+                self.canvas.create_image(
+                    x, y,
+                    image=bg_photo,
+                    anchor="center",
+                    tags=(tag, "node_bg", "node")
                 )
+            else:
+                node_w, node_h = min_w, min_h
+
+            # ── 2) Draw the thumbtack pin ────────────────────────────
+            if self.pin_image:
+                self.canvas.create_image(
+                    x,
+                    y - node_h // 2 - int(8 * scale)-5,
+                    image=self.pin_image,
+                    anchor="n",
+                    tags=(tag, "node_fg", "node")
+                )
+
+            # ── 3) Draw the portrait ─────────────────────────────────
+            current_y = y - node_h // 2 + PAD
+            if portrait_img:
+                self.canvas.create_image(
+                    x, current_y,
+                    image=portrait_img,
+                    anchor="n",
+                    tags=(tag, "node_fg", "node")
+                )
+                current_y += p_h + GAP
+
+            # ── 4) Draw the wrapped title ────────────────────────────
+            if title_h > 0:
+                title_id = self.canvas.create_text(
+                    x, current_y,
+                    text=title_text,
+                    font=title_font,
+                    fill="black",
+                    width=wrap_width,
+                    anchor="n",
+                    justify="center",
+                    tags=(tag, "node_fg", "node")
+                )
+                bbox = self.canvas.bbox(title_id)
+                actual_h = (bbox[3] - bbox[1]) if bbox else title_h
+                current_y += actual_h + (GAP if body_h > 0 else 0)
+
+            # ── 5) Draw body text ────────────────────────────────────
+            if body_h > 0:
+                self.canvas.create_text(
+                    x, current_y,
+                    text=body_text,
+                    font=body_font,
+                    fill="black",
+                    width=wrap_width,
+                    anchor="n",
+                    justify="center",
+                    tags=(tag, "node_fg", "node")
+                )
+
+            # ── 6) Store bounding box for links ──────────────────────
+            self.node_bboxes[tag] = (
+                x - node_w / 2, y - node_h / 2,
+                x + node_w / 2, y + node_h / 2
+            )
+
+            # ── 7) Layer foreground above background ────────────────
+            self.canvas.tag_raise("node_fg", "node_bg")
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_all_links
@@ -860,56 +963,76 @@ class NPCGraphEditor(ctk.CTkFrame):
     # FUNCTION: load_graph
     # Loads a graph from a JSON file, rebuilds node positions, and sets default values.
     # ─────────────────────────────────────────────────────────────────────────
-    def load_graph(self):
-        file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
-        if file_path:
-            with open(file_path, "r", encoding="utf-8") as f:
-                self.graph = json.load(f)
-            if "shapes" not in self.graph:
-                self.graph["shapes"] = []
-            
-            # Reload node positions and links as before...
-            self.node_positions = {
-                f"npc_{n['npc_name'].replace(' ', '_')}": (n["x"], n["y"])
-                for n in self.graph["nodes"]
-            }
-            for node in self.graph["nodes"]:
-                # only default to blue if no color was saved
-                node.setdefault("color", "#1D3572")
-            for link in self.graph["links"]:
-                link["arrow_mode"] = link.get("arrow_mode", "both")
-            
-            # Rebuild shapes from saved data.
-            self.shapes.clear()
-            # Sort shapes by their z-order so that lower ones are drawn first.
-            shapes_sorted = sorted(self.graph.get("shapes", []), key=lambda s: s.get("z", 0))
-            for shape in shapes_sorted:
-                self.shapes[shape["tag"]] = shape
-            
-            # Update shape_counter so that new shapes will have unique tags.
-            max_counter = -1
-            for shape in self.graph["shapes"]:
-                try:
-                    # Assume tag format is "shape_<number>"
-                    num = int(shape["tag"].split("_")[1])
-                    if num > max_counter:
-                        max_counter = num
-                except (IndexError, ValueError):
-                    pass
-            self.shape_counter = max_counter + 1
-            self.original_positions = {
-                f"npc_{node['npc_name'].replace(' ', '_')}": (node["x"], node["y"])
-                for node in self.graph["nodes"]
-            }
+    def load_graph(self, path=None):
+        # ── 0) Clear existing canvas items (keep only background) ─────────────────
+        for item in self.canvas.find_all():
+            if "background" not in self.canvas.gettags(item):
+                self.canvas.delete(item)
+        # Reset internal state
+        self.node_positions.clear()
+        self.node_bboxes.clear()
+        self.node_images.clear()
+        self.node_holder_images.clear()
+        self.link_canvas_ids.clear()
+        self.shapes.clear()
 
-            self.original_shape_positions = {
-                shape["tag"]: (shape["x"], shape["y"])
-                for shape in self.graph.get("shapes", [])
-            }
-            self.draw_graph()
+        # ── 1) Prompt for file if needed and load JSON ───────────────────────────
+        if not path:
+            path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
+            if not path:
+                return
+        with open(path, 'r', encoding='utf-8') as f:
+            self.graph = json.load(f)
+        self.graph.setdefault("shapes", [])
 
+        # ── 2) Ensure every node dict has its own unique `tag` ────────────────────
+        seen = set()
+        for node in self.graph["nodes"]:
+            base = f"npc_{node['npc_name'].replace(' ', '_')}"
+            # if JSON already had a tag and it's unused, keep it
+            tag = node.get("tag", base)
+            if tag in seen:
+                # collide: generate a new one
+                i = 1
+                while f"{base}_{i}" in seen:
+                    i += 1
+                tag = f"{base}_{i}"
+            node["tag"] = tag
+            seen.add(tag)
 
+        # ── 3) Rebuild node_positions from those tags ──────────────────────────────
+        self.node_positions = {
+            node["tag"]: (node["x"], node["y"])
+            for node in self.graph["nodes"]
+        }
 
+        # ── 4) Fill in any defaults for color, arrow_mode, etc. ───────────────────
+        for node in self.graph["nodes"]:
+            node.setdefault("color", "#1D3572")
+        for link in self.graph["links"]:
+            link.setdefault("arrow_mode", "both")
+
+        # ── 5) Rebuild shapes dict & counter ─────────────────────────────────────
+        shapes_sorted = sorted(self.graph["shapes"], key=lambda s: s.get("z", 0))
+        for shape in shapes_sorted:
+            self.shapes[shape["tag"]] = shape
+        # update shape_counter so new shapes get unique tags
+        max_i = 0
+        for shape in self.graph["shapes"]:
+            parts = shape["tag"].split("_")
+            if parts[-1].isdigit():
+                max_i = max(max_i, int(parts[-1]))
+        self.shape_counter = max_i + 1
+
+        # ── 6) Cache original positions for zoom/undo resets ─────────────────────
+        self.original_positions = dict(self.node_positions)
+        self.original_shape_positions = {
+            sh["tag"]: (sh["x"], sh["y"])
+            for sh in self.graph["shapes"]
+        }
+
+        # ── 7) Finally redraw ────────────────────────────────────────────────────
+        self.draw_graph()
 
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: change_node_color
@@ -950,7 +1073,7 @@ class NPCGraphEditor(ctk.CTkFrame):
         shape_menu.add_command(label="Change shape size", command=lambda: self.activate_resize_mode(shape_tag))
         shape_menu.add_separator()
         shape_menu.add_command(label="Bring to Front", command=lambda: self.bring_to_front(shape_tag))
-        shape_menu.add_command(label="Send to Back", command=lambda: self.send_to_back(shape_tag))  
+        shape_menu.add_command(label="Send to Back", command=lambda tag=shape_tag: self.send_to_back(tag))  
         shape_menu.add_separator()
         shape_menu.add_command(label="Delete Shape", command=lambda: self.delete_shape(shape_tag))
         shape_menu.post(int(x), int(y))
@@ -966,15 +1089,12 @@ class NPCGraphEditor(ctk.CTkFrame):
             # Update the order in the graph's shapes list.
             self.graph["shapes"].sort(key=lambda s: s.get("z", 0))
 
-    def send_to_back(self, shape_tag):
-        # Lower the shape on the canvas.
-        self.canvas.tag_lower(shape_tag)
-        shape = self.shapes.get(shape_tag)
-        if shape:
-            # Set the shape's z property to a value lower than all others.
-            min_z = min((s.get("z", 0) for s in self.shapes.values()), default=0)
-            shape["z"] = min_z - 1
-            self.graph["shapes"].sort(key=lambda s: s.get("z", 0))
+    def send_to_back(self, tag=None):
+        tag = tag or self.selected_shape
+        if not tag:
+            return
+        self.canvas.tag_raise(tag, "background")
+        self.canvas.tag_lower(tag, "link")
 
     def activate_resize_mode(self, shape_tag):
         shape = self.shapes.get(shape_tag)
@@ -1134,39 +1254,64 @@ class NPCGraphEditor(ctk.CTkFrame):
             self.shapes[shape["tag"]] = shape
             self.draw_shape(shape)
 
-    def save_graph(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".json")
-        if file_path:
-            # Save node positions, etc.
-            for node in self.graph["nodes"]:
+    def save_graph(self, path=None):
+        # 1) Prompt for filename if needed
+        if not path:
+            path = filedialog.asksaveasfilename(
+                defaultextension=".json",
+                filetypes=[("JSON Files", "*.json")],
+            )
+            if not path:
+                return
+
+        # 2) Update each node entry with its unique tag and current x,y
+        for node in self.graph["nodes"]:
+            tag = node.get("tag")
+            # fallback to name‐based tag if somehow missing
+            if not tag:
                 tag = f"npc_{node['npc_name'].replace(' ', '_')}"
-                x, y = self.node_positions.get(tag, (node["x"], node["y"]))
-                node["x"] = x
-                node["y"] = y
+                node["tag"] = tag
 
-            for link in self.graph["links"]:
-                if "arrow_mode" not in link:
-                    link["arrow_mode"] = "both"
+            # Pull the live position from self.node_positions
+            pos = self.node_positions.get(tag)
+            if pos:
+                node["x"], node["y"] = pos
+            else:
+                # if for some reason it's missing, leave whatever was there
+                pass
 
-            # Update each shape's data.
-            for shape in self.graph.get("shapes", []):
-                tag = shape["tag"]
-                if tag in self.shapes:
-                    shape_obj = self.shapes[tag]
-                    shape["x"] = shape_obj["x"]
-                    shape["y"] = shape_obj["y"]
-                    shape["w"] = shape_obj["w"]
-                    shape["h"] = shape_obj["h"]
-                    shape["z"] = shape_obj.get("z", 0)
-                    shape.pop("canvas_id", None)
-                    shape.pop("resize_handle", None)
+        # 3) Write out the full graph dict
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(self.graph, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            messagebox.showerror("Save Error", f"Could not save file:\n{e}")
+            return
+        messagebox.showinfo("Saved", f"Graph saved to:\n{path}")
 
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(self.graph, f, indent=2)
-
+    def load_portrait_scaled(self, portrait_path, node_tag, scale=1.0):
+        if not portrait_path or not os.path.exists(portrait_path):
+            return None, (0, 0)
+        try:
+            img = Image.open(portrait_path)
+            size = int(MAX_PORTRAIT_SIZE[0] * scale), int(MAX_PORTRAIT_SIZE[1] * scale)
+            resample_method = getattr(Image, "Resampling", Image).LANCZOS
+            img.thumbnail(size, resample_method)
+            portrait_image = ImageTk.PhotoImage(img, master=self.canvas)
+            self.node_images[node_tag] = portrait_image
+            return portrait_image, img.size
+        except Exception as e:
+            print(f"Error loading portrait for {node_tag}: {e}")
+            return None, (0, 0)
     def draw_graph(self):
-        self.canvas.delete("all")
-        self.node_images.clear()
+        #self.canvas.delete("shape")
+        #self.canvas.delete("link")
+        #self.canvas.delete("link_text")
+        # ── 1) Remove everything except the corkboard background ──
+        #    we keep only items tagged “background”
+        for item in self.canvas.find_all():
+            if "background" not in self.canvas.gettags(item):
+                self.canvas.delete(item)
         self.node_bboxes = {}
         self.draw_all_shapes()
         self.draw_nodes()
@@ -1180,28 +1325,54 @@ class NPCGraphEditor(ctk.CTkFrame):
                 bbox[2] + padding, bbox[3] + padding
             ))
         # Check if there are any "link" items before using them as reference.
+        # bring links above the background
         if self.canvas.find_withtag("link"):
-            self.canvas.tag_lower("node", "link")
-        else:
-            self.canvas.tag_lower("node")
-        # Lower "shape" below "link" if possible.
-        if self.canvas.find_withtag("shape") and self.canvas.find_withtag("link"):
-            self.canvas.tag_lower("shape", "link")
-        elif self.canvas.find_withtag("shape"):
-            self.canvas.tag_lower("shape")
+            self.canvas.tag_raise("link", "background")
+        # then make sure nodes (post-its) are on top of everything
+        if self.canvas.find_withtag("node"):
+            self.canvas.tag_raise("node")
+        # finally keep shapes just above background but below links/nodes
+        if self.canvas.find_withtag("shape"):
+            self.canvas.tag_raise("shape", "background")
 
 
     def start_drag(self, event):
+        # Convert mouse coords to canvas coords
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
-        item = self.canvas.find_closest(x, y)
-        if not item:
-            return
-        tags = self.canvas.gettags(item[0])
-        self.selected_node = next((t for t in tags if t.startswith("npc_")), None)
-        self.selected_shape = next((t for t in tags if t.startswith("shape_")), None)
-        self.selected_items = self.canvas.find_withtag(self.selected_node or self.selected_shape)
-        self.drag_start = (x, y)
+
+        # Reset any previous selection
+        self.selected_node = None
+        self.selected_shape = None
+        self.drag_start = None
+
+        # Find all items under the cursor
+        items = list(self.canvas.find_overlapping(x, y, x, y))
+        # Iterate in reverse so the topmost items get priority
+        for item in reversed(items):
+            tags = self.canvas.gettags(item)
+            # First check for an NPC node tag
+            for tag in tags:
+                if tag.startswith("npc_"):
+                    self.selected_node = tag
+                    break
+            if self.selected_node:
+                break
+            # Then check for a shape tag
+            for tag in tags:
+                if tag.startswith("shape_"):
+                    self.selected_shape = tag
+                    break
+            if self.selected_shape:
+                break
+
+        # If we found something, prepare for dragging
+        active_tag = self.selected_node or self.selected_shape
+        if active_tag:
+            self.selected_items = self.canvas.find_withtag(active_tag)
+            self.drag_start = (x, y)
+        else:
+            self.selected_items = []
 
     def on_drag(self, event):
         if not (self.selected_node or self.selected_shape) or not self.drag_start:
