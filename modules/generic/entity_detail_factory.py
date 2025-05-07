@@ -170,10 +170,10 @@ def insert_npc_table(parent, header, npc_names, open_entity_callback):
     table = ctk.CTkFrame(parent)
     table.pack(fill="both", expand=True, padx=10, pady=(0,0))
 
-    cols         = ["Portrait", "Name", "Secret", "Background", "Factions", "Traits"]
-    weights      = [0,         1,       2,        2,            1,          4     ]
-    wrap_lengths = [0,       120,     250,      250,          100,        500   ]
-    text_heights = {2: 60, 3: 60, 5: 60}
+    cols         = ["Portrait", "Name", "Secret", "Background",  "Traits", "Factions"]
+    weights      = [0,         1,       2,        2,            4,          1     ]
+    wrap_lengths = [0,       120,     250,      250,          500,        100   ]
+    text_heights = {2: 60, 3: 60, 4: 60}
 
     # configure columns
     for idx, w in enumerate(weights):
@@ -217,7 +217,7 @@ def insert_npc_table(parent, header, npc_names, open_entity_callback):
         factions   = ", ".join(data.get("Factions") or [])
         traits     = format_longtext(data.get("Traits"))
 
-        values = [name, secret, background, factions, traits]
+        values = [name, secret, background, traits, factions]
         for c, txt in enumerate(values, start=1):
             if c in text_heights:
                 cell = CTkTextbox(table, wrap="word", height=text_heights[c])
@@ -337,6 +337,118 @@ def insert_creature_table(parent, header, creature_names, open_entity_callback):
 
         table.grid_rowconfigure(r, weight=1)
 
+def insert_places_table(parent, header, place_names, open_entity_callback):
+    """
+    Render a table of Places (excluding PlayerDisplay) with columns:
+    Portrait, Name, Description, NPCs, Secrets
+    """
+    # Section header
+    CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")) \
+        .pack(anchor="w", padx=10, pady=(1, 2))
+
+    # Table container
+    table = ctk.CTkFrame(parent)
+    table.pack(fill="both", expand=True, padx=10, pady=(0, 0))
+
+    # Column defs
+    cols         = ["Portrait", "Name", "Description", "NPCs", "Secrets"]
+    weights      = [0,          1,      2,             1,      1    ]
+    wrap_lengths = [0,        150,    400,           200,    200  ]
+    # only Description (2) and Secrets (4) get scrollboxes
+    text_heights = {2: 60,  4: 60}
+
+    # configure columns
+    for idx, w in enumerate(weights):
+        table.grid_columnconfigure(idx, weight=w)
+
+    # header row
+    for c, col_name in enumerate(cols):
+        CTkLabel(table, text=col_name, font=("Arial", 12, "bold")) \
+            .grid(row=0, column=c, padx=5, pady=1, sticky="nsew")
+
+    # load place data once
+    place_map = {
+        pl["Name"]: pl
+        for pl in GenericModelWrapper("places").load_items()
+    }
+
+    # populate rows
+    for r, name in enumerate(place_names, start=1):
+        data     = place_map.get(name, {}) or {}
+        portrait = data.get("Portrait", "")
+        desc     = format_longtext(data.get("Description", ""))
+        secrets  = format_longtext(data.get("Secrets", ""))
+        npcs     = data.get("NPCs") or []
+        values   = [portrait, name, desc, npcs, secrets]
+
+        for c, val in enumerate(values):
+            # scrollable for Description & Secrets
+            if c in text_heights:
+                cell = CTkTextbox(table, wrap="word", height=text_heights[c])
+                cell.insert = cell._textbox.insert
+                cell.insert("1.0", val)
+                cell.configure(state="disabled")
+
+            # Portrait thumbnail
+            elif c == 0:
+                if portrait and os.path.exists(portrait):
+                    img   = Image.open(portrait).resize((40, 40), Image.Resampling.LANCZOS)
+                    photo = CTkImage(light_image=img, size=(40, 40))
+                    cell  = CTkLabel(table, image=photo, text="", anchor="center")
+                    cell.image = photo
+                    cell.bind(
+                        "<Button-1>",
+                        lambda e, p=portrait, n=name: show_portrait(p, n)
+                    )
+                else:
+                    cell = CTkLabel(table, text="–", font=("Arial", 12), anchor="center")
+
+            # clickable Name
+            elif c == 1:
+                cell = CTkLabel(
+                    table, text=val,
+                    text_color="#00BFFF", font=("Arial", 12, "underline"),
+                    cursor="hand2", anchor="center",
+                    height=60
+                )
+                if open_entity_callback:
+                    cell.bind(
+                        "<Button-1>",
+                        lambda e, nm=val: open_entity_callback("Places", nm)
+                    )
+
+            # NPCs list as individual links
+            elif c == 3:
+                cell = ctk.CTkFrame(table, height=60)
+                for i, npc_name in enumerate(val):
+                    link = CTkLabel(
+                        cell, text=npc_name,
+                        text_color="#00BFFF", font=("Arial", 12, "underline"),
+                        cursor="hand2",
+                        height=60
+                    )
+                    if open_entity_callback:
+                        link.bind(
+                            "<Button-1>",
+                            lambda e, nm=npc_name: open_entity_callback("NPCs", nm)
+                        )
+                    link.grid(row=0, column=i, padx=(0, 5))
+
+            # default simple label
+            else:
+                cell = CTkLabel(
+                    table, text=val,
+                    font=("Arial", 12),
+                    wraplength=wrap_lengths[c],
+                    justify="left", anchor="w",
+                    height=60
+                )
+
+            cell.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
+
+        # match NPC row heights
+        table.grid_rowconfigure(r, weight=1)
+
 def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity_callback=None):
     """
     Build a scrollable detail view for a scenario with:
@@ -388,7 +500,7 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
             elif linked == "Creatures":
                 insert_creature_table(frame, "Creatures", items, open_entity_callback)
             elif linked == "Places":
-                insert_links(frame, "Places", items, "Places", open_entity_callback)
+                insert_places_table(frame, "Places", items, open_entity_callback)
             else:
                 insert_links(frame, name, items, linked, open_entity_callback)
 
