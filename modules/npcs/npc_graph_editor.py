@@ -700,17 +700,28 @@ class NPCGraphEditor(ctk.CTkFrame):
     
         # — ADDED: draw the corkboard background once canvas exists
     def _on_canvas_configure(self, event):
-        if not hasattr(self, "_bg_drawn"):
-            bg_path = os.path.join("assets", "images", "corkboard_bg.png")
-            if os.path.exists(bg_path):
-                img = Image.open(bg_path)
-                img = img.resize((event.width, event.height), Image.Resampling.LANCZOS)
-                self.background_photo = ImageTk.PhotoImage(img, master=self.canvas)
-                self.background_id = self.canvas.create_image(
-                    0, 0, image=self.background_photo, anchor="nw", tags="background"
-                )
-                self.canvas.tag_lower("background")
-            self._bg_drawn = True
+        """
+        Whenever the canvas is resized (or we manually call this),
+        redraw the background to fill the full width/height.
+        """
+        bg_path = os.path.join("assets", "images", "corkboard_bg.png")
+        if os.path.exists(bg_path):
+            # Load & resize the corkboard to exactly event.width×event.height
+            img = Image.open(bg_path)
+            img = img.resize((event.width, event.height), Image.Resampling.LANCZOS)
+            self.background_photo = ImageTk.PhotoImage(img, master=self.canvas)
+
+            # Remove any old background image
+            self.canvas.delete("background")
+
+            # Draw the new one, always tagged "background"
+            self.background_id = self.canvas.create_image(
+                0, 0,
+                image=self.background_photo,
+                anchor="nw",
+                tags="background"
+            )
+            self.canvas.tag_lower("background")
     # ─────────────────────────────────────────────────────────────────────────
     # FUNCTION: draw_nodes
     # Iterates over all nodes in the graph, draws their rectangles, portraits, and labels,

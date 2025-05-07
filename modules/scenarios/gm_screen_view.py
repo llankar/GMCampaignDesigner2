@@ -56,6 +56,8 @@ class GMScreenView(ctk.CTkFrame):
 
         self.tabs = {}
         self.current_tab = None
+        self.tab_order = []                  # ← new: keeps track of left-to-right order
+        self.dragging = None                 # ← new: holds (tab_name, start_x)
 
         # A container to hold both the scrollable tab area and the plus button
         self.tab_bar_container = ctk.CTkFrame(self, height=60)
@@ -86,12 +88,12 @@ class GMScreenView(ctk.CTkFrame):
 
         # The plus button stays on the right side of the container
         self.add_button = ctk.CTkButton(
-            self.tab_bar_container,
+            self.tab_bar,
             text="+",
             width=40,
             command=self.add_new_tab
         )
-        self.add_button.pack(side="right", padx=5, pady=5)
+        self.add_button.pack(side="left", padx=2, pady=5)
 
         # Main content area for scenario details
         self.content_area = ctk.CTkScrollableFrame(self)
@@ -240,7 +242,98 @@ class GMScreenView(ctk.CTkFrame):
 
         content_frame.pack_forget()
         self.show_tab(name)
+        # 1) append to order list
+        self.tab_order.append(name)
+
+        # collect ALL the widgets you need to drag
+        draggable_widgets = (
+            tab_frame,
+            tab_button,
+            close_button,
+            detach_button
+        )
+
+        for w in draggable_widgets:
+            w.bind("<Button-1>",        lambda e, n=name: self._on_tab_press(e, n))
+            w.bind("<B1-Motion>",       lambda e, n=name: self._on_tab_motion(e, n))
+            w.bind("<ButtonRelease-1>", lambda e, n=name: self._on_tab_release(e, n))
+
         self.reposition_add_button()
+
+    def _on_tab_press(self, event, name):
+        # 1) Make sure winfo_x/y are up-to-date
+        self.tab_bar.update_idletasks()
+
+        # 2) Start drag state
+        self.dragging = {"name": name, "start_x": event.x_root}
+
+        # 3) Convert every tab HEADER to place() at its current pixel pos
+        for tn in self.tab_order:
+            f = self.tabs[tn]["button_frame"]
+            fx, fy = f.winfo_x(), f.winfo_y()
+            f.pack_forget()
+            f.place(in_=self.tab_bar, x=fx, y=fy)
+
+        # 4) Hide the “+” so it doesn’t get in the way
+        self.add_button.pack_forget()
+
+        # 5) Lift the one we’re dragging above the others
+        self.tabs[name]["button_frame"].lift()
+
+    def _on_tab_motion(self, event, name):
+        frame = self.tabs[name]["button_frame"]
+        rel_x = event.x_root - self.tab_bar.winfo_rootx() - frame.winfo_width() // 2
+
+        # move the dragged tab along with the cursor
+        frame.place_configure(x=rel_x)
+
+        # same midpoint-swap logic as before…
+        for idx, other in enumerate(self.tab_order):
+            if other == name: continue
+            of = self.tabs[other]["button_frame"]
+            mid = of.winfo_x() + of.winfo_width() // 2
+
+            if rel_x < mid and self.tab_order.index(name) > idx:
+                self._trigger_shift(other, dx=frame.winfo_width())
+                self._swap_order(name, other)
+                break
+            if rel_x > mid and self.tab_order.index(name) < idx:
+                self._trigger_shift(other, dx=-frame.winfo_width())
+                self._swap_order(name, other)
+                break
+                
+    def _trigger_shift(self, other_name, dx):
+        oframe = self.tabs[other_name]["button_frame"]
+        start = oframe.winfo_x()
+        target = start + dx
+        self._animate_shift([oframe], [dx])
+
+    def _animate_shift(self, frames, deltas, step=0):
+        if step >= 10: return
+        for frame, delta in zip(frames, deltas):
+            cur = frame.winfo_x()
+            frame.place_configure(x=cur + delta/10)
+        self.after(20, lambda: self._animate_shift(frames, deltas, step+1))
+    
+    def _swap_order(self, name, other):
+        old = self.tab_order.index(name)
+        new = self.tab_order.index(other)
+        self.tab_order.pop(old)
+        self.tab_order.insert(new, name)
+
+    def _on_tab_release(self, event, name):
+        # snap all headers back into pack()
+        for tn in self.tab_order:
+            f = self.tabs[tn]["button_frame"]
+            f.place_forget()
+            f.pack(side="left", padx=2, pady=5)
+
+        # **use your helper** to put “+” back in line
+        self.reposition_add_button()
+        self.tab_bar_canvas.configure(
+            scrollregion=self.tab_bar_canvas.bbox("all")
+        )
+        self.dragging = None
 
     def toggle_detach_tab(self, name):
         if self.tabs[name]["detached"]:
@@ -254,79 +347,84 @@ class GMScreenView(ctk.CTkFrame):
 
     def detach_tab(self, name):
         print(f"[DETACH] Start detaching tab: {name}")
-        if self.tabs[name]["detached"]:
+        if self.tabs[name].get("detached", False):
             print(f"[DETACH] Tab '{name}' is already detached.")
             return
 
+        # Hide the current content
         old_frame = self.tabs[name]["content_frame"]
         old_frame.pack_forget()
 
+        # Create the Toplevel (hidden briefly)
         detached_window = ctk.CTkToplevel(self)
+        detached_window.withdraw()
         detached_window.title(name)
         detached_window.lift()
         detached_window.attributes("-topmost", True)
         detached_window.protocol("WM_DELETE_WINDOW", lambda: None)
-        print(f"[DETACH] Detached window created: {detached_window}")
 
-        # Check if this is a Note tab; handle separately
+        # Build the new content frame
         if name.startswith("Note") and hasattr(old_frame, "text_box"):
-            current_text = old_frame.text_box.get("1.0", "end-1c")
-            new_frame = self.create_note_frame(detached_window, initial_text=current_text)
+            txt = old_frame.text_box.get("1.0", "end-1c")
+            new_frame = self.create_note_frame(detached_window, initial_text=txt)
         else:
             factory = self.tabs[name].get("factory")
-            if factory is None:
-                new_frame = old_frame
-            else:
-                new_frame = factory(detached_window)
-                # For tabs with state (like NPC Graph), restore state from graph_editor
-                if hasattr(old_frame, "graph_editor") and hasattr(old_frame.graph_editor, "get_state"):
-                    saved_state = old_frame.graph_editor.get_state()
-                    if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
-                        new_frame.graph_editor.set_state(saved_state)
-                if hasattr(old_frame, "scenario_graph_editor") and hasattr(old_frame.scenario_graph_editor, "get_state"):
-                    saved_state = old_frame.scenario_graph_editor.get_state()
-                    if saved_state and hasattr(new_frame, "scenario_graph_editor") and hasattr(new_frame.scenario_graph_editor, "set_state"):
-                        new_frame.scenario_graph_editor.set_state(saved_state)
+            new_frame = old_frame if factory is None else factory(detached_window)
 
+        # Pack so children are laid out
         new_frame.pack(fill="both", expand=True)
         new_frame.update_idletasks()
-        req_width = new_frame.winfo_reqwidth()
-        req_height = new_frame.winfo_reqheight()
 
-        if not hasattr(GMScreenView, 'detached_count'):
-            GMScreenView.detached_count = 0
-        offset_x = GMScreenView.detached_count * (req_width + 10)
-        offset_y = 0
-        detached_window.geometry(f"{req_width}x{req_height}+{offset_x}+{offset_y}")
-        GMScreenView.detached_count += 1
+        # If there's a graph editor, restore its state right away
+        if hasattr(old_frame, "graph_editor") and hasattr(old_frame.graph_editor, "get_state"):
+            state = old_frame.graph_editor.get_state()
+            if state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
+                ge = new_frame.graph_editor
+                # draw full-size background & links
+                ce = ge.canvas
+                ce.update_idletasks()
+                cfg = type("E", (), {
+                    "width":  ce.winfo_width(),
+                    "height": ce.winfo_height()
+                })()
+                ge._on_canvas_configure(cfg)
+                ge.set_state(state)
 
-        print(f"[DETACH] New frame in detached window created: {new_frame}")
+        # Hard-code size for all graph windows
+        GRAPH_W, GRAPH_H = 1600, 800
+        x_off = getattr(GMScreenView, "detached_count", 0) * (GRAPH_W + 10)
+        y_off = 0
+        detached_window.geometry(f"{GRAPH_W}x{GRAPH_H}")
+        GMScreenView.detached_count = getattr(GMScreenView, "detached_count", 0) + 1
 
-        # (Optional) Update portrait label if needed…
+        detached_window.deiconify()
+        print(f"[DETACH] Detached window shown at {GRAPH_W}×{GRAPH_H}")
+
+        # Portrait & scenario-graph restoration (unchanged)…
+        if hasattr(old_frame, "scenario_graph_editor") and hasattr(old_frame.scenario_graph_editor, "get_state"):
+            scen = old_frame.scenario_graph_editor.get_state()
+            if scen and hasattr(new_frame, "scenario_graph_editor") and hasattr(new_frame.scenario_graph_editor, "set_state"):
+                new_frame.scenario_graph_editor.set_state(scen)
+
         if hasattr(new_frame, "portrait_label"):
             self.tabs[name]["portrait_label"] = new_frame.portrait_label
-            print(f"[DETACH] Using existing portrait label from new frame.")
         else:
-            portrait_label = self.tabs[name].get("portrait_label")
-            if portrait_label and portrait_label.winfo_exists():
-                portrait_key = getattr(portrait_label, "entity_name", None)
-                if portrait_key and portrait_key in self.portrait_images:
-                    new_portrait_label = ctk.CTkLabel(new_frame, image=self.portrait_images[portrait_key], text="")
-                    new_portrait_label.image = self.portrait_images[portrait_key]
-                    new_portrait_label.entity_name = portrait_key
-                    new_portrait_label.is_portrait = True
-                    new_portrait_label.pack(pady=10)
-                    print(f"[DETACH] Recreated portrait label for entity '{portrait_key}'.")
-                    self.tabs[name]["portrait_label"] = new_portrait_label
+            pl = self.tabs[name].get("portrait_label")
+            if pl and pl.winfo_exists():
+                key = getattr(pl, "entity_name", None)
+                if key in self.portrait_images:
+                    lab = ctk.CTkLabel(new_frame, image=self.portrait_images[key], text="")
+                    lab.image = self.portrait_images[key]
+                    lab.entity_name = key
+                    lab.is_portrait = True
+                    lab.pack(pady=10)
+                    self.tabs[name]["portrait_label"] = lab
 
-        self.tabs[name]["detached"] = True
-        self.tabs[name]["window"] = detached_window
-        self.tabs[name]["content_frame"] = new_frame
+        # Mark as detached
+        self.tabs[name]["detached"]       = True
+        self.tabs[name]["window"]         = detached_window
+        self.tabs[name]["content_frame"]  = new_frame
         print(f"[DETACH] Tab '{name}' successfully detached.")
-
-        # Reorder detached windows after detaching (if you have that function)
-        if hasattr(self, "reorder_detached_windows"):
-            self.reorder_detached_windows()
 
 
     def create_note_frame(self, master=None, initial_text=""):
@@ -350,49 +448,68 @@ class GMScreenView(ctk.CTkFrame):
 
     def reattach_tab(self, name):
         print(f"[REATTACH] Start reattaching tab: {name}")
+        # If the tab isn't marked detached, skip
         if not self.tabs[name].get("detached", False):
             print(f"[REATTACH] Tab '{name}' is not detached.")
             return
 
+        # Retrieve the detached window and its content frame
         detached_window = self.tabs[name]["window"]
         current_frame = self.tabs[name]["content_frame"]
 
-        # Save state from the graph editor in the detached frame
+        # Preserve graph state if present
         saved_state = None
         if hasattr(current_frame, "graph_editor") and hasattr(current_frame.graph_editor, "get_state"):
             saved_state = current_frame.graph_editor.get_state()
         if hasattr(current_frame, "scenario_graph_editor") and hasattr(current_frame.scenario_graph_editor, "get_state"):
             saved_state = current_frame.scenario_graph_editor.get_state()
 
-        # Special handling for note tabs (if any)
+        # Special case: Note tabs store their text
         current_text = ""
         if name.startswith("Note") and hasattr(current_frame, "text_box"):
             current_text = current_frame.text_box.get("1.0", "end-1c")
-            
+
+        # Destroy the detached window
         if detached_window:
             detached_window.destroy()
             print("[REATTACH] Detached window destroyed.")
 
+        # Recreate or reuse the content frame
         factory = self.tabs[name].get("factory")
         if factory is None:
             new_frame = current_frame
         else:
+            # Note tabs get their text back
             if name.startswith("Note"):
                 new_frame = factory(self.content_area, initial_text=current_text)
             else:
                 new_frame = factory(self.content_area)
-            # Restore the graph state if available
+
+            # Restore NPC-graph state, ensuring the canvas background exists first
             if saved_state and hasattr(new_frame, "graph_editor") and hasattr(new_frame.graph_editor, "set_state"):
+                ce = new_frame.graph_editor.canvas
+                ce.update_idletasks()
+                # Synthesize a Configure event to lay down the background
+                cfg = type("E", (), {
+                    "width":  ce.winfo_width(),
+                    "height": ce.winfo_height()
+                })()
+                new_frame.graph_editor._on_canvas_configure(cfg)
                 new_frame.graph_editor.set_state(saved_state)
+
+            # Restore scenario-graph state if present
             if saved_state and hasattr(new_frame, "scenario_graph_editor") and hasattr(new_frame.scenario_graph_editor, "set_state"):
                 new_frame.scenario_graph_editor.set_state(saved_state)
+
+        # Pack and finalize
         new_frame.pack(fill="both", expand=True)
-            
         self.tabs[name]["content_frame"] = new_frame
         self.tabs[name]["detached"] = False
         self.tabs[name]["window"] = None
         self.show_tab(name)
-        self.reorder_detached_windows()
+        # Reorder any remaining detached windows
+        if hasattr(self, "reorder_detached_windows"):
+            self.reorder_detached_windows()
         print(f"[REATTACH] Tab '{name}' reattached successfully.")
 
 
@@ -400,6 +517,8 @@ class GMScreenView(ctk.CTkFrame):
     def close_tab(self, name):
         if len(self.tabs) == 1:
             return
+        if name in self.tab_order:
+            self.tab_order.remove(name)
         if self.tabs[name].get("detached", False) and self.tabs[name].get("window"):
             self.tabs[name]["window"].destroy()
         self.tabs[name]["button_frame"].destroy()
@@ -411,11 +530,17 @@ class GMScreenView(ctk.CTkFrame):
 
     def reposition_add_button(self):
         self.add_button.pack_forget()
-        if self.tabs:
-            last_tab_frame = list(self.tabs.values())[-1]["button_frame"]
-            self.add_button.pack(side="left", padx=5, after=last_tab_frame)
+        if self.tab_order:
+            last = self.tabs[self.tab_order[-1]]["button_frame"]
+            self.add_button.pack(
+                side="left",
+                padx=2,
+                pady=5,
+                after=last
+            )
         else:
-            self.add_button.pack(side="left", padx=5)
+            self.add_button.pack(side="left", padx=2, pady=5)
+    
 
     def show_tab(self, name):
         # Hide content for the current tab if it's not detached.
