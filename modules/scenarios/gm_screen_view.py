@@ -39,8 +39,9 @@ class GMScreenView(ctk.CTkFrame):
             "PCs": GenericModelWrapper("pcs"),
             "Factions": GenericModelWrapper("factions"),
             "Creatures": GenericModelWrapper("Creatures"),
-            "Clues": GenericModelWrapper("clues"),
-            "Informations": GenericModelWrapper("informations")
+            "Clues": GenericModelWrapper("Clues"),
+            "Informations": GenericModelWrapper("informations"),
+            "Objects": GenericModelWrapper("Objects")
         }
 
         self.templates = {
