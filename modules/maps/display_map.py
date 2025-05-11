@@ -76,10 +76,12 @@ def _on_display_map(entity_type, entity_name):
     map_mask_tk   = ImageTk.PhotoImage(map_mask_img)
 
     # load icons at runtime
-    add_icon   = _self.load_icon("icons/brush.png",    size=(48,48))
-    rem_icon   = _self.load_icon("icons/eraser.png",   size=(48,48))
-    save_icon  = _self.load_icon("icons/save.png",     size=(48,48))
-    fs_icon    = _self.load_icon("icons/expand.png",   size=(48,48))
+    add_icon   = _self.load_icon("icons/brush.png",  size=(48,48))
+    rem_icon   = _self.load_icon("icons/eraser.png", size=(48,48))
+    save_icon  = _self.load_icon("icons/save.png",   size=(48,48))
+    fs_icon    = _self.load_icon("icons/expand.png", size=(48,48))
+    reset_icon    = _self.load_icon("icons/full.png", size=(48,48))
+    clear_icon    = _self.load_icon("icons/empty.png", size=(48,48))
 
     # build UI
     frame   = ctk.CTkFrame(container); frame.pack(fill="both", expand=True)
@@ -89,13 +91,15 @@ def _on_display_map(entity_type, entity_name):
     for icon, tip, cmd in [
         (add_icon,  "Add Fog",    lambda: setattr(_self, "map_mode", "add")),
         (rem_icon,  "Remove Fog", lambda: setattr(_self, "map_mode", "remove")),
+        (clear_icon, "Clear Mask",  lambda: _clear_mask()),
+        (reset_icon, "Reset Mask",  lambda: _reset_mask()),
         (save_icon, "Save Mask",  lambda: _save_fog_mask(item)),
         (fs_icon,   "Fullscreen", lambda: _show_fullscreen_map(item))
     ]:
         btn = create_icon_button(toolbar, icon, tip, cmd)
         btn.pack(side="left", padx=5)
 
-    # brush size slider
+     # brush size slider
     ctk.CTkLabel(toolbar, text="Size:").pack(side="left", padx=(20,2))
     slider = ctk.CTkSlider(toolbar, from_=5, to=200, command=_set_brush_size, width=120)
     slider.set(map_brush_size)
@@ -111,13 +115,11 @@ def _on_display_map(entity_type, entity_name):
     scroll_frame = ctk.CTkFrame(frame)
     scroll_frame.pack(fill="both", expand=True)
 
-    # Vertical & horizontal scrollbars
     v_scroll = tk.Scrollbar(scroll_frame, orient="vertical")
     h_scroll = tk.Scrollbar(scroll_frame, orient="horizontal")
     v_scroll.pack(side="right", fill="y")
     h_scroll.pack(side="bottom", fill="x")
 
-    # Canvas with scroll commands
     canvas = tk.Canvas(
         scroll_frame,
         width=w, height=h,
@@ -128,7 +130,6 @@ def _on_display_map(entity_type, entity_name):
     v_scroll.config(command=canvas.yview)
     canvas.pack(side="left", fill="both", expand=True)
 
-    # Draw images at (0,0)
     canvas.create_image(0, 0, anchor=tk.NW, image=map_base_tk)
     _mask_id = canvas.create_image(0, 0, anchor=tk.NW, image=map_mask_tk)
     map_canvas = canvas
@@ -139,6 +140,21 @@ def _on_display_map(entity_type, entity_name):
     # painting bindings
     canvas.bind("<Button-1>",  _on_paint)
     canvas.bind("<B1-Motion>", _on_paint)
+
+# ─ Clear / Reset helpers ─────────────────────────────────────────
+def _clear_mask():
+    global map_mask_img, map_mask_tk, map_canvas, _mask_id, map_mask_draw
+    w, h = map_mask_img.size
+    map_mask_draw.rectangle([(0, 0), (w, h)], fill=(0, 0, 0, 0))
+    map_mask_tk = ImageTk.PhotoImage(map_mask_img)
+    map_canvas.itemconfig(_mask_id, image=map_mask_tk)
+
+def _reset_mask():
+    global map_mask_img, map_mask_tk, map_canvas, _mask_id, map_mask_draw
+    w, h = map_mask_img.size
+    map_mask_draw.rectangle([(0, 0), (w, h)], fill=(0, 0, 0, 128))
+    map_mask_tk = ImageTk.PhotoImage(map_mask_img)
+    map_canvas.itemconfig(_mask_id, image=map_mask_tk)
 
 # ─ Helpers ──────────────────────────────────────────────────────
 def _ensure_fog_mask(item):
@@ -184,7 +200,6 @@ def _save_fog_mask(item):
     if map_mask_img is None:
         messagebox.showerror("Error", "No mask to save.")
         return
-    # resize back to original map size before saving
     orig = Image.open(item["Image"])
     mask_to_save = map_mask_img.resize(orig.size, Image.NEAREST)
     mask_to_save.save(item["FogMaskPath"])
@@ -194,30 +209,22 @@ def _save_fog_mask(item):
 def _show_fullscreen_map(item):
     """
     Display the map on the second monitor with a FULLY-OPAQUE fog
-    everywhere the GM hasn’t cleared it (using the current in-memory mask),
-    stretched to fill the entire screen.
+    everywhere the GM hasn’t cleared it, stretched to fill the screen.
     """
-    # 1) Load original base and current in-memory mask
     base_orig = Image.open(item["Image"]).convert("RGBA")
     mask0     = map_mask_img.resize(base_orig.size, Image.NEAREST).convert("RGBA")
 
-    # 2) Create binary full-opaque mask where any fog remains
-    a         = mask0.split()[3]
-    bin_alpha = a.point(lambda p: 255 if p > 0 else 0)
+    alpha     = mask0.split()[3]
+    bin_alpha = alpha.point(lambda p: 255 if p > 0 else 0)
     mask_full = Image.new("RGBA", base_orig.size, (0,0,0,255))
     mask_full.putalpha(bin_alpha)
 
-    # 3) Composite and convert to RGB
     comp = Image.alpha_composite(base_orig, mask_full).convert("RGB")
 
-    # 4) Pick second monitor geometry
-    monitors = _get_monitors()
-    sx, sy, sw, sh = monitors[1] if len(monitors) > 1 else monitors[0]
-
-    # 5) **Stretch** the image to fill the screen
+    mons = _get_monitors()
+    sx, sy, sw, sh = mons[1] if len(mons) > 1 else mons[0]
     comp = comp.resize((sw, sh), Image.LANCZOS)
 
-    # 6) Show in a borderless CTkToplevel
     photo = ImageTk.PhotoImage(comp)
     win   = ctk.CTkToplevel()
     win.overrideredirect(True)
@@ -227,5 +234,4 @@ def _show_fullscreen_map(item):
     lbl.image = photo
     lbl.pack(fill="both", expand=True)
 
-    # 7) Click anywhere to close
     win.bind("<Button-1>", lambda e: win.destroy())

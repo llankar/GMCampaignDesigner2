@@ -82,30 +82,30 @@ class MainWindow(ctk.CTk):
 
     def load_icons(self):
         self.icons = {
-            "change_db": self.load_icon("database_icon.png", size=(48, 48)),
-            "swarm_path": self.load_icon("folder_icon.png", size=(48, 48)),
-            "manage_scenarios": self.load_icon("scenario_icon.png", size=(48, 48)),
-            "manage_pcs": self.load_icon("pc_icon.png", size=(48, 48)),
-            "manage_npcs": self.load_icon("npc_icon.png", size=(48, 48)),
-            "manage_creatures": self.load_icon("creature_icon.png", size=(48, 48)),
-            "manage_factions": self.load_icon("faction_icon.png", size=(48, 48)),
-            "manage_places": self.load_icon("places_icon.png", size=(48, 48)),
-            "manage_objects": self.load_icon("objects_icon.png", size=(48, 48)),
-            "manage_informations": self.load_icon("informations_icon.png", size=(48, 48)),
-            "manage_clues": self.load_icon("clues_icon.png", size=(48, 48)),
-            "export_scenarios": self.load_icon("export_icon.png", size=(48, 48)),
-            "gm_screen": self.load_icon("gm_screen_icon.png", size=(48, 48)),
-            "npc_graph": self.load_icon("npc_graph_icon.png", size=(48, 48)),
-            "pc_graph": self.load_icon("pc_graph_icon.png", size=(48, 48)),
-            "faction_graph": self.load_icon("faction_graph_icon.png", size=(48, 48)),
-            "scenario_graph": self.load_icon("scenario_graph_icon.png", size=(48, 48)),
-            "generate_portraits": self.load_icon("generate_icon.png", size=(48, 48)),
-            "associate_portraits": self.load_icon("associate_icon.png", size=(48, 48)),
-            "import_scenario": self.load_icon("import_icon.png", size=(48, 48)),
-            "export_foundry": self.load_icon("export_foundry_icon.png", size=(48, 48))
+            "change_db": self.load_icon("database_icon.png", size=(56, 56)),
+            "swarm_path": self.load_icon("folder_icon.png", size=(56, 56)),
+            "manage_scenarios": self.load_icon("scenario_icon.png", size=(56, 56)),
+            "manage_pcs": self.load_icon("pc_icon.png", size=(56, 56)),
+            "manage_npcs": self.load_icon("npc_icon.png", size=(56, 56)),
+            "manage_creatures": self.load_icon("creature_icon.png", size=(56, 56)),
+            "manage_factions": self.load_icon("faction_icon.png", size=(56, 56)),
+            "manage_places": self.load_icon("places_icon.png", size=(56, 56)),
+            "manage_objects": self.load_icon("objects_icon.png", size=(56, 56)),
+            "manage_informations": self.load_icon("informations_icon.png", size=(56, 56)),
+            "manage_clues": self.load_icon("clues_icon.png", size=(56, 56)),
+            "export_scenarios": self.load_icon("export_icon.png", size=(56, 56)),
+            "gm_screen": self.load_icon("gm_screen_icon.png", size=(56, 56)),
+            "npc_graph": self.load_icon("npc_graph_icon.png", size=(56, 56)),
+            "pc_graph": self.load_icon("pc_graph_icon.png", size=(56, 56)),
+            "faction_graph": self.load_icon("faction_graph_icon.png", size=(56, 56)),
+            "scenario_graph": self.load_icon("scenario_graph_icon.png", size=(56, 56)),
+            "generate_portraits": self.load_icon("generate_icon.png", size=(56, 56)),
+            "associate_portraits": self.load_icon("associate_icon.png", size=(56, 56)),
+            "import_scenario": self.load_icon("import_icon.png", size=(56, 56)),
+            "export_foundry": self.load_icon("export_foundry_icon.png", size=(56, 56))
         }
 
-    def load_icon(self, file_name, size=(48, 48)):
+    def load_icon(self, file_name, size=(56, 56)):
         path = os.path.join("assets", file_name)
         try:
             pil_image = Image.open(path)
