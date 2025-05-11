@@ -34,6 +34,7 @@ from db.db import load_schema_from_json, initialize_db
 from modules.factions.faction_graph_editor import FactionGraphEditor
 from modules.pcs.display_pcs import display_pcs_in_banner
 from modules.generic.generic_list_selection_view import GenericListSelectionView
+from modules.maps.display_map import select_map
 
 
 # Set up CustomTkinter appearance
@@ -97,6 +98,7 @@ class MainWindow(ctk.CTk):
             "manage_objects": self.load_icon("objects_icon.png", size=(48, 48)),
             "manage_informations": self.load_icon("informations_icon.png", size=(48, 48)),
             "manage_clues": self.load_icon("clues_icon.png", size=(48, 48)),
+            "manage_maps": self.load_icon("maps_icon.png", size=(48, 48)),
             "export_scenarios": self.load_icon("export_icon.png", size=(48, 48)),
             "gm_screen": self.load_icon("gm_screen_icon.png", size=(48, 48)),
             "npc_graph": self.load_icon("npc_graph_icon.png", size=(48, 48)),
@@ -106,7 +108,8 @@ class MainWindow(ctk.CTk):
             "generate_portraits": self.load_icon("generate_icon.png", size=(48, 48)),
             "associate_portraits": self.load_icon("associate_icon.png", size=(48, 48)),
             "import_scenario": self.load_icon("import_icon.png", size=(48, 48)),
-            "export_foundry": self.load_icon("export_foundry_icon.png", size=(48, 48))
+            "export_foundry": self.load_icon("export_foundry_icon.png", size=(48, 48)),
+            "map_tool": self.load_icon("map_tool_icon.png", size=(48, 48)),
         }
 
     def load_icon(self, file_name, size=(48, 48)):
@@ -171,6 +174,7 @@ class MainWindow(ctk.CTk):
             ("manage_objects", "Manage Objects", lambda: self.open_entity("objects")),
             ("manage_informations", "Manage Informations", lambda: self.open_entity("informations")),
             ("manage_clues", "Manage Clues", lambda: self.open_entity("clues")),
+            ("manage_maps", "Manage Maps", lambda: self.open_entity("maps")),
             ("export_scenarios", "Export Scenarios", self.preview_and_export_scenarios),
             ("gm_screen", "Open GM Screen", self.open_gm_screen),
             ("npc_graph", "Open NPC Graph Editor", self.open_npc_graph_editor),
@@ -180,7 +184,11 @@ class MainWindow(ctk.CTk):
             ("generate_portraits", "Generate Portraits", self.generate_missing_portraits),
             ("associate_portraits", "Associate NPC Portraits", self.associate_npc_portraits),
             ("import_scenario", "Import Scenario", self.open_scenario_importer),
-            ("export_foundry", "Export Scenarios for Foundry", self.export_foundry)
+            ("export_foundry", "Export Scenarios for Foundry", self.export_foundry),
+            ("map_tool", "Map Tooly", self.map_tool),
+            
+            
+            
         ]
         self.icon_buttons = []
         for idx, (icon_key, tooltip, cmd) in enumerate(icons_list):
@@ -396,6 +404,9 @@ class MainWindow(ctk.CTk):
         self.faction_wrapper = GenericModelWrapper("factions")
         self.object_wrapper = GenericModelWrapper("objects")
         self.creature_wrapper = GenericModelWrapper("creatures")
+        self.clues_wrapper = GenericModelWrapper("clues")
+        self.informations_wrapper = GenericModelWrapper("informations")
+        self.maps_wrapper = GenericModelWrapper("maps")
 
     def open_faction_graph_editor(self):
         self._graph_type = 'faction'
@@ -1221,6 +1232,9 @@ class MainWindow(ctk.CTk):
         if self.current_gm_view:
             self.current_gm_view.open_global_search()
          # otherwise ignore silently
+
+    def map_tool(self):
+        select_map(self, self.maps_wrapper, load_template("maps"))
 
 if __name__ == "__main__":
     app = MainWindow()

@@ -201,18 +201,27 @@ class GenericEditorWindow(ctk.CTkToplevel):
         # --- Reorder fields so that "Portrait" comes first ---
         fields = self.template["fields"]
         portrait_field = None
+        image_field = None
         other_fields = []
         for field in fields:
             if field["name"] == "Portrait":
                 portrait_field = field
+            elif field["name"] == "Image":
+                image_field = field
             else:
                 other_fields.append(field)
-
         if portrait_field:
             ctk.CTkLabel(self.scroll_frame, text=portrait_field["name"]).pack(pady=(5, 0), anchor="w")
             self.create_portrait_field(portrait_field)
+        if image_field:
+            ctk.CTkLabel(self.scroll_frame, text=image_field["name"]).pack(pady=(5, 0), anchor="w")
+            self.create_image_field(image_field)
 
         for field in other_fields:
+            if (field["name"] == "FogMaskPath"):
+                continue
+            if (field["name"] == "Image"):
+                continue
             ctk.CTkLabel(self.scroll_frame, text=field["name"]).pack(pady=(5, 0), anchor="w")
             if field["type"] == "longtext":
                 self.create_longtext_field(field)
@@ -224,6 +233,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 self.create_file_field(field)
             else:
                 self.create_text_entry(field)
+                
 
         self.create_action_bar()
 
@@ -696,6 +706,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
     # === Sauvegarde ===
     def save(self):
         for field in self.template["fields"]:
+            if field["name"] in ["FogMaskPath"]:
+                continue
             widget = self.field_widgets[field["name"]]
             if field["type"] == "longtext":
                 data = widget.get_text_data()
@@ -710,6 +722,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
                 self.item[field["name"]] = getattr(self, "attachment_filename", "")
             elif field["name"] == "Portrait":
                 self.item[field["name"]] = self.portrait_path
+            elif field["name"] == "Image":
+                self.item[field["name"]] = self.image_path
             elif field["type"] == "boolean":
                 # widget is stored as (option_menu, StringVar); convert to Boolean.
                 self.item[field["name"]] = True if widget[1].get() == "True" else False
@@ -748,6 +762,34 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         self.field_widgets[field["name"]] = self.portrait_path
     
+    def create_image_field(self, field):
+        # Create a main frame for the image field
+        frame = ctk.CTkFrame(self.scroll_frame)
+        frame.pack(fill="x", pady=5)
+
+        self.image_path = self.item.get("Image", "")
+
+        # Create a separate frame for the image and center it
+        image_frame = ctk.CTkFrame(frame)
+        image_frame.pack(fill="x", pady=5)
+
+        if self.image_path and os.path.exists(self.image_path):
+            image = Image.open(self.image_path).resize((256, 256))
+            self.image_image = ctk.CTkImage(light_image=image, size=(256, 256))
+            self.image_label = ctk.CTkLabel(image_frame, image=self.image_image, text="")
+        else:
+            self.image_label = ctk.CTkLabel(image_frame, text="[No Image]")
+
+        # Pack without specifying a side to center the widget
+        self.image_label.pack(pady=5)
+
+        # Create a frame for the buttons and pack them (they'll appear below the centered image)
+        button_frame = ctk.CTkFrame(frame)
+        button_frame.pack(pady=5)
+
+        ctk.CTkButton(button_frame, text="Select Image", command=self.select_image).pack(side="left", padx=5)
+        self.field_widgets[field["name"]] = self.image_path
+
     def launch_swarmui(self):
         global SWARMUI_PROCESS
         # Retrieve the SwarmUI path from config.ini
@@ -906,6 +948,42 @@ class GenericEditorWindow(ctk.CTkToplevel):
         if file_path:
             self.portrait_path = self.copy_and_resize_portrait(file_path)
             self.portrait_label.configure(text=os.path.basename(self.portrait_path))
+    
+    def select_image(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Image",
+            filetypes=[
+                ("Image Files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.webp"),
+                ("PNG Files", "*.png"),
+                ("JPEG Files", "*.jpg;*.jpeg"),
+                ("GIF Files", "*.gif"),
+                ("Bitmap Files", "*.bmp"),
+                ("WebP Files", "*.webp"),
+                ("All Files", "*.*")
+            ]
+        )
+
+        if file_path:
+            self.image_path = self.copy_and_resize_image(file_path)
+            self.image_label.configure(text=os.path.basename(self.image_path))
+
+    def copy_and_resize_image(self, src_path):
+        IMAGE_FOLDER = "assets/images"
+        MAX_IMAGE_SIZE = (1920, 1080)
+
+        os.makedirs(IMAGE_FOLDER, exist_ok=True)
+
+        image_name = self.item.get("Name", "Unnamed").replace(" ", "_")
+        ext = os.path.splitext(src_path)[-1].lower()
+        dest_filename = f"{image_name}_{id(self)}{ext}"
+        dest_path = os.path.join(IMAGE_FOLDER, dest_filename)
+
+        with Image.open(src_path) as img:
+            img = img.convert("RGB")
+            img.thumbnail(MAX_IMAGE_SIZE)
+            img.save(dest_path)
+
+        return dest_path
 
     def copy_and_resize_portrait(self, src_path):
         PORTRAIT_FOLDER = "assets/portraits"
