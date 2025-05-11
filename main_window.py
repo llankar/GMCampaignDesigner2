@@ -87,7 +87,7 @@ class MainWindow(ctk.CTk):
 
     def load_icons(self):
         self.icons = {
-            "change_db": self.load_icon("database_icon.png", size=(64, 64)),
+            "change_db": self.load_icon("database_icon.png", size=(48, 48)),
             "swarm_path": self.load_icon("folder_icon.png", size=(48, 48)),
             "manage_scenarios": self.load_icon("scenario_icon.png", size=(48, 48)),
             "manage_pcs": self.load_icon("pc_icon.png", size=(48, 48)),
@@ -158,6 +158,7 @@ class MainWindow(ctk.CTk):
 
     def create_icon_grid(self):
         icons_frame = ctk.CTkFrame(self.sidebar_inner, fg_color="transparent")
+        
         icons_frame.pack(fill="both", expand=True, padx=5, pady=5)
         columns = 2
         for col in range(columns):
