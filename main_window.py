@@ -87,32 +87,32 @@ class MainWindow(ctk.CTk):
 
     def load_icons(self):
         self.icons = {
-            "change_db": self.load_icon("database_icon.png", size=(48, 48)),
-            "swarm_path": self.load_icon("folder_icon.png", size=(48, 48)),
-            "manage_scenarios": self.load_icon("scenario_icon.png", size=(48, 48)),
-            "manage_pcs": self.load_icon("pc_icon.png", size=(48, 48)),
-            "manage_npcs": self.load_icon("npc_icon.png", size=(48, 48)),
-            "manage_creatures": self.load_icon("creature_icon.png", size=(48, 48)),
-            "manage_factions": self.load_icon("faction_icon.png", size=(48, 48)),
-            "manage_places": self.load_icon("places_icon.png", size=(48, 48)),
-            "manage_objects": self.load_icon("objects_icon.png", size=(48, 48)),
-            "manage_informations": self.load_icon("informations_icon.png", size=(48, 48)),
-            "manage_clues": self.load_icon("clues_icon.png", size=(48, 48)),
-            "manage_maps": self.load_icon("maps_icon.png", size=(48, 48)),
-            "export_scenarios": self.load_icon("export_icon.png", size=(48, 48)),
-            "gm_screen": self.load_icon("gm_screen_icon.png", size=(48, 48)),
-            "npc_graph": self.load_icon("npc_graph_icon.png", size=(48, 48)),
-            "pc_graph": self.load_icon("pc_graph_icon.png", size=(48, 48)),
-            "faction_graph": self.load_icon("faction_graph_icon.png", size=(48, 48)),
-            "scenario_graph": self.load_icon("scenario_graph_icon.png", size=(48, 48)),
-            "generate_portraits": self.load_icon("generate_icon.png", size=(48, 48)),
-            "associate_portraits": self.load_icon("associate_icon.png", size=(48, 48)),
-            "import_scenario": self.load_icon("import_icon.png", size=(48, 48)),
-            "export_foundry": self.load_icon("export_foundry_icon.png", size=(48, 48)),
-            "map_tool": self.load_icon("map_tool_icon.png", size=(48, 48)),
+            "change_db": self.load_icon("database_icon.png", size=(60, 60)),
+            "swarm_path": self.load_icon("folder_icon.png", size=(60, 60)),
+            "manage_scenarios": self.load_icon("scenario_icon.png", size=(60, 60)),
+            "manage_pcs": self.load_icon("pc_icon.png", size=(60, 60)),
+            "manage_npcs": self.load_icon("npc_icon.png", size=(60, 60)),
+            "manage_creatures": self.load_icon("creature_icon.png", size=(60, 60)),
+            "manage_factions": self.load_icon("faction_icon.png", size=(60, 60)),
+            "manage_places": self.load_icon("places_icon.png", size=(60, 60)),
+            "manage_objects": self.load_icon("objects_icon.png", size=(60, 60)),
+            "manage_informations": self.load_icon("informations_icon.png", size=(60, 60)),
+            "manage_clues": self.load_icon("clues_icon.png", size=(60, 60)),
+            "manage_maps": self.load_icon("maps_icon.png", size=(60, 60)),
+            "export_scenarios": self.load_icon("export_icon.png", size=(60, 60)),
+            "gm_screen": self.load_icon("gm_screen_icon.png", size=(60, 60)),
+            "npc_graph": self.load_icon("npc_graph_icon.png", size=(60, 60)),
+            "pc_graph": self.load_icon("pc_graph_icon.png", size=(60, 60)),
+            "faction_graph": self.load_icon("faction_graph_icon.png", size=(60, 60)),
+            "scenario_graph": self.load_icon("scenario_graph_icon.png", size=(60, 60)),
+            "generate_portraits": self.load_icon("generate_icon.png", size=(60, 60)),
+            "associate_portraits": self.load_icon("associate_icon.png", size=(60, 60)),
+            "import_scenario": self.load_icon("import_icon.png", size=(60, 60)),
+            "export_foundry": self.load_icon("export_foundry_icon.png", size=(60, 60)),
+            "map_tool": self.load_icon("map_tool_icon.png", size=(60, 60)),
         }
 
-    def load_icon(self, file_name, size=(48, 48)):
+    def load_icon(self, file_name, size=(60, 60)):
         path = os.path.join("assets", file_name)
         try:
             pil_image = Image.open(path)
@@ -132,14 +132,14 @@ class MainWindow(ctk.CTk):
         logo_path = os.path.join("assets", "GMCampaignDesigner logo.png")
         if os.path.exists(logo_path):
             logo_image = Image.open(logo_path).resize((60, 60))
-            logo = ctk.CTkImage(light_image=logo_image, dark_image=logo_image, size=(100, 100))
+            logo = ctk.CTkImage(light_image=logo_image, dark_image=logo_image, size=(80, 80))
             self.logo_image = logo
             logo_label = ctk.CTkLabel(self.sidebar_inner, image=logo, text="")
             logo_label.pack(pady=(0, 3), anchor="center")
 
         # Header label
         header_label = ctk.CTkLabel(self.sidebar_inner, text="Campaign Tools", font=("Helvetica", 16, "bold"))
-        header_label.pack(pady=(0, 5), anchor="center")
+        header_label.pack(pady=(0, 2), anchor="center")
 
         # Database display container
         db_container = ctk.CTkFrame(self.sidebar_inner, fg_color="transparent",
@@ -152,14 +152,14 @@ class MainWindow(ctk.CTk):
         db_name = os.path.splitext(os.path.basename(db_path))[0]
         self.db_name_label = ctk.CTkLabel(db_container, text=db_name,
                                         font=("Segoe UI", 14, "italic"), fg_color="transparent", text_color="white")
-        self.db_name_label.pack(pady=(0, 3), anchor="center")
+        self.db_name_label.pack(pady=(0, 1), anchor="center")
 
         self.create_icon_grid()
 
     def create_icon_grid(self):
         icons_frame = ctk.CTkFrame(self.sidebar_inner, fg_color="transparent")
         
-        icons_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        icons_frame.pack(fill="both", expand=True, padx=2, pady=2)
         columns = 2
         for col in range(columns):
             icons_frame.grid_columnconfigure(col, weight=1)
@@ -196,7 +196,7 @@ class MainWindow(ctk.CTk):
             row = idx // columns
             col = idx % columns
             btn = create_icon_button(icons_frame, self.icons[icon_key], tooltip, cmd)
-            btn.grid(row=row, column=col, padx=5, pady=5)
+            btn.grid(row=row, column=col, padx=2, pady=2)
             self.icon_buttons.append(btn)
 
     def create_content_area(self):
