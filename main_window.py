@@ -87,7 +87,7 @@ class MainWindow(ctk.CTk):
 
     def load_icons(self):
         self.icons = {
-            "change_db": self.load_icon("database_icon.png", size=(48, 48)),
+            "change_db": self.load_icon("database_icon.png", size=(64, 64)),
             "swarm_path": self.load_icon("folder_icon.png", size=(48, 48)),
             "manage_scenarios": self.load_icon("scenario_icon.png", size=(48, 48)),
             "manage_pcs": self.load_icon("pc_icon.png", size=(48, 48)),
