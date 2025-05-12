@@ -9,6 +9,7 @@ from modules.ui.icon_button import create_icon_button
 from modules.ui.image_viewer import _get_monitors
 
 # ─ Module‐level state ───────────────────────────────────────────
+
 _self = None
 _maps = {}
 map_canvas = None
@@ -19,6 +20,10 @@ map_mask_tk = None
 map_brush_size = 30
 map_brush_shape = "Square"  # "Circle" or "Square"
 _mask_id = None
+# keep fullscreen window & widgets around so we can update later
+_fullscreen_win   = None
+_fullscreen_label = None
+_fullscreen_photo = None
 
 # ─ Brush helpers ─────────────────────────────────────────────────
 def _set_brush_size(v):
@@ -204,13 +209,18 @@ def _save_fog_mask(item):
     mask_to_save = map_mask_img.resize(orig.size, Image.NEAREST)
     mask_to_save.save(item["FogMaskPath"])
     _self.maps_wrapper.save_items(list(_maps.values()))
-    messagebox.showinfo("Saved", f"Mask saved to:\n{item['FogMaskPath']}")
+    # First update the second‐screen view…
+    _update_fullscreen_map(item)
+    if _fullscreen_win and _fullscreen_win.winfo_exists():
+        # force a redraw
+        _fullscreen_win.update_idletasks()
 
 def _show_fullscreen_map(item):
     """
     Display the map on the second monitor with a FULLY-OPAQUE fog
     everywhere the GM hasn’t cleared it, stretched to fill the screen.
     """
+    global _fullscreen_win, _fullscreen_label, _fullscreen_photo, map_mask_img
     base_orig = Image.open(item["Image"]).convert("RGBA")
     mask0     = map_mask_img.resize(base_orig.size, Image.NEAREST).convert("RGBA")
 
@@ -230,8 +240,38 @@ def _show_fullscreen_map(item):
     win.overrideredirect(True)
     win.geometry(f"{sw}x{sh}+{sx}+{sy}")
 
-    lbl = tk.Label(win, image=photo, bg="black")
-    lbl.image = photo
-    lbl.pack(fill="both", expand=True)
-
+    _fullscreen_photo = photo
+    _fullscreen_label = tk.Label(win, image=photo, bg="black")
+    _fullscreen_label.image = photo
+    _fullscreen_label.pack(fill="both", expand=True)
+    
     win.bind("<Button-1>", lambda e: win.destroy())
+    _fullscreen_win = win
+
+def _update_fullscreen_map(item):
+   """Re-render the fullscreen view if it’s already open."""
+  
+   if _fullscreen_win is None or not _fullscreen_win.winfo_exists():
+       return
+
+   # regenerate composite exactly as in _show_fullscreen_map
+   base_orig = Image.open(item["Image"]).convert("RGBA")
+   mask0     = map_mask_img.resize(base_orig.size, Image.NEAREST).convert("RGBA")
+
+   alpha     = mask0.split()[3]
+   bin_alpha = alpha.point(lambda p: 255 if p > 0 else 0)
+   mask_full = Image.new("RGBA", base_orig.size, (0,0,0,255))
+   mask_full.putalpha(bin_alpha)
+
+   comp = Image.alpha_composite(base_orig, mask_full).convert("RGB")
+
+   # resize to current monitor geometry
+   mons = _get_monitors()
+   sx, sy, sw, sh = mons[1] if len(mons) > 1 else mons[0]
+   comp = comp.resize((sw, sh), Image.LANCZOS)
+
+   # update PhotoImage and label
+   new_photo = ImageTk.PhotoImage(comp)
+   _fullscreen_photo = new_photo
+   _fullscreen_label.config(image=new_photo)
+   _fullscreen_label.image = new_photo
