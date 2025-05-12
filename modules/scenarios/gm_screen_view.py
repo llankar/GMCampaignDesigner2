@@ -13,6 +13,7 @@ from modules.npcs.npc_graph_editor import NPCGraphEditor
 from modules.pcs.pc_graph_editor import PCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
 from modules.generic.generic_list_selection_view import GenericListSelectionView   
+import random
 
 PORTRAIT_FOLDER = "assets/portraits"
 MAX_PORTRAIT_SIZE = (64, 64)  # Thumbnail size for lists
@@ -94,7 +95,16 @@ class GMScreenView(ctk.CTkFrame):
             width=40,
             command=self.add_new_tab
         )
+        
+        self.random_button = ctk.CTkButton(
+            self.tab_bar,
+            text="?",
+            width=40,
+            command=self._add_random_entity
+        )
+        self.random_button.pack(side="left", padx=2, pady=5)
         self.add_button.pack(side="left", padx=2, pady=5)
+        self.random_button.pack(side="left", padx=2, pady=5)
 
         # Main content area for scenario details
         self.content_area = ctk.CTkScrollableFrame(self)
@@ -275,9 +285,10 @@ class GMScreenView(ctk.CTkFrame):
             f.pack_forget()
             f.place(in_=self.tab_bar, x=fx, y=fy)
 
-        # 4) Hide the “+” so it doesn’t get in the way
+        # 4) Hide the “+” and "?" so it doesn’t get in the way
         self.add_button.pack_forget()
-
+        self.random_button.pack_forget()
+        
         # 5) Lift the one we’re dragging above the others
         self.tabs[name]["button_frame"].lift()
 
@@ -531,17 +542,33 @@ class GMScreenView(ctk.CTkFrame):
 
     def reposition_add_button(self):
         self.add_button.pack_forget()
+        self.random_button.pack_forget()
         if self.tab_order:
             last = self.tabs[self.tab_order[-1]]["button_frame"]
-            self.add_button.pack(
-                side="left",
-                padx=2,
-                pady=5,
-                after=last
-            )
+            self.add_button.pack(side="left", padx=2, pady=5, after=last)
+            self.random_button.pack(side="left", padx=2, pady=5, after=self.add_button)
         else:
             self.add_button.pack(side="left", padx=2, pady=5)
+            self.random_button.pack(side="left", padx=2, pady=5)
     
+    def _add_random_entity(self):
+        """Pick a random NPC, Creature, Object, Information or Clue and open it.
+        """
+        types = ["NPCs", "Creatures", "Objects", "Informations", "Clues"]
+        etype = random.choice(types)
+        wrapper = self.wrappers.get(etype)
+        if not wrapper:
+            return
+        items = wrapper.load_items()
+        if not items:
+            messagebox.showinfo("Random Entity", f"No items found for {etype}.")
+            return
+        # decide which key to use
+        key = "Title" if etype in ("Scenarios", "Informations") else "Name"
+        choice = random.choice(items)
+        name = choice.get(key)
+        # open it in a new tab
+        self.open_entity_tab(etype, name)
 
     def show_tab(self, name):
         # Hide content for the current tab if it's not detached.
