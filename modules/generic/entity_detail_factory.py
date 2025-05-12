@@ -8,6 +8,7 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 from tkinter import Toplevel, messagebox
 from tkinter import ttk
 from modules.ui.image_viewer import show_portrait
+from modules.generic.generic_editor_window import GenericEditorWindow
 
 # Configure portrait size.
 PORTRAIT_SIZE = (200, 200)
@@ -457,6 +458,40 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
     """
     frame = ctk.CTkFrame(master)
     frame.pack(fill="both", expand=True, padx=20, pady=10)
+    edit_btn = ctk.CTkButton(
+        frame,
+        text="Edit",
+        command=lambda et=entity_type, en=scenario_item: EditWindow(
+            frame,
+            en,
+            load_template(et.lower()),
+            wrappers[et],
+            creation_mode=False,
+            on_save=rebuild_frame
+        )
+    )
+    edit_btn.pack(anchor="ne", padx=10, pady=(0, 10))
+    def rebuild_frame(updated_item):
+        # 1) Destroy the old frame
+        frame.destroy()
+
+        # 2) Build a fresh one and pack it
+        new_frame = create_scenario_detail_frame(
+            entity_type,
+            updated_item,
+            master,
+            open_entity_callback
+        )
+        new_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # 3) Update the GM-view’s tabs dict so show_tab() refers to the new widget
+        #    open_entity_callback is bound to the GMScreenView instance
+        gm_view = open_entity_callback.__self__
+        # pick the right key—"Title" for scenarios, else "Name"
+        key_field = "Title" if entity_type == "Scenarios" else "Name"
+        tab_name = updated_item.get(key_field)
+        gm_view.tabs[tab_name]["content_frame"] = new_frame
+        
     ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=1)
     # ——— HEADER ———
     CTkLabel(
@@ -517,6 +552,29 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
     ttk.Separator(frame, orient="horizontal").pack(fill="x", pady=10)
     return frame
 
+def EditWindow(self, item, template, model_wrapper, creation_mode=False, on_save=None):
+    # load the full list so saves actually persist
+    items = model_wrapper.load_items()
+    key_field = "Title" if model_wrapper.entity_type == "scenarios" else "Name"
+    # 3) Find the same dict in our list and edit *that*
+    target = next((it for it in items if it.get(key_field) == item.get(key_field)), None)
+    if target is None:
+        # Fallback: fall back to editing the passed-in dict, and append if new
+        target = item
+        items.append(target)
+    editor = GenericEditorWindow(
+        self, target, template,
+        model_wrapper, creation_mode
+    )
+    self.master.wait_window(editor)
+    if getattr(editor, "saved", False):
+        model_wrapper.save_items(items)
+        # let the detail frame know it should refresh itself
+        if callable(on_save):
+            on_save(target)
+   # 2) Identify the unique key field ("Title" for scenarios, else "Name")
+  
+        
 def create_entity_detail_frame(entity_type, entity, master, open_entity_callback=None):
     """
     Routes Scenarios through our custom header/body and
@@ -535,6 +593,45 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
     # Create the actual content frame inside the scrollable container.
     content_frame = ctk.CTkFrame(master)
     content_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    # — Add an “Edit” button so GMs can open the generic editor for this entity —
+    
+    # rebuild_frame will clear & re-populate this same content_frame
+    def rebuild_frame(updated_item):
+        # 1) Destroy the old frame
+        content_frame.destroy()
+
+        # 2) Build a fresh one and pack it
+        new_frame = create_entity_detail_frame(
+            entity_type,
+            updated_item,
+            master,
+            open_entity_callback
+        )
+        new_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # 3) Update the GM-view’s tabs dict so show_tab() refers to the new widget
+        #    open_entity_callback is bound to the GMScreenView instance
+        gm_view = open_entity_callback.__self__
+        # pick the right key—"Title" for scenarios, else "Name"
+        key_field = "Title" if entity_type == "Scenarios" else "Name"
+        tab_name = updated_item.get(key_field)
+        gm_view.tabs[tab_name]["content_frame"] = new_frame
+        
+
+    edit_btn = ctk.CTkButton(
+       content_frame,
+       text="Edit",
+       command=lambda et=entity_type, en=entity: EditWindow(
+           content_frame,
+           en,
+           load_template(et.lower()),
+           wrappers[et],
+           creation_mode=False,
+           on_save=rebuild_frame
+       )
+   )
+       
+    edit_btn.pack(anchor="ne", padx=10, pady=(0, 10))
 
     # This local cache is used for portrait images (if any).
     content_frame.portrait_images = {}
