@@ -6,9 +6,9 @@ from PIL import Image, ImageTk, ImageDraw, ImageOps
 
 from modules.generic.generic_list_selection_view import GenericListSelectionView
 from modules.ui.icon_button import create_icon_button
-from modules.ui.image_viewer import _get_monitors
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
+from modules.ui.image_viewer import _get_monitors, show_portrait
 
 # ─ Module‐level state ───────────────────────────────────────────
 _current_map = None
@@ -304,8 +304,23 @@ def _on_display_map(entity_type, entity_name):
         add_token_to_canvas(rec["path"], rec["x"], rec["y"], persist=False)
     global _token_menu
     _token_menu = tk.Menu(map_canvas, tearoff=0)
+    _token_menu.add_command(label="Show Portrait", command=lambda: show_token_portrait(_menu_token_id))
+    _token_menu.add_separator()
     _token_menu.add_command(label="Delete Token", command=lambda: delete_token(_menu_token_id))
+def show_token_portrait(token_id):
+    """
+    Look up the token’s image path and pop up a full‐screen portrait.
+    """
+    # find the token record
+    tok = next((t for t in _tokens if t["id"] == token_id), None)
+    if not tok:
+        messagebox.showerror("Error", "Token not found.")
+        return
 
+    path = tok["path"]
+    # Use the same full‐screen viewer as NPCGraphEditor does :contentReference[oaicite:2]{index=2}:contentReference[oaicite:3]{index=3}
+    show_portrait(path)
+    
 def on_token_right_click(evt):
     """
     Show context menu when right-clicking a token.
