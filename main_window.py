@@ -707,7 +707,7 @@ class MainWindow(ctk.CTk):
 
         # For each entity, load its template and build a CREATE TABLE
         for entity in ("pcs","npcs", "scenarios", "factions",
-                    "places", "objects", "creatures", "informations","clues"):
+                    "places", "objects", "creatures", "informations","clues", "maps"):
 
             tpl = load_template(entity)   # loads modules/<entity>/<entity>_template.json
             cols = []

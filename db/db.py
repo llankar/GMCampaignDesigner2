@@ -91,7 +91,8 @@ def update_table_schema(conn, cursor):
         "creatures",      # new one
         "informations",
         "clues",
-        "pcs"
+        "pcs",
+        "maps"
     ]
 
     for ent in entities:
