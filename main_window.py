@@ -34,7 +34,7 @@ from db.db import load_schema_from_json, initialize_db
 from modules.factions.faction_graph_editor import FactionGraphEditor
 from modules.pcs.display_pcs import display_pcs_in_banner
 from modules.generic.generic_list_selection_view import GenericListSelectionView
-from modules.maps.display_map import select_map
+from modules.maps.display_map_controller import DisplayMapController
 
 
 # Set up CustomTkinter appearance
@@ -1235,7 +1235,15 @@ class MainWindow(ctk.CTk):
          # otherwise ignore silently
 
     def map_tool(self):
-        select_map(self, self.maps_wrapper, load_template("maps"))
+        # 1) wrap your 'maps' table
+        maps_wrapper = GenericModelWrapper("maps")
+
+        # 2) instantiate the controller,
+        #    passing the frame as parent
+        self.map_controller = DisplayMapController(
+            self.content_frame,
+            maps_wrapper, load_template("maps")
+        )
 
 if __name__ == "__main__":
     app = MainWindow()
