@@ -968,7 +968,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             self.image_label.configure(text=os.path.basename(self.image_path))
 
     def copy_and_resize_image(self, src_path):
-        IMAGE_FOLDER = "assets/images"
+        IMAGE_FOLDER = "assets/images/map_images"
         MAX_IMAGE_SIZE = (1920, 1080)
 
         os.makedirs(IMAGE_FOLDER, exist_ok=True)

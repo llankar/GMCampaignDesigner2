@@ -10,6 +10,7 @@ from modules.helpers.template_loader import load_template
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.ui.image_viewer import _get_monitors, show_portrait
 
+
 # ─ Module‐level state ───────────────────────────────────────────
 _current_map      = None
 _self             = None
@@ -36,8 +37,11 @@ map_zoom          = 1.0              # current zoom factor
 map_base_pil      = None             # fit-to-screen copy of map
 map_base_orig     = None             # pristine full-res map
 gm_view_size      = (0, 0)           # (w, h) of the GM canvas at 100%
-_base_id          = None             # canvas item ID for the base map image
-
+_base_id          = None   
+_marker_pos = None   # holds (wx, wy) while the marker is active# canvas item ID for the base map image
+# ── after your other module-globals ─────────────────────────
+_marker_after_id = None     # ID of the .after() call
+_marker_id       = None     # canvas ID of the red circle on main canvas
 _templates = {
     "NPC":      load_template("npcs"),
     "Creature": load_template("creatures")
@@ -63,7 +67,41 @@ def select_map(self, maps_wrapper, map_template):
         on_select_callback=_on_display_map
     )
     selector.pack(fill="both", expand=True)
+    
+def _show_marker():
+    """"Actually draw the red circle at _marker_pos on both canvases."""
+    global _marker_id
+    if not _marker_pos:
+        return
+    wx, wy = _marker_pos
+    r = 20
+    # draw on GM canvas
+    _marker_id = map_canvas.create_oval(
+        wx-r, wy-r, wx+r, wy+r,
+        outline="red", width=3
+    )
+    # redraw fullscreen (pass the world‐pos)
+    if _fullscreen_win and _fullscreen_win.winfo_exists():
+        _update_fullscreen_map(_current_map, marker_world=_marker_pos)
 
+def _end_marker(evt):
+    """On release: cancel or remove the marker everywhere."""
+    global _marker_after_id, _marker_id, _marker_pos
+    # cancel pending long‐press
+    if _marker_after_id:
+        map_canvas.after_cancel(_marker_after_id)
+        _marker_after_id = None
+
+    # remove from GM canvas
+    if _marker_id:
+        map_canvas.delete(_marker_id)
+        _marker_id = None
+
+    # clear stored pos and update fullscreen to erase it
+    _marker_pos = None
+    if _fullscreen_win and _fullscreen_win.winfo_exists():
+        _update_fullscreen_map(_current_map, marker_world=None)
+        
 def on_entity_selected(entity_type, entity_name, picker_frame):
     """
     Called when user picks an NPC or Creature in the selection dialog.
@@ -348,9 +386,9 @@ def _on_display_map(entity_type, entity_name):
     for icon, tip, cmd in [
         (icons["add"],   "Add Fog",    lambda: setattr(_self, "map_mode", "add")),
         (icons["rem"],   "Remove Fog", lambda: setattr(_self, "map_mode", "remove")),
-        (icons["clear"], "Clear Mask", lambda: _clear_mask()),
-        (icons["reset"], "Reset Mask", lambda: _reset_mask()),
-        (icons["save"],  "Save Mask",  lambda: _save_fog_mask(item)),
+        (icons["clear"], "Clear Fog", lambda: _clear_mask()),
+        (icons["reset"], "Reset Fog", lambda: _reset_mask()),
+        (icons["save"],  "Save Image",  lambda: _save_fog_mask(item)),
         (icons["npc"],   "Add NPC",    lambda: open_entity_picker("NPC")),
         (icons["creat"], "Add Creature", lambda: open_entity_picker("Creature")),
         (icons["fs"],    "Fullscreen", lambda: _show_fullscreen_map(item)),
@@ -385,13 +423,18 @@ def _on_display_map(entity_type, entity_name):
     map_canvas.tag_bind("token", "<B1-Motion>",       on_token_move)
     map_canvas.tag_bind("token", "<ButtonRelease-1>", on_token_release)
     map_canvas.tag_bind("token", "<ButtonRelease-3>", on_token_right_click)
+    map_canvas.bind("<Button-2>", _center_view_on_click)
+    # long-press marker bindings
+    map_canvas.bind("<ButtonPress-1>", _begin_marker, add="+")
+    map_canvas.bind("<ButtonRelease-1>", _end_marker, add="+")
+    
     # zoom with Ctrl+wheel
-    map_canvas.bind("<Control-MouseWheel>", _on_zoom)
+    map_canvas.bind("<MouseWheel>", _on_zoom)
     map_canvas.bind("<Control-Button-4>",   _on_zoom)
     map_canvas.bind("<Control-Button-5>",   _on_zoom)
 
     # painting bindings
-    map_canvas.bind("<Button-1>",    _on_paint)
+    map_canvas.bind("<Button-1>",    _on_paint, add="+")
     map_canvas.bind("<B1-Motion>",   _on_paint)
 
     # spawn saved tokens
@@ -405,73 +448,123 @@ def _on_display_map(entity_type, entity_name):
     _token_menu.add_separator()
     _token_menu.add_command(label="Delete Token", command=lambda: delete_token(_menu_token_id))
 
+def _center_view_on_click(event):
+    """
+    Recenters the view so that the point you middle‐click (or long‐press)
+    ends up in the exact center of the canvas.
+    """
+    # 1) Canvas size in pixels
+    canvas_w = map_canvas.winfo_width()
+    canvas_h = map_canvas.winfo_height()
+
+    # 2) Full map size *after* zoom
+    zoomed_w = int(gm_view_size[0] * map_zoom)
+    zoomed_h = int(gm_view_size[1] * map_zoom)
+
+    # 3) Figure out how much you *can* scroll
+    scrollable_w = max(0, zoomed_w - canvas_w)
+    scrollable_h = max(0, zoomed_h - canvas_h)
+
+    # 4) World‐coords under the mouse
+    world_x = map_canvas.canvasx(event.x)
+    world_y = map_canvas.canvasy(event.y)
+
+    # 5) Desired top‐left so that world_x/world_y is centered
+    target_x = world_x - canvas_w // 2
+    target_y = world_y - canvas_h // 2
+
+    # 6) Clamp to [0 … scrollable]
+    target_x = min(max(target_x, 0), scrollable_w)
+    target_y = min(max(target_y, 0), scrollable_h)
+
+    # 7) Convert to “fractions” of the *entire* scrollregion
+    fx = target_x / float(zoomed_w) if zoomed_w else 0.0
+    fy = target_y / float(zoomed_h) if zoomed_h else 0.0
+
+    # 8) Scroll!
+    map_canvas.xview_moveto(fx)
+    map_canvas.yview_moveto(fy)
+
+    # 9) Finally, reposition your base & mask so they stay aligned
+    off_x = map_canvas.canvasx(0)
+    off_y = map_canvas.canvasy(0)
+    map_canvas.coords(_base_id, -off_x, -off_y)
+    map_canvas.coords(_mask_id, -off_x, -off_y)
+
+    print(f"[CENTER] mouse_world=({world_x:.1f}, {world_y:.1f})")
+    print(f"[CENTER] scrollable=({scrollable_w},{scrollable_h}), "
+        f"target=({target_x:.1f},{target_y:.1f}), fx={fx:.4f}, fy={fy:.4f}")
+
 def _on_zoom(event):
-    """
-    True zoom: resize the base map & the CURRENT mask (map_mask_img),
-    reposition tokens (both position & size), update canvas & mirror on second screen.
-    """
     global map_zoom, map_base_tk, map_mask_tk
 
-    # 1) Determine wheel direction
     delta = getattr(event, "delta", None)
     if delta is None:
         delta = 1 if event.num == 4 else -1
     factor = 1.1 if delta > 0 else 0.9
-    map_zoom *= factor
+    new_zoom = map_zoom * factor
 
-    # 2) Compute new GM-view size
-    w0, h0 = gm_view_size
-    wz, hz = int(w0 * map_zoom), int(h0 * map_zoom)
+    # Canvas and image dimensions
+    canvas_w = map_canvas.winfo_width()
+    canvas_h = map_canvas.winfo_height()
+    base_w, base_h = gm_view_size
+    zoomed_w, zoomed_h = int(base_w * new_zoom), int(base_h * new_zoom)
 
-    # 3) RESAMPLE
-    new_base = map_base_orig.resize((wz, hz), Image.LANCZOS)
-    new_mask = map_mask_img.resize((wz, hz), Image.NEAREST)
+    # Get world coords under mouse BEFORE zoom
+    mouse_world_x = map_canvas.canvasx(event.x) / map_zoom
+    mouse_world_y = map_canvas.canvasy(event.y) / map_zoom
 
-    # 4) Update your PhotoImages
-    map_base_tk = ImageTk.PhotoImage(new_base)
-    map_mask_tk = ImageTk.PhotoImage(new_mask)
+    # Resize map and mask
+    map_base_tk = ImageTk.PhotoImage(map_base_orig.resize((zoomed_w, zoomed_h), Image.LANCZOS))
+    map_mask_tk = ImageTk.PhotoImage(map_mask_orig.resize((zoomed_w, zoomed_h), Image.NEAREST))
     map_canvas.itemconfig(_base_id, image=map_base_tk)
     map_canvas.itemconfig(_mask_id, image=map_mask_tk)
 
-    # 5) Move each token to its scaled coord
+    # Resize/move tokens
     for t in _tokens:
-        x0, y0 = t["x"], t["y"]
-        map_canvas.coords(t["id"], x0 * map_zoom, y0 * map_zoom)
-
-    # 6) ALSO rescale each token image
-    for t in _tokens:
-        orig = t["orig_pil"]
-        w0, h0 = orig.size
-        w1, h1 = max(1, int(w0 * map_zoom)), max(1, int(h0 * map_zoom))
-        resized = orig.resize((w1, h1), Image.LANCZOS)
-        tk_new = ImageTk.PhotoImage(resized)
+        x, y = t["x"], t["y"]
+        map_canvas.coords(t["id"], x * new_zoom, y * new_zoom)
+        resized = t["orig_pil"].resize(
+            (int(t["orig_pil"].width * new_zoom), int(t["orig_pil"].height * new_zoom)),
+            Image.LANCZOS
+        )
         t["pil"] = resized
-        t["tk"]  = tk_new
-        map_canvas.itemconfig(t["id"], image=tk_new)
+        t["tk"] = ImageTk.PhotoImage(resized)
+        map_canvas.itemconfig(t["id"], image=t["tk"])
 
-    # 7) Expand scrollregion for panning
-    map_canvas.config(scrollregion=(0, 0, wz, hz))
+    # Update scroll region
+    map_canvas.config(scrollregion=(0, 0, zoomed_w, zoomed_h))
 
-    # 8) Center the view at the zoom focal point (mouse position)
-    cx = map_canvas.canvasx(event.x)
-    cy = map_canvas.canvasy(event.y)
-    cx_z, cy_z = cx * map_zoom, cy * map_zoom
-    vw = map_canvas.winfo_width()
-    vh = map_canvas.winfo_height()
-    left = cx_z - vw / 2
-    top  = cy_z - vh / 2
-    max_x = wz - vw
-    max_y = hz - vh
-    fx = min(max(left, 0), max_x) / max(wz, 1)
-    fy = min(max(top,  0), max_y) / max(hz, 1)
+    # New target: center the zoomed image on mouse_world_x/y
+    center_x = (mouse_world_x * new_zoom) - (canvas_w // 2)
+    center_y = (mouse_world_y * new_zoom) - (canvas_h // 2)
+
+    # Clamp scroll to valid range
+    max_x = max(0, zoomed_w - canvas_w)
+    max_y = max(0, zoomed_h - canvas_h)
+    scroll_x = min(max(center_x, 0), max_x)
+    scroll_y = min(max(center_y, 0), max_y)
+
+    fx = scroll_x / zoomed_w
+    fy = scroll_y / zoomed_h
     map_canvas.xview_moveto(fx)
     map_canvas.yview_moveto(fy)
 
-    # 9) Mirror to fullscreen if active
-    if _current_map:
-        _update_fullscreen_map(_current_map)
+    # Update image position
+    offset_x = map_canvas.canvasx(0)
+    offset_y = map_canvas.canvasy(0)
+    map_canvas.coords(_base_id, offset_x, offset_y)
+    map_canvas.coords(_mask_id, offset_x, offset_y)
 
-    return "break"
+    map_zoom = new_zoom
+
+    if _current_map:
+        _update_fullscreen_map(_current_map, marker_world=_marker_pos)
+
+    print(f"[ZOOM] zoom={map_zoom:.3f}, mouse_world=({mouse_world_x:.1f}, {mouse_world_y:.1f})")
+    print(f"[ZOOM] center_on=({center_x:.1f}, {center_y:.1f}) → fx={fx:.4f}, fy={fy:.4f}")
+    print(f"[ZOOM] canvas offset = ({offset_x:.1f}, {offset_y:.1f})")
+    
 
 def _on_paint(evt):
     """
@@ -553,28 +646,21 @@ def _ensure_fog_mask(item):
         _self.maps_wrapper.save_items(list(_maps.values()))
     return mask
 
+def _begin_marker(evt):
+    """
+    On press: schedule a long-press after 500 ms,
+    storing the click in world-coords into the global.
+    """
+    global _marker_pos, _marker_after_id
 
-def _on_paint(event):
-    global map_mask_img, map_mask_draw, map_mask_tk, map_canvas, _mask_id
-    mode = getattr(_self, "map_mode", None)
-    if mode not in ("add", "remove"):
-        return
-    x = map_canvas.canvasx(event.x)
-    y = map_canvas.canvasy(event.y)
-    for item in map_canvas.find_overlapping(x, y, x, y):
-        if "token" in map_canvas.gettags(item):
-            return "break"
-    r = map_brush_size
-    c = (0,0,0,128) if mode=="add" else (0,0,0,0)
-    if map_brush_shape == "Circle":
-        map_mask_draw.ellipse([(x-r, y-r), (x+r, y+r)], fill=c)
-    else:
-        map_mask_draw.rectangle([(x-r, y-r), (x+r, y+r)], fill=c)
-    map_mask_tk = ImageTk.PhotoImage(map_mask_img)
-    map_canvas.itemconfig(_mask_id, image=map_mask_tk)
-    return "break"
-
-
+    # record the world-coords immediately
+    _marker_pos = (
+        map_canvas.canvasx(evt.x),
+        map_canvas.canvasy(evt.y)
+    )
+    # schedule the marker to appear in half a second
+    _marker_after_id = map_canvas.after(500, _show_marker)
+    
 def _save_fog_mask(item):
     """
     Save fog mask and persist map (including Tokens).
@@ -620,29 +706,34 @@ def _show_fullscreen_map(item):
     _update_fullscreen_map(item)
 
 
-def _update_fullscreen_map(item):
+def _update_fullscreen_map(item, marker_world=None):
     """
     Rebuild the fullscreen image by:
-      1) compositing base + tokens + fog at zoomed “world” size,
-      2) cropping a sw×sh rectangle centered at the same world-center
-         as your GM canvas,
-      3) pasting into a letterboxed sw×sh RGB canvas.
+      1) compositing base + tokens at zoomed “world” size,
+      2) overlaying the current fog mask as fully opaque,
+      3) cropping a sw×sh rectangle centered at the GM‐canvas center,
+      4) letterboxing that crop into a sw×sh black canvas,
+      5) drawing an optional red marker at marker_world.
     """
-    global _fullscreen_photo
+    global _fullscreen_photo, _marker_pos
 
+    # If caller didn’t pass a marker, fall back to the last one
+    if marker_world is None:
+        marker_world = _marker_pos
+
+    # Bail if the fullscreen window is closed
     if not (_fullscreen_win and _fullscreen_win.winfo_exists()):
         return
 
-    # ————————————————
-    # 1) Build zoomed “world” image at your GM-view resolution
+    # 1) Build the zoomed “world” at GM‐canvas resolution
     gm_w, gm_h = gm_view_size
     wz, hz     = int(gm_w * map_zoom), int(gm_h * map_zoom)
 
+    # resize base map
     base_z = map_base_orig.resize((wz, hz), Image.LANCZOS)
-    mask_z = map_mask_orig.resize((wz, hz), Image.NEAREST)
 
-    # draw tokens onto a transparent RGBA layer
-    token_layer = Image.new("RGBA", (wz, hz), (0,0,0,0))
+    # draw tokens onto transparent layer
+    token_layer = Image.new("RGBA", (wz, hz), (0, 0, 0, 0))
     for t in _tokens:
         ox = int(t["x"] * map_zoom)
         oy = int(t["y"] * map_zoom)
@@ -652,46 +743,58 @@ def _update_fullscreen_map(item):
             Image.LANCZOS
         )
         token_layer.paste(img_z,
-                           (ox - img_z.width//2, oy - img_z.height//2),
-                           img_z)
+                          (ox - img_z.width//2, oy - img_z.height//2),
+                          img_z)
 
     comp = Image.alpha_composite(base_z.convert("RGBA"), token_layer)
-    full = Image.alpha_composite(comp, mask_z).convert("RGB")
 
-    # ————————————————
-    # 2) Compute the world-center of the GM canvas:
-    #    this is exactly where the GM sees the center of their window.
-    cw = map_canvas.winfo_width()
-    ch = map_canvas.winfo_height()
-    cx = map_canvas.canvasx(cw/2)    # world-coords
-    cy = map_canvas.canvasy(ch/2)
+    # 2) Overlay the current fog mask as fully opaque
+    mask_resized = map_mask_img.resize((wz, hz), Image.NEAREST)
+    alpha = mask_resized.split()[3].point(lambda p: 255 if p > 0 else 0)
+    opaque_mask = Image.new("RGBA", (wz, hz), (0, 0, 0, 255))
+    opaque_mask.putalpha(alpha)
+    full = Image.alpha_composite(comp, opaque_mask).convert("RGB")
 
-    #    Now crop a rectangle of size sw×sh around that center:
+    # 3) Crop a sw×sh rectangle around the GM‐canvas center
+    cw, ch = map_canvas.winfo_width(), map_canvas.winfo_height()
+    cx = map_canvas.canvasx(cw / 2)
+    cy = map_canvas.canvasy(ch / 2)
+
     mons = _get_monitors()
     mon  = mons[1] if len(mons) > 1 else mons[0]
     sw, sh = mon[2], mon[3]
 
-    left = int(cx - sw/2)
-    top  = int(cy - sh/2)
-    # clamp inside the zoomed world:
+    left = int(cx - sw / 2)
+    top  = int(cy - sh / 2)
     left = max(0, min(left, wz - sw))
     top  = max(0, min(top, hz - sh))
 
     viewport = full.crop((left, top, left + sw, top + sh))
 
-    # ————————————————
-    # 3) Paste into a letterboxed canvas in case sw×sh > viewport:
-    canvas_img = Image.new("RGB", (sw, sh), (0,0,0))
-    # If viewport is smaller (zoom < 1), center it:
+    # 4) Letterbox into a sw×sh black canvas
+    canvas_img = Image.new("RGB", (sw, sh), (0, 0, 0))
     pw, ph = viewport.size
-    px, py = (sw - pw)//2, (sh - ph)//2
+    px, py = (sw - pw) // 2, (sh - ph) // 2
     canvas_img.paste(viewport, (px, py))
 
-    # ————————————————
-    # 4) Display
+    # 5) Draw optional red marker
+    if marker_world:
+        wx, wy = marker_world
+        # compute marker position in the cropped image:
+        mx = int((wx ) - left) + px
+        my = int((wy ) - top)  + py
+        r  = int(20 * map_zoom)
+        print(f"Marker at {marker_world} -> {mx},{my} ({r})")
+        print(f"Zomm factor: {map_zoom}")
+        draw = ImageDraw.Draw(canvas_img)
+        draw.ellipse([mx - r, my - r, mx + r, my + r], outline="red", width=4)
+
+    # Swap in the new image
     photo = ImageTk.PhotoImage(canvas_img)
     _fullscreen_photo = photo
     _fullscreen_label.config(image=photo)
     _fullscreen_label.image = photo
+
+
 
 
