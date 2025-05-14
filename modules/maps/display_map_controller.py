@@ -11,6 +11,7 @@ from modules.generic.generic_list_selection_view import GenericListSelectionView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.ui.icon_button import create_icon_button
 from screeninfo import get_monitors
+from modules.helpers.template_loader import load_template
 
 DEFAULT_BRUSH_SIZE = 32  # px
 MASKS_DIR = os.path.join(os.getcwd(), "masks")
@@ -23,7 +24,15 @@ class DisplayMapController:
         self.parent = parent
         self.maps = maps_wrapper
         self.map_template = map_template
-
+        
+        self._model_wrappers = {
+            "NPC":      GenericModelWrapper("npcs"),
+            "Creature": GenericModelWrapper("creatures"),
+        }
+        self._templates = {
+            "NPC":      load_template("npcs"),
+            "Creature": load_template("creatures")
+        }
         # --- State ---
         self.current_map = None
         self.base_img    = None
@@ -32,7 +41,8 @@ class DisplayMapController:
         self.mask_tk     = None
         self.base_id     = None
         self.mask_id     = None
-
+        self._zoom_after_id = None
+        self._fast_resample = Image.BILINEAR   # interactive filter
         self.zoom        = 1.0
         self.pan_x       = 0
         self.pan_y       = 0
@@ -190,8 +200,8 @@ class DisplayMapController:
         create_icon_button(toolbar, icons["save"],  "Save Fog",    command=self.save_fog).pack(side="left")
 
         # Token controls
-        create_icon_button(toolbar, icons["npc"],   "Add NPC",      command=lambda: self.add_token("NPC")).pack(side="right")
-        create_icon_button(toolbar, icons["creat"], "Add Creature", command=lambda: self.add_token("Creature")).pack(side="right")
+        create_icon_button(toolbar, icons["npc"],   "Add NPC",      command=lambda: self.open_entity_picker("NPC")).pack(side="right")
+        create_icon_button(toolbar, icons["creat"], "Add Creature", command=lambda: self.open_entity_picker("Creature")).pack(side="right")
 
         # Fullscreen
         create_icon_button(toolbar, icons["fs"],    "Fullscreen",   command=self.open_fullscreen).pack(side="right")
@@ -349,36 +359,50 @@ class DisplayMapController:
         self.zoom = max(MIN_ZOOM, min(MAX_ZOOM, self.zoom * (1 + ZOOM_STEP*delta)))
         self.pan_x = event.x - xw*self.zoom
         self.pan_y = event.y - yw*self.zoom
-        self._update_canvas_images()
+        # Debounce the full redraw
+        if self._zoom_after_id:
+            self.canvas.after_cancel(self._zoom_after_id)
+        self._zoom_after_id = self.canvas.after(
+            50,                            # wait 50ms after last wheel event
+            lambda: self._perform_zoom(final=False)
+    )
 
-    def on_resize(self, event):
+    def _perform_zoom(self, final: bool):
+        """Actually do the heavy redraw. If final==True, you could switch to LANCZOS."""
+        # choose resample filter
+        resample = Image.LANCZOS if final else self._fast_resample
+        # redraw base, mask, tokens using `resample` instead of hardcoded LANCZOS:
+        self._update_canvas_images(resample=resample)
+
+    def on_resize(self):
         # just redraw at new canvas size
         self._update_canvas_images()
 
-    def _update_canvas_images(self):
+    def _update_canvas_images(self, resample=Image.LANCZOS):
         """Redraw GM canvas then mirror to fullscreen."""
-        if self.base_img:
-            w, h = self.base_img.size
-            sw, sh = int(w*self.zoom), int(h*self.zoom)
-            x0, y0 = self.pan_x, self.pan_y
+        if not self.base_img:
+            return
+        w, h = self.base_img.size
+        sw, sh = int(w*self.zoom), int(h*self.zoom)
+        x0, y0 = self.pan_x, self.pan_y
 
-            # Base
-            base_resized = self.base_img.resize((sw,sh), resample=Image.LANCZOS)
-            self.base_tk = ImageTk.PhotoImage(base_resized)
-            if self.base_id:
-                self.canvas.itemconfig(self.base_id, image=self.base_tk)
-                self.canvas.coords(self.base_id, x0, y0)
-            else:
-                self.base_id = self.canvas.create_image(x0, y0, image=self.base_tk, anchor='nw')
+        # Base
+        base_resized = self.base_img.resize((sw,sh), resample=self._fast_resample)
+        self.base_tk = ImageTk.PhotoImage(base_resized)
+        if self.base_id:
+            self.canvas.itemconfig(self.base_id, image=self.base_tk)
+            self.canvas.coords(self.base_id, x0, y0)
+        else:
+            self.base_id = self.canvas.create_image(x0, y0, image=self.base_tk, anchor='nw')
 
-            # Mask
-            mask_resized = self.mask_img.resize((sw,sh), resample=Image.LANCZOS)
-            self.mask_tk = ImageTk.PhotoImage(mask_resized)
-            if self.mask_id:
-                self.canvas.itemconfig(self.mask_id, image=self.mask_tk)
-                self.canvas.coords(self.mask_id, x0, y0)
-            else:
-                self.mask_id = self.canvas.create_image(x0, y0, image=self.mask_tk, anchor='nw')
+        # Mask
+        mask_resized = self.mask_img.resize((sw,sh), resample=Image.LANCZOS)
+        self.mask_tk = ImageTk.PhotoImage(mask_resized)
+        if self.mask_id:
+            self.canvas.itemconfig(self.mask_id, image=self.mask_tk)
+            self.canvas.coords(self.mask_id, x0, y0)
+        else:
+            self.mask_id = self.canvas.create_image(x0, y0, image=self.mask_tk, anchor='nw')
 
         # Tokens
         for token in self.tokens:
@@ -491,19 +515,47 @@ class DisplayMapController:
                                                         outline='blue', width=3)
                 i_id = self.fs_canvas.create_image(sx, sy, image=fsimg, anchor='nw')
                 token['fs_canvas_ids'] = (b_id, i_id)
+    
+    def open_entity_picker(self, entity_type):
+        """
+        Show a GenericListSelectionView for NPCs or Creatures.
+        """
+        picker = tk.Toplevel(self.parent)
+        picker.title(f"Select {entity_type}")
+        picker.geometry("1300x600")
+        view = GenericListSelectionView(
+            master=picker,
+            entity_type=entity_type,
+            model_wrapper=self._model_wrappers[entity_type],
+            template=self._templates[entity_type],
+            on_select_callback=lambda et, name: self.on_entity_selected(et, name, picker)
+        )
+        
+        view.pack(fill="both", expand=True)
+    
+    def on_entity_selected(self, entity_type, entity_name, picker_frame):
+        """
+        Called when user picks an NPC or Creature in the selection dialog.
+        """
+        items = self._model_wrappers[entity_type].load_items()
+        selected = next(item for item in items if item.get("Name") == entity_name)
+        portrait = selected.get("Portrait")
+        if isinstance(portrait, dict):
+            path = portrait.get("path") or portrait.get("text")
+        else:
+            path = portrait
 
+        self.add_token(path, entity_type, entity_name)
+        picker_frame.destroy()
+        
     # --- Token management ---
-    def add_token(self, entity_type):
-        picker = GenericModelWrapper(f"{entity_type.lower()}s")
-        choice = picker.select_one()
-        if not choice:
-            return
-
-        img_path = choice.get("Portrait") or choice.get("Image") or choice.get("image_path")
+    def add_token(self, path, entity_type, entity_name):
+        img_path = path
         pil_img  = Image.open(img_path).convert("RGBA")
+        pil_img = pil_img.resize((48, 48), resample=Image.LANCZOS)
         token = {
             "entity_type": entity_type,
-            "entity_id":   choice.get("id"),
+            "entity_id":  entity_name,
             "image_path":  img_path,
             "pil_image":   pil_img,
             "position":    (0, 0),
