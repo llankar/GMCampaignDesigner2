@@ -1237,7 +1237,6 @@ class MainWindow(ctk.CTk):
     def map_tool(self):
         # 1) wrap your 'maps' table
         maps_wrapper = GenericModelWrapper("maps")
-
         # 2) instantiate the controller,
         #    passing the frame as parent
         self.map_controller = DisplayMapController(
