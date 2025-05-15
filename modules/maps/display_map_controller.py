@@ -4,6 +4,7 @@ import os
 import ast
 import json
 import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageDraw
 from modules.ui.image_viewer import show_portrait
@@ -18,6 +19,7 @@ MASKS_DIR = os.path.join(os.getcwd(), "masks")
 MAX_ZOOM = 3.0
 MIN_ZOOM = 0.1
 ZOOM_STEP = 0.1  # 10% per wheel notch
+ctk.set_appearance_mode("dark")
 
 class DisplayMapController:
     def __init__(self, parent, maps_wrapper, map_template):
@@ -48,6 +50,7 @@ class DisplayMapController:
         self.pan_y       = 0
 
         self.brush_size  = DEFAULT_BRUSH_SIZE
+        self.brush_shape = "rectangle"  # new: "rectangle" or "circle"
         self.fog_mode    = "add"    # "add" or "rem"
         self.tokens      = []       # list of token dicts
 
@@ -176,8 +179,9 @@ class DisplayMapController:
         # Initial draw
         self._update_canvas_images()
 
-    def _build_toolbar(self):
-        toolbar = tk.Frame(self.parent)
+    def _build_toolbar(self):    
+        # use a dark‐mode CTkFrame for the toolbar
+        toolbar = ctk.CTkFrame(self.parent) 
         toolbar.pack(side="top", fill="x")
 
         # Load icons
@@ -199,25 +203,43 @@ class DisplayMapController:
         create_icon_button(toolbar, icons["reset"], "Reset Fog",   command=self.reset_fog).pack(side="left")
         create_icon_button(toolbar, icons["save"],  "Save Fog",    command=self.save_fog).pack(side="left")
 
-        # Token controls
-        create_icon_button(toolbar, icons["npc"],   "Add NPC",      command=lambda: self.open_entity_picker("NPC")).pack(side="right")
-        create_icon_button(toolbar, icons["creat"], "Add Creature", command=lambda: self.open_entity_picker("Creature")).pack(side="right")
+        # Token controls and fullscreen before the brush size
+        create_icon_button(toolbar, icons["creat"], "Add Creature", command=lambda: self.open_entity_picker("Creature"))\
+            .pack(side="left", padx=2)
+        create_icon_button(toolbar, icons["npc"],   "Add NPC",      command=lambda: self.open_entity_picker("NPC"))\
+            .pack(side="left", padx=2)
+        create_icon_button(toolbar, icons["fs"],    "Fullscreen",   command=self.open_fullscreen)\
+            .pack(side="left", padx=2)
 
-        # Fullscreen
-        create_icon_button(toolbar, icons["fs"],    "Fullscreen",   command=self.open_fullscreen).pack(side="right")
-
-        # Brush‐size slider
-        self.brush_slider = tk.Scale(
-            toolbar, from_=4, to=128, orient="horizontal",
-            label="Brush Size", command=self._on_brush_size_change
+        # Brush shape selector
+        shape_label = ctk.CTkLabel(toolbar, text="Shape:")
+        shape_label.pack(side="left", padx=(10,2), pady=8)
+        self.shape_menu = ctk.CTkOptionMenu(
+            toolbar,
+            values=["Rectangle", "Circle"],
+            command=self._on_brush_shape_change
+        )
+        self.shape_menu.set("Rectangle")
+        self.shape_menu.pack(side="left", padx=5, pady=8)
+        
+        # Brush‐size control in dark mode
+        size_label = ctk.CTkLabel(toolbar, text="Brush Size:")
+        size_label.pack(side="left", padx=(10,2), pady=8)
+        self.brush_slider = ctk.CTkSlider(
+            toolbar, from_=4, to=128,
+            command=self._on_brush_size_change
         )
         self.brush_slider.set(self.brush_size)
-        self.brush_slider.pack(side="left", padx=5)
+        self.brush_slider.pack(side="left", padx=5, pady=8)
 
         # Key bindings for bracket adjustments
         self.parent.bind("[", lambda e: self._change_brush(-4))
         self.parent.bind("]", lambda e: self._change_brush(+4))
-
+        
+    def _on_brush_shape_change(self, val):
+        # normalize to lowercase for comparisons
+        self.brush_shape = val.lower()
+        
     def _build_canvas(self):
         self.canvas = tk.Canvas(self.parent, bg="black")
         self.canvas.pack(fill="both", expand=True)
@@ -239,13 +261,11 @@ class DisplayMapController:
         self.fog_mode = mode
 
     def clear_fog(self):
-        self.mask_img = Image.new("RGBA", self.base_img.size, (255,255,255,255))
+        self.mask_img = Image.new("RGBA", self.base_img.size, (0,0,0,0))
         self._update_canvas_images()
 
     def reset_fog(self):
-        mask_path = self.current_map.get("FogMaskPath", "")
-        if mask_path and os.path.exists(mask_path):
-            self.mask_img = Image.open(mask_path).convert("RGBA")
+        self.mask_img = Image.new("RGBA", self.base_img.size, (0, 0, 0, 128))
         self._update_canvas_images()
 
     def save_fog(self):
@@ -261,6 +281,15 @@ class DisplayMapController:
         # Persist *all* maps via save_items
         all_maps = list(self._maps.values())
         self.maps.save_items(all_maps)
+        # Now that fog (and any moved tokens) are final, refresh the second‐screen view
+        # only if that window (and its canvas) still exist:
+        try:
+            if getattr(self, 'fs', None) and self.fs.winfo_exists() \
+                and getattr(self, 'fs_canvas', None) and self.fs_canvas.winfo_exists():
+                self._update_fullscreen_map()
+        except tk.TclError:
+            # second‐screen has been closed or destroyed—ignore
+            pass
 
     def _on_brush_size_change(self, val):
         try:
@@ -294,10 +323,16 @@ class DisplayMapController:
         draw = ImageDraw.Draw(self.mask_img)
         if self.fog_mode == "add":
             # Paint semi-transparent black
-            draw.rectangle([left, top, right, bottom], fill=(0, 0, 0, 128))
+            if self.brush_shape == "circle":
+                draw.ellipse([left, top, right, bottom], fill=(0, 0, 0, 128))
+            else:
+                draw.rectangle([left, top, right, bottom], fill=(0, 0, 0, 128))
         else:
-            # Erase back to fully transparent
-            draw.rectangle([left, top, right, bottom], fill=(0, 0, 0,   0))
+            # Erase (make fully transparent)
+            if self.brush_shape == "circle":
+                draw.ellipse([left, top, right, bottom], fill=(0, 0, 0,   0))
+            else:
+                draw.rectangle([left, top, right, bottom], fill=(0, 0, 0,   0))
 
         self._update_canvas_images()
 
@@ -429,8 +464,6 @@ class DisplayMapController:
                 # bind all token events right after creation:
                 self._bind_token(token)
 
-        # Mirror
-        self._update_fullscreen_map()
     
     def _bind_token(self, token):
         """Attach drag & right-click handlers to both border & image."""
@@ -455,8 +488,8 @@ class DisplayMapController:
             return
         m = monitors[1]
         self.fs = tk.Toplevel(self.parent)
-        self.fs.overrideredirect(True)
-        self.fs.attributes("-topmost", True)
+        self.fs.title("Players Map")
+        self.fs.resizable(True, True)
         self.fs.geometry(f"{m.width}x{m.height}+{m.x}+{m.y}")
         self.fs_canvas = tk.Canvas(self.fs, bg="black")
         self.fs_canvas.pack(fill="both", expand=True)
@@ -483,17 +516,6 @@ class DisplayMapController:
             self.fs_base_id = self.fs_canvas.create_image(x0, y0,
                                                           image=self.fs_base_tk,
                                                           anchor='nw')
-
-        mask_resized = self.mask_img.resize((sw,sh), resample=Image.LANCZOS)
-        self.fs_mask_tk = ImageTk.PhotoImage(mask_resized)
-        if self.fs_mask_id:
-            self.fs_canvas.itemconfig(self.fs_mask_id, image=self.fs_mask_tk)
-            self.fs_canvas.coords(self.fs_mask_id, x0, y0)
-        else:
-            self.fs_mask_id = self.fs_canvas.create_image(x0, y0,
-                                                          image=self.fs_mask_tk,
-                                                          anchor='nw')
-
         for token in self.tokens:
             pil = token['pil_image']
             tw, th = pil.size
@@ -515,6 +537,23 @@ class DisplayMapController:
                                                         outline='blue', width=3)
                 i_id = self.fs_canvas.create_image(sx, sy, image=fsimg, anchor='nw')
                 token['fs_canvas_ids'] = (b_id, i_id)
+        
+        # create a copy of the mask where any non-zero alpha becomes 255 (fully opaque)
+        mask_copy = self.mask_img.copy()
+        # split out alpha channel
+        _, _, _, alpha = mask_copy.split()
+        # map any alpha>0 to 255, leave 0 as 0
+        alpha = alpha.point(lambda a: 255 if a>0 else 0)
+        mask_copy.putalpha(alpha)
+        mask_resized = mask_copy.resize((sw, sh), resample=Image.LANCZOS)
+        self.fs_mask_tk = ImageTk.PhotoImage(mask_resized)
+        if self.fs_mask_id:
+            self.fs_canvas.itemconfig(self.fs_mask_id, image=self.fs_mask_tk)
+            self.fs_canvas.coords(self.fs_mask_id, x0, y0)
+        else:
+            self.fs_mask_id = self.fs_canvas.create_image(x0, y0,
+                                                        image=self.fs_mask_tk,
+                                                        anchor='nw')
     
     def open_entity_picker(self, entity_type):
         """
