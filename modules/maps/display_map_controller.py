@@ -201,7 +201,7 @@ class DisplayMapController:
         create_icon_button(toolbar, icons["rem"],   "Remove Fog",  command=lambda: self._set_fog("rem")).pack(side="left")
         create_icon_button(toolbar, icons["clear"], "Clear Fog",   command=self.clear_fog).pack(side="left")
         create_icon_button(toolbar, icons["reset"], "Reset Fog",   command=self.reset_fog).pack(side="left")
-        create_icon_button(toolbar, icons["save"],  "Save Fog",    command=self.save_fog).pack(side="left")
+        create_icon_button(toolbar, icons["save"],  "Save Map",    command=self.save_map).pack(side="left")
 
         # Token controls and fullscreen before the brush size
         create_icon_button(toolbar, icons["creat"], "Add Creature", command=lambda: self.open_entity_picker("Creature"))\
@@ -270,7 +270,7 @@ class DisplayMapController:
         self.mask_img = Image.new("RGBA", self.base_img.size, (0, 0, 0, 128))
         self._update_canvas_images()
 
-    def save_fog(self):
+    def save_map(self):
         """Save the current fog mask to disk and persist the path."""
         os.makedirs(MASKS_DIR, exist_ok=True)
         fname     = os.path.basename(self.current_map["Image"])
