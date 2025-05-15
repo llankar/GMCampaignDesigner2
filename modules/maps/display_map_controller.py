@@ -116,7 +116,7 @@ class DisplayMapController:
         if mask_path and os.path.exists(mask_path):
             self.mask_img = Image.open(mask_path).convert("RGBA")
         else:
-            self.mask_img = Image.new("RGBA", self.base_img.size, (255,255,255,128))
+            self.mask_img = Image.new("RGBA", self.base_img.size, (0,0,0,128))
 
         # Reset view
         self.zoom  = 1.0
@@ -254,8 +254,10 @@ class DisplayMapController:
         self.parent.bind("<Configure>",        lambda e: self._update_canvas_images())
 
     def load_icon(self, path, size=(32,32)):
-        img = Image.open(path).resize(size, resample=Image.LANCZOS)
-        return ImageTk.PhotoImage(img)
+        #Load & resize with PIL
+        pil_img = Image.open(path).resize(size, resample=Image.LANCZOS)
+        # Wrap in a CTkImage so CustomTkinter buttons get the right type
+        return ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=size)
 
     def _set_fog(self, mode):
         self.fog_mode = mode
@@ -273,7 +275,17 @@ class DisplayMapController:
         os.makedirs(MASKS_DIR, exist_ok=True)
         fname     = os.path.basename(self.current_map["Image"])
         mask_path = os.path.join(MASKS_DIR, fname)
-        self.mask_img.save(mask_path)
+        # ensure we’re using a .png so we can preserve alpha
+        base, ext = os.path.splitext(mask_path or "")
+        if not ext.lower() in (".png",):
+            # if no path or wrong ext, switch to PNG
+            base = base or os.path.splitext(self.current_map["ImagePath"])[0]
+            mask_path = base + "_mask.png"
+            self.current_map["FogMaskPath"] = mask_path
+
+        os.makedirs(os.path.dirname(mask_path), exist_ok=True)
+        # save with explicit PNG format to keep RGBA channel
+        self.mask_img.save(mask_path, format="PNG")
 
         # Update in-memory record
         self.current_map["FogMaskPath"] = mask_path
