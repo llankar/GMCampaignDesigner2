@@ -360,7 +360,16 @@ class DisplayMapController:
         self._marker_after_id = self.canvas.after(500, self._create_marker)
 
     def _on_mouse_move(self, event):
-        # No panning: always paint
+        # If the user has moved since the press, cancel the long-press marker
+        if self._marker_after_id and self._marker_start:
+            dx = event.x - self._marker_start[0]
+            dy = event.y - self._marker_start[1]
+            # 5 px threshold; tweak to taste
+            if abs(dx) > 5 or abs(dy) > 5:
+                self.canvas.after_cancel(self._marker_after_id)
+                self._marker_after_id = None
+
+        # Now do the normal paint (or whatever else) on drag
         self.on_paint(event)
 
     def _on_mouse_up(self, event):
@@ -397,8 +406,6 @@ class DisplayMapController:
             self._fs_marker_id = self.fs_canvas.create_oval(sx-r,sy-r,sx+r,sy+r, outline='red', width=2)
 
     def on_zoom(self, event):
-        if not (event.state & 0x0004):  # Ctrl
-            return
         # keep cursor world‐point fixed
         xw = (event.x - self.pan_x) / self.zoom
         yw = (event.y - self.pan_y) / self.zoom
