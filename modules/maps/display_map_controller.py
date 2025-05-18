@@ -517,8 +517,12 @@ class DisplayMapController:
         self.fs.geometry(f"{m.width}x{m.height}+{m.x}+{m.y}")
         self.fs_canvas = tk.Canvas(self.fs, bg="black")
         self.fs_canvas.pack(fill="both", expand=True)
+        # reset IDs so base/mask/tokens all get re-created on the new canvas
         self.fs_base_id = None
         self.fs_mask_id = None
+        # clear any stale fullscreen token IDs
+        for token in self.tokens:
+            token.pop('fs_canvas_ids', None)
         self._update_fullscreen_map()
 
     def _update_fullscreen_map(self):
@@ -621,12 +625,20 @@ class DisplayMapController:
         img_path = path
         pil_img  = Image.open(img_path).convert("RGBA")
         pil_img = pil_img.resize((48, 48), resample=Image.LANCZOS)
+        # compute world‐coords of current canvas center
+        # ensure geometry is up-to-date
+        self.canvas.update_idletasks()
+        cw = self.canvas.winfo_width()
+        ch = self.canvas.winfo_height()
+        xw_center = (cw/2 - self.pan_x) / self.zoom
+        yw_center = (ch/2 - self.pan_y) / self.zoom
         token = {
-            "entity_type": entity_type,
-            "entity_id":  entity_name,
-            "image_path":  img_path,
-            "pil_image":   pil_img,
-            "position":    (0, 0),
+            "entity_type":  entity_type,
+            "entity_id":    entity_name,
+            "image_path":   img_path,
+            "pil_image":    pil_img,
+            # position at the map’s current center
+            "position":     (xw_center, yw_center),
             "border_color": "#0000ff",
         }
         self.tokens.append(token)
