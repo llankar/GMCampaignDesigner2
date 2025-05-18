@@ -1247,8 +1247,16 @@ class MainWindow(ctk.CTk):
 
         # 2) Create a brand-new top-level window for map editing
         top = ctk.CTkToplevel(self)
+        
+        # Bring it to front right now…
+        top.lift()
+        # …and give it focus
+        top.focus_force()
+        # …temporarily make it topmost, then immediately turn that off
+        top.attributes("-topmost", True)
+        top.after_idle(lambda: top.attributes("-topmost", False))
         top.title("Map Tool")
-        top.geometry("1000x700")  # or whatever size you prefer
+        top.geometry("1400x900")  # or whatever size you prefer
 
         # 3) Inside that window, create a single frame to hold your map UI
         map_frame = ctk.CTkFrame(top)
