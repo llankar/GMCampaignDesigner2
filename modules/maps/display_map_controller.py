@@ -5,7 +5,7 @@ import ast
 import json
 import tkinter as tk
 import customtkinter as ctk
-from tkinter import messagebox
+from tkinter import messagebox, colorchooser
 from PIL import Image, ImageTk, ImageDraw
 from modules.ui.image_viewer import show_portrait
 from modules.generic.generic_list_selection_view import GenericListSelectionView
@@ -173,6 +173,7 @@ class DisplayMapController:
                 "image_path":  path,
                 "pil_image":   pil_img,
                 "position":    (xw, yw),
+                "border_color": rec.get("border_color", "#0000ff")
             }
             self.tokens.append(token)
 
@@ -472,12 +473,16 @@ class DisplayMapController:
 
             if 'canvas_ids' in token:
                 b_id, i_id = token['canvas_ids']
+                # update border color in case it changed
+                self.canvas.itemconfig(b_id, outline=token.get('border_color','#0000ff'))
                 self.canvas.coords(b_id, sx-3, sy-3, sx+nw+3, sy+nh+3)
                 self.canvas.coords(i_id, sx, sy)
                 self.canvas.itemconfig(i_id, image=tkimg)
             else:
-                b_id = self.canvas.create_rectangle(sx-3, sy-3, sx+nw+3, sy+nh+3,
-                                                    outline='blue', width=3)
+                b_id = self.canvas.create_rectangle(
+                    sx-3, sy-3, sx+nw+3, sy+nh+3,
+                    outline=token.get('border_color','#0000ff'),
+                    width=3)
                 i_id = self.canvas.create_image(sx, sy, image=tkimg, anchor='nw')
                 token['canvas_ids'] = (b_id, i_id)
                 # bind all token events right after creation:
@@ -549,11 +554,16 @@ class DisplayMapController:
             if 'fs_canvas_ids' in token:
                 b_id, i_id = token['fs_canvas_ids']
                 self.fs_canvas.coords(b_id, sx-3, sy-3, sx+nw+3, sy+nh+3)
+                # also update fullscreen border color
+                self.fs_canvas.itemconfig(b_id, outline=token.get('border_color','#0000ff'))
                 self.fs_canvas.coords(i_id, sx, sy)
                 self.fs_canvas.itemconfig(i_id, image=fsimg)
             else:
-                b_id = self.fs_canvas.create_rectangle(sx-3, sy-3, sx+nw+3, sy+nh+3,
-                                                        outline='blue', width=3)
+                b_id = self.fs_canvas.create_rectangle(
+                    sx-3, sy-3, sx+nw+3, sy+nh+3,
+                    outline=token.get('border_color','#0000ff'),
+                    width=3
+                    )
                 i_id = self.fs_canvas.create_image(sx, sy, image=fsimg, anchor='nw')
                 token['fs_canvas_ids'] = (b_id, i_id)
         
@@ -617,6 +627,7 @@ class DisplayMapController:
             "image_path":  img_path,
             "pil_image":   pil_img,
             "position":    (0, 0),
+            "border_color": "#0000ff",
         }
         self.tokens.append(token)
         self._update_canvas_images()
@@ -654,12 +665,33 @@ class DisplayMapController:
     def _show_token_menu(self, event, token):
         menu = tk.Menu(self.canvas, tearoff=0)
         menu.add_command(label="Show Portrait",
-                         command=lambda: show_portrait(token["image_path"], token.get("entity_type")))
+            command=lambda: show_portrait(token["image_path"], token.get("entity_type")))
+        menu.add_command(label="Change Border Color",
+            command=lambda t=token: self._change_token_border_color(t))
         menu.add_separator()
         menu.add_command(label="Delete Token",
-                         command=lambda t=token: self._delete_token(t))
+            command=lambda t=token: self._delete_token(t))
         menu.tk_popup(event.x_root, event.y_root)
-
+    
+    def _change_token_border_color(self, token):
+        """Open a color chooser and update the token’s border."""
+        result = colorchooser.askcolor(
+            color=token.get("border_color", "#0000ff"),
+            title="Choose token border color"
+        )
+        # result == ( (r,g,b), "#rrggbb" ) or (None, None) if cancelled
+        if result and result[1]:
+            new_color = result[1]
+            token["border_color"] = new_color
+            # update GM canvas border
+            b_id = token["canvas_ids"][0]
+            self.canvas.itemconfig(b_id, outline=new_color)
+            # update fullscreen border if open
+            if getattr(self, "fs_canvas", None) and "fs_canvas_ids" in token:
+                fs_b_id = token["fs_canvas_ids"][0]
+                self.fs_canvas.itemconfig(fs_b_id, outline=new_color)
+            # persist the choice
+            self._persist_tokens()
     def _delete_token(self, token):
         for cid in token.get("canvas_ids", []):
             self.canvas.delete(cid)
@@ -673,17 +705,19 @@ class DisplayMapController:
         """Serialize tokens into current_map and save all maps."""
         # Build the JSON/AST-safe list
         data = []
+        # build one entry per token
         for t in self.tokens:
             x, y = t["position"]
-            data.append({
+            entry = {
                 "entity_type": t["entity_type"],
                 "entity_id":   t["entity_id"],
                 "image_path":  t["image_path"],
                 "x":           x,
                 "y":           y,
-            })
-
-        # Update in-memory record
+                "border_color": t.get("border_color", "#0000ff")
+            }
+            data.append(entry)
+        # serialize all tokens back into the map record
         self.current_map["Tokens"] = json.dumps(data)
 
         # Persist all maps
