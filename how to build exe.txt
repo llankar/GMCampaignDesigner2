@@ -1,0 +1,10 @@
+pyinstaller main_window.spec
+
+datas=[('assets', 'assets'), ('data', 'data'),('config', 'config'), ('static', 'static')],
+    
+pyinstaller main_window.spec
+
+copy whole directory
+
+copy modules to root and to _internal directory
+copy assets, config, masks, static to root directory
