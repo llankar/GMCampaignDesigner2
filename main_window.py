@@ -209,6 +209,8 @@ class MainWindow(ctk.CTk):
 
         # ✅ Always explicitly create these initially:
         self.banner_frame = ctk.CTkFrame(self.content_frame, height=150, fg_color="#444")
+        # — Monkey-patch banner_frame.pack to grid instead, so open_gm_screen’s pack() won’t clash
+        self.banner_frame.pack = lambda *args, **kwargs: self.banner_frame.grid(row=0, column=0, sticky="ew")
         self.inner_content_frame = ctk.CTkFrame(self.content_frame, fg_color="#222")
 
         self.banner_toggle_btn = ctk.CTkButton(
@@ -547,8 +549,13 @@ class MainWindow(ctk.CTk):
             return
 
         # 3) Ensure the PC‐banner is shown and up to date
-        if not self.banner_frame.winfo_ismapped():
-            self.banner_frame.grid(row=0, column=0, sticky="ew")
+        if getattr(self, 'banner_frame', None) and self.banner_frame.winfo_exists():
+            if not self.banner_frame.winfo_ismapped():
+                self.banner_frame.pack(fill='x')
+        else:
+            # banner_frame was destroyed (or never created): re-create it
+            self.banner_frame = self._create_banner_frame()
+            self.banner_frame.pack(fill='x')
         pcs_items = {pc["Name"]: pc for pc in self.pc_wrapper.load_items()}
         if pcs_items:
             display_pcs_in_banner(self.banner_frame, pcs_items)
@@ -1235,13 +1242,23 @@ class MainWindow(ctk.CTk):
          # otherwise ignore silently
 
     def map_tool(self):
-        # 1) wrap your 'maps' table
+        # 1) Wrap your 'maps' table as before
         maps_wrapper = GenericModelWrapper("maps")
-        # 2) instantiate the controller,
-        #    passing the frame as parent
+
+        # 2) Create a brand-new top-level window for map editing
+        top = ctk.CTkToplevel(self)
+        top.title("Map Tool")
+        top.geometry("1000x700")  # or whatever size you prefer
+
+        # 3) Inside that window, create a single frame to hold your map UI
+        map_frame = ctk.CTkFrame(top)
+        map_frame.pack(fill="both", expand=True)
+
+        # 4) Pass that frame into your map controller
         self.map_controller = DisplayMapController(
-            self.content_frame,
-            maps_wrapper, load_template("maps")
+            map_frame,
+            maps_wrapper,
+            load_template("maps")
         )
 
 if __name__ == "__main__":
