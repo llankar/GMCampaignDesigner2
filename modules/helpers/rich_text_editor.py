@@ -6,35 +6,24 @@ from modules.helpers.custom_buttons import MinimalCTkButton  # Import de notre b
 class RichTextEditor(ctk.CTkFrame):
     def __init__(self, master, initial_text=""):
         super().__init__(master)
-        # Global toolbar at the top
-        toolbar = ctk.CTkFrame(self)
-        toolbar.pack(fill="x", padx=5, pady=5)
+        # Global toolbar at the top (exposed as self.toolbar)
+        self.toolbar = ctk.CTkFrame(self)
+        self.toolbar.pack(fill="x", padx=5, pady=5)
 
-        # Bouton Bold avec notre surcharge pour réduire le padding interne
-        bold_button = MinimalCTkButton(toolbar, text="Bold", command=self.toggle_bold)
+        # Bouton Bold
+        bold_button = MinimalCTkButton(self.toolbar, text="Bold", command=self.toggle_bold)
         bold_button.pack(side="left", padx=5)
 
-        # Vous pouvez faire de même pour les autres boutons...
-        italic_button = MinimalCTkButton(toolbar, text="Italic", command=self.toggle_italic)
+        italic_button = MinimalCTkButton(self.toolbar, text="Italic", command=self.toggle_italic)
         italic_button.pack(side="left", padx=5)
-        
-        underline_button = MinimalCTkButton(toolbar, text="Underline", command=self.toggle_underline)
+
+        underline_button = MinimalCTkButton(self.toolbar, text="Underline", command=self.toggle_underline)
         underline_button.pack(side="left", padx=5)
 
-        # (le reste de l'initialisation reste inchangé)
-        size_button = MinimalCTkButton(toolbar, text="Font Size", command=self.change_font_size)
-        size_button.pack(side="left", padx=5)
-        color_button = MinimalCTkButton(toolbar, text="Text Color", command=self.change_text_color)
-        color_button.pack(side="left", padx=5)
-        left_button = MinimalCTkButton(toolbar, text="Left", command=self.align_left)
-        left_button.pack(side="left", padx=5)
-        center_button = MinimalCTkButton(toolbar, text="Center", command=self.align_center)
-        center_button.pack(side="left", padx=5)
-        right_button = MinimalCTkButton(toolbar, text="Right", command=self.align_right)
-        right_button.pack(side="left", padx=5)
-        bullet_button = MinimalCTkButton(toolbar, text="Bullet List", command=self.toggle_bullet_list)
+        bullet_button = MinimalCTkButton(self.toolbar, text="Bullet List", command=self.toggle_bullet_list)
         bullet_button.pack(side="left", padx=5)
-        numbered_button = MinimalCTkButton(toolbar, text="Numbered List", command=self.toggle_numbered_list)
+
+        numbered_button = MinimalCTkButton(self.toolbar, text="Numbered List", command=self.toggle_numbered_list)
         numbered_button.pack(side="left", padx=5)
 
         # === Create the text widget ===
