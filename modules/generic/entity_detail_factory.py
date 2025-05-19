@@ -449,6 +449,73 @@ def insert_places_table(parent, header, place_names, open_entity_callback):
 
         # match NPC row heights
         table.grid_rowconfigure(r, weight=1)
+        
+def insert_list_longtext(parent, header, items, max_lines=20):
+    """Insert a header + several collapsed CTkTextboxes, each sized & toggled correctly."""
+    # Header label
+    ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")) \
+        .pack(anchor="w", padx=10, pady=(10, 2))
+
+    for idx, scene in enumerate(items, start=1):
+        raw = scene.get("text", "") if isinstance(scene, dict) else str(scene)
+
+        # Outer frame + hidden body
+        outer = ctk.CTkFrame(parent, fg_color="transparent")
+        outer.pack(fill="x", expand=True, padx=20, pady=2)
+        body = ctk.CTkFrame(outer, fg_color="transparent")
+
+        # The textbox itself
+        tb = CTkTextbox(body, wrap="word")
+        tb._textbox.insert("1.0", raw)
+        tb.configure(state="disabled")
+        tb.pack(fill="x", padx=10, pady=5)
+
+        # --- bind update_height with its own tb/outer/idx baked in ---
+        def make_update(tb=tb, outer=outer, max_lines=max_lines, idx=idx):
+            def update_height():
+                # temporarily unlock so it can re-measure
+                tb.configure(state="normal")
+                outer.update_idletasks()
+
+                # count wrapped lines, clamp
+                display_lines = tb._textbox.count("1.0", "end-1c", "displaylines")[0]
+                lines = max(1, min(display_lines, max_lines))
+                print(f"[DEBUG] scene {idx}: display_lines={display_lines}, clamped={lines}")
+
+                # apply to inner Text (CTkTextbox wrapper will auto-follow)
+                tb._textbox.configure(height=lines)
+                tb.configure(state="disabled", height=lines)
+            return update_height
+
+        update_height = make_update()
+        tb.after_idle(update_height)   # initial sizing
+
+        # --- bind toggle with its own btn/body/update_height/idx baked in ---
+        expanded = ctk.BooleanVar(value=False)
+        btn = ctk.CTkButton(
+            outer,
+            text=f"▶ Scene {idx}",
+            fg_color="transparent",
+            anchor="w",
+        )
+        def make_toggle(btn=btn, body=body, update_height=update_height, expanded=expanded, idx=idx):
+            def _toggle():
+                if expanded.get():
+                    body.pack_forget()
+                    btn.configure(text=f"▶ Scene {idx}")
+                else:
+                    body.pack(fill="x", padx=10, pady=5)
+                    btn.configure(text=f"▼ Scene {idx}")
+                    update_height()
+                expanded.set(not expanded.get())
+            return _toggle
+
+        btn.configure(command=make_toggle())
+        btn.pack(fill="x", expand=True)
+
+
+
+
 
 def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity_callback=None):
     """
@@ -510,12 +577,15 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
         f for f in tpl["fields"]
         if f["name"] not in ("Title", "Summary", "Secrets")
     ]
+
+    
     # group them
+    scenes_fields = [f for f in body_fields if f["name"] == "Scenes"]
     npc_fields   = [f for f in body_fields if f.get("linked_type") == "NPCs"]
     creature_fields = [f for f in body_fields if f.get("linked_type") == "Creatures"]
     place_fields = [f for f in body_fields if f.get("linked_type") == "Places"]
-    other_fields = [f for f in body_fields if f not in npc_fields + place_fields + creature_fields]
-    ordered_fields = npc_fields + creature_fields + place_fields + other_fields
+    other_fields = [f for f in body_fields if f not in scenes_fields +  npc_fields + place_fields + creature_fields]
+    ordered_fields = scenes_fields + npc_fields + creature_fields + place_fields + other_fields
 
     # render in that order
     for field in ordered_fields:
@@ -525,6 +595,8 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
 
         if ftype == "text":
             insert_text(frame, name, value)
+        elif ftype == "list_longtext":
+            insert_list_longtext(frame, name, value)
         elif ftype == "longtext":
             insert_longtext(frame, name, value)
         elif ftype == "list":
