@@ -978,10 +978,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         dest_filename = f"{image_name}_{id(self)}{ext}"
         dest_path = os.path.join(IMAGE_FOLDER, dest_filename)
 
-        with Image.open(src_path) as img:
-            img = img.convert("RGB")
-            img.thumbnail(MAX_IMAGE_SIZE)
-            img.save(dest_path)
+        shutil.copy(src_path, dest_path)
 
         return dest_path
 
@@ -996,10 +993,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         dest_filename = f"{npc_name}_{id(self)}{ext}"
         dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
 
-        with Image.open(src_path) as img:
-            img = img.convert("RGB")
-            img.thumbnail(MAX_PORTRAIT_SIZE)
-            img.save(dest_path)
+        shutil.copy(src_path, dest_path)
         
         return dest_path
     
