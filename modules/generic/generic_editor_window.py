@@ -313,22 +313,48 @@ class GenericEditorWindow(ctk.CTkToplevel):
         self.field_widgets[field["name"]] = (option_menu, var)
 
     def create_longtext_field(self, field):
+        # Load or initialize content
         value = self.item.get(field["name"], "")
         editor = RichTextEditor(self.scroll_frame)
         editor.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
 
         if isinstance(value, dict):
-            editor.load_text_data(value)         
+            editor.load_text_data(value)
         else:
-            if not isinstance(value, str):
-                value = str(value)
-            editor.text_widget.insert("1.0", value)
+            text = value if isinstance(value, str) else str(value)
+            editor.text_widget.insert("1.0", text)
 
+        # Keep snapshot for cancel
+        original_text = editor.text_widget.get("1.0", "end-1c")
+
+        # Hide RichTextEditor toolbar (must be defined in RichTextEditor as self.toolbar_frame)
+        editor.toolbar.pack_forget()
+
+        # Handlers for entering and exiting edit mode
+        def start_edit(event):
+            # show toolbar *before* the text widget so it appears above
+            editor.toolbar.pack(fill="x",
+            before=editor.text_widget,pady=2)
+
+        def end_edit():
+            editor.toolbar.pack_forget()
+
+        def cancel_edit():
+            editor.text_widget.delete("1.0", "end")
+            editor.text_widget.insert("1.0", original_text)
+            end_edit()
+
+        # Show toolbar & validation when user clicks into the text widget
+        # show toolbar on entry…
+        editor.text_widget.bind("<FocusIn>", start_edit)
+        # …and hide it as soon as focus leaves the text area
+        editor.text_widget.bind("<FocusOut>", lambda e: end_edit())
+
+        # Pack editor into the UI and register it
         editor.pack(fill="x", pady=5)
-        
         self.field_widgets[field["name"]] = editor
 
-        # For scenario Summary fields, add a button to generate a description from CSV
+        # Add extra buttons for specific fields
         if field["name"] == "Summary":
             ctk.CTkButton(
                 self.scroll_frame,
