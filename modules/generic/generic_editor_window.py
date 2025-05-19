@@ -14,7 +14,7 @@ from modules.helpers.config_helper import ConfigHelper
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 import tkinter as tk
 import random
-
+from modules.helpers.text_helpers import format_longtext
 SWARMUI_PROCESS = None
 class CustomDropdown(ctk.CTkToplevel):
     def __init__(self, master, options, command, width=None, max_height=300, **kwargs):
@@ -223,7 +223,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
             if (field["name"] == "Image"):
                 continue
             ctk.CTkLabel(self.scroll_frame, text=field["name"]).pack(pady=(5, 0), anchor="w")
-            if field["type"] == "longtext":
+            if field["type"] == "list_longtext":
+                self.create_dynamic_longtext_list(field)
+            elif field["type"] == "longtext":
                 self.create_longtext_field(field)
             elif field["name"] in ["NPCs", "Places", "Factions", "Objects", "Creatures", "PCs"]:
                 self.create_dynamic_combobox_list(field)
@@ -252,6 +254,61 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         # Optionally, adjust window position.
         position_window_at_top(self)
+    def create_dynamic_longtext_list(self, field):
+        """
+        Build a container with any existing scenes (each a RichTextEditor),
+        plus an “Add Scene” button that appends another editor.
+        """
+        container = ctk.CTkFrame(self.scroll_frame)
+        container.pack(fill="x", pady=5)
+
+        editors = []
+
+        def remove_this(row_frame, editor):
+            row_frame.destroy()
+            editors.remove(editor)
+
+        def add_scene(initial_text=""):
+            row = ctk.CTkFrame(container)
+            row.pack(fill="x", pady=(0,5))
+
+            # label or numbering if you like
+            ctk.CTkLabel(row, text=f"Scene {len(editors)+1}").pack(anchor="w")
+
+            # the rich-text editor itself
+            rte = RichTextEditor(row)
+            rte.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
+            rte.pack(fill="x", pady=2)
+
+            # populate if we have initial_text
+            if isinstance(initial_text, dict):
+                # restore all formatting
+                rte.load_text_data(initial_text)
+            else:
+                # just plain text (including newlines)
+                rte.text_widget.insert("1.0", initial_text or "")
+
+            # remove-button
+            btn = ctk.CTkButton(row, text="– Remove", width=80,
+                                command=lambda: remove_this(row, rte))
+            btn.pack(anchor="e", pady=(2,0))
+
+            editors.append(rte)
+
+        # pre-populate from model
+        for scene in (self.item.get(field["name"]) or []):
+            add_scene(scene)
+
+        # the “+ Add Scene” button
+        add_btn = ctk.CTkButton(container, text="+ Add Scene",
+                                command=add_scene)
+        add_btn.pack(anchor="w", pady=(5,0))
+
+        # store for save()
+        self.field_widgets[field["name"]]           = editors
+        self.field_widgets[f"{field['name']}_container"]   = container
+        self.field_widgets[f"{field['name']}_add_scene"]   = add_scene
+    
     def create_file_field(self, field):
         frame = ctk.CTkFrame(self.scroll_frame)
         frame.pack(fill="x", pady=5)
@@ -735,7 +792,14 @@ class GenericEditorWindow(ctk.CTkToplevel):
             if field["name"] in ["FogMaskPath", "Tokens"]:
                 continue
             widget = self.field_widgets[field["name"]]
-            if field["type"] == "longtext":
+            if field["type"] == "list_longtext":
+                # grab each editor’s serialized data
+                self.item[field["name"]] = [
+                    rte.get_text_data() if hasattr(rte, "get_text_data")
+                                        else rte.text_widget.get("1.0","end-1c")
+                for rte in widget
+                ]
+            elif field["type"] == "longtext":
                 data = widget.get_text_data()
                 if isinstance(data, dict) and not data.get("text", "").strip():
                     self.item[field["name"]] = ""
