@@ -218,7 +218,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             self.create_image_field(image_field)
 
         for field in other_fields:
-            if (field["name"] == "FogMaskPath" or field["name"] == "Tokens"):
+            if (field["name"] == "FogMaskPath" or field["name"] == "Tokens" or field["name"] == "token_size"):
                 continue
             if (field["name"] == "Image"):
                 continue
@@ -789,7 +789,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
     # === Sauvegarde ===
     def save(self):
         for field in self.template["fields"]:
-            if field["name"] in ["FogMaskPath", "Tokens"]:
+            if field["name"] in ["FogMaskPath", "Tokens", "token_size"]:
                 continue
             widget = self.field_widgets[field["name"]]
             if field["type"] == "list_longtext":
