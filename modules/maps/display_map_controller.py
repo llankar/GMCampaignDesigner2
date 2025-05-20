@@ -186,7 +186,12 @@ class DisplayMapController:
                 "pil_image":    pil,
                 "position":     (xw, yw),
                 "border_color": rec.get("border_color", "#0000ff"),
-                "size":         sz
+                "size":         sz,
+                "hp":           rec.get("hp", 10),           
+                "max_hp":       rec.get("total_hp", 10),
+                "hp_label_id":  None,                        
+                "hp_entry":     None,                        
+                "hp_entry_id":  None                         
             })
 
         # 8) Hydrate each token & create its hidden, word-wrapped info box
@@ -563,6 +568,22 @@ class DisplayMapController:
                 self.canvas.coords(i_id, sx, sy)
                 
                 self.canvas.itemconfig(i_id, image=tkimg)
+                # ─── HP circle update ───
+                hp = token.get("hp", 10)
+                max_hp = token.get("max_hp", 10)
+                ratio = hp / max_hp if max_hp > 0 else 1.0
+                color = "#ff3333" if ratio < 0.10 else "#33cc33"
+
+                circle_diam = max(18, int(nw * 0.25))
+                cx = sx + nw - circle_diam + 4
+                cy = sy + nh - circle_diam + 4
+
+                if "hp_canvas_ids" in token:
+                    cid, tid = token["hp_canvas_ids"]
+                    self.canvas.coords(cid, cx, cy, cx + circle_diam, cy + circle_diam)
+                    self.canvas.itemconfig(cid, fill=color)
+                    self.canvas.coords(tid, cx + circle_diam // 2, cy + circle_diam // 2)
+                    self.canvas.itemconfig(tid, text=str(hp))
                 # update name text below the token
                 name_id = token.get('name_id')
                 if name_id:
@@ -598,6 +619,35 @@ class DisplayMapController:
                     fill='white',
                     anchor='n'
                 )
+                hp = token.get("hp", 10)
+                max_hp = token.get("max_hp", 10)  # You can later make this configurable
+                ratio = hp / max_hp if max_hp > 0 else 1.0
+                color = "#ff3333" if ratio < 0.10 else "#33cc33"  # red or green
+                nw, nh = int(tw*self.zoom), int(th*self.zoom)  # token size
+                circle_diam = max(18, int(nw * 0.25))
+                cx = sx + nw - circle_diam + 4
+                cy = sy + nh - circle_diam + 4
+                if "hp_canvas_ids" in token:
+                    cid, tid = token["hp_canvas_ids"]
+                    self.canvas.coords(cid, cx, cy,cx + circle_diam, cy + circle_diam)
+                    self.canvas.itemconfig(cid, fill=color)
+                    self.canvas.coords(tid, cx + circle_diam//2, cy + circle_diam//2)
+                    self.canvas.itemconfig(tid, text=str(hp))
+                else:
+                    cid = self.canvas.create_oval(
+                        cx, cy, cx + circle_diam, cy + circle_diam,
+                        fill=color,
+                        outline="black",
+                        width=1
+                    )
+                    tid = self.canvas.create_text(
+                        cx + circle_diam//2,
+                        cy + circle_diam//2,
+                        text=str(hp),
+                        font=("Arial", max(10, circle_diam // 2), "bold"),
+                        fill="white"
+                    )
+                    token["hp_canvas_ids"] = (cid, tid)
                 # ─────────────── NEW: add right‐of‐token multi‐line textbox ───────────────
                 rec = token.get('entity_record', {})
                 # — coerce to a single string before inserting, and clear old text
@@ -837,7 +887,11 @@ class DisplayMapController:
             "position":     (xw_center, yw_center),
             "border_color": "#0000ff",
             "entity_record": entity_record or {},
-            "info_widget": info_widget  # ✅ fix crash here
+            "info_widget": info_widget,  # ✅ fix crash here
+            "hp": 10,
+            "hp_label_id": None,
+            "hp_entry": None,
+            "hp_entry_id": None
         }
 
         self.tokens.append(token)
@@ -911,6 +965,10 @@ class DisplayMapController:
         if info_widget_id:
             self.canvas.move(info_widget_id, dx, dy)
         sx, sy = self.canvas.coords(i_id)
+        if "hp_canvas_ids" in token:
+            cid, tid = token["hp_canvas_ids"]
+            self.canvas.move(cid, dx, dy)
+            self.canvas.move(tid, dx, dy)
         token["position"] = ((sx - self.pan_x)/self.zoom, (sy - self.pan_y)/self.zoom)
 
     def _on_token_release(self, event, token):
@@ -1007,7 +1065,9 @@ class DisplayMapController:
                     "x":           x,
                     "y":           y,
                     "border_color": t.get("border_color", "#0000ff"),
-                    "size":        t.get("size", self.token_size)
+                    "size":        t.get("size", self.token_size),
+                    "hp":           t.get("hp", 10),
+                    "max_hp":           t.get("max_hp", 10)
                 }
                 data.append(entry)
             except KeyError as e:
