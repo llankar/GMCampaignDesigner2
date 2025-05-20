@@ -50,6 +50,8 @@ class DisplayMapController:
         self.zoom        = 1.0
         self.pan_x       = 0
         self.pan_y       = 0
+        self.selected_token  = None    # last clicked token
+        self.clipboard_token = None    # copied token data
 
         self.brush_size  = DEFAULT_BRUSH_SIZE
         self.token_size  = 48
@@ -280,6 +282,15 @@ class DisplayMapController:
     def _build_canvas(self):
         self.canvas = tk.Canvas(self.parent, bg="black")
         self.canvas.pack(fill="both", expand=True)
+        
+        # Global Copy/Paste bindings
+        # Must use bind_all so shortcuts work even if canvas isn't focused
+        # Global Copy/Paste bindings on the real Tk root
+        root = self.parent.winfo_toplevel()
+        root.bind_all("<Control-c>", self._copy_token)
+        root.bind_all("<Control-C>", self._copy_token)
+        root.bind_all("<Control-v>", self._paste_token)
+        root.bind_all("<Control-V>", self._paste_token)
 
         # Painting, panning, markers
         self.canvas.bind("<ButtonPress-1>",    self._on_mouse_down)
@@ -737,8 +748,54 @@ class DisplayMapController:
             self._update_fullscreen_map()
 
     def _on_token_press(self, event, token):
+        # mark this as the “selected” token for copy/paste
+        self.selected_token = token
         token["drag_data"] = {"x": event.x, "y": event.y}
+    
+    def _copy_token(self, event=None):
+        """Copy the last‐clicked token’s data into a buffer."""
+        """Ctrl+C → copy the currently selected token."""
+        if not self.selected_token:
+            return
+        t = self.selected_token
+        # store only the minimal data needed to recreate it
+        self.clipboard_token = {
+            "entity_type":  t["entity_type"],
+            "entity_id":    t["entity_id"],
+            "image_path":   t["image_path"],
+            "size":         t.get("size", self.token_size),
+            "border_color": t.get("border_color", "#0000ff"),
+        }
 
+    def _paste_token(self, event=None):
+        c = getattr(self, "clipboard_token", None)
+        if not c:
+            return
+        # compute center of the *visible* canvas in world coords
+        vcx = (self.canvas.winfo_width() // 2 - self.pan_x) / self.zoom
+        vcy = (self.canvas.winfo_height() // 2 - self.pan_y) / self.zoom
+
+        # Re-create the PIL image at the original token size
+        pil_img = Image.open(c["image_path"]).convert("RGBA") \
+                    .resize((c["size"], c["size"]), Image.LANCZOS)
+
+        # Clone all relevant fields into a new token dict
+        token = {
+            "entity_type":  c["entity_type"],
+            "entity_id":    c["entity_id"],
+            "image_path":   c["image_path"],
+            "size":         c["size"],
+            "border_color": c["border_color"],
+            "pil_image":    pil_img,
+            "position":     (vcx, vcy),
+            "drag_data":    {}
+        }
+
+        # Add it to your tokens list, then persist & re-draw everything
+        self.tokens.append(token)
+        self._persist_tokens()
+        self._update_canvas_images()
+    
     def _on_token_move(self, event, token):
         dx = event.x - token["drag_data"]["x"]
         dy = event.y - token["drag_data"]["y"]

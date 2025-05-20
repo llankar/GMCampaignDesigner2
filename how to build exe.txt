@@ -1,8 +1,8 @@
-pyinstaller main_window.spec
+pyi-makespec main_window.py --onedir --windowed
 
 datas=[('assets', 'assets'), ('data', 'data'),('config', 'config'), ('static', 'static')],
     
-pyinstaller main_window.spec
+pyinstaller --noconfirm main_window.spec
 
 copy whole directory
 
