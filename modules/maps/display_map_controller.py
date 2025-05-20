@@ -291,6 +291,7 @@ class DisplayMapController:
         root.bind_all("<Control-C>", self._copy_token)
         root.bind_all("<Control-v>", self._paste_token)
         root.bind_all("<Control-V>", self._paste_token)
+        root.bind_all("<Delete>", self._on_delete_key)
 
         # Painting, panning, markers
         self.canvas.bind("<ButtonPress-1>",    self._on_mouse_down)
@@ -301,6 +302,15 @@ class DisplayMapController:
         self.canvas.bind("<MouseWheel>",       self.on_zoom)
         self.parent.bind("<Configure>",        lambda e: self._update_canvas_images())
 
+    def _on_delete_key(self, event=None):
+        """If a token is selected (via click), delete it on Delete key."""
+        if not self.selected_token:
+            return
+        # remove it from both canvases and from the list
+        self._delete_token(self.selected_token)
+        # clear the selection so repeated deletes do nothing
+        self.selected_token = None
+        
     def load_icon(self, path, size=(32,32)):
         #Load & resize with PIL
         pil_img = Image.open(path).resize(size, resample=Image.LANCZOS)
