@@ -4,6 +4,7 @@
       {"name": "Description", "type": "longtext"},
       {"name": "Image", "type": "text"},
       { "name": "FogMaskPath",  "type": "text"},
-      { "name": "Tokens",  "type": "text"}
+      { "name": "Tokens",  "type": "text"},
+      { "name": "token_size",  "type": "int"}
   ]
 }

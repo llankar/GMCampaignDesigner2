@@ -13,8 +13,10 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.ui.icon_button import create_icon_button
 from screeninfo import get_monitors
 from modules.helpers.template_loader import load_template
+import tkinter.simpledialog as sd
 
 DEFAULT_BRUSH_SIZE = 32  # px
+
 MASKS_DIR = os.path.join(os.getcwd(), "masks")
 MAX_ZOOM = 3.0
 MIN_ZOOM = 0.1
@@ -50,6 +52,7 @@ class DisplayMapController:
         self.pan_y       = 0
 
         self.brush_size  = DEFAULT_BRUSH_SIZE
+        self.token_size  = 48
         self.brush_shape = "rectangle"  # new: "rectangle" or "circle"
         self.fog_mode    = "add"    # "add" or "rem"
         self.tokens      = []       # list of token dicts
@@ -99,6 +102,10 @@ class DisplayMapController:
             messagebox.showwarning("Not Found", f"Map '{map_name}' not found.")
             return
         self.current_map = item
+        # only restore if token_size is a real int (not None)
+        size = item.get("token_size")
+        if isinstance(size, int):
+            self.token_size = size
 
         # Clear selector
         for w in self.parent.winfo_children():
@@ -154,10 +161,11 @@ class DisplayMapController:
             token_list = []
         for rec in token_list:
             path = rec.get("image_path") or rec.get("path")
+            size = rec.get("size", 48)  # older maps will have no “size”
             try:
                 pil_img = Image.open(path).convert("RGBA")
                 # resize to 48×48
-                pil_img = pil_img.resize((48, 48), resample=Image.LANCZOS)
+                pil_img = pil_img.resize((size, size), resample=Image.LANCZOS)
             except Exception:
                 continue
             # Position may be under rec["position"] or rec["x"],rec["y"]
@@ -173,7 +181,8 @@ class DisplayMapController:
                 "image_path":  path,
                 "pil_image":   pil_img,
                 "position":    (xw, yw),
-                "border_color": rec.get("border_color", "#0000ff")
+                "border_color": rec.get("border_color", "#0000ff"),
+                "size":         size
             }
             self.tokens.append(token)
 
@@ -237,6 +246,33 @@ class DisplayMapController:
         self.parent.bind("[", lambda e: self._change_brush(-4))
         self.parent.bind("]", lambda e: self._change_brush(+4))
         
+        # Token‐size control
+        size_label = ctk.CTkLabel(toolbar, text="Token Size:")
+        size_label.pack(side="left", padx=(10,2), pady=8)
+
+        self.token_slider = ctk.CTkSlider(
+            toolbar, from_=16, to=128,
+            command=self._on_token_size_change
+        )
+        self.token_slider.set(self.token_size)
+        self.token_slider.pack(side="left", padx=5, pady=8)
+
+        # ← NEW: show current value
+        self.token_size_value_label = ctk.CTkLabel(
+            toolbar,
+            text=str(self.token_size),
+            width=32
+        )
+        self.token_size_value_label.pack(side="left", padx=(2,10), pady=8)
+        
+    
+    def _on_token_size_change(self, val):
+        try:
+            self.token_size = int(val)
+            self.token_size_value_label.configure(text=str(self.token_size))
+        except ValueError:
+            pass
+        
     def _on_brush_shape_change(self, val):
         # normalize to lowercase for comparisons
         self.brush_shape = val.lower()
@@ -292,6 +328,7 @@ class DisplayMapController:
         self.current_map["FogMaskPath"] = mask_path
 
         # Persist *all* maps via save_items
+        self.current_map["token_size"] = self.token_size
         all_maps = list(self._maps.values())
         self.maps.save_items(all_maps)
         # Now that fog (and any moved tokens) are final, refresh the second‐screen view
@@ -623,8 +660,12 @@ class DisplayMapController:
     # --- Token management ---
     def add_token(self, path, entity_type, entity_name):
         img_path = path
-        pil_img  = Image.open(img_path).convert("RGBA")
-        pil_img = pil_img.resize((48, 48), resample=Image.LANCZOS)
+        pil_img = Image.open(img_path).convert("RGBA")
+        # use the user-chosen size here
+        pil_img = pil_img.resize(
+            (self.token_size, self.token_size),
+            resample=Image.LANCZOS
+        )
         # compute world‐coords of current canvas center
         # ensure geometry is up-to-date
         self.canvas.update_idletasks()
@@ -680,11 +721,49 @@ class DisplayMapController:
             command=lambda: show_portrait(token["image_path"], token.get("entity_type")))
         menu.add_command(label="Change Border Color",
             command=lambda t=token: self._change_token_border_color(t))
+        menu.add_command(label="Resize Token",
+        command=lambda t=token: self._resize_token_dialog(t))
         menu.add_separator()
         menu.add_command(label="Delete Token",
             command=lambda t=token: self._delete_token(t))
         menu.tk_popup(event.x_root, event.y_root)
-    
+   
+
+
+    def _resize_token_dialog(self, token):
+        """Prompt for a new px size, then redraw just that token."""
+        # use the current slider value as the popup’s starting point
+        new_size = sd.askinteger(
+            "Resize Token",
+            "Enter new token size (px):",
+            initialvalue=self.token_size,
+            minvalue=8, maxvalue=512
+        )
+        if new_size is None:
+            return
+
+        # 1) update the token’s PIL image & stored size
+        try:
+            pil = Image.open(token["image_path"]) \
+                    .convert("RGBA") \
+                    .resize((new_size, new_size), Image.LANCZOS)
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not resize token image:\n{e}")
+            return
+
+        token["pil_image"] = pil
+        token["size"]      = new_size
+
+        # 2) re-draw the canvas (this will pick up token['pil_image'])
+        self._update_canvas_images()
+        if getattr(self, "fs_canvas", None):
+            self._update_fullscreen_map()
+
+        # 3) persist both tokens *and* the global slider
+        self._persist_tokens()
+        self.current_map["token_size"] = self.token_size
+        self.maps.save_items(list(self._maps.values()))
+
     def _change_token_border_color(self, token):
         """Open a color chooser and update the token’s border."""
         result = colorchooser.askcolor(
@@ -726,7 +805,8 @@ class DisplayMapController:
                 "image_path":  t["image_path"],
                 "x":           x,
                 "y":           y,
-                "border_color": t.get("border_color", "#0000ff")
+                "border_color": t.get("border_color", "#0000ff"),
+                "size":        t.get("size", self.token_size)   
             }
             data.append(entry)
         # serialize all tokens back into the map record
