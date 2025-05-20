@@ -515,13 +515,31 @@ class DisplayMapController:
                 self.canvas.coords(b_id, sx-3, sy-3, sx+nw+3, sy+nh+3)
                 self.canvas.coords(i_id, sx, sy)
                 self.canvas.itemconfig(i_id, image=tkimg)
+                # update name text below the token
+                name_id = token.get('name_id')
+                if name_id:
+                    # center text under the token
+                    tx = sx + nw/2
+                    ty = sy + nh + 2
+                    self.canvas.coords(name_id, tx, ty)
+                    self.canvas.itemconfig(name_id, text=token['entity_id'])
             else:
                 b_id = self.canvas.create_rectangle(
                     sx-3, sy-3, sx+nw+3, sy+nh+3,
                     outline=token.get('border_color','#0000ff'),
                     width=3)
                 i_id = self.canvas.create_image(sx, sy, image=tkimg, anchor='nw')
+                # then the name label
+                tx = sx + nw/2
+                ty = sy + nh + 2
+                name_id = self.canvas.create_text(
+                    tx, ty,
+                    text=token['entity_id'],
+                    fill='white',
+                    anchor='n'
+                )
                 token['canvas_ids'] = (b_id, i_id)
+                token['name_id']    = name_id
                 # bind all token events right after creation:
                 self._bind_token(token)
 
@@ -593,12 +611,18 @@ class DisplayMapController:
             sx, sy = int(xw*self.zoom + self.pan_x), int(yw*self.zoom + self.pan_y)
 
             if 'fs_canvas_ids' in token:
-                b_id, i_id = token['fs_canvas_ids']
+                b_id, i_id, t_id = token['fs_canvas_ids']
                 self.fs_canvas.coords(b_id, sx-3, sy-3, sx+nw+3, sy+nh+3)
                 # also update fullscreen border color
                 self.fs_canvas.itemconfig(b_id, outline=token.get('border_color','#0000ff'))
                 self.fs_canvas.coords(i_id, sx, sy)
                 self.fs_canvas.itemconfig(i_id, image=fsimg)
+                # move the text label under the token
+                self.fs_canvas.coords(
+                    t_id,
+                    sx + nw//2,
+                    sy + nh + 2
+                )
             else:
                 b_id = self.fs_canvas.create_rectangle(
                     sx-3, sy-3, sx+nw+3, sy+nh+3,
@@ -606,7 +630,15 @@ class DisplayMapController:
                     width=3
                     )
                 i_id = self.fs_canvas.create_image(sx, sy, image=fsimg, anchor='nw')
-                token['fs_canvas_ids'] = (b_id, i_id)
+                # then draw the name centered under the token
+                t_id = self.fs_canvas.create_text(
+                    sx + nw//2,
+                    sy + nh + 2,
+                    text=token['entity_id'],
+                    fill='white',
+                    anchor='n'
+                )
+                token['fs_canvas_ids'] = (b_id, i_id, t_id)
         
         # create a copy of the mask where any non-zero alpha becomes 255 (fully opaque)
         mask_copy = self.mask_img.copy()
@@ -713,6 +745,10 @@ class DisplayMapController:
         b_id, i_id = token["canvas_ids"]
         self.canvas.move(b_id, dx, dy)
         self.canvas.move(i_id, dx, dy)
+        # move the name label too, if it exists
+        name_id = token.get("name_id")
+        if name_id:
+            self.canvas.move(name_id, dx, dy)
         token["drag_data"] = {"x": event.x, "y": event.y}
         sx, sy = self.canvas.coords(i_id)
         token["position"] = ((sx - self.pan_x)/self.zoom, (sy - self.pan_y)/self.zoom)
