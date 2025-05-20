@@ -624,6 +624,8 @@ class DisplayMapController:
             self.fs_mask_id = self.fs_canvas.create_image(x0, y0,
                                                         image=self.fs_mask_tk,
                                                         anchor='nw')
+        # ensure the mask is on top of everything
+        self.fs_canvas.tag_raise(self.fs_mask_id)
     
     def open_entity_picker(self, entity_type):
         """
@@ -697,6 +699,10 @@ class DisplayMapController:
             self.canvas.tag_bind(tag, "<Button-3>",
                                  lambda e, t=token: self._show_token_menu(e, t))
         self._persist_tokens()
+        # if the players' (fullscreen) map is open, refresh it so the new token
+        # immediately re‐gets fog‐masked
+        if getattr(self, "fs_canvas", None) and self.fs_canvas.winfo_exists():
+            self._update_fullscreen_map()
 
     def _on_token_press(self, event, token):
         token["drag_data"] = {"x": event.x, "y": event.y}
