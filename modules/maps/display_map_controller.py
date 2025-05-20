@@ -14,6 +14,7 @@ from modules.ui.icon_button import create_icon_button
 from screeninfo import get_monitors
 from modules.helpers.template_loader import load_template
 import tkinter.simpledialog as sd
+from modules.helpers.text_helpers import format_longtext
 
 DEFAULT_BRUSH_SIZE = 32  # px
 
@@ -98,97 +99,122 @@ class DisplayMapController:
 
     def _on_display_map(self, entity_type, map_name):
         """Callback from selector: build editor UI and load the chosen map."""
-        # Lookup the chosen map record
+        # 1) Lookup the chosen map record
         item = self._maps.get(map_name)
         if not item:
             messagebox.showwarning("Not Found", f"Map '{map_name}' not found.")
             return
         self.current_map = item
-        # only restore if token_size is a real int (not None)
+
+        # Restore token size if set
         size = item.get("token_size")
         if isinstance(size, int):
             self.token_size = size
 
-        # Clear selector
+        # 2) Tear down any existing UI & build toolbar + canvas
         for w in self.parent.winfo_children():
             w.destroy()
-
-        # Build toolbar + canvas
         self._build_toolbar()
         self._build_canvas()
 
-        # Load images
-        img_path = item["Image"]
-        self.base_img = Image.open(img_path).convert("RGBA")
-
-        mask_path = item.get("FogMaskPath", "")
+        # 3) Load base image + fog mask
+        self.base_img = Image.open(item["Image"]).convert("RGBA")
+        mask_path   = item.get("FogMaskPath", "")
         if mask_path and os.path.exists(mask_path):
             self.mask_img = Image.open(mask_path).convert("RGBA")
         else:
             self.mask_img = Image.new("RGBA", self.base_img.size, (0,0,0,128))
 
-        # Reset view
+        # Reset pan/zoom
         self.zoom  = 1.0
         self.pan_x = 0
         self.pan_y = 0
 
-        # Clear any existing tokens
+        # 4) Clear out any old tokens from both canvases
         for t in self.tokens:
             for cid in t.get("canvas_ids", []):
                 self.canvas.delete(cid)
-            if self.fs_canvas and "fs_canvas_ids" in t:
+            if self.fs_canvas and t.get("fs_canvas_ids"):
                 for cid in t["fs_canvas_ids"]:
                     self.fs_canvas.delete(cid)
         self.tokens = []
 
-        # Load persisted tokens (Python‐repr list of dicts)
+        # 5) Parse persisted token list
+        print(f"[load_token item= {item}")
         raw = item.get("Tokens", [])
-        # Normalize into a Python list of dicts
+        print(f"[load_token] Raw tokens: {raw}")
         if isinstance(raw, str):
-            # old-style single-quoted repr or JSON
-            raw = raw.strip()
-            if raw:
-                    try:
-                            token_list = ast.literal_eval(raw)
-                    except (SyntaxError, ValueError):
-                            try:
-                                    token_list = json.loads(raw)
-                            except Exception:
-                                    token_list = []
-            else:
-                token_list = []
+            try:
+                token_list = ast.literal_eval(raw.strip() or "[]")
+                print(f"[load_token] Loaded {len(token_list)} tokens")
+            except Exception:
+                try:
+                    token_list = json.loads(raw)
+                except Exception:
+                    token_list = []
+                    print(f"[load_token] Failed to parse tokens: {raw}")
         elif isinstance(raw, list):
             token_list = raw
         else:
             token_list = []
+
+        # 6) Pre-load all Creature & NPC records once
+        creatures = {r.get("Name"): r for r in self._model_wrappers["Creature"].load_items()}
+        npcs      = {r.get("Name"): r for r in self._model_wrappers["NPC"].load_items()}
+
+        # 7) Build self.tokens in one pass (only image loading & metadata)
         for rec in token_list:
             path = rec.get("image_path") or rec.get("path")
-            size = rec.get("size", 48)  # older maps will have no “size”
+            sz   = rec.get("size", self.token_size)
             try:
-                pil_img = Image.open(path).convert("RGBA")
-                # resize to 48×48
-                pil_img = pil_img.resize((size, size), resample=Image.LANCZOS)
-            except Exception:
+                pil = Image.open(path).convert("RGBA")
+                pil = pil.resize((sz, sz), resample=Image.LANCZOS)
+            except Exception as e:
+                print(f"[load_token] Failed to load image '{path}': {e}")
                 continue
-            # Position may be under rec["position"] or rec["x"],rec["y"]
             pos = rec.get("position")
             if isinstance(pos, (list, tuple)) and len(pos) >= 2:
-                xw, yw = pos[0], pos[1]
+                xw, yw = pos
             else:
-                xw, yw = rec.get("x", 0), rec.get("y", 0)
-            
-            token = {
-                "entity_type": rec.get("entity_type", "NPC"),
-                "entity_id":   rec.get("entity_id"),
-                "image_path":  path,
-                "pil_image":   pil_img,
-                "position":    (xw, yw),
-                "border_color": rec.get("border_color", "#0000ff"),
-                "size":         size
-            }
-            self.tokens.append(token)
+                xw = rec.get("x", 0)
+                yw = rec.get("y", 0)
 
-        # Initial draw
+            self.tokens.append({
+                "entity_type":  rec.get("entity_type", entity_type),
+                "entity_id":    rec.get("entity_id"),
+                "image_path":   path,  # ✅ ← ADD THIS
+                "pil_image":    pil,
+                "position":     (xw, yw),
+                "border_color": rec.get("border_color", "#0000ff"),
+                "size":         sz
+            })
+
+        # 8) Hydrate each token & create its hidden, word-wrapped info box
+        for token in self.tokens:
+            if token["entity_type"] == "Creature":
+                record = creatures.get(token["entity_id"], {})
+                raw_txt = record.get("Stats", "")
+            else:
+                record = npcs.get(token["entity_id"], {})
+                raw_txt = record.get("Traits", "")
+
+            token["entity_record"] = record
+
+            # Coerce list→newline string
+            if isinstance(raw_txt, (list, tuple)):
+                info = "\n".join(map(str, raw_txt))
+            else:
+                info = str(raw_txt or "")
+
+            # Half-width, double-height, word-wrapped textbox
+            height = token["size"] * 2
+            tb = ctk.CTkTextbox(self.canvas, width=100, height=height, wrap="word")
+            tb._textbox.delete("1.0", "end")
+            tb._textbox.insert("1.0", info)
+
+            token["info_widget"] = tb
+
+        # 9) Finally draw everything onto the canvas
         self._update_canvas_images()
 
     def _build_toolbar(self):    
@@ -535,6 +561,7 @@ class DisplayMapController:
                 self.canvas.itemconfig(b_id, outline=token.get('border_color','#0000ff'))
                 self.canvas.coords(b_id, sx-3, sy-3, sx+nw+3, sy+nh+3)
                 self.canvas.coords(i_id, sx, sy)
+                
                 self.canvas.itemconfig(i_id, image=tkimg)
                 # update name text below the token
                 name_id = token.get('name_id')
@@ -544,6 +571,18 @@ class DisplayMapController:
                     ty = sy + nh + 2
                     self.canvas.coords(name_id, tx, ty)
                     self.canvas.itemconfig(name_id, text=token['entity_id'])
+                if token.get('info_widget_id'):
+                    # place it just to the right of the token
+                    ix = sx + nw + 10
+                    iy = sy + nh/2
+                    self.canvas.coords(token['info_widget_id'], ix, iy)
+                    # refresh its contents from the record
+                    rec = token.get('entity_record', {})
+                    new_text = format_longtext( rec.get("Stats", "") if token['entity_type']=="Creature" else rec.get("Traits", ""))
+                    tb = token['info_widget']
+                    # refresh entire contents from the start of the tk.Text
+                    tb._textbox.delete("1.0", "end")
+                    tb._textbox.insert("1.0", new_text)
             else:
                 b_id = self.canvas.create_rectangle(
                     sx-3, sy-3, sx+nw+3, sy+nh+3,
@@ -559,8 +598,63 @@ class DisplayMapController:
                     fill='white',
                     anchor='n'
                 )
-                token['canvas_ids'] = (b_id, i_id)
-                token['name_id']    = name_id
+                # ─────────────── NEW: add right‐of‐token multi‐line textbox ───────────────
+                rec = token.get('entity_record', {})
+                # — coerce to a single string before inserting, and clear old text
+                raw = rec.get("Stats", "") if token['entity_type']=="Creature" else rec.get("Traits", "")
+                if isinstance(raw, (list, tuple)):
+                     display = "\n".join(map(str, raw))
+                else:
+                        display = str(raw)
+                height = token.get("size", self.token_size) *2
+                entry = token.get("info_widget")
+                if not entry:
+                    entry = ctk.CTkTextbox(self.canvas, width=100, height=height, wrap="word")
+                    entry._textbox.insert("1.0", display)
+                    token["info_widget"] = entry
+
+                entry._textbox.delete("1.0", "end")
+                entry._textbox.insert("1.0", display)
+
+                ix = sx + nw + 10
+                iy = sy + nh/2
+                info_id = self.canvas.create_window(ix, iy, anchor='w', window=entry)
+                self.canvas.itemconfigure(info_id, state='hidden')  # ← start hidden
+
+                # ✅ Set first, THEN bind
+                token.update({
+                    'canvas_ids':     (b_id, i_id),
+                    'name_id':        name_id,
+                    'info_widget_id': info_id,
+                    'info_widget':    entry,
+                })
+
+                # ✅ Now bind using correct info_id
+                for cid in (b_id, i_id):
+                    self.canvas.tag_bind(cid, "<Enter>",
+                        lambda e, iid=info_id: self.canvas.itemconfigure(iid, state='normal'))
+                    self.canvas.tag_bind(cid, "<Leave>",
+                        lambda e, iid=info_id: self.canvas.itemconfigure(iid, state='hidden'))
+
+                entry.bind("<Enter>", lambda e, iid=info_id: self.canvas.itemconfigure(iid, state='normal'))
+                entry.bind("<Leave>", lambda e, iid=info_id: self.canvas.itemconfigure(iid, state='hidden'))
+                # keep it hidden if you mouse off the box itself
+                widget = token['info_widget']
+                widget.bind("<Enter>",
+                    lambda e, iid=info_id:
+                    self.canvas.itemconfigure(iid, state='normal'))
+                widget.bind("<Leave>",
+                    lambda e, iid=info_id:
+                    self.canvas.itemconfigure(iid, state='hidden'))
+
+                token.update({
+                    'canvas_ids':     (b_id, i_id),
+                    'name_id':        name_id,
+                    'info_widget_id': info_id,
+                    'info_widget':    entry,
+                })
+                # ─────────── BIND DRAG HANDLERS ONCE ───────────
+                
                 # bind all token events right after creation:
                 self._bind_token(token)
 
@@ -708,52 +802,48 @@ class DisplayMapController:
             path = portrait.get("path") or portrait.get("text")
         else:
             path = portrait
-
-        self.add_token(path, entity_type, entity_name)
+        # find the full creature/NPC record so we can show its fields later
+        all_items = self._model_wrappers[entity_type].load_items()
+        record = next((i for i in all_items if i.get("Name")==entity_name), {})       
+        self.add_token(path, entity_type, entity_name, record)
         picker_frame.destroy()
         
     # --- Token management ---
-    def add_token(self, path, entity_type, entity_name):
+    def add_token(self, path, entity_type, entity_name, entity_record=None):
         img_path = path
         pil_img = Image.open(img_path).convert("RGBA")
-        # use the user-chosen size here
-        pil_img = pil_img.resize(
-            (self.token_size, self.token_size),
-            resample=Image.LANCZOS
-        )
-        # compute world‐coords of current canvas center
-        # ensure geometry is up-to-date
+        pil_img = pil_img.resize((self.token_size, self.token_size), resample=Image.LANCZOS)
+
+        # Get canvas center in world coords
         self.canvas.update_idletasks()
         cw = self.canvas.winfo_width()
         ch = self.canvas.winfo_height()
         xw_center = (cw/2 - self.pan_x) / self.zoom
         yw_center = (ch/2 - self.pan_y) / self.zoom
+
+        # Hydrate the info box
+        raw = entity_record.get("Stats", "") if entity_type == "Creature" else entity_record.get("Traits", "")
+        display = "\n".join(map(str, raw)) if isinstance(raw, (list, tuple)) else str(raw)
+        height = self.token_size * 2
+        info_widget = ctk.CTkTextbox(self.canvas, width=100, height=height, wrap="word")
+        info_widget._textbox.delete("1.0", "end")
+        info_widget._textbox.insert("1.0", display)
+
         token = {
             "entity_type":  entity_type,
             "entity_id":    entity_name,
             "image_path":   img_path,
             "pil_image":    pil_img,
-            # position at the map’s current center
             "position":     (xw_center, yw_center),
             "border_color": "#0000ff",
+            "entity_record": entity_record or {},
+            "info_widget": info_widget  # ✅ fix crash here
         }
+
         self.tokens.append(token)
         self._update_canvas_images()
-
-        # Bind drag & menu
-        b_id, i_id = token["canvas_ids"]
-        for tag in (b_id, i_id):
-            self.canvas.tag_bind(tag, "<ButtonPress-1>",
-                                 lambda e, t=token: self._on_token_press(e, t))
-            self.canvas.tag_bind(tag, "<B1-Motion>",
-                                 lambda e, t=token: self._on_token_move(e, t))
-            self.canvas.tag_bind(tag, "<ButtonRelease-1>",
-                                 lambda e, t=token: self._on_token_release(e, t))
-            self.canvas.tag_bind(tag, "<Button-3>",
-                                 lambda e, t=token: self._show_token_menu(e, t))
         self._persist_tokens()
-        # if the players' (fullscreen) map is open, refresh it so the new token
-        # immediately re‐gets fog‐masked
+
         if getattr(self, "fs_canvas", None) and self.fs_canvas.winfo_exists():
             self._update_fullscreen_map()
 
@@ -817,6 +907,9 @@ class DisplayMapController:
         if name_id:
             self.canvas.move(name_id, dx, dy)
         token["drag_data"] = {"x": event.x, "y": event.y}
+        info_widget_id = token.get("info_widget_id")
+        if info_widget_id:
+            self.canvas.move(info_widget_id, dx, dy)
         sx, sy = self.canvas.coords(i_id)
         token["position"] = ((sx - self.pan_x)/self.zoom, (sy - self.pan_y)/self.zoom)
 
@@ -903,25 +996,30 @@ class DisplayMapController:
 
     def _persist_tokens(self):
         """Serialize tokens into current_map and save all maps."""
-        # Build the JSON/AST-safe list
         data = []
-        # build one entry per token
         for t in self.tokens:
-            x, y = t["position"]
-            entry = {
-                "entity_type": t["entity_type"],
-                "entity_id":   t["entity_id"],
-                "image_path":  t["image_path"],
-                "x":           x,
-                "y":           y,
-                "border_color": t.get("border_color", "#0000ff"),
-                "size":        t.get("size", self.token_size)   
-            }
-            data.append(entry)
-        # serialize all tokens back into the map record
-        self.current_map["Tokens"] = json.dumps(data)
+            try:
+                x, y = t["position"]
+                entry = {
+                    "entity_type": t.get("entity_type", ""),
+                    "entity_id":   t.get("entity_id", ""),
+                    "image_path":  t["image_path"],  # <-- required
+                    "x":           x,
+                    "y":           y,
+                    "border_color": t.get("border_color", "#0000ff"),
+                    "size":        t.get("size", self.token_size)
+                }
+                data.append(entry)
+            except KeyError as e:
+                print(f"[persist_tokens] Skipping token missing key: {e}")
+                continue
+            except Exception as e:
+                print(f"[persist_tokens] Error serializing token: {e}")
+                continue
 
-        # Persist all maps
+        self.current_map["Tokens"] = json.dumps(data)
         all_maps = list(self._maps.values())
         self.maps.save_items(all_maps)
+        print(f"[persist_tokens] Saving {len(data)} tokens")
+        print(f"[persist_tokens] First token (if any): {data[0] if data else '—'}")
 
