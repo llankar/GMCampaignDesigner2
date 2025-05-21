@@ -1,6 +1,5 @@
 import tkinter as tk
 from PIL import ImageTk, Image
-import customtkinter as ctk
 from screeninfo import get_monitors
 
 def open_fullscreen(self):
@@ -81,7 +80,32 @@ def _update_fullscreen_map(self):
                 anchor='n'
             )
             token['fs_canvas_ids'] = (b_id, i_id, t_id)
+        hp = token.get("hp", 0)
+        tw, th = token['pil_image'].size
+        nw, nh = int(tw*self.zoom), int(th*self.zoom)
+        sx = int(token['position'][0]*self.zoom + self.pan_x)
+        sy = int(token['position'][1]*self.zoom + self.pan_y)
 
+        if hp <= 0:
+            # clean up any old fs-cross
+            if 'fs_cross_ids' in token:
+                for x_id in token['fs_cross_ids']:
+                    self.fs_canvas.delete(x_id)
+
+            tl = (sx,      sy)
+            br = (sx+nw,   sy+nh)
+            tr = (sx+nw,   sy)
+            bl = (sx,      sy+nh)
+
+            line1 = self.fs_canvas.create_line(*tl, *br, fill="red", width=3)
+            line2 = self.fs_canvas.create_line(*tr, *bl, fill="red", width=3)
+            token['fs_cross_ids'] = (line1, line2)
+        else:
+            # remove the fs-cross if they’ve been revived
+            if 'fs_cross_ids' in token:
+                for x_id in token['fs_cross_ids']:
+                    self.fs_canvas.delete(x_id)
+                del token['fs_cross_ids']
     # create a copy of the mask where any non-zero alpha becomes 255 (fully opaque)
     mask_copy = self.mask_img.copy()
     # split out alpha channel

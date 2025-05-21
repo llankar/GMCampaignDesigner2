@@ -282,6 +282,7 @@ class DisplayMapController:
                     self.canvas.itemconfig(cid, fill=color)
                     self.canvas.coords(tid, cx + circle_diam // 2, cy + circle_diam // 2)
                     self.canvas.itemconfig(tid, text=str(hp))
+               
                 # update name text below the token
                 name_id = token.get('name_id')
                 if name_id:
@@ -347,6 +348,7 @@ class DisplayMapController:
                         fill="white"
                     )
                     token["hp_canvas_ids"] = (cid, tid)
+                   
                     self.canvas.tag_bind(
                         tid,
                         "<Double-1>",
@@ -604,8 +606,9 @@ class DisplayMapController:
     
         # Update in-memory record
         self.current_map["FogMaskPath"] = mask_path
-    
-        # Persist *all* maps via save_items
+        # Persist any moved tokens & updated HP before saving maps
+        self._persist_tokens()
+        # Now include token_size too
         self.current_map["token_size"] = self.token_size
         all_maps = list(self._maps.values())
         self.maps.save_items(all_maps)

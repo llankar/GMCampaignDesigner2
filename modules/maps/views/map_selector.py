@@ -65,9 +65,8 @@ def _on_display_map(self, entity_type, map_name):
     self.tokens = []
 
     # 5) Parse persisted token list
-    print(f"[load_token item= {item}")
     raw = item.get("Tokens", [])
-    print(f"[load_token] Raw tokens: {raw}")
+   
     if isinstance(raw, str):
         try:
             token_list = ast.literal_eval(raw.strip() or "[]")
@@ -113,7 +112,7 @@ def _on_display_map(self, entity_type, map_name):
             "border_color": rec.get("border_color", "#0000ff"),
             "size":         sz,
             "hp":           rec.get("hp", 10),           
-            "max_hp":       rec.get("total_hp", 10),
+            "max_hp":       rec.get("max_hp", 10),
             "hp_label_id":  None,                        
             "hp_entry":     None,                        
             "hp_entry_id":  None                         
