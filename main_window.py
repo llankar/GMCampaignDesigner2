@@ -34,7 +34,7 @@ from db.db import load_schema_from_json, initialize_db
 from modules.factions.faction_graph_editor import FactionGraphEditor
 from modules.pcs.display_pcs import display_pcs_in_banner
 from modules.generic.generic_list_selection_view import GenericListSelectionView
-from modules.maps.display_map_controller import DisplayMapController
+from modules.maps.controllers.display_map_controller import DisplayMapController
 
 
 # Set up CustomTkinter appearance
