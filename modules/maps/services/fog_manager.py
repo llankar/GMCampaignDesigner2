@@ -1,4 +1,4 @@
-from PIL import ImageDraw
+from PIL import ImageDraw, Image, ImageTk
 
 def _set_fog(self, mode):
     self.fog_mode = mode
@@ -43,5 +43,15 @@ def on_paint(self, event):
         else:
             draw.rectangle([left, top, right, bottom], fill=(0, 0, 0,   0))
 
-    self._update_canvas_images()
+    # —— only resize & blit the mask ——
+    w, h = self.base_img.size
+    sw, sh = int(w * self.zoom), int(h * self.zoom)
+
+    # use the interactive (fast) filter
+    mask_resized = self.mask_img.resize((sw, sh), resample=self._fast_resample)
+    self.mask_tk = ImageTk.PhotoImage(mask_resized)
+
+    # update the existing canvas image item
+    self.canvas.itemconfig(self.mask_id, image=self.mask_tk)
+    self.canvas.coords(self.mask_id, self.pan_x, self.pan_y)
 
