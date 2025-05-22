@@ -278,6 +278,11 @@ class GenericEditorWindow(ctk.CTkToplevel):
             # the rich-text editor itself
             rte = RichTextEditor(row)
             rte.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
+            # ── Hide toolbar by default and bind focus events ────────────────────
+            rte.toolbar.pack_forget()
+            rte.text_widget.bind("<FocusIn>", lambda e: rte.toolbar.pack(
+             fill="x", before=rte.text_widget, pady=2))
+            rte.text_widget.bind("<FocusOut>", lambda e: rte.toolbar.pack_forget())
             rte.pack(fill="x", pady=2)
 
             # populate if we have initial_text

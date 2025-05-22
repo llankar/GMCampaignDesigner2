@@ -1,20 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import Tree
+from PyInstaller.building.datastruct import Tree
 
 a = Analysis(
     ['main_window.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        # include the entire assets folder except the unwanted subdirs
-        Tree(
-            'assets',          # where your assets live
-            prefix='assets',   # where they will be placed in the bundle
-            excludes=['generated', 'portraits']
-        ),
-        ('data', 'data'),('config', 'config'), ('static', 'static')
-    ]
-
+    datas= [ ('data',   'data'), ('assets', 'assets'), ('config', 'config'), ('static', 'static')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
