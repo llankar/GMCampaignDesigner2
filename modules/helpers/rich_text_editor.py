@@ -33,6 +33,9 @@ class RichTextEditor(ctk.CTkFrame):
         # Insert any initial text (if any)
         self.text_widget.insert("1.0", initial_text)
         self.text_widget.bind("<KeyRelease>", self.update_text_height)
+        
+        # ▶️ **NEW**: whenever our widget is resized, recalc height
+        self.text_widget.bind("<Configure>", lambda e: self.update_text_height())
         # --- Resize dynamically on content ---
         self.update_text_height()  # Initial height
         # Run once on init and bind to typing
