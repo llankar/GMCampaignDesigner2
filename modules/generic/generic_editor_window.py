@@ -15,7 +15,10 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 import tkinter as tk
 import random
 from modules.helpers.text_helpers import format_longtext
+import json
+
 SWARMUI_PROCESS = None
+
 class CustomDropdown(ctk.CTkToplevel):
     def __init__(self, master, options, command, width=None, max_height=300, **kwargs):
         """
@@ -254,65 +257,90 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         # Optionally, adjust window position.
         position_window_at_top(self)
+    def _make_richtext_editor(self, parent, initial_text, hide_toolbar=True):
+        """
+        Shared initialization for any RichTextEditor-based field.
+        Returns the editor instance.
+        """
+        editor = RichTextEditor(parent)
+        editor.text_widget.configure(
+            bg="#2B2B2B", fg="white", insertbackground="white"
+        )
+        # Load data (dict or raw string)
+
+        data = initial_text
+        if not isinstance(data, dict):
+            try:
+                data = json.loads(data)
+            except Exception:
+                data = {"text": str(initial_text or "")}
+                
+        editor.load_text_data(data)
+        # Toolbar toggle
+        if hide_toolbar:
+            editor.toolbar.pack_forget()
+            editor.text_widget.bind(
+                "<FocusIn>",
+                lambda e: editor.toolbar.pack(fill="x", before=editor.text_widget, pady=2)
+            )
+            editor.text_widget.bind(
+                "<FocusOut>",
+                lambda e: editor.toolbar.pack_forget()
+            )
+        editor.pack(fill="x", pady=5)
+        return editor
+
+    def create_longtext_field(self, field):
+        raw = self.item.get(field["name"], "")
+        editor = self._make_richtext_editor(self.scroll_frame, raw)
+        self.field_widgets[field["name"]] = editor
+
+        # extra buttons for Summary/Secrets…
+        if field["name"] == "Summary":
+            ctk.CTkButton(
+                self.scroll_frame, text="Random Summary",
+                command=self.generate_scenario_description
+            ).pack(pady=5)
+        if field["name"] == "Secrets":
+            ctk.CTkButton(
+                self.scroll_frame, text="Generate Secret",
+                command=self.generate_secret_text
+            ).pack(pady=5)
+
     def create_dynamic_longtext_list(self, field):
-        """
-        Build a container with any existing scenes (each a RichTextEditor),
-        plus an “Add Scene” button that appends another editor.
-        """
         container = ctk.CTkFrame(self.scroll_frame)
         container.pack(fill="x", pady=5)
 
         editors = []
 
-        def remove_this(row_frame, editor):
-            row_frame.destroy()
-            editors.remove(editor)
-
         def add_scene(initial_text=""):
             row = ctk.CTkFrame(container)
-            row.pack(fill="x", pady=(0,5))
-
-            # label or numbering if you like
+            row.pack(fill="x", pady=(0, 5))
             ctk.CTkLabel(row, text=f"Scene {len(editors)+1}").pack(anchor="w")
+            
+            # here’s the only duplication left:
+            rte = self._make_richtext_editor(row, initial_text, hide_toolbar=True)
 
-            # the rich-text editor itself
-            rte = RichTextEditor(row)
-            rte.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
-            # ── Hide toolbar by default and bind focus events ────────────────────
-            rte.toolbar.pack_forget()
-            rte.text_widget.bind("<FocusIn>", lambda e: rte.toolbar.pack(
-             fill="x", before=rte.text_widget, pady=2))
-            rte.text_widget.bind("<FocusOut>", lambda e: rte.toolbar.pack_forget())
-            rte.pack(fill="x", pady=2)
-
-            # populate if we have initial_text
-            if isinstance(initial_text, dict):
-                # restore all formatting
-                rte.load_text_data(initial_text)
-            else:
-                # just plain text (including newlines)
-                rte.text_widget.insert("1.0", initial_text or "")
-
-            # remove-button
-            btn = ctk.CTkButton(row, text="– Remove", width=80,
-                                command=lambda: remove_this(row, rte))
-            btn.pack(anchor="e", pady=(2,0))
+            # Remove button
+            btn = ctk.CTkButton(
+                row, text="– Remove", width=80,
+                command=lambda: (row.destroy(), editors.remove(rte))
+            )
+            btn.pack(anchor="e", pady=(2, 0))
 
             editors.append(rte)
 
-        # pre-populate from model
-        for scene in (self.item.get(field["name"]) or []):
+        # pre-populate
+        for scene in self.item.get(field["name"], []):
             add_scene(scene)
+        # add-new button
+        ctk.CTkButton(
+            container, text="+ Add Scene", command=add_scene
+        ).pack(anchor="w", pady=(5, 0))
 
-        # the “+ Add Scene” button
-        add_btn = ctk.CTkButton(container, text="+ Add Scene",
-                                command=add_scene)
-        add_btn.pack(anchor="w", pady=(5,0))
-
-        # store for save()
-        self.field_widgets[field["name"]]           = editors
-        self.field_widgets[f"{field['name']}_container"]   = container
-        self.field_widgets[f"{field['name']}_add_scene"]   = add_scene
+        self.field_widgets[field["name"]] = editors
+        self.field_widgets[f"{field['name']}_container"] = container
+        self.field_widgets[f"{field['name']}_add_scene"] = add_scene
     
     def create_file_field(self, field):
         frame = ctk.CTkFrame(self.scroll_frame)
@@ -374,62 +402,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
         # Save the widget and its StringVar for later retrieval.
         self.field_widgets[field["name"]] = (option_menu, var)
 
-    def create_longtext_field(self, field):
-        # Load or initialize content
-        value = self.item.get(field["name"], "")
-        editor = RichTextEditor(self.scroll_frame)
-        editor.text_widget.configure(bg="#2B2B2B", fg="white", insertbackground="white")
-
-        if isinstance(value, dict):
-            editor.load_text_data(value)
-        else:
-            text = value if isinstance(value, str) else str(value)
-            editor.text_widget.insert("1.0", text)
-
-        # Keep snapshot for cancel
-        original_text = editor.text_widget.get("1.0", "end-1c")
-
-        # Hide RichTextEditor toolbar (must be defined in RichTextEditor as self.toolbar_frame)
-        editor.toolbar.pack_forget()
-
-        # Handlers for entering and exiting edit mode
-        def start_edit(event):
-            # show toolbar *before* the text widget so it appears above
-            editor.toolbar.pack(fill="x",
-            before=editor.text_widget,pady=2)
-
-        def end_edit():
-            editor.toolbar.pack_forget()
-
-        def cancel_edit():
-            editor.text_widget.delete("1.0", "end")
-            editor.text_widget.insert("1.0", original_text)
-            end_edit()
-
-        # Show toolbar & validation when user clicks into the text widget
-        # show toolbar on entry…
-        editor.text_widget.bind("<FocusIn>", start_edit)
-        # …and hide it as soon as focus leaves the text area
-        editor.text_widget.bind("<FocusOut>", lambda e: end_edit())
-
-        # Pack editor into the UI and register it
-        editor.pack(fill="x", pady=5)
-        self.field_widgets[field["name"]] = editor
-
-        # Add extra buttons for specific fields
-        if field["name"] == "Summary":
-            ctk.CTkButton(
-                self.scroll_frame,
-                text="Random Summary",
-                command=self.generate_scenario_description
-            ).pack(pady=5)
-
-        if field["name"] == "Secrets":
-            ctk.CTkButton(
-                self.scroll_frame,
-                text="Generate Secret",
-                command=self.generate_secret_text
-            ).pack(pady=5)
+    
     
     def generate_secret_text(self):
         """
