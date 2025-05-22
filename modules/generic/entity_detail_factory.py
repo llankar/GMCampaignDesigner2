@@ -450,47 +450,22 @@ def insert_places_table(parent, header, place_names, open_entity_callback):
         # match NPC row heights
         table.grid_rowconfigure(r, weight=1)
         
-def insert_list_longtext(parent, header, items, max_lines=20):
-    """Insert a header + several collapsed CTkTextboxes, each sized & toggled correctly."""
-    # Header label
+def insert_list_longtext(parent, header, items):
+    """Insert a header + several collapsed CTkLabels, each wrapping to the parent width."""
     ctk.CTkLabel(parent, text=f"{header}:", font=("Arial", 14, "bold")) \
-        .pack(anchor="w", padx=10, pady=(10, 2))
+       .pack(anchor="w", padx=10, pady=(10, 2))
 
     for idx, scene in enumerate(items, start=1):
         raw = scene.get("text", "") if isinstance(scene, dict) else str(scene)
 
-        # Outer frame + hidden body
         outer = ctk.CTkFrame(parent, fg_color="transparent")
         outer.pack(fill="x", expand=True, padx=20, pady=2)
         body = ctk.CTkFrame(outer, fg_color="transparent")
 
-        # The textbox itself
-        tb = CTkTextbox(body, wrap="word")
-        tb._textbox.insert("1.0", raw)
-        tb.configure(state="disabled")
-        tb.pack(fill="x", padx=10, pady=5)
+        # Create label with zero wraplength for now
+        lbl = ctk.CTkLabel(body, text=raw, wraplength=0, justify="left")
+        lbl.pack(fill="x", padx=10, pady=5)
 
-        # --- bind update_height with its own tb/outer/idx baked in ---
-        def make_update(tb=tb, outer=outer, max_lines=max_lines, idx=idx):
-            def update_height():
-                # temporarily unlock so it can re-measure
-                tb.configure(state="normal")
-                outer.update_idletasks()
-
-                # count wrapped lines, clamp
-                display_lines = tb._textbox.count("1.0", "end-1c", "displaylines")[0]
-                lines = max(1, min(display_lines, max_lines))
-                print(f"[DEBUG] scene {idx}: display_lines={display_lines}, clamped={lines}")
-
-                # apply to inner Text (CTkTextbox wrapper will auto-follow)
-                tb._textbox.configure(height=lines)
-                tb.configure(state="disabled", height=lines)
-            return update_height
-
-        update_height = make_update()
-        tb.after_idle(update_height)   # initial sizing
-
-        # --- bind toggle with its own btn/body/update_height/idx baked in ---
         expanded = ctk.BooleanVar(value=False)
         btn = ctk.CTkButton(
             outer,
@@ -498,20 +473,25 @@ def insert_list_longtext(parent, header, items, max_lines=20):
             fg_color="transparent",
             anchor="w",
         )
-        def make_toggle(btn=btn, body=body, update_height=update_height, expanded=expanded, idx=idx):
-            def _toggle():
-                if expanded.get():
-                    body.pack_forget()
-                    btn.configure(text=f"▶ Scene {idx}")
-                else:
-                    body.pack(fill="x", padx=10, pady=5)
-                    btn.configure(text=f"▼ Scene {idx}")
-                    update_height()
-                expanded.set(not expanded.get())
-            return _toggle
 
-        btn.configure(command=make_toggle())
+        def _toggle(btn=btn, body=body, lbl=lbl, expanded=expanded, idx=idx):
+            if expanded.get():
+                body.pack_forget()
+                btn.configure(text=f"▶ Scene {idx}")
+            else:
+                # 1) show the body
+                body.pack(fill="x", padx=10, pady=5)
+                btn.configure(text=f"▼ Scene {idx}")
+                # 2) force geometry update so width is correct
+                outer.update_idletasks()
+                # 3) set wraplength to the actual label width minus padding
+                wrap_px = lbl.winfo_width()
+                lbl.configure(wraplength=wrap_px)
+            expanded.set(not expanded.get())
+
+        btn.configure(command=_toggle)
         btn.pack(fill="x", expand=True)
+
 
 
 

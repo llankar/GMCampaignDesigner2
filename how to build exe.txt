@@ -1,6 +1,8 @@
 pyi-makespec main_window.py --onedir --windowed
 
-datas=[('assets', 'assets'), ('data', 'data'),('config', 'config'), ('static', 'static')],
+# -*- mode: python ; coding: utf-8 -*-
+datas= [ ('data',   'data'), ('assets', 'assets'), ('config', 'config'), ('static', 'static')],
+    
     
 pyinstaller --noconfirm main_window.spec
 
