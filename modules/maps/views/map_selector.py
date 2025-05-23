@@ -85,6 +85,7 @@ def _on_display_map(self, entity_type, map_name):
     # 6) Pre-load all Creature & NPC records once
     creatures = {r.get("Name"): r for r in self._model_wrappers["Creature"].load_items()}
     npcs      = {r.get("Name"): r for r in self._model_wrappers["NPC"].load_items()}
+    pcs      = {r.get("Name"): r for r in self._model_wrappers["PC"].load_items()}
 
     # 7) Build self.tokens in one pass (only image loading & metadata)
     for rec in token_list:
@@ -122,6 +123,9 @@ def _on_display_map(self, entity_type, map_name):
     for token in self.tokens:
         if token["entity_type"] == "Creature":
             record = creatures.get(token["entity_id"], {})
+            raw_txt = record.get("Stats", "")
+        elif token["entity_type"] == "PC":
+            record = pcs.get(token["entity_id"], {})
             raw_txt = record.get("Stats", "")
         else:
             record = npcs.get(token["entity_id"], {})

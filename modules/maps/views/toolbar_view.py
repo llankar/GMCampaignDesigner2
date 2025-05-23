@@ -17,6 +17,7 @@ def _build_toolbar(self):
         "fs":    self.load_icon("assets/icons/expand.png",   (48,48)),
         "npc":   self.load_icon("assets/icons/npc.png",      (48,48)),
         "creat": self.load_icon("assets/icons/creature.png", (48,48)),
+        "pc":    self.load_icon("assets/icons/pc.png",       (48,48)),
     }
 
     # Fog controls
@@ -30,6 +31,8 @@ def _build_toolbar(self):
     create_icon_button(toolbar, icons["creat"], "Add Creature", command=lambda: self.open_entity_picker("Creature"))\
         .pack(side="left", padx=2)
     create_icon_button(toolbar, icons["npc"],   "Add NPC",      command=lambda: self.open_entity_picker("NPC"))\
+        .pack(side="left", padx=2)
+    create_icon_button(toolbar, icons["pc"], "Add PC", command=lambda: self.open_entity_picker("PC")) \
         .pack(side="left", padx=2)
     create_icon_button(toolbar, icons["fs"],    "Fullscreen",   command=self.open_fullscreen)\
         .pack(side="left", padx=2)
