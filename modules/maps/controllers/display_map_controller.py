@@ -32,67 +32,12 @@ class DisplayMapController:
         self._model_wrappers = {
             "NPC":      GenericModelWrapper("npcs"),
             "Creature": GenericModelWrapper("creatures"),
+            "PC": GenericModelWrapper("pcs"),
         }
         self._templates = {
             "NPC":      load_template("npcs"),
-            "Creature": load_template("creatures")
-        }
-        # --- State ---
-        self.current_map = None
-        self.base_img    = None
-        self.mask_img    = None
-        self.base_tk     = None
-        self.mask_tk     = None
-        self.base_id     = None
-        self.mask_id     = None
-        self._zoom_after_id = None
-        self._fast_resample = Image.BILINEAR   # interactive filter
-        self.zoom        = 1.0
-        self.pan_x       = 0
-        self.pan_y       = 0
-        self.selected_token  = None    # last clicked token
-        self.clipboard_token = None    # copied token data
-    
-        self.brush_size  = DEFAULT_BRUSH_SIZE
-        self.token_size  = 48
-        self.brush_shape = "rectangle"  # new: "rectangle" or "circle"
-        self.fog_mode    = "add"    # "add" or "rem"
-        self.tokens      = []       # list of token dicts
-    
-        # Panning state
-        self._panning      = False
-        self._last_mouse   = (0, 0)
-        self._orig_pan     = (0, 0)
-    
-        # Long‐press marker
-        self._marker_after_id = None
-        self._marker_start    = None
-        self._marker_id       = None
-        self._fs_marker_id    = None
-    
-        # Fullscreen mirror
-        self.fs            = None
-        self.fs_canvas     = None
-        self.fs_base_id    = None
-        self.fs_mask_id    = None
-    
-        # Build a name→map record dict for quick lookup
-        self._maps = {m["Name"]: m for m in maps_wrapper.load_items()}
-    
-        # Begin by selecting a map
-        self.select_map()
-    def __init__(self, parent, maps_wrapper, map_template):
-        self.parent = parent
-        self.maps = maps_wrapper
-        self.map_template = map_template
-    
-        self._model_wrappers = {
-            "NPC":      GenericModelWrapper("npcs"),
-            "Creature": GenericModelWrapper("creatures"),
-        }
-        self._templates = {
-            "NPC":      load_template("npcs"),
-            "Creature": load_template("creatures")
+            "Creature": load_template("creatures"),
+            "PC": load_template("pcs"),
         }
         # --- State ---
         self.current_map = None
