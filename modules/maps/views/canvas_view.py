@@ -14,6 +14,9 @@ def _build_canvas(self):
     root.bind_all("<Control-v>", self._paste_token)
     root.bind_all("<Control-V>", self._paste_token)
     root.bind_all("<Delete>", self._on_delete_key)
+    # Undo fog
+    root.bind_all("<Control-z>",   lambda e: self.undo_fog(e))
+    root.bind_all("<Control-Z>",   lambda e: self.undo_fog(e))
 
     # Painting, panning, markers
     self.canvas.bind("<ButtonPress-1>",    self._on_mouse_down)

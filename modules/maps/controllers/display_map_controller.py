@@ -77,13 +77,32 @@ class DisplayMapController:
         self.fs_canvas     = None
         self.fs_base_id    = None
         self.fs_mask_id    = None
-    
+        self.fog_history = []            # ← add this
+        self._fog_action_active = False  # ← helper flag
+        
         # Build a name→map record dict for quick lookup
         self._maps = {m["Name"]: m for m in maps_wrapper.load_items()}
     
         # Begin by selecting a map
         self.select_map()
+    
+    def _push_fog_history(self):
+        # record a copy of the current mask before modification
+        if self.mask_img is not None:
+            # you can cap the history length if you like:
+            MAX_UNDO = 20
+            self.fog_history.append(self.mask_img.copy())
+            if len(self.fog_history) > MAX_UNDO:
+                self.fog_history.pop(0)
 
+    
+    def undo_fog(self, event=None):
+        """Revert to the last fog state."""
+        if not self.fog_history:
+            return
+        self.mask_img = self.fog_history.pop()
+        self._update_canvas_images()
+    
     def _bind_token(self, token):
         """Attach drag & right-click handlers to both border & image."""
         b_id, i_id = token['canvas_ids']
@@ -126,7 +145,10 @@ class DisplayMapController:
         token_ids = {cid for t in self.tokens for cid in t["canvas_ids"]}
         if current & token_ids:
             return
-    
+    # ——— NEW: start of a fog action ———
+        if self.fog_mode in ("add", "rem") and not self._fog_action_active:
+            self._push_fog_history()
+            self._fog_action_active = True
         # Always schedule the long-press marker, but no panning:
         self._marker_start = (event.x, event.y)
         self._marker_after_id = self.canvas.after(500, self._create_marker)
@@ -145,11 +167,11 @@ class DisplayMapController:
         self.on_paint(event)
 
     def _on_mouse_up(self, event):
-       # Cancel marker if not fired
+        # Cancel marker if not fired
         if self._marker_after_id:
             self.canvas.after_cancel(self._marker_after_id)
             self._marker_after_id = None
-    
+
         # Remove any existing marker
         if self._marker_id:
             self.canvas.delete(self._marker_id)
@@ -157,6 +179,9 @@ class DisplayMapController:
         if self.fs_canvas and self._fs_marker_id:
             self.fs_canvas.delete(self._fs_marker_id)
             self._fs_marker_id = None
+
+        # ——— NEW: end of fog action ———
+        self._fog_action_active = False
 
     def _perform_zoom(self, final: bool):
         """Actually do the heavy redraw. If final==True, you could switch to LANCZOS."""
