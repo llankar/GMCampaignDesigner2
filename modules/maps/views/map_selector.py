@@ -50,11 +50,33 @@ def _on_display_map(self, entity_type, map_name):
     else:
         self.mask_img = Image.new("RGBA", self.base_img.size, (0,0,0,128))
 
-    # Reset pan/zoom
-    self.zoom  = 1.0
-    self.pan_x = 0
-    self.pan_y = 0
+    # Restore pan/zoom if available, otherwise use defaults
+    zoom_raw  = item.get("zoom", 1.0)
+    pan_x_raw = item.get("pan_x", 0)
+    pan_y_raw = item.get("pan_y", 0)
+    
+    if self.zoom is None:
+        self.zoom = 1.0
+    if self.pan_x is None:
+        self.pan_x = 0
+    if self.pan_y is None:
+        self.pan_y = 0
+    
+    try:
+        self.zoom  = float(zoom_raw)
+    except (TypeError, ValueError):
+        self.zoom = 1.0
 
+    try:
+        self.pan_x = float(pan_x_raw)
+    except (TypeError, ValueError):
+        self.pan_x = 0.0
+
+    try:
+        self.pan_y = float(pan_y_raw)
+    except (TypeError, ValueError):
+        self.pan_y = 0.0
+        
     # 4) Clear out any old tokens from both canvases
     for t in self.tokens:
         for cid in t.get("canvas_ids", []):

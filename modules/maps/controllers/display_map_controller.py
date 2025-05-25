@@ -555,6 +555,13 @@ class DisplayMapController:
         self._persist_tokens()
         # Now include token_size too
         self.current_map["token_size"] = self.token_size
+        
+        # Now include token_size, plus pan_x, pan_y and zoom
+        self.current_map["token_size"] = self.token_size
+        self.current_map["pan_x"]      = self.pan_x
+        self.current_map["pan_y"]      = self.pan_y
+        self.current_map["zoom"]       = self.zoom
+        
         all_maps = list(self._maps.values())
         self.maps.save_items(all_maps)
         # Now that fog (and any moved tokens) are final, refresh the second‐screen view
