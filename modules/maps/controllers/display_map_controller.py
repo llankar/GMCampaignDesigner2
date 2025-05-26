@@ -182,7 +182,15 @@ class DisplayMapController:
 
         # ——— NEW: end of fog action ———
         self._fog_action_active = False
-
+        self.canvas.delete("fog_preview")
+        # now that the stroke is complete, do the full mask‐resize + blit:
+        w, h = self.base_img.size
+        sw, sh = int(w*self.zoom), int(h*self.zoom)
+        mask_resized = self.mask_img.resize((sw, sh), resample=Image.LANCZOS)
+        self.mask_tk = ImageTk.PhotoImage(mask_resized)
+        self.canvas.itemconfig(self.mask_id, image=self.mask_tk)
+        self.canvas.coords(self.mask_id, self.pan_x, self.pan_y)
+        
     def _perform_zoom(self, final: bool):
         """Actually do the heavy redraw. If final==True, you could switch to LANCZOS."""
         # choose resample filter
