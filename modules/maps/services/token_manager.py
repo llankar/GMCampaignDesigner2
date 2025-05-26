@@ -266,6 +266,4 @@ def _persist_tokens(self):
     self.current_map["Tokens"] = json.dumps(data)
     all_maps = list(self._maps.values())
     self.maps.save_items(all_maps)
-    print(f"[persist_tokens] Saving {len(data)} tokens")
-    print(f"[persist_tokens] First token (if any): {data[0] if data else '—'}")
-
+    

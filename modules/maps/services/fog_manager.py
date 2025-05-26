@@ -30,19 +30,41 @@ def on_paint(self, event):
     bottom = int(yw + half)
 
     draw = ImageDraw.Draw(self.mask_img)
+    # actually paint or erase on the mask_img
     if self.fog_mode == "add":
-        # Paint semi-transparent black
         if self.brush_shape == "circle":
-            draw.ellipse([left, top, right, bottom], fill=(0, 0, 0, 128))
+            draw.ellipse((left, top, right, bottom), fill=(0, 0, 0, 128))
         else:
-            draw.rectangle([left, top, right, bottom], fill=(0, 0, 0, 128))
-    else:
-        # Erase (make fully transparent)
-        if self.brush_shape == "circle":
-            draw.ellipse([left, top, right, bottom], fill=(0, 0, 0,   0))
-        else:
-            draw.rectangle([left, top, right, bottom], fill=(0, 0, 0,   0))
+            draw.rectangle((left, top, right, bottom), fill=(0, 0, 0, 128))
+    else:  # "rem"
+        # clear that area (make it fully transparent)
+        draw.rectangle((left, top, right, bottom), fill=(0, 0, 0,   0))    # 1) compute brush in screen coords
+    half = self.brush_size/2
+    sx = int((xw - half)*self.zoom + self.pan_x)
+    sy = int((yw - half)*self.zoom + self.pan_y)
+    size = int(self.brush_size * self.zoom)
 
+    # 2) delete any previous preview
+    self.canvas.delete("fog_preview")
+
+    # 3) draw the preview shape
+    if self.fog_mode == "add":
+        if self.brush_shape == "circle":
+            self.canvas.create_oval(
+                sx, sy, sx+size, sy+size,
+                fill="black", stipple="gray50", width=0,
+                tags="fog_preview"
+            )
+        else:
+            self.canvas.create_rectangle(
+                sx, sy, sx+size, sy+size,
+                fill="black", stipple="gray50", width=0,
+                tags="fog_preview"
+            )
+    else:
+        # you can use a background-colored outline or simply clear the preview
+        self.canvas.delete("fog_preview")
+    
     # —— only resize & blit the mask ——
     w, h = self.base_img.size
     sw, sh = int(w * self.zoom), int(h * self.zoom)
