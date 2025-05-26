@@ -17,7 +17,7 @@ from modules.helpers.text_helpers import format_longtext
 
 DEFAULT_BRUSH_SIZE = 32  # px
 
-MASKS_DIR = os.path.join(os.getcwd(), "masks")
+MASKS_DIR = "masks"
 MAX_ZOOM = 3.0
 MIN_ZOOM = 0.1
 ZOOM_STEP = 0.1  # 10% per wheel notch
@@ -558,45 +558,43 @@ class DisplayMapController:
     )
 
     def save_map(self):
-        """Save the current fog mask to disk and persist the path."""
-        os.makedirs(MASKS_DIR, exist_ok=True)
-        fname     = os.path.basename(self.current_map["Image"])
-        mask_path = os.path.join(MASKS_DIR, fname)
-        # ensure we’re using a .png so we can preserve alpha
-        base, ext = os.path.splitext(mask_path or "")
-        if not ext.lower() in (".png",):
-            # if no path or wrong ext, switch to PNG
-            base = base or os.path.splitext(self.current_map["ImagePath"])[0]
-            mask_path = base + "_mask.png"
-            self.current_map["FogMaskPath"] = mask_path
-    
-        os.makedirs(os.path.dirname(mask_path), exist_ok=True)
-        # save with explicit PNG format to keep RGBA channel
-        self.mask_img.save(mask_path, format="PNG")
-    
-        # Update in-memory record
-        self.current_map["FogMaskPath"] = mask_path
-        # Persist any moved tokens & updated HP before saving maps
+        """Save the current fog mask to disk and persist the relative path."""
+        # 1. Make sure the on-disk directory exists:
+        abs_masks_dir = os.path.abspath(MASKS_DIR)
+        os.makedirs(abs_masks_dir, exist_ok=True)
+
+        # 2. Choose a filename for the mask (always .png):
+        img_name = os.path.basename(self.current_map["Image"])
+        base, _ = os.path.splitext(img_name)
+        mask_filename = f"{base}_mask.png"
+
+        # 3. Build absolute & relative paths:
+        abs_mask_path = os.path.join(abs_masks_dir, mask_filename)
+        rel_mask_path = os.path.join(MASKS_DIR, mask_filename)   # <-- this is what we store
+
+        # 4. Save the PNG:
+        self.mask_img.save(abs_mask_path, format="PNG")
+
+        # 5. Persist only the _relative_ path in your map record:
+        self.current_map["FogMaskPath"] = rel_mask_path
+
+        # 6. Persist everything else as before:
         self._persist_tokens()
-        # Now include token_size too
-        self.current_map["token_size"] = self.token_size
-        
-        # Now include token_size, plus pan_x, pan_y and zoom
-        self.current_map["token_size"] = self.token_size
-        self.current_map["pan_x"]      = self.pan_x
-        self.current_map["pan_y"]      = self.pan_y
-        self.current_map["zoom"]       = self.zoom
-        
+        self.current_map.update({
+            "token_size": self.token_size,
+            "pan_x":      self.pan_x,
+            "pan_y":      self.pan_y,
+            "zoom":       self.zoom,
+        })
         all_maps = list(self._maps.values())
         self.maps.save_items(all_maps)
-        # Now that fog (and any moved tokens) are final, refresh the second‐screen view
-        # only if that window (and its canvas) still exist:
+
+        # 7. (Optional) Refresh your second-screen view if it exists:
         try:
             if getattr(self, 'fs', None) and self.fs.winfo_exists() \
                 and getattr(self, 'fs_canvas', None) and self.fs_canvas.winfo_exists():
-                self._update_fullscreen_map()
+             self._update_fullscreen_map()
         except tk.TclError:
-            # second‐screen has been closed or destroyed—ignore
             pass
 
     _build_canvas = _build_canvas
