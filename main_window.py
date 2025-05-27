@@ -1114,7 +1114,17 @@ class MainWindow(ctk.CTk):
                 self.apply_formatting(run, secrets.get("formatting", {}))
             else:
                 doc.add_paragraph(str(secrets))
-
+            scenes = scenario.get("Scenes") or []
+            if scenes:
+                doc.add_heading("Scenes", level=3)
+                for scene in scenes:
+                    if isinstance(scene, dict):
+                        p = doc.add_paragraph()
+                        run = p.add_run(scene.get("text", ""))
+                        self.apply_formatting(run, scene.get("formatting", {}))
+                    else:
+                        doc.add_paragraph(str(scene))
+            
             # Places Section
             doc.add_heading("Places", level=3)
             for place_name in scenario.get("Places", []):
