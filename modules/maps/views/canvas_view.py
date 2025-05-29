@@ -17,6 +17,8 @@ def _build_canvas(self):
     # Undo fog
     root.bind_all("<Control-z>",   lambda e: self.undo_fog(e))
     root.bind_all("<Control-Z>",   lambda e: self.undo_fog(e))
+    
+    root.bind_all("<Control-f>", self.open_global_search)
 
     # Painting, panning, markers
     self.canvas.bind("<ButtonPress-1>",    self._on_mouse_down)

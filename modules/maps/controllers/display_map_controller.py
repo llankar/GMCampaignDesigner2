@@ -85,7 +85,70 @@ class DisplayMapController:
     
         # Begin by selecting a map
         self.select_map()
-    
+    def open_global_search(self, event=None):
+        """Popup a filtered list of all NPCs, Creatures & PCs, then add the chosen one as a token."""
+        popup = ctk.CTkToplevel(self.parent)
+        popup.title("Search Entities")
+        popup.geometry("400x300")
+        popup.transient(self.parent)
+        popup.grab_set()
+
+        entry = ctk.CTkEntry(popup, placeholder_text="Type to search…")
+        entry.pack(fill="x", padx=10, pady=(10,5))
+        popup.after(10, lambda: entry.focus_force())
+
+        # Listbox for results
+        listbox = tk.Listbox(popup, activestyle="none")
+        listbox.pack(fill="both", expand=True, padx=10, pady=(0,10))
+
+        # Map of what’s in each row: [(etype, name, record), …]
+        search_map = []
+
+        def populate(initial=False, query=""):
+            listbox.delete(0, "end")
+            search_map.clear()
+            q = query.lower()
+            for etype, wrapper in self._model_wrappers.items():
+                items = wrapper.load_items()
+                for item in items:
+                    name = item.get("Name", "")
+                    if initial or q in name.lower():
+                        display = f"{etype}: {name}"
+                        listbox.insert("end", display)
+                        search_map.append((etype, name, item))
+            if listbox.size() > 0:
+                listbox.selection_clear(0, "end")
+                listbox.selection_set(0)
+                listbox.activate(0)
+
+        # Initial fill
+        populate(initial=True)
+
+        # Re-filter on each keystroke
+        entry.bind("<KeyRelease>", lambda e: populate(False, entry.get().strip()))
+
+        # Jump into list from entry
+        entry.bind("<Down>", lambda e: (listbox.focus_set(), "break"))
+
+        def on_select(evt=None):
+            if not search_map: return
+            idx = listbox.curselection()[0]
+            etype, name, record = search_map[idx]
+            # extract portrait path if you have one
+            portrait = record.get("Portrait", "")
+            if isinstance(portrait, dict):
+                path = portrait.get("path") or portrait.get("text", "")
+            else:
+                path = portrait
+            # finally create the token
+            self.add_token(path, etype, name, record)
+            popup.destroy()
+
+        # Bind Enter & double-click
+        entry.bind("<Return>", lambda e: on_select())
+        listbox.bind("<Return>", lambda e: on_select())
+        listbox.bind("<Double-Button-1>", on_select)
+        
     def _push_fog_history(self):
         # record a copy of the current mask before modification
         if self.mask_img is not None:
