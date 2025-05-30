@@ -403,6 +403,7 @@ class DisplayMapController:
                 rec = token.get('entity_record', {})
                 # — coerce to a single string before inserting, and clear old text
                 raw = rec.get("Stats", "") if token['entity_type']=="Creature" else rec.get("Traits", "")
+                raw = format_longtext(raw)
                 if isinstance(raw, (list, tuple)):
                      display = "\n".join(map(str, raw))
                 else:
