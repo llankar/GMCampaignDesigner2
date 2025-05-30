@@ -229,10 +229,17 @@ def _delete_token(self, token):
         del token["info_widget"], token["info_widget_id"]
 
     # 7) Fullscreen mirror items, if present
-    if getattr(self, "fs_canvas", None) and "fs_canvas_ids" in token:
-        for cid in token["fs_canvas_ids"]:
-            self.fs_canvas.delete(cid)
-        del token["fs_canvas_ids"]
+    if getattr(self, "fs_canvas", None):
+        # remove the border/image/Text on the second screen
+        if "fs_canvas_ids" in token:
+            for cid in token["fs_canvas_ids"]:
+                self.fs_canvas.delete(cid)
+            del token["fs_canvas_ids"]
+        # **also** remove the red‐cross lines if they exist
+        if "fs_cross_ids" in token:
+            for cid in token["fs_cross_ids"]:
+                self.fs_canvas.delete(cid)
+            del token["fs_cross_ids"]
 
     # 8) Finally remove from state & persist
     self.tokens.remove(token)
