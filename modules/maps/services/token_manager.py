@@ -5,6 +5,7 @@ from tkinter import messagebox, colorchooser
 from modules.ui.image_viewer import show_portrait
 import tkinter.simpledialog as sd
 import tkinter as tk
+import threading
 
 def add_token(self, path, entity_type, entity_name, entity_record=None):
     img_path = path
@@ -76,7 +77,14 @@ def _on_token_move(self, event, token):
 
 def _on_token_release(self, event, token):
     token.pop("drag_data", None)
-    self._persist_tokens()
+    # debounce any pending save
+    try:
+        self.canvas.after_cancel(self._persist_after_id)
+    except AttributeError:
+        pass
+
+    # schedule one save after the UI becomes idle
+    self._persist_after_id = self.canvas.after_idle(self._persist_tokens)
 
 def _copy_token(self, event=None):
     """Copy the last‐clicked token’s data into a buffer."""
@@ -246,31 +254,36 @@ def _delete_token(self, token):
     self._persist_tokens()
 
 def _persist_tokens(self):
-    """Serialize tokens into current_map and save all maps."""
+    """Quickly capture token state, then hand off the heavy write to a daemon thread."""
+    # 1) Build the JSON in–memory (cheap)
     data = []
     for t in self.tokens:
-        try:
-            x, y = t["position"]
-            entry = {
-                "entity_type": t.get("entity_type", ""),
-                "entity_id":   t.get("entity_id", ""),
-                "image_path":  t["image_path"],  # <-- required
-                "x":           x,
-                "y":           y,
-                "border_color": t.get("border_color", "#0000ff"),
-                "size":        t.get("size", self.token_size),
-                "hp":           t.get("hp", 10),
-                "max_hp":           t.get("max_hp", 10)
-            }
-            data.append(entry)
-        except KeyError as e:
-            print(f"[persist_tokens] Skipping token missing key: {e}")
-            continue
-        except Exception as e:
-            print(f"[persist_tokens] Error serializing token: {e}")
-            continue
+            try:
+                    x, y = t["position"]
+                    data.append({
+                            "entity_type":    t.get("entity_type", ""),
+                            "entity_id":        t.get("entity_id", ""),
+                            "image_path":     t["image_path"],
+                            "x":                        x,
+                            "y":                        y,
+                            "border_color": t.get("border_color", "#0000ff"),
+                            "size":                 t.get("size", self.token_size),
+                            "hp":                     t.get("hp", 10),
+                            "max_hp":             t.get("max_hp", 10),
+                    })
+            except Exception:
+                    continue
 
     self.current_map["Tokens"] = json.dumps(data)
     all_maps = list(self._maps.values())
-    self.maps.save_items(all_maps)
+
+    # 2) Fire‐and‐forget the actual disk write so the UI never blocks
+    
+    def _write_maps():
+            try:
+                    self.maps.save_items(all_maps)
+            except Exception as e:
+                    print(f"[persist_tokens] Background save error: {e}")
+
+    threading.Thread(target=_write_maps, daemon=True).start()
     
