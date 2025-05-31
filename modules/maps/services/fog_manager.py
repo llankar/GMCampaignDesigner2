@@ -85,27 +85,7 @@ def on_paint(self, event):
     else:
         # in “erase” mode we just delete the old preview if any
         self.canvas.delete("fog_preview")
-
-    # 2) delete any previous preview
-    self.canvas.delete("fog_preview")
-
-    # 3) draw the preview shape
-    if self.fog_mode == "add":
-        if self.brush_shape == "circle":
-            self.canvas.create_oval(
-                sx, sy, sx+size, sy+size,
-                fill="black", stipple="gray50", width=0,
-                tags="fog_preview"
-            )
-        else:
-            self.canvas.create_rectangle(
-                sx, sy, sx+size, sy+size,
-                fill="black", stipple="gray50", width=0,
-                tags="fog_preview"
-            )
-    else:
-        # you can use a background-colored outline or simply clear the preview
-        self.canvas.delete("fog_preview")
+    
     
     # —— only resize & blit the mask ——
     w, h = self.base_img.size
