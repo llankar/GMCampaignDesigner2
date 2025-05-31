@@ -181,8 +181,40 @@ class DisplayMapController:
                                  lambda e, t=token: self._on_token_release(e, t))
             # right-click → context menu
             self.canvas.tag_bind(cid, "<Button-3>",
-                                 lambda e, t=token: self._show_token_menu(e, t))
-
+                                 lambda e, t=token: self._on_token_right_click(e, t))
+            # ─── Double-click: HP edit or ignore ────────────────────────────
+            self.canvas.tag_bind(
+                cid, "<Double-Button-1>",
+                lambda e, t=token: self._on_token_double_click(e, t)
+            )
+    def _on_token_right_click(self, event, token):
+        """
+        Any right‐click on the token: if it hit the HP circle, show max-HP menu;
+        otherwise show the token’s context menu.
+        """
+        print(f"right click on token {token}")
+        if "hp_canvas_ids" in token:
+            hp_cid, _ = token["hp_canvas_ids"]
+            x1, y1, x2, y2 = self.canvas.coords(hp_cid)
+            pad = 4
+            if x1 - pad <= event.x <= x2 + pad and y1 - pad <= event.y <= y2 + pad:
+                return self._on_max_hp_menu_click(event, token)
+        # fall back to the token’s own menu
+        return self._show_token_menu(event, token)
+    
+    def _on_token_double_click(self, event, token):
+        """
+        Any double‐click on the token: if it hit the HP circle, open the HP editor.
+        """
+        print(f"double click on token {token}")
+        if "hp_canvas_ids" not in token:
+            return
+        hp_cid, _ = token["hp_canvas_ids"]
+        x1, y1, x2, y2 = self.canvas.coords(hp_cid)
+        pad = 4
+        if x1 - pad <= event.x <= x2 + pad and y1 - pad <= event.y <= y2 + pad:
+            self._on_hp_double_click(event, token)
+                                     
     def _create_marker(self):
         x0, y0 = self._marker_start
         xw = (x0 - self.pan_x) / self.zoom
@@ -270,7 +302,7 @@ class DisplayMapController:
         x0, y0 = self.pan_x, self.pan_y
     
         # Base
-        base_resized = self.base_img.resize((sw,sh), resample=self._fast_resample)
+        base_resized = self.base_img.resize((sw,sh), resample=resample)
         self.base_tk = ImageTk.PhotoImage(base_resized)
         if self.base_id:
             self.canvas.itemconfig(self.base_id, image=self.base_tk)
@@ -279,7 +311,7 @@ class DisplayMapController:
             self.base_id = self.canvas.create_image(x0, y0, image=self.base_tk, anchor='nw')
     
         # Mask
-        mask_resized = self.mask_img.resize((sw,sh), resample=Image.LANCZOS)
+        mask_resized = self.mask_img.resize((sw,sh), resample=resample)
         self.mask_tk = ImageTk.PhotoImage(mask_resized)
         if self.mask_id:
             self.canvas.itemconfig(self.mask_id, image=self.mask_tk)
@@ -292,7 +324,7 @@ class DisplayMapController:
             pil = token['pil_image']
             tw, th = pil.size
             nw, nh = int(tw*self.zoom), int(th*self.zoom)
-            img_r = pil.resize((nw,nh), resample=Image.LANCZOS)
+            img_r = pil.resize((nw,nh), resample=resample)
             tkimg = ImageTk.PhotoImage(img_r)
             token['tk_image'] = tkimg
     
@@ -389,16 +421,18 @@ class DisplayMapController:
                         fill="white"
                     )
                     token["hp_canvas_ids"] = (cid, tid)
-                   
-                    self.canvas.tag_bind(
-                        tid,
-                        "<Double-1>",
-                        lambda e, t=token: self._on_hp_double_click(e, t)
-                    )
-                    self.canvas.tag_bind(
-                        tid, 
-                        "<Button-3>",
-                        lambda e, t=token: self._on_max_hp_menu_click(e, t))
+                    # bind to both circle and text for reliable clicks at any zoom:
+                    for item_id in (cid, tid):
+                        self.canvas.tag_bind(
+                                item_id,
+                                "<Double-Button-1>",
+                                lambda e, t=token: self._on_hp_double_click(e, t)
+                        )
+                        self.canvas.tag_bind(
+                                item_id,
+                                "<Button-3>",
+                                lambda e, t=token: self._on_max_hp_menu_click(e, t)
+                        )
                 # ─────────────── NEW: add right‐of‐token multi‐line textbox ───────────────
                 rec = token.get('entity_record', {})
                 # — coerce to a single string before inserting, and clear old text
@@ -536,28 +570,44 @@ class DisplayMapController:
         
     def _on_hp_double_click(self, event, token):
         """
-        Handler for double-click on the HP text. Swaps the text with an inline CTkEntry
-        so the GM can type a new HP (absolute or relative) directly.
+        Handler for double-click on the HP circle or text.
+        Swaps the HP text with an inline CTkEntry so the GM can type a new HP.
         """
+        # ─── Cancel any pending zoom redraws ────────────────────────────────
+        for attr in ("_zoom_after_id", "_zoom_final_after_id"):
+            zid = getattr(self, attr, None)
+            if zid:
+                self.canvas.after_cancel(zid)
+                setattr(self, attr, None)
+
         # If an edit entry already exists, remove it first
         if "hp_entry_widget" in token:
             self.canvas.delete(token["hp_entry_widget_id"])
             token["hp_entry_widget"].destroy()
             del token["hp_entry_widget"], token["hp_entry_widget_id"]
 
-        # Hide the text item
+        # Hide the existing HP text
         cid, tid = token["hp_canvas_ids"]
         self.canvas.itemconfigure(tid, state="hidden")
 
-        # Get the on-screen coords of the HP text
+        # Compute on-screen coords of the HP text
         x, y = self.canvas.coords(tid)
+        # ─── Clamp to canvas bounds so it never draws fully off-screen ───────
+        cw, ch = self.canvas.winfo_width(), self.canvas.winfo_height()
+        margin = 20
+        x = min(max(x, margin), cw - margin)
+        y = min(max(y, margin), ch - margin)
 
-        # Create the inline entry pre-filled with the current HP
+        # Create the inline entry, pre-filled with current HP
         entry = ctk.CTkEntry(self.canvas, width=50)
         entry.insert(0, str(token.get("hp", 0)))
 
-        # Embed the entry into the canvas
+        # Embed & raise the entry so it’s on top, then force an immediate render
         entry_id = self.canvas.create_window(x, y, window=entry, anchor="center")
+        self.canvas.lift(entry_id)
+        self.canvas.update_idletasks()
+
+        # Store references on the token
         token["hp_entry_widget"]    = entry
         token["hp_entry_widget_id"] = entry_id
 
@@ -621,13 +671,23 @@ class DisplayMapController:
         self.zoom = max(MIN_ZOOM, min(MAX_ZOOM, self.zoom * (1 + ZOOM_STEP*delta)))
         self.pan_x = event.x - xw*self.zoom
         self.pan_y = event.y - yw*self.zoom
-        # Debounce the full redraw
+        # 1) quick, cheap redraw
         if self._zoom_after_id:
             self.canvas.after_cancel(self._zoom_after_id)
         self._zoom_after_id = self.canvas.after(
-            50,                            # wait 50ms after last wheel event
+            50,
             lambda: self._perform_zoom(final=False)
-    )
+        )
+        # 2) one high-quality pass after a bit more idle time
+        try:
+            if self._zoom_final_after_id:
+                self.canvas.after_cancel(self._zoom_final_after_id)
+        except AttributeError:
+            pass
+        self._zoom_final_after_id = self.canvas.after(
+            1000,
+            lambda: self._perform_zoom(final=True)
+        )
 
     def save_map(self):
         """Save the current fog mask to disk and persist the relative path."""

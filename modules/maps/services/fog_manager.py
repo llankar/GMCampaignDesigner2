@@ -40,9 +40,51 @@ def on_paint(self, event):
         # clear that area (make it fully transparent)
         draw.rectangle((left, top, right, bottom), fill=(0, 0, 0,   0))    # 1) compute brush in screen coords
     half = self.brush_size/2
-    sx = int((xw - half)*self.zoom + self.pan_x)
-    sy = int((yw - half)*self.zoom + self.pan_y)
-    size = int(self.brush_size * self.zoom)
+    size      = int(self.brush_size * self.zoom)
+    half_size = size // 2
+    size      = int(self.brush_size * self.zoom)
+    half_size = size // 2
+
+    # Directly center on the mouse‐pointer (event.x/event.y):
+    px = event.x - half_size
+    py = event.y - half_size
+
+    if self.fog_mode == "add":
+        if self.brush_shape == "circle":
+            self.canvas.create_oval(
+                px, py, px + size, py + size,
+                fill="black", stipple="gray50", width=0,
+                tags="fog_preview"
+            )
+        else:
+            self.canvas.create_rectangle(
+                px, py, px + size, py + size,
+                fill="black", stipple="gray50", width=0,
+                tags="fog_preview"
+            )
+    else:
+        # in “erase” mode we just delete the old preview if any
+        self.canvas.delete("fog_preview")
+    # Directly center on the mouse‐pointer (event.x/event.y):
+    px = event.x - half_size
+    py = event.y - half_size
+
+    if self.fog_mode == "add":
+        if self.brush_shape == "circle":
+            self.canvas.create_oval(
+                px, py, px + size, py + size,
+                fill="black", stipple="gray50", width=0,
+                tags="fog_preview"
+            )
+        else:
+            self.canvas.create_rectangle(
+                px, py, px + size, py + size,
+                fill="black", stipple="gray50", width=0,
+                tags="fog_preview"
+            )
+    else:
+        # in “erase” mode we just delete the old preview if any
+        self.canvas.delete("fog_preview")
 
     # 2) delete any previous preview
     self.canvas.delete("fog_preview")
