@@ -258,21 +258,43 @@ def _persist_tokens(self):
     # 1) Build the JSON in–memory (cheap)
     data = []
     for t in self.tokens:
-            try:
-                    x, y = t["position"]
-                    data.append({
-                            "entity_type":    t.get("entity_type", ""),
-                            "entity_id":        t.get("entity_id", ""),
-                            "image_path":     t["image_path"],
-                            "x":                        x,
-                            "y":                        y,
-                            "border_color": t.get("border_color", "#0000ff"),
-                            "size":                 t.get("size", self.token_size),
-                            "hp":                     t.get("hp", 10),
-                            "max_hp":             t.get("max_hp", 10),
-                    })
-            except Exception:
-                    continue
+        try:
+            x, y = t["position"]
+            item_type = t.get("type", "token")
+
+            item_data = {
+                "type": item_type,
+                "x": x,
+                "y": y,
+            }
+
+            if item_type == "token":
+                item_data.update({
+                    "entity_type":    t.get("entity_type", ""),
+                    "entity_id":      t.get("entity_id", ""),
+                    "image_path":     t.get("image_path", ""),
+                    "size":           t.get("size", self.token_size),
+                    "hp":             t.get("hp", 10),
+                    "max_hp":         t.get("max_hp", 10),
+                    "border_color":   t.get("border_color", "#0000ff"),
+                })
+            elif item_type in ["rectangle", "oval"]:
+                item_data.update({
+                    "shape_type":     t.get("shape_type", item_type),
+                    "fill_color":     t.get("fill_color", "#FFFFFF"),
+                    "is_filled":      t.get("is_filled", True),
+                    "width":          t.get("width", 50),
+                    "height":         t.get("height", 50),
+                    "border_color":   t.get("border_color", "#000000"),
+                })
+            else:
+                # Silently skip unknown types for now
+                continue
+
+            data.append(item_data)
+        except Exception as e:
+            print(f"Error processing item {t} for persistence: {e}")
+            continue
 
     self.current_map["Tokens"] = json.dumps(data)
     all_maps = list(self._maps.values())
@@ -286,4 +308,3 @@ def _persist_tokens(self):
                     print(f"[persist_tokens] Background save error: {e}")
 
     threading.Thread(target=_write_maps, daemon=True).start()
-    
