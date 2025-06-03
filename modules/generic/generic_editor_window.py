@@ -331,7 +331,14 @@ class GenericEditorWindow(ctk.CTkToplevel):
             editors.append(rte)
 
         # pre-populate
-        for scene in self.item.get(field["name"], []):
+        scenes_data = self.item.get(field["name"]) # Get the raw value first
+        # If the key exists and its value is None, or if the key doesn't exist (though .get would give default),
+        # ensure we iterate over an empty list to prevent TypeError.
+        # The original .get(field["name"], []) only helps if the key is missing, not if value is None.
+        if scenes_data is None:
+            scenes_data = []
+        
+        for scene in scenes_data:
             add_scene(scene)
         # add-new button
         ctk.CTkButton(

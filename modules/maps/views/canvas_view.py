@@ -5,15 +5,14 @@ def _build_canvas(self):
     self.canvas = tk.Canvas(self.parent, bg="black")
     self.canvas.pack(fill="both", expand=True)
 
-    # Global Copy/Paste bindings
-    # Must use bind_all so shortcuts work even if canvas isn't focused
-    # Global Copy/Paste bindings on the real Tk root
+    # Global Copy/Paste/Delete bindings on the real Tk root
     root = self.parent.winfo_toplevel()
-    root.bind_all("<Control-c>", self._copy_token)
-    root.bind_all("<Control-C>", self._copy_token)
-    root.bind_all("<Control-v>", self._paste_token)
-    root.bind_all("<Control-V>", self._paste_token)
-    root.bind_all("<Delete>", self._on_delete_key)
+    root.bind_all("<Control-c>", lambda event: self._copy_item()) # Use generic item copy
+    root.bind_all("<Control-C>", lambda event: self._copy_item()) # Case insensitive
+    root.bind_all("<Control-v>", lambda event: self._paste_item()) # Use generic item paste
+    root.bind_all("<Control-V>", lambda event: self._paste_item()) # Case insensitive
+    root.bind_all("<Delete>", self._on_delete_key) # Calls updated _on_delete_key
+    
     # Undo fog
     root.bind_all("<Control-z>",   lambda e: self.undo_fog(e))
     root.bind_all("<Control-Z>",   lambda e: self.undo_fog(e))
@@ -24,31 +23,37 @@ def _build_canvas(self):
     self.canvas.bind("<ButtonPress-1>",    self._on_mouse_down)
     self.canvas.bind("<B1-Motion>",        self._on_mouse_move)
     self.canvas.bind("<ButtonRelease-1>",  self._on_mouse_up)
-    self.canvas.bind("<ButtonPress-2>",    self._on_middle_click)
+    self.canvas.bind("<ButtonPress-2>",    self._on_middle_click) # Typically middle mouse
+    
     # Zoom & resize
     self.canvas.bind("<MouseWheel>",       self.on_zoom)
-    self.parent.bind("<Configure>",        lambda e: self._update_canvas_images())
+    # Configure binding might be better on self.canvas if self.parent is not the direct container that resizes
+    self.parent.bind("<Configure>",        lambda e: self._update_canvas_images() if self.base_img else None)
+
 
 def _on_delete_key(self, event=None):
-    """If a token is selected (via click), delete it on Delete key."""
-    if not self.selected_token:
+    """If an item (token or shape) is selected, delete it on Delete key."""
+    if not self.selected_token: # selected_token now refers to the selected item
         return
-    # remove it from both canvases and from the list
-    self._delete_token(self.selected_token)
-    # clear the selection so repeated deletes do nothing
-    self.selected_token = None
+    
+    item_to_delete = self.selected_token
+    self.selected_token = None # Clear selection before deleting
+    self._delete_item(item_to_delete) # Use the generic delete method
 
 def on_paint(self, event):
     """Paint or erase fog using a square brush of size self.brush_size,
        with semi-transparent black (alpha=128) for fog."""
-    if any('drag_data' in t for t in self.tokens):
+    # Prevent fog painting if a drag operation is in progress for any item
+    if any(t.get('drag_data') for t in self.tokens):
         return
     if not self.mask_img:
         return
 
     # Convert screen → world coords
-    xw = (event.x - self.pan_x) / self.zoom
-    yw = (event.y - self.pan_y) / self.zoom
+    # Ensure zoom is not zero to prevent division by zero error
+    current_zoom = self.zoom if self.zoom != 0 else MIN_ZOOM 
+    xw = (event.x - self.pan_x) / current_zoom
+    yw = (event.y - self.pan_y) / current_zoom
 
     half = self.brush_size / 2
     left   = int(xw - half)
@@ -57,18 +62,13 @@ def on_paint(self, event):
     bottom = int(yw + half)
 
     draw = ImageDraw.Draw(self.mask_img)
+    fill_color = (0,0,0,0) # Default to erase (transparent)
     if self.fog_mode == "add":
-        # Paint semi-transparent black
-        if self.brush_shape == "circle":
-            draw.ellipse([left, top, right, bottom], fill=(0, 0, 0, 128))
-        else:
-            draw.rectangle([left, top, right, bottom], fill=(0, 0, 0, 128))
-    else:
-        # Erase (make fully transparent)
-        if self.brush_shape == "circle":
-            draw.ellipse([left, top, right, bottom], fill=(0, 0, 0,   0))
-        else:
-            draw.rectangle([left, top, right, bottom], fill=(0, 0, 0,   0))
+        fill_color = (0,0,0,128) # Semi-transparent black to add fog
+    
+    if self.brush_shape == "circle":
+        draw.ellipse([left, top, right, bottom], fill=fill_color)
+    else: # Default to rectangle
+        draw.rectangle([left, top, right, bottom], fill=fill_color)
 
     self._update_canvas_images()
-
