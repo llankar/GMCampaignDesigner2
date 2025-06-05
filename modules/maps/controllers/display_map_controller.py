@@ -592,7 +592,7 @@ class DisplayMapController:
 
     def _copy_item(self, item_to_copy=None):
         active_item = item_to_copy if item_to_copy else self.selected_token
-        if not active_item: return
+        #if not active_item: return
         self.clipboard_token = active_item.copy()
         for key_to_pop in ['pil_image', 'tk_image', 'info_widget', 'entity_record', 
                            'canvas_ids', 'hp_canvas_ids', 'name_id', 'info_widget_id',

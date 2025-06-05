@@ -18,7 +18,13 @@ def _build_canvas(self):
     root.bind_all("<Control-Z>",   lambda e: self.undo_fog(e))
     
     root.bind_all("<Control-f>", self.open_global_search)
+    root.bind_all("<Control-F>", self.open_global_search)
+    
+    root.bind_all("<Control-s>", lambda e: self.save_map())
+    root.bind_all("<Control-S>", lambda e: self.save_map())
 
+    root.bind_all("<Control-p>", lambda e: self.open_fullscreen())
+    root.bind_all("<Control-P>", lambda e: self.open_fullscreen())
     # Painting, panning, markers
     self.canvas.bind("<ButtonPress-1>",    self._on_mouse_down)
     self.canvas.bind("<B1-Motion>",        self._on_mouse_move)
