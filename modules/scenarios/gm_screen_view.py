@@ -12,10 +12,11 @@ from modules.generic.entity_detail_factory import create_entity_detail_frame
 from modules.npcs.npc_graph_editor import NPCGraphEditor
 from modules.pcs.pc_graph_editor import PCGraphEditor
 from modules.scenarios.scenario_graph_editor import ScenarioGraphEditor
-from modules.generic.generic_list_selection_view import GenericListSelectionView   
+from modules.generic.generic_list_selection_view import GenericListSelectionView
+from modules.helpers.config_helper import ConfigHelper
 import random
 
-PORTRAIT_FOLDER = "assets/portraits"
+PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (64, 64)  # Thumbnail size for lists
 
 class GMScreenView(ctk.CTkFrame):

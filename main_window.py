@@ -977,7 +977,7 @@ class MainWindow(ctk.CTk):
             output_filename = f"{npc_name.replace(' ', '_')}_portrait.png"
             with open(output_filename, "wb") as f:
                 f.write(downloaded_image.content)
-            GENERATED_FOLDER = "assets/generated"
+            GENERATED_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "generated")
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
             npc["Portrait"] = self.copy_and_resize_portrait(npc, output_filename)
@@ -1031,7 +1031,7 @@ class MainWindow(ctk.CTk):
             output_filename = f"{creature_name.replace(' ', '_')}_portrait.png"
             with open(output_filename, "wb") as f:
                 f.write(downloaded_image.content)
-            GENERATED_FOLDER = "assets/generated"
+            GENERATED_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "generated")
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
             creature["Portrait"] = self.copy_and_resize_portrait(creature, output_filename)

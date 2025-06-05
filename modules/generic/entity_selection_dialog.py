@@ -4,8 +4,9 @@ from tkinter import messagebox
 from PIL import Image
 from customtkinter import CTkLabel, CTkImage
 from modules.helpers.text_helpers import format_longtext
+from modules.helpers.config_helper import ConfigHelper
 
-PORTRAIT_FOLDER = "assets/portraits"
+PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (64, 64)
 
 class EntitySelectionDialog(ctk.CTkToplevel):
