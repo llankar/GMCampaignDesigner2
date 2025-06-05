@@ -8,8 +8,9 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.ui.image_viewer import show_portrait
+from modules.helpers.config_helper import ConfigHelper
 
-PORTRAIT_FOLDER = "assets/portraits"
+PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (1024, 1024)
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")

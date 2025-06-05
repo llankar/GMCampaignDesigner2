@@ -22,7 +22,7 @@ from modules.ui.image_viewer import show_portrait
 from modules.helpers.template_loader import load_template
 
 # Global constants
-PORTRAIT_FOLDER = "assets/portraits"
+PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (128, 128)
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
