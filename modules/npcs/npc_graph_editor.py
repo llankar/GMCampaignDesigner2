@@ -16,6 +16,7 @@ from PIL import Image, ImageTk
 import os
 import textwrap
 from modules.ui.image_viewer import show_portrait
+from modules.helpers.config_helper import ConfigHelper
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -23,7 +24,7 @@ ctk.set_default_color_theme("blue")
 #logging.basicConfig(level=logging.ERROR)
 
 # Constants for portrait folder and max portrait size
-PORTRAIT_FOLDER = "assets/portraits"
+PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (64, 64)
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -208,6 +209,10 @@ class NPCGraphEditor(ctk.CTkFrame):
 
         portrait_path = npc_data.get("Portrait", "")
        #logging.debug(f"Portrait path: {portrait_path}")
+        if portrait_path and not os.path.isabs(portrait_path):
+            candidate = os.path.join(ConfigHelper.get_campaign_dir(), portrait_path)
+            if os.path.exists(candidate):
+                portrait_path = candidate
         if not portrait_path or not os.path.exists(portrait_path):
             messagebox.showerror("Error", "No valid portrait found for this NPC.")
            #logging.error("No valid portrait found.")
@@ -760,6 +765,10 @@ class NPCGraphEditor(ctk.CTkFrame):
             portrait_img = None
             p_w = p_h = 0
             portrait_path = data.get("Portrait", "")
+            if portrait_path and not os.path.isabs(portrait_path):
+                candidate = os.path.join(ConfigHelper.get_campaign_dir(), portrait_path)
+                if os.path.exists(candidate):
+                    portrait_path = candidate
             if portrait_path and os.path.exists(portrait_path):
                 img = Image.open(portrait_path)
                 ow, oh = img.size
@@ -1301,6 +1310,10 @@ class NPCGraphEditor(ctk.CTkFrame):
         messagebox.showinfo("Saved", f"Graph saved to:\n{path}")
 
     def load_portrait_scaled(self, portrait_path, node_tag, scale=1.0):
+        if portrait_path and not os.path.isabs(portrait_path):
+            candidate = os.path.join(ConfigHelper.get_campaign_dir(), portrait_path)
+            if os.path.exists(candidate):
+                portrait_path = candidate
         if not portrait_path or not os.path.exists(portrait_path):
             return None, (0, 0)
         try:

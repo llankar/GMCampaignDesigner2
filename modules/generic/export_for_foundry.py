@@ -4,6 +4,7 @@ import shutil
 import zipfile
 from tkinter import filedialog, messagebox
 from modules.generic.generic_model_wrapper import GenericModelWrapper
+from modules.helpers.config_helper import ConfigHelper
 
 # Define the name for the temporary portraits folder and the relative folder name in the ZIP.
 TEMP_PORTRAIT_FOLDER = "temp_portraits"
@@ -59,6 +60,10 @@ def preview_and_export_foundry(self):
         if portrait:
             # Normalize path separators.
             portrait = portrait.replace("\\", "/")
+            if not os.path.isabs(portrait):
+                abs_portrait = os.path.join(ConfigHelper.get_campaign_dir(), portrait)
+                if os.path.exists(abs_portrait):
+                    portrait = abs_portrait
             file_name = os.path.basename(portrait)
             # Copy the portrait file to the temporary folder.
             # Note: You may need to adjust the source path if the portraits are not found relative to the working directory.

@@ -990,7 +990,7 @@ class GenericEditorWindow(ctk.CTkToplevel):
             self.portrait_path = self.copy_and_resize_portrait(output_filename)
             self.portrait_label.configure(text=os.path.basename(self.portrait_path))
             #copy the outputfilename file to the assets/generated folder
-            GENERATED_FOLDER = "assets/generated"
+            GENERATED_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "generated")
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
             os.remove(output_filename)  # Delete the original image file
@@ -1043,7 +1043,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
             self.image_label.configure(text=os.path.basename(self.image_path))
 
     def copy_and_resize_image(self, src_path):
-        IMAGE_FOLDER = "assets/images/map_images"
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        IMAGE_FOLDER = os.path.join(campaign_dir, "assets", "images", "map_images")
         MAX_IMAGE_SIZE = (1920, 1080)
 
         os.makedirs(IMAGE_FOLDER, exist_ok=True)
@@ -1058,7 +1059,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
         return dest_path
 
     def copy_and_resize_portrait(self, src_path):
-        PORTRAIT_FOLDER = "assets/portraits"
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        PORTRAIT_FOLDER = os.path.join(campaign_dir, "assets", "portraits")
         MAX_PORTRAIT_SIZE = (1024, 1024)
 
         os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
