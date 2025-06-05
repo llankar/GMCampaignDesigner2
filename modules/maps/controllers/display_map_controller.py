@@ -666,9 +666,32 @@ class DisplayMapController:
             if item_to_delete.get("info_widget_id"): self.canvas.delete(item_to_delete["info_widget_id"])
             if item_to_delete.get("info_widget") and hasattr(item_to_delete["info_widget"], 'destroy'):
                  item_to_delete["info_widget"].destroy()
+        # Clean up fullscreen canvas artifacts if present
+        if getattr(self, "fs_canvas", None):
+            if item_to_delete.get("fs_canvas_ids"):
+                for fs_id in item_to_delete["fs_canvas_ids"]:
+                    if fs_id:
+                        try:
+                            self.fs_canvas.delete(fs_id)
+                        except tk.TclError:
+                            pass
+                del item_to_delete["fs_canvas_ids"]
+            if item_to_delete.get("fs_cross_ids"):
+                for fs_id in item_to_delete["fs_cross_ids"]:
+                    if fs_id:
+                        try:
+                            self.fs_canvas.delete(fs_id)
+                        except tk.TclError:
+                            pass
+                del item_to_delete["fs_cross_ids"]
         if item_to_delete in self.tokens: self.tokens.remove(item_to_delete)
         if self.selected_token is item_to_delete: self.selected_token = None
         self._persist_tokens(); self._update_canvas_images()
+        try:
+            if getattr(self, 'fs_canvas', None) and self.fs_canvas.winfo_exists():
+                self._update_fullscreen_map()
+        except tk.TclError:
+            pass
 
     def _bring_item_to_front(self, item):
         if item in self.tokens:
