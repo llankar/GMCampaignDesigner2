@@ -5,7 +5,7 @@ import tkinter as tk
 import customtkinter as ctk
 from modules.maps.views.map_selector import select_map, _on_display_map
 from modules.maps.views.toolbar_view import _build_toolbar, _on_brush_size_change, _on_brush_shape_change, _change_brush, _on_token_size_change
-from modules.maps.views.canvas_view import _build_canvas, _on_delete_key, on_paint
+from modules.maps.views.canvas_view import _build_canvas, _on_delete_key
 from modules.maps.services.fog_manager import _set_fog, clear_fog, reset_fog, on_paint
 # Removed direct imports from token_manager, as methods are now part of this controller or generic
 # from modules.maps.services.token_manager import add_token, _on_token_press, _on_token_move, _on_token_release, _copy_token, _paste_token, _show_token_menu, _resize_token_dialog, _change_token_border_color, _delete_token, _persist_tokens
