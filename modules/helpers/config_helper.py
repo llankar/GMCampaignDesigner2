@@ -36,4 +36,10 @@ class ConfigHelper:
         with open(file_path, "w", encoding="utf-8") as configfile:
             config.write(configfile)
 
+    @classmethod
+    def get_campaign_dir(cls):
+        """Return the directory containing the configured database file."""
+        db_path = cls.get("Database", "path", fallback="default_campaign.db")
+        return os.path.abspath(os.path.dirname(db_path))
+
 

@@ -18,6 +18,7 @@ import textwrap
 import re
 from tkinter.font import Font  # add at top of file
 from modules.ui.image_viewer import show_portrait
+from modules.helpers.config_helper import ConfigHelper
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -39,7 +40,7 @@ def get_monitors():
 #logging.basicConfig(level=logging.ERROR)
 
 # Constants for portrait folder and max portrait size
-PORTRAIT_FOLDER = "assets/portraits"
+PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (64, 64)
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -155,6 +156,10 @@ class PCGraphEditor(ctk.CTkFrame):
 
         # 3) Grab the portrait path
         portrait_path = npc_data.get("Portrait", "")
+        if portrait_path and not os.path.isabs(portrait_path):
+            candidate = os.path.join(ConfigHelper.get_campaign_dir(), portrait_path)
+            if os.path.exists(candidate):
+                portrait_path = candidate
         if not portrait_path or not os.path.exists(portrait_path):
             messagebox.showerror("Error", "No valid portrait found for this NPC.")
             return
