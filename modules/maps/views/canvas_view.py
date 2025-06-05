@@ -46,7 +46,7 @@ def _on_delete_key(self, event=None):
     self.selected_token = None # Clear selection before deleting
     self._delete_item(item_to_delete) # Use the generic delete method
 
-def on_paint(self, event):
+def on_paint2(self, event):
     """Paint or erase fog using a square brush of size self.brush_size,
        with semi-transparent black (alpha=128) for fog."""
     # Prevent fog painting if a drag operation is in progress for any item
