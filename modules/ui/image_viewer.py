@@ -1,5 +1,6 @@
 # modules/ui/image_viewer.py
 import os, ctypes
+from modules.helpers.config_helper import ConfigHelper
 from ctypes import wintypes
 import tkinter as tk
 import customtkinter as ctk
@@ -29,6 +30,10 @@ def show_portrait(path, title=None):
     Display a full‑screen CTkToplevel showing the image at `path`.
     Clicking anywhere closes the window.
     """
+    if path and not os.path.isabs(path):
+        candidate = os.path.join(ConfigHelper.get_campaign_dir(), path)
+        if os.path.exists(candidate):
+            path = candidate
     if not path or not os.path.exists(path):
         tk.messagebox.showerror("Error", "No valid portrait available.")
         return

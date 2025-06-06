@@ -241,7 +241,7 @@ app.register_blueprint(journal_bp)
 # Directories for assets
 # ──────────────────────────────────────────────────────────────────────────────
 CURRENT_DIR    = os.path.dirname(__file__)
-BASE_DIR       = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
+BASE_DIR       = os.path.dirname(DB_PATH)
 GRAPH_DIR      = os.path.join(BASE_DIR, "assets", "graphs")
 PORTRAITS_DIR  = os.path.join(BASE_DIR, "assets", "portraits")
 FALLBACK_PORTRAIT = "/assets/images/fallback.png"
