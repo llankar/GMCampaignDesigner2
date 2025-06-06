@@ -15,7 +15,7 @@
             margin: 0;
             padding: 20px;
             font-family: 'Permanent Marker', cursive;
-            background: url('/assets/images/corkboard_bg.png') center/cover no-repeat;
+            background: url("{{ url_for('get_asset', filename='corkboard_bg.png')}}") center/cover no-repeat;
             overflow-x: hidden;
         }
 
@@ -152,7 +152,7 @@
             right: 8px;
             width: 30px;
             height: 30px;
-            background: url('/assets/images/postage-stamp.png') no-repeat center/contain;
+            background: url("{{ url_for('get_asset', filename='postage-stamp.png')}}") no-repeat center/contain;
             opacity: 0.6;
             transform: rotate(-1deg);
             pointer-events: none;
@@ -209,18 +209,19 @@
                 vh = window.innerHeight,
                 cards = Array.from(board.querySelectorAll('.card')),
                 doodles = [
-                    '/assets/images/doodle_arrow.png',
-                    '/assets/images/doodle_interro.png',
-                    '/assets/images/doodle_exclam.png',
-                    '/assets/images/doodle_star.png',
-                    '/assets/images/doodle_symbol.png',
-                    '/assets/images/doodle_secret.png'
+                    'doodle_arrow.png',
+                    'doodle_interro.png',
+                    'doodle_exclam.png',
+                    'doodle_star.png',
+                    'doodle_symbol.png',
+                    'doodle_secret.png'
                 ];
 
             // scatter doodles
             for (let i = 0; i < 6; i++) {
                 const d = document.createElement('img');
-                d.src = doodles[Math.floor(Math.random() * doodles.length)];
+                const filename = doodles[Math.floor(Math.random() * doodles.length)];
+                d.src = "{{ url_for('get_asset', filename='') }}" + filename;
                 d.className = 'doodle';
                 d.style.top = Math.random() * (vh - 100) + 'px';
                 d.style.left = Math.random() * (bw - 100) + 'px';

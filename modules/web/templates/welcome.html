@@ -9,7 +9,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: url('{{ bg_image }}') no-repeat center center fixed;
+            background: url("{{ url_for('get_asset', filename='backgrounds/background.png')}}") no-repeat center center fixed;
             background-size: cover;
             font-family: "Segoe UI", sans-serif;
         }

@@ -428,12 +428,13 @@ def default():
 @app.route('/welcome')
 def welcome():
     # look for a matching background
-    bg_dir = os.path.join(BASE_DIR, "assets", "images", "backgrounds")
-    fname = f"{DB_NAME}.png"
-    if os.path.exists(os.path.join(bg_dir, fname)):
-        bg_path = f"/assets/images/backgrounds/{fname}"
+    two_up = os.path.dirname( os.path.dirname(CURRENT_DIR) )
+    asset_dir = os.path.join(two_up,"assets", "images", "backgrounds")
+    fname = f"background.png"
+    if os.path.exists(os.path.join(asset_dir, fname)):
+        bg_path = asset_dir+"/"+fname
     else:
-        bg_path = "/assets/images/backgrounds/default_campaign.png"
+        bg_path = asset_dir+fname+f"/default_campaign.png"
 
     return render_template(
         'welcome.html',
@@ -533,8 +534,17 @@ def get_portrait(filename):
 
 @app.route("/assets/<path:filename>")
 def get_asset(filename):
-    asset_dir = os.path.join(BASE_DIR, "assets")
+    two_up = os.path.dirname( os.path.dirname(CURRENT_DIR) )
+    asset_dir = os.path.join(two_up,"assets", "images")
+   
     return send_from_directory(asset_dir, filename)
+
+@app.route("/assets/css/<path:filename>")
+def get_css(filename):
+        # climb two levels up from CURRENT_DIR, then into “assets/css”
+        two_up = os.path.dirname(os.path.dirname(CURRENT_DIR))
+        css_dir = os.path.join(two_up, "assets", "css")
+        return send_from_directory(css_dir, filename)
 
 @app.route('/api/clue-positions', methods=['POST'])
 def set_all_clue_positions():

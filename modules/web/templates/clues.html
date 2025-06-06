@@ -12,7 +12,7 @@
             margin: 0;
             padding: 20px;
             font-family: 'Permanent Marker', cursive;
-            background: url('/assets/images/corkboard_bg.png') center/cover no-repeat;
+            background: url("{{ url_for('get_asset', filename='corkboard_bg.png') }}") center/cover no-repeat;
             overflow-x: hidden;
             overflow-y: auto;
         }
@@ -95,7 +95,7 @@
             left: 50%;
             width: 48px;
             height: 48px;
-            background: url('/assets/images/thumbtack.png') no-repeat center/contain;
+            background: url("{{ url_for('get_asset', filename='thumbtack.png') }}") no-repeat center/contain;
             transform: translateX(-50%);
         }
 

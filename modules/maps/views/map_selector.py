@@ -5,6 +5,7 @@ import os
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk, ImageDraw
+from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.template_loader import load_template
 from modules.generic.generic_list_selection_view import GenericListSelectionView
 
@@ -43,10 +44,14 @@ def _on_display_map(self, entity_type, map_name): # entity_type here is the map'
     self._build_canvas()
 
     # 3) Load base image + fog mask
-    self.base_img = Image.open(item["Image"]).convert("RGBA")
+    campaign_dir = ConfigHelper.get_campaign_dir()
+    image_path = item.get("Image", "")
+    full_image_path= os.path.join(campaign_dir, image_path)
+    self.base_img = Image.open(full_image_path).convert("RGBA")
     mask_path   = item.get("FogMaskPath", "")
-    if mask_path and os.path.exists(mask_path):
-        self.mask_img = Image.open(mask_path).convert("RGBA")
+    full_mask_path= os.path.join(campaign_dir, mask_path)
+    if full_mask_path and os.path.exists(full_mask_path):
+        self.mask_img = Image.open(full_mask_path).convert("RGBA")
     else:
         self.mask_img = Image.new("RGBA", self.base_img.size, (0,0,0,128))
 
@@ -134,7 +139,11 @@ def _on_display_map(self, entity_type, map_name): # entity_type here is the map'
         }
 
         if item_type_from_rec == "token":
-            path = rec.get("image_path") # No longer fallback to rec.get("path")
+            
+            campaign_dir = ConfigHelper.get_campaign_dir()
+            portrait_path = rec.get("image_path")
+            path = os.path.join(campaign_dir, portrait_path)
+            
             sz   = rec.get("size", self.token_size) # Use self.token_size as default
             pil_image = None
             try:
