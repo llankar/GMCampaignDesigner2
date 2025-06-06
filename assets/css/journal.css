@@ -1,5 +1,5 @@
 :root {
-    --bg-texture: url('/assets/images/journalbackground.png');
+    --bg-texture: url('journalbackground.png');
     --primary-color: #3B2E2A;
     /* dark brown */
     --accent-color: #E1C699;

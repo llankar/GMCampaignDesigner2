@@ -813,8 +813,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
         frame = ctk.CTkFrame(self.scroll_frame)
         frame.pack(fill="x", pady=5)
 
-        self.portrait_path = self.item.get("Portrait", "")
-
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        portrait_path = self.item.get("Portrait", "")
+        self.portrait_path= os.path.join(campaign_dir, portrait_path)
         # Create a separate frame for the image and center it
         image_frame = ctk.CTkFrame(frame)
         image_frame.pack(fill="x", pady=5)
@@ -843,8 +844,10 @@ class GenericEditorWindow(ctk.CTkToplevel):
         frame = ctk.CTkFrame(self.scroll_frame)
         frame.pack(fill="x", pady=5)
 
-        self.image_path = self.item.get("Image", "")
-
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        image_path = self.item.get("Image", "")
+        self.image_path= os.path.join(campaign_dir, image_path)
+        
         # Create a separate frame for the image and center it
         image_frame = ctk.CTkFrame(frame)
         image_frame.pack(fill="x", pady=5)

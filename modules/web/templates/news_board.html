@@ -13,7 +13,7 @@
             margin: 0;
             padding: 20px;
             font-family: 'Permanent Marker', cursive;
-            background: url('/assets/images/corkboard_bg.png') center/cover no-repeat;
+            background: url("{{ url_for('get_asset', filename='corkboard_bg.png')}}") center/cover no-repeat;
             overflow-x: hidden;
         }
 
@@ -58,7 +58,7 @@
         .news-card {
             position: absolute;
             z-index: 10;
-            background: url('/assets/images/newspaper_bg.png') center/cover no-repeat;
+            background: url("{{ url_for('get_asset', filename='newspaper_bg.png')}}") center/cover no-repeat;
             background-size: cover;
             background-blend-mode: multiply;
             background-color: #fdfcf7;
@@ -70,9 +70,9 @@
             cursor: grab;
             transition: transform .2s;
             transform: rotate(var(--rotation));
-            -webkit-mask-image: url('/assets/images/torn_edge_mask.png');
+            -webkit-mask-image: url("{{ url_for('get_asset', filename='torn_edge_mask.png')}}");
             -webkit-mask-size: 100% 100%;
-            mask-image: url('/assets/images/torn_edge_mask.png');
+            mask-image: url("{{ url_for('get_asset', filename='torn_edge_mask.png')}}");
             mask-size: 100% 100%;
         }
 
@@ -88,7 +88,7 @@
             left: 50%;
             width: 40px;
             height: 40px;
-            background: url('/assets/images/thumbtack.png') no-repeat center/contain;
+            background: url("{{ url_for('get_asset', filename='thumbtack.png')}}") no-repeat center/contain;
             transform: translateX(-50%);
         }
 
@@ -170,17 +170,19 @@
 
             // Random doodles
             const doodleImages = [
-                '/assets/images/doodle_arrow.png',
-                '/assets/images/doodle_interro.png',
-                '/assets/images/doodle_exclam.png',
-                '/assets/images/doodle_star.png',
-                '/assets/images/doodle_symbol.png',
-                '/assets/images/doodle_secret.png'
+               'doodle_arrow.png',
+               'doodle_interro.png',
+                'doodle_exclam.png',
+                'doodle_star.png',
+                'doodle_symbol.png',
+                'doodle_secret.png'
             ];
             const doodleCount = 6;
             for (let i = 0; i < doodleCount; i++) {
                 const img = document.createElement('img');
-                img.src = doodleImages[Math.floor(Math.random() * doodleImages.length)];
+                // Use url_for to build “/assets/…” URLs dynamically:
+                const filename = doodleImages[Math.floor(Math.random() * doodleImages.length)];
+                img.src = "{{ url_for('get_asset', filename='') }}" + filename;
                 img.className = 'doodle';
                 img.style.top = Math.random() * (bh - 100) + 'px';
                 img.style.left = Math.random() * (bw - 100) + 'px';
