@@ -378,7 +378,8 @@ class GenericEditorWindow(ctk.CTkToplevel):
             return
 
         # ensure upload folder
-        upload_folder = os.path.join(os.getcwd(), "assets", "uploads")
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        upload_folder = os.path.join(campaign_dir, "assets", "uploads")
         os.makedirs(upload_folder, exist_ok=True)
 
         # copy into uploads/
