@@ -815,19 +815,22 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         campaign_dir = ConfigHelper.get_campaign_dir()
         portrait_path = self.item.get("Portrait", "")
-        self.portrait_path= os.path.join(campaign_dir, portrait_path)
-        # Create a separate frame for the image and center it
         image_frame = ctk.CTkFrame(frame)
         image_frame.pack(fill="x", pady=5)
-        
-        if self.portrait_path and os.path.exists(self.portrait_path):
-            image = Image.open(self.portrait_path).resize((256, 256))
-            self.portrait_image = ctk.CTkImage(light_image=image, size=(256, 256))
-            self.portrait_label = ctk.CTkLabel(image_frame, image=self.portrait_image, text="")
-        else:
+        if portrait_path == "" or portrait_path is None:
             self.portrait_label = ctk.CTkLabel(image_frame, text="[No Image]")
-        
-        # Pack without specifying a side to center the widget
+            self.portrait_path= "[No Image]"
+        else:
+            self.portrait_path= os.path.join(campaign_dir, portrait_path)
+            # Create a separate frame for the image and center it
+            if self.portrait_path and os.path.exists(self.portrait_path):
+                image = Image.open(self.portrait_path).resize((256, 256))
+                self.portrait_image = ctk.CTkImage(light_image=image, size=(256, 256))
+                self.portrait_label = ctk.CTkLabel(image_frame, image=self.portrait_image, text="")
+            else:
+                self.portrait_label = ctk.CTkLabel(image_frame, text="[No Image]")
+            
+            # Pack without specifying a side to center the widget
         self.portrait_label.pack(pady=5)
         
         # Create a frame for the buttons and pack them (they'll appear below the centered image)
@@ -846,18 +849,21 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
         campaign_dir = ConfigHelper.get_campaign_dir()
         image_path = self.item.get("Image", "")
-        self.image_path= os.path.join(campaign_dir, image_path)
-        
         # Create a separate frame for the image and center it
         image_frame = ctk.CTkFrame(frame)
         image_frame.pack(fill="x", pady=5)
-
-        if self.image_path and os.path.exists(self.image_path):
-            image = Image.open(self.image_path).resize((256, 256))
-            self.image_image = ctk.CTkImage(light_image=image, size=(256, 256))
-            self.image_label = ctk.CTkLabel(image_frame, image=self.image_image, text="")
-        else:
+        if image_path == "" or image_path is None:
             self.image_label = ctk.CTkLabel(image_frame, text="[No Image]")
+            self.image_path= "[No Image]"
+        else:
+            self.image_path= os.path.join(campaign_dir, image_path)
+            
+            if self.image_path and os.path.exists(self.image_path):
+                image = Image.open(self.image_path).resize((256, 256))
+                self.image_image = ctk.CTkImage(light_image=image, size=(256, 256))
+                self.image_label = ctk.CTkLabel(image_frame, image=self.image_image, text="")
+            else:
+                self.image_label = ctk.CTkLabel(image_frame, text="[No Image]")
 
         # Pack without specifying a side to center the widget
         self.image_label.pack(pady=5)
@@ -1057,10 +1063,10 @@ class GenericEditorWindow(ctk.CTkToplevel):
         ext = os.path.splitext(src_path)[-1].lower()
         dest_filename = f"{image_name}_{id(self)}{ext}"
         dest_path = os.path.join(IMAGE_FOLDER, dest_filename)
-
+        dest_path_short= os.path.join("assets/images/map_images/", dest_filename)
         shutil.copy(src_path, dest_path)
 
-        return dest_path
+        return dest_path_short
 
     def copy_and_resize_portrait(self, src_path):
         campaign_dir = ConfigHelper.get_campaign_dir()
@@ -1073,9 +1079,9 @@ class GenericEditorWindow(ctk.CTkToplevel):
         ext = os.path.splitext(src_path)[-1].lower()
         dest_filename = f"{npc_name}_{id(self)}{ext}"
         dest_path = os.path.join(PORTRAIT_FOLDER, dest_filename)
-
+        dest_path_short= os.path.join("assets/portraits/", dest_filename)
         shutil.copy(src_path, dest_path)
         
-        return dest_path
+        return dest_path_short
     
     
