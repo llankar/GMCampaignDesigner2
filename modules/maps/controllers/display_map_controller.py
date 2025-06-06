@@ -17,12 +17,13 @@ from PIL import Image, ImageTk, ImageDraw
 from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.template_loader import load_template
 from modules.helpers.text_helpers import format_longtext
+from modules.helpers.config_helper import ConfigHelper
 
 DEFAULT_BRUSH_SIZE = 32  # px
 DEFAULT_SHAPE_WIDTH = 50
 DEFAULT_SHAPE_HEIGHT = 50
 
-MASKS_DIR = "masks"
+MASKS_DIR = os.path.join(ConfigHelper.get_campaign_dir(), "masks")
 MAX_ZOOM = 3.0
 MIN_ZOOM = 0.1
 ZOOM_STEP = 0.1  # 10% per wheel notch

@@ -977,7 +977,7 @@ class MainWindow(ctk.CTk):
             output_filename = f"{npc_name.replace(' ', '_')}_portrait.png"
             with open(output_filename, "wb") as f:
                 f.write(downloaded_image.content)
-            GENERATED_FOLDER = "assets/generated"
+            GENERATED_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "generated")
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
             npc["Portrait"] = self.copy_and_resize_portrait(npc, output_filename)
@@ -1031,7 +1031,7 @@ class MainWindow(ctk.CTk):
             output_filename = f"{creature_name.replace(' ', '_')}_portrait.png"
             with open(output_filename, "wb") as f:
                 f.write(downloaded_image.content)
-            GENERATED_FOLDER = "assets/generated"
+            GENERATED_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "generated")
             os.makedirs(GENERATED_FOLDER, exist_ok=True)
             shutil.copy(output_filename, os.path.join(GENERATED_FOLDER, output_filename))
             creature["Portrait"] = self.copy_and_resize_portrait(creature, output_filename)
@@ -1041,7 +1041,8 @@ class MainWindow(ctk.CTk):
             print(f"Error generating portrait for Creature '{creature.get('Name', 'Unknown')}': {e}")
 
     def copy_and_resize_portrait(self, entity, src_path):
-        PORTRAIT_FOLDER = "assets/portraits"
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        PORTRAIT_FOLDER = os.path.join(campaign_dir, "assets", "portraits")
         MAX_PORTRAIT_SIZE = (1024, 1024)
         os.makedirs(PORTRAIT_FOLDER, exist_ok=True)
         name = entity.get("Name", "Unnamed").replace(" ", "_")
@@ -1190,7 +1191,8 @@ class MainWindow(ctk.CTk):
 
     def build_portrait_mapping(self):
         mapping = {}
-        dir_txt_path = os.path.join("assets", "portraits", "dir.txt")
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        dir_txt_path = os.path.join(campaign_dir, "assets", "portraits", "dir.txt")
         if not os.path.exists(dir_txt_path):
             print(f"dir.txt not found at {dir_txt_path}")
             return mapping
@@ -1234,7 +1236,8 @@ class MainWindow(ctk.CTk):
             if normalized_npc in portrait_mapping:
                 portrait_file = portrait_mapping[normalized_npc]
                 if not npc["Portrait"] or npc["Portrait"].strip() == "":
-                    new_portrait_path = os.path.join("assets", "portraits", portrait_file)
+                    campaign_dir = ConfigHelper.get_campaign_dir()
+                    new_portrait_path = os.path.join(campaign_dir, "assets", "portraits", portrait_file)
                     cursor.execute("UPDATE npcs SET Portrait = ? WHERE Name = ?", (new_portrait_path, npc_name))
                     print(f"Associated portrait '{portrait_file}' with NPC '{npc_name}'")
                     modified = True

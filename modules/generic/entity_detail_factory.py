@@ -9,6 +9,7 @@ from tkinter import Toplevel, messagebox
 from tkinter import ttk
 from modules.ui.image_viewer import show_portrait
 from modules.generic.generic_editor_window import GenericEditorWindow
+from modules.helpers.config_helper import ConfigHelper
 
 # Configure portrait size.
 PORTRAIT_SIZE = (200, 200)
@@ -198,6 +199,10 @@ def insert_npc_table(parent, header, npc_names, open_entity_callback):
 
         # portrait
         portrait_path = data.get("Portrait")
+        if portrait_path and not os.path.isabs(portrait_path):
+            candidate = os.path.join(ConfigHelper.get_campaign_dir(), portrait_path)
+            if os.path.exists(candidate):
+                portrait_path = candidate
         if portrait_path and os.path.exists(portrait_path):
             img = Image.open(portrait_path).resize((40,40), Image.Resampling.LANCZOS)
             photo = CTkImage(light_image=img, size=(40,40))
