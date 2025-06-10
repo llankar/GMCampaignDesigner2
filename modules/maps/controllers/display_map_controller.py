@@ -11,6 +11,7 @@ from modules.maps.services.fog_manager import _set_fog, clear_fog, reset_fog, on
 # from modules.maps.services.token_manager import add_token, _on_token_press, _on_token_move, _on_token_release, _copy_token, _paste_token, _show_token_menu, _resize_token_dialog, _change_token_border_color, _delete_token, _persist_tokens
 from modules.maps.services.token_manager import add_token, _persist_tokens, _change_token_border_color # Keep this if it's used by other token_manager functions not moved
 from modules.maps.views.fullscreen_view import open_fullscreen, _update_fullscreen_map
+from modules.maps.views.web_display_view import open_web_display, _update_web_display_map
 from modules.maps.services.entity_picker_service import open_entity_picker, on_entity_selected
 from modules.maps.utils.icon_loader import load_icon
 from PIL import Image, ImageTk, ImageDraw
@@ -365,7 +366,10 @@ class DisplayMapController:
                     elif item_type == "oval": shape_id = self.canvas.create_oval(sx, sy, sx + shape_width, sy + shape_height, fill=fill_color, outline=border_color, width=2)
                     item['canvas_ids'] = (shape_id,) if shape_id else ();
                     if shape_id: self._bind_item_events(item)
-        if self.fs_canvas: self._update_fullscreen_map()
+        if self.fs_canvas:
+            self._update_fullscreen_map()
+        if getattr(self, '_web_server_thread', None):
+            self._update_web_display_map()
 
     def _bind_item_events(self, item):
         if not item.get('canvas_ids'): return
@@ -691,6 +695,8 @@ class DisplayMapController:
         try:
             if getattr(self, 'fs_canvas', None) and self.fs_canvas.winfo_exists():
                 self._update_fullscreen_map()
+            if getattr(self, '_web_server_thread', None):
+                self._update_web_display_map()
         except tk.TclError:
             pass
 
@@ -835,6 +841,8 @@ class DisplayMapController:
         try:
             if getattr(self, 'fs', None) and self.fs.winfo_exists() and \
                getattr(self, 'fs_canvas', None) and self.fs_canvas.winfo_exists(): self._update_fullscreen_map()
+            if getattr(self, '_web_server_thread', None):
+                self._update_web_display_map()
         except tk.TclError: pass
             
     def _on_drawing_tool_change(self, selected_tool: str):
@@ -911,6 +919,7 @@ class DisplayMapController:
     _set_fog = _set_fog
     _show_token_menu = _show_token_menu # Token-specific context menu
     _update_fullscreen_map = _update_fullscreen_map
+    _update_web_display_map = _update_web_display_map
     add_token = add_token # For adding new entity tokens
     clear_fog = clear_fog
     load_icon = load_icon
@@ -918,6 +927,7 @@ class DisplayMapController:
     on_paint = on_paint # For fog
     open_entity_picker = open_entity_picker
     open_fullscreen = open_fullscreen
+    open_web_display = open_web_display
     reset_fog = reset_fog
     select_map = select_map
 
