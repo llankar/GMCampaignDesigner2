@@ -43,6 +43,8 @@ def _build_toolbar(self):
         .pack(side="left", padx=2)
     create_icon_button(toolbar, icons["fs"],    "Fullscreen",   command=self.open_fullscreen)\
         .pack(side="left", padx=2)
+    create_icon_button(toolbar, icons["fs"],    "Web Display",   command=self.open_web_display)\
+        .pack(side="left", padx=2)
 
     # Brush shape selector (for fog)
     shape_label = ctk.CTkLabel(toolbar, text="Fog Shape:") # Clarified label
