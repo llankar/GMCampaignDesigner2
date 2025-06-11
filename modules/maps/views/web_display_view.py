@@ -2,10 +2,13 @@ import io
 import threading
 from flask import Flask, send_file
 from PIL import Image, ImageDraw
+from modules.helpers.config_helper import ConfigHelper
 
 # Simple Flask app to serve the current map image
 
-def open_web_display(self, port=32000):
+def open_web_display(self, port=None):
+    if port is None:
+        port = int(ConfigHelper.get("Server", "map_port", fallback=32000))
     if getattr(self, '_web_server_thread', None):
         return  # already running
     self._web_app = Flask(__name__)
