@@ -2,6 +2,8 @@ import json
 from PIL import Image, ImageTk
 import customtkinter as ctk
 from tkinter import messagebox, colorchooser
+import os
+from modules.helpers.config_helper import ConfigHelper
 from modules.ui.image_viewer import show_portrait
 import tkinter.simpledialog as sd
 import tkinter as tk
@@ -9,6 +11,17 @@ import threading
 
 def add_token(self, path, entity_type, entity_name, entity_record=None):
     img_path = path
+    if img_path and not os.path.isabs(img_path):
+        candidate = os.path.join(ConfigHelper.get_campaign_dir(), img_path)
+        if os.path.exists(candidate):
+            img_path = candidate
+    if not img_path or not os.path.exists(img_path):
+        messagebox.showerror(
+            "Error",
+            f"Token image not found for '{entity_name}': {img_path}"
+        )
+        return
+
     pil_img = Image.open(img_path).convert("RGBA")
     pil_img = pil_img.resize((self.token_size, self.token_size), resample=Image.LANCZOS)
 
