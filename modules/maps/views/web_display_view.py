@@ -19,7 +19,10 @@ def open_web_display(self, port=5001):
     @self._web_app.route('/map.png')
     def map_png():
         controller._update_web_display_map()
-        buf = io.BytesIO(controller._web_image_bytes)
+        data = getattr(controller, '_web_image_bytes', None)
+        if not data:
+            return ('No map image', 404)
+        buf = io.BytesIO(data)
         # 'cache_timeout' was removed in Flask 3.x in favor of 'max_age'.
         # Use the modern argument name for compatibility.
         return send_file(buf, mimetype='image/png', max_age=0)
@@ -61,8 +64,11 @@ def _render_map_image(self):
         elif item_type in ['rectangle', 'oval']:
             shape_w = int(item.get('width', 50) * self.zoom)
             shape_h = int(item.get('height', 50) * self.zoom)
-            fill_color = item.get('fill_color', '') if item.get('is_filled', True) else ''
-            border_color = item.get('border_color', '#000000')
+            fill_color = None
+            if item.get('is_filled', True):
+                fc = item.get('fill_color')
+                fill_color = fc if fc else None
+            border_color = item.get('border_color', '#000000') or None
             if item_type == 'rectangle':
                 draw.rectangle([sx, sy, sx + shape_w, sy + shape_h], fill=fill_color, outline=border_color, width=2)
             else:
@@ -89,4 +95,3 @@ def _update_web_display_map(self):
     img.save(buf, format='PNG')
     self._web_image_bytes = buf.getvalue()
     buf.close()
-
