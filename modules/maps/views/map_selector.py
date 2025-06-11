@@ -236,3 +236,5 @@ def _on_display_map(self, entity_type, map_name): # entity_type here is the map'
 
     # 9) Finally draw everything onto the canvas
     self._update_canvas_images()
+    if getattr(self, '_web_server_thread', None):
+        self._update_web_display_map()
