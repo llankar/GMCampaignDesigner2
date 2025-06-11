@@ -675,5 +675,5 @@ def edit_clue(idx):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    port = int(ConfigHelper.get('Server', 'map_port', fallback=31000))
+    port = int(ConfigHelper.get('WebServer', 'web_port', fallback=31000))
     app.run(host='0.0.0.0', port=port, debug=True)
