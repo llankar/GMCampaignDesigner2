@@ -14,7 +14,31 @@ def open_web_display(self, port=5001):
 
     @self._web_app.route('/')
     def index():
-        return '<img src="/map.png" style="max-width:100%;">'
+        # Basic HTML page that reloads the map image periodically so
+        # changes on the GM side appear without requiring a manual refresh.
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset='utf-8'>
+        <title>Map Display</title>
+        <style>
+            body { margin: 0; }
+            img { max-width: 100%; height: auto; }
+        </style>
+        <script>
+            function reloadImage() {
+                const img = document.getElementById('mapImage');
+                img.src = '/map.png?ts=' + Date.now();
+            }
+            setInterval(reloadImage, 1000);
+        </script>
+        </head>
+        <body>
+        <img id='mapImage' src='/map.png?ts=0'>
+        </body>
+        </html>
+        """
 
     @self._web_app.route('/map.png')
     def map_png():
@@ -23,9 +47,11 @@ def open_web_display(self, port=5001):
         if not data:
             return ('No map image', 404)
         buf = io.BytesIO(data)
-        # 'cache_timeout' was removed in Flask 3.x in favor of 'max_age'.
-        # Use the modern argument name for compatibility.
-        return send_file(buf, mimetype='image/png', max_age=0)
+        resp = send_file(buf, mimetype='image/png', max_age=0)
+        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
+        return resp
 
     def run_app():
         self._web_app.run(host='0.0.0.0', port=port, threaded=True, use_reloader=False)
