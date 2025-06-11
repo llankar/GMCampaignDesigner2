@@ -48,6 +48,8 @@ def add_token(self, path, entity_type, entity_name, entity_record=None):
 
     if getattr(self, "fs_canvas", None) and self.fs_canvas.winfo_exists():
         self._update_fullscreen_map()
+    if getattr(self, '_web_server_thread', None):
+        self._update_web_display_map()
 
 def _on_token_press(self, event, token):
     # mark this as the “selected” token for copy/paste
@@ -175,6 +177,8 @@ def _resize_token_dialog(self, token):
     self._update_canvas_images()
     if getattr(self, "fs_canvas", None):
         self._update_fullscreen_map()
+    if getattr(self, '_web_server_thread', None):
+        self._update_web_display_map()
 
     # 3) persist both tokens *and* the global slider
     self._persist_tokens()

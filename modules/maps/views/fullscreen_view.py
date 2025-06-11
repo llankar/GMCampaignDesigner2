@@ -192,3 +192,9 @@ def _update_fullscreen_map(self):
         self.fs_canvas.delete(self.fs_mask_id)
         self.fs_mask_id = None
 
+    if hasattr(self, '_update_web_display_map'):
+        try:
+            self._update_web_display_map()
+        except Exception:
+            pass
+
