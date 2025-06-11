@@ -19,7 +19,10 @@ def open_web_display(self, port=5001):
     @self._web_app.route('/map.png')
     def map_png():
         controller._update_web_display_map()
-        buf = io.BytesIO(controller._web_image_bytes)
+        data = getattr(controller, '_web_image_bytes', None)
+        if not data:
+            return ('No map image', 404)
+        buf = io.BytesIO(data)
         # 'cache_timeout' was removed in Flask 3.x in favor of 'max_age'.
         # Use the modern argument name for compatibility.
         return send_file(buf, mimetype='image/png', max_age=0)
