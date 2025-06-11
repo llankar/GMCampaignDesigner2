@@ -1,6 +1,7 @@
 import io
 import threading
-from flask import Flask, send_file
+import requests
+from flask import Flask, send_file, request
 from PIL import Image, ImageDraw
 from modules.helpers.config_helper import ConfigHelper
 
@@ -12,6 +13,7 @@ def open_web_display(self, port=None):
     if getattr(self, '_web_server_thread', None):
         return  # already running
     self._web_app = Flask(__name__)
+    self._web_port = port
 
     controller = self
 
@@ -55,6 +57,13 @@ def open_web_display(self, port=None):
         resp.headers['Pragma'] = 'no-cache'
         resp.headers['Expires'] = '0'
         return resp
+
+    @self._web_app.route('/shutdown')
+    def shutdown():
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func:
+            func()
+        return 'Server shutting down'
 
     def run_app():
         self._web_app.run(host='0.0.0.0', port=port, threaded=True, use_reloader=False)
@@ -124,3 +133,17 @@ def _update_web_display_map(self):
     img.save(buf, format='PNG')
     self._web_image_bytes = buf.getvalue()
     buf.close()
+
+def close_web_display(self, port=None):
+    thread = getattr(self, '_web_server_thread', None)
+    if not thread:
+        return
+    if port is None:
+        port = getattr(self, '_web_port', int(ConfigHelper.get("Server", "map_port", fallback=32000)))
+    try:
+        requests.get(f'http://127.0.0.1:{port}/shutdown', timeout=1)
+    except Exception:
+        pass
+    thread.join(timeout=1)
+    self._web_server_thread = None
+    self._web_app = None

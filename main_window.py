@@ -1282,6 +1282,15 @@ class MainWindow(ctk.CTk):
             load_template("maps")
         )
 
+        def _on_close():
+            try:
+                self.map_controller.close_web_display()
+            except Exception:
+                pass
+            top.destroy()
+
+        top.protocol("WM_DELETE_WINDOW", _on_close)
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
