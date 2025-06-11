@@ -1,5 +1,6 @@
 import tkinter as tk
 from PIL import ImageDraw
+MIN_ZOOM = 0.01  # Minimum zoom level to prevent division by zero
 
 def _build_canvas(self):
     self.canvas = tk.Canvas(self.parent, bg="black")

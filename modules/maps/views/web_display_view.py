@@ -9,7 +9,7 @@ from modules.helpers.config_helper import ConfigHelper
 
 def open_web_display(self, port=None):
     if port is None:
-        port = int(ConfigHelper.get("Server", "map_port", fallback=32000))
+        port = int(ConfigHelper.get("MapServer", "map_port", fallback=32000))
     if getattr(self, '_web_server_thread', None):
         return  # already running
     self._web_app = Flask(__name__)
@@ -136,8 +136,8 @@ def _update_web_display_map(self):
 
 def close_web_display(self, port=None):
     thread = getattr(self, '_web_server_thread', None)
-    if not thread:
-        return
+    #if not thread:
+        #5return
     if port is None:
         port = getattr(self, '_web_port', int(ConfigHelper.get("Server", "map_port", fallback=32000)))
     try:
