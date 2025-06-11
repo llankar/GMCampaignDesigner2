@@ -135,15 +135,28 @@ def _update_web_display_map(self):
     buf.close()
 
 def close_web_display(self, port=None):
+    """Shut down the web display server if it is running."""
+
     thread = getattr(self, '_web_server_thread', None)
-    #if not thread:
-        #5return
+    if not thread:
+        return
+
     if port is None:
-        port = getattr(self, '_web_port', int(ConfigHelper.get("Server", "map_port", fallback=32000)))
+        port = getattr(
+            self,
+            '_web_port',
+            int(ConfigHelper.get("MapServer", "map_port", fallback=32000)),
+        )
     try:
-        requests.get(f'http://127.0.0.1:{port}/shutdown', timeout=1)
+        requests.get(f"http://127.0.0.1:{port}/shutdown", timeout=1)
     except Exception:
+        # Ignore errors if the server is already stopped
         pass
+
     thread.join(timeout=1)
+    if thread.is_alive():
+        # Give it another chance to shut down gracefully
+        thread.join(timeout=1)
+
     self._web_server_thread = None
     self._web_app = None
