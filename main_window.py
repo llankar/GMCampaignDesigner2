@@ -7,7 +7,7 @@ import requests
 import shutil
 import tkinter as tk
 from tkinter import filedialog, messagebox, Toplevel, Listbox, MULTIPLE, PhotoImage
-#import logging
+import logging
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
@@ -1286,7 +1286,7 @@ class MainWindow(ctk.CTk):
             try:
                 self.map_controller.close_web_display()
             except Exception:
-                pass
+                logging.exception("Error while closing web display")
             top.destroy()
 
         top.protocol("WM_DELETE_WINDOW", _on_close)
