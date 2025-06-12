@@ -1,8 +1,8 @@
 import io
 import threading
 import logging
-import requests
-from flask import Flask, send_file, request
+from flask import Flask, send_file
+from werkzeug.serving import make_server
 from PIL import Image, ImageDraw
 from modules.helpers.config_helper import ConfigHelper
 
@@ -59,15 +59,9 @@ def open_web_display(self, port=None):
         resp.headers['Expires'] = '0'
         return resp
 
-    @self._web_app.route('/shutdown')
-    def shutdown():
-        func = request.environ.get('werkzeug.server.shutdown')
-        if func:
-            func()
-        return 'Server shutting down'
-
     def run_app():
-        self._web_app.run(host='0.0.0.0', port=port, threaded=True, use_reloader=False)
+        self._web_server = make_server('0.0.0.0', port, self._web_app, threaded=True)
+        self._web_server.serve_forever()
 
     self._web_server_thread = threading.Thread(target=run_app, daemon=True)
     self._web_server_thread.start()
@@ -136,7 +130,11 @@ def _update_web_display_map(self):
     buf.close()
 
 def close_web_display(self, port=None):
-    """Shut down the web display server if it is running."""
+    """Shut down the web display server if it is running.
+
+    The server is stopped using Werkzeug's ``shutdown`` API rather than
+    sending an HTTP request to a dedicated route.
+    """
 
     thread = getattr(self, '_web_server_thread', None)
     if not thread:
@@ -148,11 +146,12 @@ def close_web_display(self, port=None):
             '_web_port',
             int(ConfigHelper.get("MapServer", "map_port", fallback=32000)),
         )
-    try:
-        requests.get(f"http://127.0.0.1:{port}/shutdown", timeout=1)
-    except Exception:
-        # Ignore errors if the server is already stopped
-        pass
+
+    if getattr(self, '_web_server', None):
+        try:
+            self._web_server.shutdown()
+        except Exception:
+            pass
 
     for _ in range(5):  # wait up to ~5 seconds total
         thread.join(timeout=1)
@@ -163,4 +162,5 @@ def close_web_display(self, port=None):
         logging.warning("Web display server did not shut down within timeout.")
     else:
         self._web_server_thread = None
+        self._web_server = None
         self._web_app = None
