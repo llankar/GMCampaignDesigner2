@@ -1,5 +1,6 @@
 import io
 import threading
+import logging
 import requests
 from flask import Flask, send_file, request
 from PIL import Image, ImageDraw
@@ -153,10 +154,13 @@ def close_web_display(self, port=None):
         # Ignore errors if the server is already stopped
         pass
 
-    thread.join(timeout=1)
-    if thread.is_alive():
-        # Give it another chance to shut down gracefully
+    for _ in range(5):  # wait up to ~5 seconds total
         thread.join(timeout=1)
+        if not thread.is_alive():
+            break
 
-    self._web_server_thread = None
-    self._web_app = None
+    if thread.is_alive():
+        logging.warning("Web display server did not shut down within timeout.")
+    else:
+        self._web_server_thread = None
+        self._web_app = None
