@@ -167,7 +167,7 @@ class DisplayMapController:
     def _create_marker(self):
         if not self._marker_start: return
         x0, y0 = self._marker_start; xw = (x0 - self.pan_x) / self.zoom; yw = (y0 - self.pan_y) / self.zoom
-        sx, sy = int(xw*self.zoom + self.pan_x), int(yw*self.zoom + self.pan_y); r = 10
+        sx, sy = int(xw*self.zoom + self.pan_x), int(yw*self.zoom + self.pan_y); r = 25
         self._marker_id = self.canvas.create_oval(sx-r,sy-r,sx+r,sy+r, outline='red', width=2)
         if self.fs_canvas: self._fs_marker_id = self.fs_canvas.create_oval(sx-r,sy-r,sx+r,sy+r, outline='red', width=2)
 
