@@ -149,19 +149,6 @@ def _paste_token(self, event=None):
     self._persist_tokens()
     self._update_canvas_images()
 
-def _show_token_menu(self, event, token):
-    menu = tk.Menu(self.canvas, tearoff=0)
-    menu.add_command(label="Show Portrait",
-        command=lambda: show_portrait(token["image_path"], token.get("entity_type")))
-    menu.add_command(label="Change Border Color",
-        command=lambda t=token: self._change_token_border_color(t))
-    menu.add_command(label="Resize Token",
-    command=lambda t=token: self._resize_token_dialog(t))
-    menu.add_separator()
-    menu.add_command(label="Delete Token",
-        command=lambda t=token: self._delete_token(t))
-    menu.tk_popup(event.x_root, event.y_root)
-
 def _resize_token_dialog(self, token):
     """Prompt for a new px size, then redraw just that token."""
     # use the current slider value as the popup’s starting point
