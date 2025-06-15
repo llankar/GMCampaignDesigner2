@@ -19,6 +19,7 @@ from modules.generic.generic_model_wrapper import GenericModelWrapper
 from modules.helpers.template_loader import load_template
 from modules.helpers.text_helpers import format_longtext
 from modules.helpers.config_helper import ConfigHelper
+from modules.ui.image_viewer import show_portrait
 
 DEFAULT_BRUSH_SIZE = 32  # px
 DEFAULT_SHAPE_WIDTH = 50
@@ -569,7 +570,7 @@ class DisplayMapController:
         menu.add_separator()
         menu.add_command(label="Bring to Front", command=lambda t=token: self._bring_item_to_front(t))
         menu.add_command(label="Send to Back", command=lambda t=token: self._send_item_to_back(t))
-        
+        menu.add_command(label="Show Portrait", command=lambda t=token: show_portrait(t["image_path"], t.get("entity_type")))
         # Display the menu
         try:
             menu.tk_popup(event.x_root, event.y_root)
