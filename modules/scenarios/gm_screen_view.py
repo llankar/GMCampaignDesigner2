@@ -756,25 +756,6 @@ class GMScreenView(ctk.CTkFrame):
     def _on_link_clicked(self, linked_type, item, event=None):
         self.open_entity_tab(linked_type, item)
 
-    def create_note_frame(self, master=None, initial_text=""):
-        if master is None:
-            master = self.content_area
-        frame = ctk.CTkFrame(master)
-        toolbar = ctk.CTkFrame(frame)
-        toolbar.pack(fill="x", padx=5, pady=5)
-        save_button = ctk.CTkButton(
-            toolbar,
-            text="Save Note",
-            command=lambda: self.save_note_to_file(frame, f"Note_{len(self.tabs)}")
-        )
-        save_button.pack(side="right", padx=5)
-        text_box = ctk.CTkTextbox(frame, wrap="word", height=500)
-        text_box.pack(fill="both", expand=True, padx=10, pady=5)
-        text_box.insert("1.0", initial_text)
-        frame.text_box = text_box
-        return frame
-
-
     def save_note_to_file(self, note_frame, default_name):
         file_path = filedialog.asksaveasfilename(
             initialfile=default_name,

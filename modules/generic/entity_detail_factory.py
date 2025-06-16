@@ -289,6 +289,10 @@ def insert_creature_table(parent, header, creature_names, open_entity_callback):
 
         # portrait
         portrait_path = data.get("Portrait")
+        if portrait_path and not os.path.isabs(portrait_path):
+            candidate = os.path.join(ConfigHelper.get_campaign_dir(), portrait_path)
+            if os.path.exists(candidate):
+                portrait_path = candidate
         if portrait_path and os.path.exists(portrait_path):
             img = Image.open(portrait_path).resize((40,40), Image.Resampling.LANCZOS)
             photo = CTkImage(light_image=img, size=(40,40))
@@ -695,24 +699,29 @@ def create_entity_detail_frame(entity_type, entity, master, open_entity_callback
 
     # If entity_type is "NPCs" and the entity has a valid Portrait, load and show it.
     portrait_path = entity.get("Portrait")
-    if (entity_type in {"NPCs", "PCs", "Creatures"}) and portrait_path and os.path.exists(portrait_path):
-        try:
-            img = Image.open(entity["Portrait"])
-            img = img.resize(PORTRAIT_SIZE, Image.Resampling.LANCZOS)
-            ctk_image = CTkImage(light_image=img, size=PORTRAIT_SIZE)
-            portrait_label = CTkLabel(content_frame, image=ctk_image, text="")
-            portrait_label.image = ctk_image  # persist reference
-            portrait_label.entity_name = entity.get("Name", "")
-            portrait_label.is_portrait = True
-            content_frame.portrait_images[entity.get("Name", "")] = ctk_image
-            portrait_label.bind(
-                "<Button-1>",
-                lambda e, p=portrait_path, n=portrait_label.entity_name: show_portrait(p, n)
-            )
-            portrait_label.pack(pady=10)
-            content_frame.portrait_label = portrait_label
-        except Exception as e:
-            print(f"[DEBUG] Error loading portrait for {entity.get('Name','')}: {e}")
+    if (entity_type in {"NPCs", "PCs", "Creatures"}) :
+        if portrait_path and not os.path.isabs(portrait_path):
+            candidate = os.path.join(ConfigHelper.get_campaign_dir(), portrait_path)
+            if os.path.exists(candidate):
+                portrait_path = candidate
+        if portrait_path and os.path.exists(portrait_path):
+            try:
+                img = Image.open(portrait_path)
+                img = img.resize(PORTRAIT_SIZE, Image.Resampling.LANCZOS)
+                ctk_image = CTkImage(light_image=img, size=PORTRAIT_SIZE)
+                portrait_label = CTkLabel(content_frame, image=ctk_image, text="")
+                portrait_label.image = ctk_image  # persist reference
+                portrait_label.entity_name = entity.get("Name", "")
+                portrait_label.is_portrait = True
+                content_frame.portrait_images[entity.get("Name", "")] = ctk_image
+                portrait_label.bind(
+                    "<Button-1>",
+                    lambda e, p=portrait_path, n=portrait_label.entity_name: show_portrait(p, n)
+                )
+                portrait_label.pack(pady=10)
+                content_frame.portrait_label = portrait_label
+            except Exception as e:
+                print(f"[DEBUG] Error loading portrait for {entity.get('Name','')}: {e}")
 
     # Create fields from the template.
     template = load_template(entity_type.lower())
