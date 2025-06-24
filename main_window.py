@@ -814,7 +814,7 @@ class MainWindow(ctk.CTk):
                     cwd=swarmui_path,
                     env=env
                 )
-                time.sleep(120.0)
+                time.sleep(20.0)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to launch SwarmUI: {e}")
 
