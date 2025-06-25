@@ -472,7 +472,7 @@ def insert_list_longtext(parent, header, items):
         body = ctk.CTkFrame(outer, fg_color="transparent")
 
         # Create label with zero wraplength for now
-        lbl = ctk.CTkLabel(body, text=raw, wraplength=0, justify="left")
+        lbl = ctk.CTkLabel(body, text=raw, wraplength=0, justify="left", font=("Arial", 16))
         lbl.pack(fill="x", padx=10, pady=5)
 
         expanded = ctk.BooleanVar(value=False)
@@ -500,11 +500,6 @@ def insert_list_longtext(parent, header, items):
 
         btn.configure(command=_toggle)
         btn.pack(fill="x", expand=True)
-
-
-
-
-
 
 def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity_callback=None):
     """
@@ -553,7 +548,7 @@ def create_scenario_detail_frame(entity_type, scenario_item, master, open_entity
     CTkLabel(
         frame,
         text=format_longtext(scenario_item.get("Summary", "")),
-        font=("Arial", 14),
+        font=("Arial", 16),
         wraplength=1620,
         justify="left"
     ).pack(fill="x", pady=(0, 15))
