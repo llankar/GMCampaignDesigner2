@@ -32,13 +32,14 @@ def on_paint(self, event):
     draw = ImageDraw.Draw(self.mask_img)
     # actually paint or erase on the mask_img
     if self.fog_mode == "add":
-        if self.brush_shape == "circle":
-            draw.ellipse((left, top, right, bottom), fill=(0, 0, 0, 128))
-        else:
-            draw.rectangle((left, top, right, bottom), fill=(0, 0, 0, 128))
-    else:  # "rem"
-        # clear that area (make it fully transparent)
-        draw.rectangle((left, top, right, bottom), fill=(0, 0, 0,   0))    # 1) compute brush in screen coords
+        draw_color= (0, 0, 0, 128)  # semi-transparent black
+    else:
+        draw_color= (0, 0, 0, 0) # semi-transparent black
+    if self.brush_shape == "circle":
+        draw.ellipse((left, top, right, bottom), fill=draw_color)
+    else:
+        draw.rectangle((left, top, right, bottom), fill=draw_color)
+    
     half = self.brush_size/2
     size      = int(self.brush_size * self.zoom)
     half_size = size // 2
@@ -49,43 +50,6 @@ def on_paint(self, event):
     px = event.x - half_size
     py = event.y - half_size
 
-    if self.fog_mode == "add":
-        if self.brush_shape == "circle":
-            self.canvas.create_oval(
-                px, py, px + size, py + size,
-                fill="black", stipple="gray50", width=0,
-                tags="fog_preview"
-            )
-        else:
-            self.canvas.create_rectangle(
-                px, py, px + size, py + size,
-                fill="black", stipple="gray50", width=0,
-                tags="fog_preview"
-            )
-    else:
-        # in “erase” mode we just delete the old preview if any
-        self.canvas.delete("fog_preview")
-    # Directly center on the mouse‐pointer (event.x/event.y):
-    px = event.x - half_size
-    py = event.y - half_size
-
-    if self.fog_mode == "add":
-        if self.brush_shape == "circle":
-            self.canvas.create_oval(
-                px, py, px + size, py + size,
-                fill="black", stipple="gray50", width=0,
-                tags="fog_preview"
-            )
-        else:
-            self.canvas.create_rectangle(
-                px, py, px + size, py + size,
-                fill="black", stipple="gray50", width=0,
-                tags="fog_preview"
-            )
-    else:
-        # in “erase” mode we just delete the old preview if any
-        self.canvas.delete("fog_preview")
-    
     
     # —— only resize & blit the mask ——
     w, h = self.base_img.size

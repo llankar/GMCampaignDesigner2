@@ -85,45 +85,32 @@ def open_entity_tab(entity_type, name, master):
     Opens (or focuses) a detail window for the given entity_type/name.
     Debug prints added to trace why/when new windows are created.
     """
-    print(f"[DEBUG] open_entity_tab called with entity_type={entity_type!r}, name={name!r}")
-
     # 1) Build a unique key and look for an existing window
     window_key = f"{entity_type}:{name}"
-    print(f"[DEBUG] computed window_key={window_key!r}")
     existing = _open_entity_windows.get(window_key)
-    print(f"[DEBUG] lookup existing window: {existing!r}")
     if existing:
         alive = existing.winfo_exists()
-        print(f"[DEBUG] existing.winfo_exists() = {alive}")
         if alive:
-            print(f"[DEBUG] -> focusing existing window for {window_key}")
             existing.deiconify()
             existing.lift()
             return
         else:
-            print(f"[DEBUG] -> found dead window object, removing from registry")
             _open_entity_windows.pop(window_key, None)
 
     # 2) Load the data item
-    print(f"[DEBUG] loading items for type={entity_type}")
     wrapper = wrappers.get(entity_type)
     if not wrapper:
-        print(f"[DEBUG] ERROR: unknown wrapper for {entity_type}")
         messagebox.showerror("Error", f"Unknown type '{entity_type}'")
         return
 
     items = wrapper.load_items()
-    print(f"[DEBUG] loaded {len(items)} items")
     key_field = "Title" if entity_type == "Scenarios" else "Name"
     item = next((i for i in items if i.get(key_field) == name), None)
-    print(f"[DEBUG] lookup item by key_field={key_field!r}: found={item is not None}")
     if not item:
-        print(f"[DEBUG] ERROR: item not found")
         messagebox.showerror("Error", f"{entity_type[:-1]} '{name}' not found.")
         return
 
     # 3) Create a new Toplevel window
-    print(f"[DEBUG] creating new CTkToplevel for {window_key}")
     new_window = ctk.CTkToplevel()
     new_window.title(f"{entity_type[:-1]}: {name}")
     new_window.geometry("1000x600")
@@ -131,7 +118,6 @@ def open_entity_tab(entity_type, name, master):
     new_window.configure(padx=10, pady=10)
 
     # 4) Build the scrollable detail frame inside it
-    print(f"[DEBUG] building scrollable detail frame")
     scrollable_container = ctk.CTkScrollableFrame(new_window)
     scrollable_container.pack(fill="both", expand=True)
     frame = create_entity_detail_frame(
@@ -143,17 +129,14 @@ def open_entity_tab(entity_type, name, master):
     frame.pack(fill="both", expand=True)
 
     # 5) Register it and hook the close event
-    print(f"[DEBUG] registering new window in _open_entity_windows[{window_key!r}]")
     _open_entity_windows[window_key] = new_window
 
     def _on_close():
-        print(f"[DEBUG] window {window_key!r} closing, removing from registry")
         _open_entity_windows.pop(window_key, None)
         new_window.destroy()
 
     new_window.protocol("WM_DELETE_WINDOW", _on_close)
-    print(f"[DEBUG] open_entity_tab completed for {window_key}")
-
+    
 def unwrap_value(val):
     """
     If val is a dict with a 'text' key, return that.
