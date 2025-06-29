@@ -4,14 +4,27 @@ import os
 class ConfigHelper:
     _instance = None
     _config = None
+    _config_mtime = None
 
     @classmethod
     def load_config(cls, file_path="config/config.ini"):
-        cls._config = configparser.ConfigParser()
-        if os.path.exists(file_path):
-            cls._config.read(file_path)
-        else:
-            print(f"Warning: config file '{file_path}' not found.")
+        """Load the configuration from ``file_path``.
+
+        The file is read only when it's not cached or when the file has
+        changed on disk since the last load. This allows updating the
+        configuration without restarting the application.
+        """
+        mtime = os.path.getmtime(file_path) if os.path.exists(file_path) else None
+
+        if cls._config is None or mtime != cls._config_mtime:
+            cls._config = configparser.ConfigParser()
+            if mtime is not None:
+                cls._config.read(file_path)
+                cls._config_mtime = mtime
+            else:
+                print(f"Warning: config file '{file_path}' not found.")
+                cls._config_mtime = None
+
         return cls._config
 
     @classmethod
