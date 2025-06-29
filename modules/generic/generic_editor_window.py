@@ -724,7 +724,6 @@ class GenericEditorWindow(ctk.CTkToplevel):
 
             # open the dropdown on click *or* focus for EVERY dynamic combobox:
             entry.bind("<Button-1>",  lambda e, w=entry, v=var: open_dropdown(w, v))
-            entry.bind("<Button-1>", lambda e, w=entry, v=var: open_dropdown(w, v))
 
             if initial_value and initial_value in options_list:
                 var.set(initial_value)
