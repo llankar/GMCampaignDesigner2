@@ -186,7 +186,7 @@ class MainWindow(ctk.CTk):
             ("associate_portraits", "Associate NPC Portraits", self.associate_npc_portraits),
             ("import_scenario", "Import Scenario", self.open_scenario_importer),
             ("export_foundry", "Export Scenarios for Foundry", self.export_foundry),
-            ("map_tool", "Map Tooly", self.map_tool),
+            ("map_tool", "Map Tool", self.map_tool),
             
             
             
