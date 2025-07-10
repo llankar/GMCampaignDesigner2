@@ -9,6 +9,7 @@ from PIL import Image, ImageTk
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.ui.image_viewer import show_portrait
 from modules.helpers.config_helper import ConfigHelper
+from modules.helpers.window_helper import position_window_at_top
 
 PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (1024, 1024)
@@ -209,7 +210,7 @@ class GenericListView(ctk.CTkFrame):
 
         for group_val in sorted(grouped.keys()):
             group_id = sanitize_id(f"group_{group_val}")
-            self.tree.insert("", "end", iid=group_id, text=group_val, open=True)
+            self.tree.insert("", "end", iid=group_id, text=group_val, open=False)
             for item in grouped[group_val]:
                 raw = item.get(self.unique_field, "")
                 if isinstance(raw, dict):
@@ -339,3 +340,7 @@ class GenericListView(ctk.CTkFrame):
             self.refresh_list()
 
         ctk.CTkButton(top, text="OK", command=confirm).pack(pady=10)
+        top.transient(self.master)
+        top.lift()
+        top.focus_force()
+        
