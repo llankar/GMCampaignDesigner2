@@ -10,6 +10,7 @@ from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.ui.image_viewer import show_portrait
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.window_helper import position_window_at_top
+from modules.scenarios.gm_screen_view import GMScreenView
 
 PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (1024, 1024)
@@ -285,11 +286,20 @@ class GenericListView(ctk.CTkFrame):
         has_portrait = bool(portrait_path and os.path.exists(portrait_path))
 
         menu = tk.Menu(self, tearoff=0)
+        if self.model_wrapper.entity_type == "scenarios":
+            menu.add_command(
+                label="Open in GM Screen",
+                command=lambda: self.open_in_gm_screen(iid)
+            )
         if has_portrait:
-            menu.add_command(label="Show Portrait",
-                            command=lambda: self.show_portrait_window(iid))
-        menu.add_command(label="Delete",
-                        command=lambda: self.delete_item(iid))
+            menu.add_command(
+                label="Show Portrait",
+                command=lambda: self.show_portrait_window(iid)
+            )
+        menu.add_command(
+            label="Delete",
+            command=lambda: self.delete_item(iid)
+        )
         menu.post(event.x_root, event.y_root)
     
     def delete_item(self, iid):
@@ -297,6 +307,24 @@ class GenericListView(ctk.CTkFrame):
                     if sanitize_id(str(it.get(self.unique_field, ""))) != iid]
         self.model_wrapper.save_items(self.items)
         self.filter_items(self.search_var.get())
+
+    def open_in_gm_screen(self, iid):
+        item = next(
+            (it for it in self.filtered_items
+             if sanitize_id(str(it.get(self.unique_field, ""))) == iid),
+            None
+        )
+        if not item:
+            messagebox.showerror("Error", "Scenario not found.")
+            return
+
+        window = ctk.CTkToplevel(self)
+        title = item.get("Title", item.get("Name", "Scenario"))
+        window.title(f"Scenario: {title}")
+        window.geometry("1000x600")
+
+        view = GMScreenView(window, scenario_item=item)
+        view.pack(fill="both", expand=True)
 
     def add_item(self):
         new = {}
