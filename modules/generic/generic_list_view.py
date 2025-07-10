@@ -282,8 +282,13 @@ class GenericListView(ctk.CTkFrame):
         item = next((it for it in self.filtered_items
                     if sanitize_id(str(it.get(self.unique_field, ""))) == iid),
                     None)
+        campaign_dir = ConfigHelper.get_campaign_dir()
         portrait_path = item.get("Portrait", "") if item else ""
-        has_portrait = bool(portrait_path and os.path.exists(portrait_path))
+        if portrait_path:
+            portrait_path= os.path.join(campaign_dir, portrait_path)
+            has_portrait = bool(portrait_path and os.path.isabs(portrait_path))
+        else:
+            has_portrait = False
 
         menu = tk.Menu(self, tearoff=0)
         if self.model_wrapper.entity_type == "scenarios":
@@ -321,8 +326,8 @@ class GenericListView(ctk.CTkFrame):
         window = ctk.CTkToplevel(self)
         title = item.get("Title", item.get("Name", "Scenario"))
         window.title(f"Scenario: {title}")
-        window.geometry("1000x600")
-
+        
+        window.geometry("1920x1080+0+0")
         view = GMScreenView(window, scenario_item=item)
         view.pack(fill="both", expand=True)
 
