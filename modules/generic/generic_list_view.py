@@ -20,6 +20,15 @@ ctk.set_default_color_theme("blue")
 def sanitize_id(s):
     return re.sub(r'[^a-zA-Z0-9]+', '_', str(s)).strip('_')
 
+def unique_iid(tree, base_id):
+    """Return a unique iid for the given treeview based on base_id."""
+    iid = base_id
+    counter = 1
+    while tree.exists(iid):
+        counter += 1
+        iid = f"{base_id}_{counter}"
+    return iid
+
 class _ToolTip:
     """Simple tooltip for a Treeview showing full cell text on hover."""
     def __init__(self, widget):
@@ -191,7 +200,8 @@ class GenericListView(ctk.CTkFrame):
             raw = item.get(self.unique_field, "")
             if isinstance(raw, dict):
                 raw = raw.get("text", "")
-            iid = sanitize_id(raw or f"item_{int(time.time()*1000)}")
+            base_id = sanitize_id(raw or f"item_{int(time.time()*1000)}")
+            iid = unique_iid(self.tree, base_id)
             name_text = self.clean_value(item.get(self.unique_field, ""))
             vals = tuple(self.clean_value(item.get(c, "")) for c in self.columns)
             try:
@@ -209,13 +219,15 @@ class GenericListView(ctk.CTkFrame):
             grouped.setdefault(key, []).append(item)
 
         for group_val in sorted(grouped.keys()):
-            group_id = sanitize_id(f"group_{group_val}")
+            base_group_id = sanitize_id(f"group_{group_val}")
+            group_id = unique_iid(self.tree, base_group_id)
             self.tree.insert("", "end", iid=group_id, text=group_val, open=False)
             for item in grouped[group_val]:
                 raw = item.get(self.unique_field, "")
                 if isinstance(raw, dict):
                     raw = raw.get("text", "")
-                iid = sanitize_id(raw or f"item_{int(time.time()*1000)}")
+                base_iid = sanitize_id(raw or f"item_{int(time.time()*1000)}")
+                iid = unique_iid(self.tree, base_iid)
                 name_text = self.clean_value(item.get(self.unique_field, ""))
                 vals = tuple(self.clean_value(item.get(c, "")) for c in self.columns)
                 try:
