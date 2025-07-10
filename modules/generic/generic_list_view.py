@@ -79,6 +79,10 @@ class GenericListView(ctk.CTkFrame):
         self.items = self.model_wrapper.load_items()
         self.filtered_items = list(self.items)
 
+        self.group_column = ConfigHelper.get(
+            "ListGrouping", self.model_wrapper.entity_type, fallback=None
+        )
+
         self.unique_field = next(
             (f["name"] for f in self.template["fields"] if f["name"] != "Portrait"),
             None
@@ -101,6 +105,9 @@ class GenericListView(ctk.CTkFrame):
         .pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Add",
             command=self.add_item)\
+        .pack(side="left", padx=5)
+        ctk.CTkButton(search_frame, text="Group By",
+            command=self.choose_group_column)\
         .pack(side="left", padx=5)
 
         # --- Treeview setup ---
@@ -171,7 +178,10 @@ class GenericListView(ctk.CTkFrame):
         self.tree.delete(*self.tree.get_children())
         self.batch_index = 0
         self.batch_size = 50
-        self.insert_next_batch()
+        if self.group_column:
+            self.insert_grouped_items()
+        else:
+            self.insert_next_batch()
 
     def insert_next_batch(self):
         end = min(self.batch_index + self.batch_size, len(self.filtered_items))
@@ -190,6 +200,27 @@ class GenericListView(ctk.CTkFrame):
         self.batch_index = end
         if end < len(self.filtered_items):
             self.after(50, self.insert_next_batch)
+
+    def insert_grouped_items(self):
+        grouped = {}
+        for item in self.filtered_items:
+            key = self.clean_value(item.get(self.group_column, "")) or "Unknown"
+            grouped.setdefault(key, []).append(item)
+
+        for group_val in sorted(grouped.keys()):
+            group_id = sanitize_id(f"group_{group_val}")
+            self.tree.insert("", "end", iid=group_id, text=group_val, open=True)
+            for item in grouped[group_val]:
+                raw = item.get(self.unique_field, "")
+                if isinstance(raw, dict):
+                    raw = raw.get("text", "")
+                iid = sanitize_id(raw or f"item_{int(time.time()*1000)}")
+                name_text = self.clean_value(item.get(self.unique_field, ""))
+                vals = tuple(self.clean_value(item.get(c, "")) for c in self.columns)
+                try:
+                    self.tree.insert(group_id, "end", iid=iid, text=name_text, values=vals)
+                except Exception as e:
+                    print("[ERROR] inserting item:", e, iid, vals)
 
     def clean_value(self, val):
         if val is None:
@@ -291,3 +322,20 @@ class GenericListView(ctk.CTkFrame):
         if added:
             self.model_wrapper.save_items(self.items)
             self.filter_items(self.search_var.get())
+
+    def choose_group_column(self):
+        options = [self.unique_field] + [c for c in self.columns if c != self.unique_field]
+        top = ctk.CTkToplevel(self)
+        top.title("Group By")
+        var = ctk.StringVar(value=self.group_column or options[0])
+        ctk.CTkLabel(top, text="Select grouping column:").pack(padx=10, pady=10)
+        menu = ctk.CTkOptionMenu(top, values=options, variable=var)
+        menu.pack(padx=10, pady=5)
+
+        def confirm():
+            self.group_column = var.get()
+            ConfigHelper.set("ListGrouping", self.model_wrapper.entity_type, self.group_column)
+            top.destroy()
+            self.refresh_list()
+
+        ctk.CTkButton(top, text="OK", command=confirm).pack(pady=10)
