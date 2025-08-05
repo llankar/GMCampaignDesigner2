@@ -4,13 +4,14 @@ import os, ctypes
 from ctypes import wintypes
 import customtkinter as ctk
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
 from modules.generic.generic_editor_window import GenericEditorWindow
 from modules.ui.image_viewer import show_portrait
 from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.window_helper import position_window_at_top
 from modules.scenarios.gm_screen_view import GMScreenView
+import shutil
 
 PORTRAIT_FOLDER = os.path.join(ConfigHelper.get_campaign_dir(), "assets", "portraits")
 MAX_PORTRAIT_SIZE = (1024, 1024)
@@ -117,6 +118,10 @@ class GenericListView(ctk.CTkFrame):
         ctk.CTkButton(search_frame, text="Add",
             command=self.add_item)\
         .pack(side="left", padx=5)
+        if self.model_wrapper.entity_type == "maps":
+            ctk.CTkButton(search_frame, text="Import Directory",
+                          command=self.import_map_directory)\
+                .pack(side="left", padx=5)
         ctk.CTkButton(search_frame, text="Group By",
             command=self.choose_group_column)\
         .pack(side="left", padx=5)
@@ -368,6 +373,51 @@ class GenericListView(ctk.CTkFrame):
         if added:
             self.model_wrapper.save_items(self.items)
             self.filter_items(self.search_var.get())
+
+    def import_map_directory(self):
+        dir_path = filedialog.askdirectory(title="Select Map Image Directory")
+        if not dir_path:
+            return
+
+        supported = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
+        new_items = []
+        for filename in os.listdir(dir_path):
+            src = os.path.join(dir_path, filename)
+            if not os.path.isfile(src):
+                continue
+            if not filename.lower().endswith(supported):
+                continue
+            name, _ = os.path.splitext(filename)
+            image_path = self._copy_map_image(src, name)
+            item = {
+                "Name": name,
+                "Description": "",
+                "Image": image_path,
+                "FogMaskPath": "",
+                "Tokens": "[]",
+                "token_size": 0,
+                "pan_x": 0,
+                "pan_y": 0,
+                "zoom": 1.0,
+            }
+            new_items.append(item)
+
+        if new_items:
+            self.add_items(new_items)
+            messagebox.showinfo("Import Complete", f"Imported {len(new_items)} maps from directory.")
+        else:
+            messagebox.showwarning("No Images Found", "No supported image files were found in the selected directory.")
+
+    def _copy_map_image(self, src_path, image_name):
+        campaign_dir = ConfigHelper.get_campaign_dir()
+        image_folder = os.path.join(campaign_dir, "assets", "images", "map_images")
+        os.makedirs(image_folder, exist_ok=True)
+        ext = os.path.splitext(src_path)[-1].lower()
+        safe_name = image_name.replace(" ", "_")
+        dest_filename = f"{safe_name}_{int(time.time()*1000)}{ext}"
+        dest_path = os.path.join(image_folder, dest_filename)
+        shutil.copy(src_path, dest_path)
+        return os.path.join("assets/images/map_images", dest_filename)
 
     def choose_group_column(self):
         options = [self.unique_field] + [c for c in self.columns if c != self.unique_field]
