@@ -48,12 +48,12 @@ def _on_display_map(self, entity_type, map_name): # entity_type here is the map'
     image_path = item.get("Image", "")
     full_image_path= os.path.join(campaign_dir, image_path)
     self.base_img = Image.open(full_image_path).convert("RGBA")
-    mask_path   = item.get("FogMaskPath", "")
-    full_mask_path= os.path.join(campaign_dir, mask_path)
-    if full_mask_path and os.path.exists(full_mask_path):
+    mask_path = (item.get("FogMaskPath") or "").strip()
+    full_mask_path = os.path.join(campaign_dir, mask_path) if mask_path else ""
+    if mask_path and os.path.isfile(full_mask_path):
         self.mask_img = Image.open(full_mask_path).convert("RGBA")
     else:
-        self.mask_img = Image.new("RGBA", self.base_img.size, (0,0,0,128))
+        self.mask_img = Image.new("RGBA", self.base_img.size, (0, 0, 0, 128))
 
     # Restore pan/zoom if available, otherwise use defaults
     zoom_raw  = item.get("zoom", 1.0)
