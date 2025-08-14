@@ -75,7 +75,7 @@ class ScenarioGeneratorView(ctk.CTkFrame):
                 card,
                 text=key,
                 text_color="#ecf0f1",
-                font=("Helvetica", 14, "bold"),
+                font=("Helvetica", 16, "bold"),
                 anchor="w",
             )
             desc_lbl = ctk.CTkLabel(
@@ -83,8 +83,8 @@ class ScenarioGeneratorView(ctk.CTkFrame):
                 text=value,
                 text_color="#bdc3c7",
                 justify="left",
-                wraplength=1700,
-                font=("Helvetica", 11),
+                wraplength=1580,
+                font=("Helvetica", 14),
             )
             title_lbl.pack(anchor="w", padx=8, pady=(4, 0))
             desc_lbl.pack(anchor="w", padx=8, pady=(0, 6))
