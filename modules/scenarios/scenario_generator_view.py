@@ -1,3 +1,5 @@
+
+import tkinter as tk
 from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
@@ -11,9 +13,6 @@ class ScenarioGeneratorView(ctk.CTkFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
-
-        # Match the dark background style from the original generator UI
-        self.configure(fg_color="#2c3e50")
 
         self.setting_var = ctk.StringVar(value=list(GENERATOR_FUNCTIONS.keys())[0])
         self.title_var = ctk.StringVar(value="")
@@ -30,6 +29,7 @@ class ScenarioGeneratorView(ctk.CTkFrame):
         ctk.CTkOptionMenu(top, values=list(GENERATOR_FUNCTIONS.keys()),
                           variable=self.setting_var).pack(side="left", padx=5)
         ctk.CTkButton(top, text="Generate", command=self.generate_campaign).pack(side="left", padx=5)
+
 
         # Scrollable area for displaying generated scenario cards
         self.results_frame = ctk.CTkScrollableFrame(self, fg_color="#2c3e50")
@@ -58,6 +58,7 @@ class ScenarioGeneratorView(ctk.CTkFrame):
             return
 
         self.current_campaign = campaign
+
 
         # Clear previous results
         for child in self.results_frame.winfo_children():
