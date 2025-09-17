@@ -20,6 +20,7 @@ from modules.helpers.config_helper import ConfigHelper
 from modules.helpers.swarmui_helper import get_available_models
 from modules.ui.tooltip import ToolTip
 from modules.ui.icon_button import create_icon_button
+from modules.ui.dice_roller_window import DiceRollerWindow
 
 from modules.generic.generic_list_view import GenericListView
 from modules.generic.generic_model_wrapper import GenericModelWrapper
@@ -69,6 +70,7 @@ class MainWindow(ctk.CTk):
         self.load_model_config()
         self.init_wrappers()
         self.current_gm_view = None
+        self.dice_roller_window = None
         root = self.winfo_toplevel()
         root.bind_all("<Control-f>", self._on_ctrl_f)
 
@@ -112,6 +114,7 @@ class MainWindow(ctk.CTk):
             "export_foundry": self.load_icon("export_foundry_icon.png", size=(60, 60)),
             "map_tool": self.load_icon("map_tool_icon.png", size=(60, 60)),
             "generate_scenario": self.load_icon("generate_scenario_icon.png", size=(60, 60)),
+            "dice_roller": self.load_icon("dice_roller_icon.png", size=(60, 60)),
         }
 
     def load_icon(self, file_name, size=(60, 60)):
@@ -190,9 +193,7 @@ class MainWindow(ctk.CTk):
             ("import_scenario", "Import Scenario", self.open_scenario_importer),
             ("export_foundry", "Export Scenarios for Foundry", self.export_foundry),
             ("map_tool", "Map Tool", self.map_tool),
-            
-            
-            
+            ("dice_roller", "Open Dice Roller", self.open_dice_roller),
         ]
         self.icon_buttons = []
         for idx, (icon_key, tooltip, cmd) in enumerate(icons_list):
@@ -697,6 +698,19 @@ class MainWindow(ctk.CTk):
         parent.grid_columnconfigure(0, weight=1)
         self.current_open_view = container
         self.current_open_entity = None
+
+    def open_dice_roller(self):
+        if self.dice_roller_window is not None and self.dice_roller_window.winfo_exists():
+            self.dice_roller_window.focus()
+            self.dice_roller_window.lift()
+            return
+
+        def _cleanup():
+            self.dice_roller_window = None
+
+        self.dice_roller_window = DiceRollerWindow(self, on_close=_cleanup)
+        self.dice_roller_window.focus()
+        self.dice_roller_window.lift()
 
     def change_database_storage(self):
         # 1) Pick or create .db
